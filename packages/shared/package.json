@@ -1,6 +1,10 @@
 {
   "name": "@network/shared",
   "version": "1.0.0",
+  "description": "Shared Zod schemas, types, constants, and utilities",
+  "author": {
+    "name": "Rahul Kesharwani"
+  },
   "private": true,
   "type": "module",
   "main": "./dist/index.js",

@@ -5,7 +5,6 @@
   "author": {
     "name": "Rahul Kesharwani"
   },
-  "license": "UNLICENSED",
   "private": true,
   "workspaces": [
     "packages/*"
