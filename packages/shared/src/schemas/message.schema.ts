@@ -1,5 +1,17 @@
 import { z } from 'zod';
 
+const base64Schema = z
+  .string()
+  .min(1)
+  .regex(/^[A-Za-z0-9+/]+=*$/, { message: 'Value must be valid base64.' });
+
+const ivSchema = z
+  .string()
+  .length(16, { message: 'IV must be 16 base64 characters (12 bytes).' })
+  .regex(/^[A-Za-z0-9+/]+=*$/, { message: 'IV must be valid base64.' });
+
+export const MESSAGE_TYPES = ['text', 'sharedVideo', 'sharedShort'] as const;
+
 export const groupCreateSchema = z.object({
   name: z
     .string()
@@ -33,20 +45,24 @@ export const messageSendSchema = z
       .min(1, { message: 'Invalid Receiver ID.' })
       .optional(),
 
-    text: z
-      .string()
-      .trim()
-      .max(2000, { message: 'Message text cannot exceed 2000 characters.' })
-      .optional(),
+    messageType: z.enum(MESSAGE_TYPES, {
+      message: 'Invalid message type.',
+    }),
 
-    sharedVideoId: z
-      .string()
-      .min(1, { message: 'Invalid Shared Video ID.' })
-      .optional(),
-    sharedShortId: z
-      .string()
-      .min(1, { message: 'Invalid Shared Short ID.' })
-      .optional(),
+    ciphertext: base64Schema.max(4096, {
+      message: 'Ciphertext exceeds maximum allowed size.',
+    }),
+
+    iv: ivSchema,
+
+    encryptedKeys: z
+      .record(
+        z.string().min(1),
+        z.string().min(1, { message: 'Encrypted key cannot be empty.' })
+      )
+      .refine((v) => Object.keys(v).length >= 1, {
+        message: 'Must include at least one recipient key.',
+      }),
   })
   .refine((data) => data.conversationId || data.receiverId, {
     message:
@@ -56,13 +72,4 @@ export const messageSendSchema = z
   .refine((data) => !(data.conversationId && data.receiverId), {
     message: 'Provide either a conversationId OR a receiverId, not both.',
     path: ['receiverId'],
-  })
-  .refine((data) => data.text || data.sharedVideoId || data.sharedShortId, {
-    message:
-      'Cannot send an empty message. Provide text or a shared media link.',
-    path: ['text'],
-  })
-  .refine((data) => !(data.sharedVideoId && data.sharedShortId), {
-    message: 'A message can only share one media item at a time.',
-    path: ['sharedShortId'],
   });
