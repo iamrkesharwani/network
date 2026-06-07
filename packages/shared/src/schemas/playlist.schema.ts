@@ -32,4 +32,9 @@ export const playlistItemSchema = z
   .refine((data) => data.videoId || data.shortId, {
     message:
       'Must provide either a Video ID or a Short ID to add to the playlist.',
+    path: ['videoId'],
+  })
+  .refine((data) => !(data.videoId && data.shortId), {
+    message: 'A playlist item must be either a video or a short, not both.',
+    path: ['shortId'],
   });

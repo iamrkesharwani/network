@@ -51,11 +51,18 @@ export const messageSendSchema = z
   .refine((data) => data.conversationId || data.receiverId, {
     message:
       'Must provide either a conversationId (for existing chats) or a receiverId (to start a new 1:1 chat).',
+    path: ['conversationId'],
   })
   .refine((data) => !(data.conversationId && data.receiverId), {
     message: 'Provide either a conversationId OR a receiverId, not both.',
+    path: ['receiverId'],
   })
   .refine((data) => data.text || data.sharedVideoId || data.sharedShortId, {
     message:
       'Cannot send an empty message. Provide text or a shared media link.',
+    path: ['text'],
+  })
+  .refine((data) => !(data.sharedVideoId && data.sharedShortId), {
+    message: 'A message can only share one media item at a time.',
+    path: ['sharedShortId'],
   });

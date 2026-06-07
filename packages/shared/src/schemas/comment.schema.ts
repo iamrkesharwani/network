@@ -13,13 +13,14 @@ export const commentCreateSchema = z
 
     parentId: z.string().min(1, { message: 'Invalid Parent ID.' }).optional(),
   })
-  .refine(
-    (data) => (data.videoId || data.shortId) && !(data.videoId && data.shortId),
-    {
-      message:
-        'A comment must belong to exactly one target (either a video or a short, not both).',
-    }
-  );
+  .refine((data) => data.videoId || data.shortId, {
+    message: 'A comment must belong to either a video or a short.',
+    path: ['videoId'],
+  })
+  .refine((data) => !(data.videoId && data.shortId), {
+    message: 'A comment cannot belong to both a video and a short.',
+    path: ['shortId'],
+  });
 
 export const commentUpdateSchema = z.object({
   text: z
