@@ -23,11 +23,11 @@ export const connectDb = async () => {
     }
 
     await mongoose.connect(uri, {
-      dbName: dbName || 'clipvity',
+      dbName: dbName || 'network',
     });
 
     logger.info(
-      { dbName: dbName || 'clipvity' },
+      { dbName: dbName || 'network' },
       'Successfully connected to MongoDB initial pool'
     );
   } catch (error) {
