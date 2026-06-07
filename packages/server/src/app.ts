@@ -1,17 +1,36 @@
 import express from 'express';
 import type { Application, Request, Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import { env } from './config/env.js';
+import { apiLimiter } from './middleware/rateLimit.middleware.js';
+import { errorHandler } from './middleware/error.middleware.js';
+import routes from './routes/index.js';
+import { API_V1_PREFIX } from '@network/shared';
 
 const app: Application = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(helmet());
+app.use(
+  cors({
+    origin: env.CLIENT_URL,
+    credentials: true,
+  })
+);
+app.use(mongoSanitize());
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(apiLimiter);
 
 app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
-    status: 'success',
-    message: 'API is running',
+    success: true,
+    message: 'API is running successfully',
   });
 });
+
+app.use(API_V1_PREFIX, routes);
+app.use(errorHandler);
 
 export default app;
