@@ -1,0 +1,3 @@
+export const MAX_SHORT_DURATION_SECONDS = 90;
+export const REQUIRED_SHORT_ASPECT_RATIO = '9:16';
+export const MAX_SHORT_SIZE_BYTES = 500 * 1024 * 1024;
