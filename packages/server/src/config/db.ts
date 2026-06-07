@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { logger } from '../utils/logger.js';
+import { env } from './env.js';
 
 mongoose.connection.on('connected', () => {
   logger.info('Mongoose event: Connected to MongoDB cluster');
@@ -15,8 +16,8 @@ mongoose.connection.on('disconnected', () => {
 
 export const connectDb = async () => {
   try {
-    const uri = process.env['MONGODB_URI'];
-    const dbName = process.env['DB_NAME'];
+    const uri = env.MONGODB_URI;
+    const dbName = env.DB_NAME;
 
     if (!uri) {
       throw new Error('MONGODB_URI is not defined in environment variables');
