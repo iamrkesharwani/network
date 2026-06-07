@@ -53,11 +53,7 @@ export const userProfileUpdateSchema = z.object({
     .optional(),
 
   avatarUrl: z
-    .string()
-    .trim()
-    .pipe(z.url({ message: 'Avatar must be a valid URL.' }))
-    .refine((url) => url.startsWith('https://'), {
-      message: 'Avatar URL must use HTTPS.',
-    })
+    .url({ message: 'Avatar must be a valid URL.' })
+    .startsWith('https://', { message: 'Avatar URL must use HTTPS.' })
     .optional(),
 });

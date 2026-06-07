@@ -1,20 +1,8 @@
 import { z } from 'zod';
 
-export const VIDEO_CATEGORIES = [
-  'Gaming',
-  'Education',
-  'Technology',
-  'Entertainment',
-  'Music',
-  'Sports',
-  'News',
-  'Travel',
-  'Vlog',
-] as const;
+export const SHORT_VISIBILITY = ['public', 'private', 'unlisted'] as const;
 
-export const VIDEO_VISIBILITY = ['public', 'private', 'unlisted'] as const;
-
-export const videoUploadSchema = z.object({
+export const shortUploadSchema = z.object({
   title: z
     .string()
     .trim()
@@ -24,7 +12,7 @@ export const videoUploadSchema = z.object({
   description: z
     .string()
     .trim()
-    .max(5000, { message: 'Description cannot exceed 5000 characters.' })
+    .max(500, { message: 'Description cannot exceed 500 characters.' })
     .optional(),
 
   thumbnailUrl: z
@@ -32,10 +20,6 @@ export const videoUploadSchema = z.object({
     .startsWith('https://', { message: 'Thumbnail URL must use HTTPS.' }),
 
   streamId: z.string().min(1, { message: 'Cloudflare Stream ID is required.' }),
-
-  category: z.enum(VIDEO_CATEGORIES, {
-    message: 'Invalid or missing category selected.',
-  }),
 
   tags: z
     .array(
@@ -49,17 +33,17 @@ export const videoUploadSchema = z.object({
           message: 'Tags can only contain letters and numbers.',
         })
     )
-    .max(10, { message: 'You can only add up to 10 tags.' })
+    .max(5, { message: 'Shorts can have a maximum of 5 tags.' })
     .optional()
     .default([]),
 
   visibility: z
-    .enum(VIDEO_VISIBILITY, {
+    .enum(SHORT_VISIBILITY, {
       message: 'Invalid visibility state selected.',
     })
     .default('public'),
 });
 
-export const videoUpdateSchema = videoUploadSchema
+export const shortUpdateSchema = shortUploadSchema
   .partial()
   .omit({ streamId: true });
