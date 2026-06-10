@@ -1,9 +1,8 @@
 import { combineReducers } from '@reduxjs/toolkit';
-
-const placeholderReducer = (state = {}) => state;
+import { authReducer } from './auth/authSlice';
 
 export const rootReducer = combineReducers({
-  placeholder: placeholderReducer,
+  auth: authReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
