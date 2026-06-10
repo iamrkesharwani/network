@@ -1,5 +1,12 @@
+import ToastProvider from './shared/components/ToastContainer';
+import { AppRoutes } from './routes/AppRoutes';
+
 const App = () => {
-  return <div>App</div>;
+  return (
+    <ToastProvider>
+      <AppRoutes />
+    </ToastProvider>
+  );
 };
 
 export default App;
