@@ -1,76 +1,73 @@
 import { Link } from 'react-router-dom';
 import { Menu, Search, Bell, Sun, Moon } from 'lucide-react';
-import Avatar from '../shared/components/Avatar';
 import { useTheme } from '../shared/hooks/useTheme';
+import Avatar from '../shared/components/Avatar';
 
 export interface NavbarProps {
   onMobileMenuClick: () => void;
 }
 
-export const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
+const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
   const { isDark, toggle } = useTheme();
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-md border-b border-border">
-      <div className="flex items-center justify-between h-16 px-4 w-full sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="p-2 -ml-2 text-text-muted rounded-lg md:hidden hover:bg-surface-raised hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"
-            onClick={onMobileMenuClick}
-          >
-            <span className="sr-only">Open sidebar</span>
-            <Menu className="w-5 h-5" aria-hidden="true" />
-          </button>
+    <header className="sticky top-0 z-40 w-full h-14 bg-surface border-b border-border flex items-center px-4 sm:px-6">
+      <div className="flex items-center gap-3 shrink-0">
+        <button
+          type="button"
+          onClick={onMobileMenuClick}
+          className="p-2 -ml-1 rounded-lg md:hidden text-icon hover:text-icon-hover hover:bg-surface-raised transition-colors focus:outline-none"
+        >
+          <span className="sr-only">Open sidebar</span>
+          <Menu className="w-5 h-5" />
+        </button>
 
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-              <span className="text-white text-xs font-bold font-display">
-                N
-              </span>
-            </div>
-            <span className="text-lg font-semibold font-display tracking-tight text-text-primary group-hover:text-primary transition-colors">
-              Network
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+            <span className="text-white text-sm font-bold font-display leading-none">
+              N
             </span>
-          </Link>
-        </div>
-
-        <div className="hidden flex-1 max-w-lg px-10 md:block">
-          <div className="relative">
-            <Search className="absolute inset-y-0 left-3 my-auto w-4 h-4 text-text-muted pointer-events-none" />
-            <input
-              type="search"
-              className="w-full h-9 pl-9 pr-4 text-sm bg-surface-raised border border-border rounded-full text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-surface transition-all"
-              placeholder="Search videos, creators..."
-            />
           </div>
+          <span className="text-base font-semibold font-display text-text-primary tracking-tight group-hover:text-primary transition-colors">
+            Network
+          </span>
+        </Link>
+      </div>
+
+      <div className="hidden md:flex flex-1 justify-center px-10">
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-icon pointer-events-none" />
+          <input
+            type="search"
+            placeholder="Search videos, creators..."
+            className="w-full h-9 pl-9 pr-4 rounded-lg bg-surface-raised border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:bg-surface transition-all"
+          />
         </div>
+      </div>
 
-        <div className="flex items-center gap-1">
-          <button className="relative p-2 text-text-muted rounded-full hover:bg-surface-raised hover:text-text-primary focus:outline-none transition-colors">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full ring-2 ring-surface" />
-          </button>
+      <div className="flex items-center gap-1 ml-auto shrink-0">
+        <button
+          onClick={toggle}
+          aria-label="Toggle theme"
+          className="p-2 rounded-lg text-icon hover:text-icon-hover hover:bg-surface-raised transition-colors focus:outline-none"
+        >
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
 
-          <button
-            onClick={toggle}
-            className="p-2 text-text-muted rounded-full hover:bg-surface-raised hover:text-text-primary focus:outline-none transition-colors"
-            aria-label="Toggle theme"
-          >
-            {isDark ? (
-              <Sun className="w-5 h-5" />
-            ) : (
-              <Moon className="w-5 h-5" />
-            )}
-          </button>
+        <button className="relative p-2 rounded-lg text-icon hover:text-icon-hover hover:bg-surface-raised transition-colors focus:outline-none">
+          <Bell className="w-5 h-5" />
+          <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+          </span>
+        </button>
 
-          <Link
-            to="/profile"
-            className="ml-1 focus:outline-none rounded-full ring-2 ring-transparent hover:ring-primary/40 transition-all"
-          >
-            <Avatar size="sm" fallback="U" />
-          </Link>
-        </div>
+        <Link
+          to="/profile"
+          className="ml-1 rounded-full ring-2 ring-transparent hover:ring-primary transition-all focus:outline-none"
+        >
+          <Avatar size="sm" fallback="U" />
+        </Link>
       </div>
     </header>
   );
