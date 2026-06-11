@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -31,11 +32,12 @@ const Modal = ({ isOpen, onClose, title, children, className }: ModalProps) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
+        aria-hidden="true"
       />
       <div
         ref={modalRef}
@@ -43,16 +45,17 @@ const Modal = ({ isOpen, onClose, title, children, className }: ModalProps) => {
         aria-modal="true"
         className={cn(
           'relative w-full max-w-lg rounded-xl border shadow-2xl transition-all duration-200',
-          'border-border bg-surface text-text',
+          'border-border bg-surface text-text-primary',
           className
         )}
       >
         {title && (
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
-            <h2 className="text-lg font-semibold">{title}</h2>
+            <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
             <button
               onClick={onClose}
-              className="rounded-full p-1 transition-colors hover:bg-surface-raised"
+              aria-label="Close modal"
+              className="rounded-full p-1 transition-colors hover:bg-surface-raised focus:outline-none"
             >
               <X className="h-5 w-5 text-text-muted" />
             </button>
@@ -60,7 +63,8 @@ const Modal = ({ isOpen, onClose, title, children, className }: ModalProps) => {
         )}
         <div className="p-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -1,5 +1,6 @@
 import { useState, type ImgHTMLAttributes } from 'react';
 import { User } from 'lucide-react';
+import { cn } from '../utils/cn';
 
 export interface AvatarProps extends ImgHTMLAttributes<HTMLImageElement> {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -13,7 +14,7 @@ const Avatar = ({
   size = 'md',
   fallback,
   isOnline,
-  className = '',
+  className,
   ...props
 }: AvatarProps) => {
   const [imgError, setImgError] = useState(false);
@@ -32,15 +33,23 @@ const Avatar = ({
     xl: 'w-8 h-8',
   };
 
-  const currentSizeClass = sizeClasses[size];
-  const baseClasses =
-    'relative inline-flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-medium overflow-hidden shrink-0';
-  const combinedClasses =
-    `${baseClasses} ${currentSizeClass} ${className}`.trim();
+  const indicatorSizes = {
+    sm: 'w-2 h-2',
+    md: 'w-3 h-3',
+    lg: 'w-3 h-3',
+    xl: 'w-4 h-4',
+  };
 
   return (
     <div className="relative inline-block shrink-0">
-      <div className={combinedClasses}>
+      <div
+        className={cn(
+          'relative inline-flex items-center justify-center rounded-full',
+          'bg-surface-raised text-text-secondary font-medium overflow-hidden shrink-0',
+          sizeClasses[size],
+          className
+        )}
+      >
         {src && !imgError ? (
           <img
             src={src}
@@ -58,11 +67,11 @@ const Avatar = ({
 
       {isOnline !== undefined && (
         <span
-          className={`absolute bottom-0 right-0 block rounded-full ring-2 ring-white ${
-            isOnline ? 'bg-green-500' : 'bg-gray-400'
-          } ${
-            size === 'sm' ? 'w-2 h-2' : size === 'xl' ? 'w-4 h-4' : 'w-3 h-3'
-          }`}
+          className={cn(
+            'absolute bottom-0 right-0 block rounded-full ring-2 ring-surface',
+            isOnline ? 'bg-success' : 'bg-text-muted',
+            indicatorSizes[size]
+          )}
         />
       )}
     </div>

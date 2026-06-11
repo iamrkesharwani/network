@@ -14,28 +14,30 @@ export interface ToastProps {
 
 const Toast = ({ id, type, message, onClose, duration = 3000 }: ToastProps) => {
   useEffect(() => {
-    if (duration) {
-      const timer = setTimeout(() => onClose(id), duration);
-      return () => clearTimeout(timer);
-    }
+    if (!duration) return;
+    const timer = setTimeout(() => onClose(id), duration);
+    return () => clearTimeout(timer);
   }, [id, duration, onClose]);
 
-  const variants = {
+  const variants: Record<
+    ToastType,
+    { container: string; icon: React.ReactNode }
+  > = {
     success: {
       container: 'border-success bg-success/10 text-success',
-      icon: <CheckCircle2 className="h-5 w-5" />,
+      icon: <CheckCircle2 className="h-5 w-5 shrink-0" />,
     },
     error: {
       container: 'border-error bg-error/10 text-error',
-      icon: <XCircle className="h-5 w-5" />,
+      icon: <XCircle className="h-5 w-5 shrink-0" />,
     },
     warning: {
       container: 'border-yellow-500 bg-yellow-500/10 text-yellow-500',
-      icon: <AlertCircle className="h-5 w-5" />,
+      icon: <AlertCircle className="h-5 w-5 shrink-0" />,
     },
     info: {
       container: 'border-primary bg-primary/10 text-primary',
-      icon: <Info className="h-5 w-5" />,
+      icon: <Info className="h-5 w-5 shrink-0" />,
     },
   };
 
@@ -43,18 +45,18 @@ const Toast = ({ id, type, message, onClose, duration = 3000 }: ToastProps) => {
 
   return (
     <div
+      role="alert"
       className={cn(
-        'pointer-events-auto flex w-full max-w-sm items-center justify-between space-x-4 overflow-hidden rounded-lg border p-4 shadow-lg transition-all',
+        'pointer-events-auto flex w-full max-w-sm items-center gap-3',
+        'overflow-hidden rounded-lg border p-4 shadow-lg transition-all',
         container
       )}
-      role="alert"
     >
-      <div className="flex flex-1 items-center space-x-3">
-        {icon}
-        <p className="text-sm font-medium">{message}</p>
-      </div>
+      {icon}
+      <p className="flex-1 text-sm font-medium">{message}</p>
       <button
         onClick={() => onClose(id)}
+        aria-label="Close notification"
         className="shrink-0 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100"
       >
         <X className="h-4 w-4" />

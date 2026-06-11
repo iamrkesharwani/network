@@ -3,7 +3,12 @@ import { createServer } from 'node:http';
 import mongoose from 'mongoose';
 import app from './app.js';
 import { connectDb } from './config/db.js';
-import { initRedis } from './config/redis.js';
+import {
+  initRedis,
+  redisClient,
+  pubClient,
+  subClient,
+} from './config/redis.js';
 import { initSocket } from './config/socket.js';
 import { logger } from './utils/logger.js';
 import { env } from './config/env.js';
@@ -35,15 +40,19 @@ const gracefulShutdown = async (signal: string) => {
       process.exit(1);
     }
 
-    logger.info(
-      'HTTP server closed cleanly. Terminating database connections...'
-    );
+    logger.info('HTTP server closed cleanly. Terminating all connections...');
+
     try {
-      await mongoose.disconnect();
-      logger.info('MongoDB connection pool disconnected successfully.');
+      await Promise.all([
+        mongoose.disconnect(),
+        redisClient.quit(),
+        pubClient.quit(),
+        subClient.quit(),
+      ]);
+      logger.info('All connections closed successfully.');
       process.exit(0);
-    } catch (dbError) {
-      logger.error(dbError, 'Error during database disconnection sequence');
+    } catch (shutdownError) {
+      logger.error(shutdownError, 'Error during connection teardown');
       process.exit(1);
     }
   });

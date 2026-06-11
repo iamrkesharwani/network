@@ -8,11 +8,14 @@ import { Provider } from 'react-redux';
 import store from './store/store';
 import App from './App';
 import './index.css';
+import { fetchCsrfToken } from './shared/lib/axiosInstance';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </StrictMode>
-);
+fetchCsrfToken().then(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </StrictMode>
+  );
+});
