@@ -1,11 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
-import { ZodObject, ZodError } from 'zod';
+import { type ZodType, ZodError } from 'zod';
 import { ApiError } from '../utils/ApiError.js';
 
 interface ValidationSchemas {
-  body?: ZodObject;
-  query?: ZodObject;
-  params?: ZodObject;
+  body?: ZodType<unknown>;
+  query?: ZodType<unknown>;
+  params?: ZodType<unknown>;
 }
 
 export const validate = (schemas: ValidationSchemas) => {
@@ -19,10 +19,14 @@ export const validate = (schemas: ValidationSchemas) => {
         req.body = await schemas.body.parseAsync(req.body);
       }
       if (schemas.query) {
-        req.query = (await schemas.query.parseAsync(req.query)) as any;
+        req.query = (await schemas.query.parseAsync(
+          req.query
+        )) as unknown as typeof req.query;
       }
       if (schemas.params) {
-        req.params = (await schemas.params.parseAsync(req.params)) as any;
+        req.params = (await schemas.params.parseAsync(
+          req.params
+        )) as unknown as typeof req.params;
       }
       next();
     } catch (error) {

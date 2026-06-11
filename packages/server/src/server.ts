@@ -3,6 +3,8 @@ import { createServer } from 'node:http';
 import mongoose from 'mongoose';
 import app from './app.js';
 import { connectDb } from './config/db.js';
+import { initRedis } from './config/redis.js';
+import { initSocket } from './config/socket.js';
 import { logger } from './utils/logger.js';
 import { env } from './config/env.js';
 
@@ -12,6 +14,9 @@ const httpServer = createServer(app);
 const startServer = async () => {
   try {
     await connectDb();
+    await initRedis();
+    initSocket(httpServer);
+
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Server listening on port ${port}`);
     });
