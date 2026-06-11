@@ -11,18 +11,20 @@ export const paginateQuery = async <T extends Document>(
 ): Promise<Omit<PaginatedResponse<T>, 'success' | 'message'>> => {
   const skip = (page - 1) * limit;
 
-  const [data, totalCount] = await Promise.all([
-    model
-      .find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean()
-      .exec() as Promise<T[]>,
-    model.countDocuments(filter).exec(),
-  ]);
+  const data = (await model
+    .find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit + 1)
+    .lean()
+    .exec()) as T[];
 
-  const hasNextPage = skip + data.length < totalCount;
+  const hasNextPage = data.length > limit;
+
+  if (hasNextPage) {
+    data.pop();
+  }
+
   const lastItem = data[data.length - 1];
   const nextCursor =
     hasNextPage && lastItem && lastItem._id ? String(lastItem._id) : null;
