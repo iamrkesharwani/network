@@ -1,13 +1,18 @@
 import express from 'express';
-import type { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
+import cookieParser from 'cookie-parser';
+import routes from './routes/index.js';
+import { API_V1_PREFIX } from '@network/shared';
 import { env } from './config/env.js';
 import { apiLimiter } from './middleware/rateLimit.middleware.js';
 import { errorHandler } from './middleware/error.middleware.js';
-import routes from './routes/index.js';
-import { API_V1_PREFIX } from '@network/shared';
+import {
+  generateCsrfToken,
+  validateCsrfToken,
+} from './middleware/csrf.middleware.js';
+import type { Application, Request, Response } from 'express';
 
 const app: Application = express();
 
@@ -21,6 +26,8 @@ app.use(
 app.use(mongoSanitize());
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
+
 app.use(apiLimiter);
 
 app.get('/health', (_req: Request, res: Response) => {
@@ -29,6 +36,9 @@ app.get('/health', (_req: Request, res: Response) => {
     message: 'API is running successfully',
   });
 });
+
+app.get(`${API_V1_PREFIX}/csrf-token`, generateCsrfToken);
+app.use(validateCsrfToken);
 
 app.use(API_V1_PREFIX, routes);
 app.use(errorHandler);

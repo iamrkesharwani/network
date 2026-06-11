@@ -31,6 +31,9 @@ const envSchema = z.object({
   CF_R2_SECRET_ACCESS_KEY: z.string(),
   CF_R2_BUCKET_NAME: z.string(),
   CF_PUBLIC_URL: z.url(),
+  LOG_LEVEL: z
+    .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
+    .default('info'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
