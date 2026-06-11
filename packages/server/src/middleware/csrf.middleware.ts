@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import crypto from 'node:crypto';
 import { ApiError } from '../utils/ApiError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 import { env } from '../config/env.js';
 
 export const generateCsrfToken = (_req: Request, res: Response) => {
@@ -11,12 +12,12 @@ export const generateCsrfToken = (_req: Request, res: Response) => {
     secure: env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
+    maxAge: 15 * 60 * 1000,
   });
 
-  res.status(200).json({
-    success: true,
-    data: { csrfToken: token },
-  });
+  res
+    .status(200)
+    .json(new ApiResponse({ csrfToken: token }, 'CSRF token generated'));
 };
 
 export const validateCsrfToken = (
@@ -29,10 +30,22 @@ export const validateCsrfToken = (
     return next();
   }
 
-  const cookieToken = req.cookies?._csrf;
+  const cookieToken = req.cookies['_csrf'];
   const headerToken = req.headers['x-csrf-token'];
 
-  if (!cookieToken || !headerToken || cookieToken !== headerToken) {
+  if (!cookieToken || !headerToken || Array.isArray(headerToken)) {
+    return next(
+      new ApiError(403, 'FORBIDDEN', 'Invalid or missing CSRF token')
+    );
+  }
+
+  const cookieBuf = Buffer.from(cookieToken as string);
+  const headerBuf = Buffer.from(headerToken);
+
+  if (
+    cookieBuf.length !== headerBuf.length ||
+    !crypto.timingSafeEqual(cookieBuf, headerBuf)
+  ) {
     return next(
       new ApiError(403, 'FORBIDDEN', 'Invalid or missing CSRF token')
     );
