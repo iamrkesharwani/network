@@ -13,6 +13,7 @@ import {
   validateCsrfToken,
 } from './middleware/csrf.middleware.js';
 import type { Application, Request, Response } from 'express';
+import { sanitizeMiddleware } from './middleware/sanitize.middleware.js';
 
 const app: Application = express();
 
@@ -27,7 +28,7 @@ app.use(mongoSanitize());
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
-
+app.use(sanitizeMiddleware);
 app.use(apiLimiter);
 
 app.get('/health', (_req: Request, res: Response) => {
