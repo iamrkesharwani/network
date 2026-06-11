@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 type Theme = 'light' | 'dark';
 
@@ -8,20 +8,12 @@ const getInitialTheme = (): Theme => {
   return 'dark';
 };
 
-const applyTheme = (theme: Theme) => {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
-};
-
-const initialTheme = getInitialTheme();
-applyTheme(initialTheme);
-
 interface UiState {
   theme: Theme;
 }
 
 const initialState: UiState = {
-  theme: initialTheme,
+  theme: getInitialTheme(),
 };
 
 const uiSlice = createSlice({
@@ -30,11 +22,9 @@ const uiSlice = createSlice({
   reducers: {
     toggleTheme(state) {
       state.theme = state.theme === 'light' ? 'dark' : 'light';
-      applyTheme(state.theme);
     },
-    setTheme(state, action: { payload: Theme }) {
+    setTheme(state, action: PayloadAction<Theme>) {
       state.theme = action.payload;
-      applyTheme(state.theme);
     },
   },
 });
