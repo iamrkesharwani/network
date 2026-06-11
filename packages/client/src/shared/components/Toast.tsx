@@ -1,77 +1,64 @@
 import { useEffect } from 'react';
-import { CheckCircle, AlertTriangle, XCircle, Info, X } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, Info, X } from 'lucide-react';
+import { cn } from '../utils/cn';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 export interface ToastProps {
   id: string;
+  type: ToastType;
   message: string;
-  type?: ToastType;
-  duration?: number;
   onClose: (id: string) => void;
+  duration?: number;
 }
 
-const Toast = ({
-  id,
-  message,
-  type = 'info',
-  duration = 5000,
-  onClose,
-}: ToastProps) => {
+const Toast = ({ id, type, message, onClose, duration = 3000 }: ToastProps) => {
   useEffect(() => {
-    if (duration > 0) {
-      const timer = setTimeout(() => {
-        onClose(id);
-      }, duration);
+    if (duration) {
+      const timer = setTimeout(() => onClose(id), duration);
       return () => clearTimeout(timer);
     }
   }, [id, duration, onClose]);
 
-  const styles = {
+  const variants = {
     success: {
-      bg: 'bg-green-50 border-green-200',
-      text: 'text-green-800',
-      icon: <CheckCircle className="w-5 h-5 text-green-500" />,
+      container: 'border-success bg-success/10 text-success',
+      icon: <CheckCircle2 className="h-5 w-5" />,
     },
     error: {
-      bg: 'bg-red-50 border-red-200',
-      text: 'text-red-800',
-      icon: <XCircle className="w-5 h-5 text-red-500" />,
+      container: 'border-error bg-error/10 text-error',
+      icon: <XCircle className="h-5 w-5" />,
     },
     warning: {
-      bg: 'bg-yellow-50 border-yellow-200',
-      text: 'text-yellow-800',
-      icon: <AlertTriangle className="w-5 h-5 text-yellow-500" />,
+      container: 'border-yellow-500 bg-yellow-500/10 text-yellow-500',
+      icon: <AlertCircle className="h-5 w-5" />,
     },
     info: {
-      bg: 'bg-blue-50 border-blue-200',
-      text: 'text-blue-800',
-      icon: <Info className="w-5 h-5 text-blue-500" />,
+      container: 'border-primary bg-primary/10 text-primary',
+      icon: <Info className="h-5 w-5" />,
     },
   };
 
-  const currentStyle = styles[type];
+  const { container, icon } = variants[type];
 
   return (
     <div
+      className={cn(
+        'pointer-events-auto flex w-full max-w-sm items-center justify-between space-x-4 overflow-hidden rounded-lg border p-4 shadow-lg transition-all',
+        container
+      )}
       role="alert"
-      className={`flex items-start w-full max-w-sm p-4 mb-3 border rounded-lg shadow-lg pointer-events-auto transition-all duration-300 ${currentStyle.bg}`}
     >
-      <div className="shrink-0">{currentStyle.icon}</div>
-
-      <div className={`ml-3 w-0 flex-1 pt-0.5 ${currentStyle.text}`}>
+      <div className="flex flex-1 items-center space-x-3">
+        {icon}
         <p className="text-sm font-medium">{message}</p>
       </div>
-
-      <div className="flex shrink-0 ml-4">
-        <button
-          onClick={() => onClose(id)}
-          className={`inline-flex rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 opacity-70 hover:opacity-100 transition-opacity ${currentStyle.text}`}
-          aria-label="Close"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+      <button
+        onClick={() => onClose(id)}
+        className="shrink-0 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100"
+      >
+        <X className="h-4 w-4" />
+      </button>
     </div>
   );
 };

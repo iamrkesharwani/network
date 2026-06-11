@@ -1,21 +1,15 @@
-export interface SkeletonProps {
-  variant?: 'text' | 'circular' | 'rectangular';
-  className?: string;
-}
+import type { HTMLAttributes } from 'react';
+import { cn } from '../utils/cn';
 
-const Skeleton = ({ variant = 'text', className = '' }: SkeletonProps) => {
-  const baseClasses = 'animate-pulse bg-gray-200';
+export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {}
 
-  const variantClasses = {
-    text: 'rounded-md',
-    circular: 'rounded-full',
-    rectangular: 'rounded-xl',
-  };
-
-  const combinedClasses =
-    `${baseClasses} ${variantClasses[variant]} ${className}`.trim();
-
-  return <div className={combinedClasses} aria-hidden="true" />;
+const Skeleton = ({ className, ...props }: SkeletonProps) => {
+  return (
+    <div
+      className={cn('animate-pulse rounded-md bg-surface-raised', className)}
+      {...props}
+    />
+  );
 };
 
 export default Skeleton;
