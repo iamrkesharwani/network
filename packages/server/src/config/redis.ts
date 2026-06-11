@@ -25,10 +25,16 @@ redisClient.on('error', (err) => {
 
 export const initRedis = async () => {
   try {
+    const connectClient = async (client: Redis) => {
+      if (client.status === 'wait') {
+        await client.connect();
+      }
+    };
+
     await Promise.all([
-      redisClient.connect(),
-      pubClient.connect(),
-      subClient.connect(),
+      connectClient(redisClient),
+      connectClient(pubClient),
+      connectClient(subClient),
     ]);
     logger.info('Successfully connected to Redis cluster.');
   } catch (error) {
