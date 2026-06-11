@@ -4,3 +4,7 @@ export const ALLOWED_AVATAR_MIME_TYPES = [
   'image/png',
   'image/webp',
 ];
+export const USER_ROLES = ['user', 'moderator', 'admin'] as const;
+export type UserRole = (typeof USER_ROLES)[number];
+export const AUTH_PROVIDERS = ['local', 'google', 'apple'] as const;
+export type AuthProvider = (typeof AUTH_PROVIDERS)[number];

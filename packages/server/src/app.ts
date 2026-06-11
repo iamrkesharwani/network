@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 import routes from './routes/index.js';
 import { API_V1_PREFIX } from '@network/shared';
@@ -24,7 +23,6 @@ app.use(
     credentials: true,
   })
 );
-app.use(mongoSanitize());
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
@@ -40,7 +38,6 @@ app.get('/health', (_req: Request, res: Response) => {
 
 app.get(`${API_V1_PREFIX}/csrf-token`, generateCsrfToken);
 app.use(validateCsrfToken);
-
 app.use(API_V1_PREFIX, routes);
 app.use(errorHandler);
 
