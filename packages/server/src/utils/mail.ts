@@ -107,6 +107,7 @@ export const sendPasswordResetEmail = async (
     USER_NAME: userName,
     OTP_CODE: otp,
     CURRENT_YEAR: new Date().getFullYear().toString(),
+    FIRST_LETTER: SITE_NAME.charAt(0).toUpperCase(),
   });
   await sendEmail(to, `${otp} is your ${SITE_NAME} password reset code`, html);
 };

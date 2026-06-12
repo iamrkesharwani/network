@@ -1,17 +1,22 @@
 import { Router } from 'express';
 import { validate } from '../../middleware/validate.middleware.js';
 import {
-  loginSchema,
-  userRegistrationSchema,
-  verifyEmailSchema,
-  forgotPasswordSchema,
-  resetPasswordSchema,
-} from '@network/shared';
-import * as authController from './auth.controller.js';
-import {
   authLimiter,
   otpLimiter,
 } from '../../middleware/rateLimit.middleware.js';
+import { requireAuth } from '../../middleware/auth.middleware.js';
+import {
+  loginSchema,
+  userRegistrationSchema,
+  verifyEmailSchema,
+  changePasswordSchema,
+  requestResetPasswordSchema,
+  completeResetPasswordSchema,
+} from '@network/shared';
+
+import * as authCoreController from './controllers/auth.core.controller.js';
+import * as authPasswordController from './controllers/auth.password.controller.js';
+import * as authVerifyController from './controllers/auth.verify.controller.js';
 
 const router = Router();
 
@@ -19,45 +24,52 @@ router.post(
   '/register',
   authLimiter,
   validate({ body: userRegistrationSchema }),
-  authController.registerLocal
+  authCoreController.registerLocal
 );
 
 router.post(
   '/login',
   authLimiter,
   validate({ body: loginSchema }),
-  authController.loginLocal
+  authCoreController.loginLocal
 );
 
-router.post('/refresh', authController.refreshTokens);
+router.post('/refresh', authCoreController.refreshTokens);
 
-router.post('/logout', authController.logout);
+router.post('/logout', authCoreController.logout);
 
 router.post(
   '/send-verification',
   otpLimiter,
-  authController.requestEmailVerification
+  authVerifyController.requestEmailVerification
 );
 
 router.post(
   '/verify-email',
   otpLimiter,
   validate({ body: verifyEmailSchema }),
-  authController.verifyEmail
+  authVerifyController.verifyEmail
 );
 
 router.post(
-  '/forgot-password',
+  '/change-password',
+  requireAuth,
+  validate({ body: changePasswordSchema }),
+  authPasswordController.changePassword
+);
+
+router.post(
+  '/request-password-reset',
   otpLimiter,
-  validate({ body: forgotPasswordSchema }),
-  authController.requestPasswordReset
+  validate({ body: requestResetPasswordSchema }),
+  authPasswordController.requestPasswordReset
 );
 
 router.post(
   '/reset-password',
   otpLimiter,
-  validate({ body: resetPasswordSchema }),
-  authController.resetPassword
+  validate({ body: completeResetPasswordSchema }),
+  authPasswordController.completePasswordReset
 );
 
 export default router;
