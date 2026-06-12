@@ -11,7 +11,7 @@ import {
   generateCsrfToken,
   validateCsrfToken,
 } from './middleware/csrf.middleware.js';
-import type { Application, Request, Response } from 'express';
+import type { Application } from 'express';
 import { sanitizeMiddleware } from './middleware/sanitize.middleware.js';
 
 const app: Application = express();
@@ -28,23 +28,8 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 app.use(sanitizeMiddleware);
 app.use(apiLimiter);
-
-app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    message: 'API is running successfully',
-  });
-});
-
 app.get(`${API_V1_PREFIX}/csrf-token`, generateCsrfToken);
-if (env.NODE_ENV === 'production') {
-  app.use(validateCsrfToken);
-} else {
-  console.warn(
-    '[SECURITY] Running in development mode: CSRF validation is disabled.'
-  );
-}
-
+app.use(validateCsrfToken);
 app.use(API_V1_PREFIX, routes);
 app.use(errorHandler);
 

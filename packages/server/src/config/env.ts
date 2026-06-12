@@ -2,40 +2,63 @@ import { z } from 'zod';
 import 'dotenv/config';
 import { logger } from '../utils/logger.js';
 
-const envSchema = z.object({
-  NODE_ENV: z
-    .enum(['development', 'production', 'test'])
-    .default('development'),
-  PORT: z.coerce.number().default(5000),
-  CLIENT_URL: z.url(),
-  MONGODB_URI: z.url(),
-  DB_NAME: z.string().default('network'),
-  REDIS_URI: z.url(),
-  JWT_SECRET: z
-    .string()
-    .min(32, { message: 'JWT_SECRET must be at least 32 characters' }),
-  JWT_REFRESH_SECRET: z
-    .string()
-    .min(32, { message: 'JWT_REFRESH_SECRET must be at least 32 characters' }),
-  GOOGLE_CLIENT_ID: z.string(),
-  GOOGLE_CLIENT_SECRET: z.string(),
-  GOOGLE_REDIRECT_URI: z.url(),
-  SMTP_HOST: z.string(),
-  SMTP_PORT: z.coerce.number(),
-  SMTP_USER: z.string(),
-  SMTP_PASS: z.string(),
-  EMAIL_FROM: z.email(),
-  CF_ACCOUNT_ID: z.string(),
-  CF_API_TOKEN: z.string(),
-  CF_R2_ACCESS_KEY_ID: z.string(),
-  CF_R2_SECRET_ACCESS_KEY: z.string(),
-  CF_R2_BUCKET_NAME: z.string(),
-  CF_PUBLIC_URL: z.url(),
-  LOG_LEVEL: z
-    .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
-    .default('info'),
-  RESEND_API_KEY: z.string().startsWith('re_'),
-});
+const envSchema = z
+  .object({
+    NODE_ENV: z
+      .enum(['development', 'production', 'test'])
+      .default('development'),
+    PORT: z.coerce.number().default(5000),
+    CLIENT_URL: z.url(),
+    MONGODB_URI: z.url(),
+    DB_NAME: z.string().default('network'),
+    REDIS_URI: z.url(),
+    JWT_SECRET: z
+      .string()
+      .min(32, { message: 'JWT_SECRET must be at least 32 characters' }),
+
+    // OAuth
+    GOOGLE_CLIENT_ID: z.string(),
+    GOOGLE_CLIENT_SECRET: z.string(),
+    GOOGLE_REDIRECT_URI: z.url(),
+
+    // Email
+    EMAIL_FROM: z.email(),
+
+    // Resend
+    RESEND_API_KEY: z.string().startsWith('re_').optional(),
+
+    // SMTP
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().optional(),
+    SMTP_USER: z.string().optional(),
+    SMTP_PASS: z.string().optional(),
+
+    // Cloudflare R2
+    CF_ACCOUNT_ID: z.string(),
+    CF_API_TOKEN: z.string(),
+    CF_R2_ACCESS_KEY_ID: z.string(),
+    CF_R2_SECRET_ACCESS_KEY: z.string(),
+    CF_R2_BUCKET_NAME: z.string(),
+    CF_PUBLIC_URL: z.url(),
+
+    LOG_LEVEL: z
+      .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
+      .default('info'),
+  })
+  .refine(
+    (data) => {
+      if (data.NODE_ENV === 'production') {
+        return (
+          data.SMTP_HOST && data.SMTP_PORT && data.SMTP_USER && data.SMTP_PASS
+        );
+      }
+      return data.RESEND_API_KEY;
+    },
+    {
+      message:
+        'Production requires SMTP_HOST/PORT/USER/PASS. Development requires RESEND_API_KEY.',
+    }
+  );
 
 const parsedEnv = envSchema.safeParse(process.env);
 

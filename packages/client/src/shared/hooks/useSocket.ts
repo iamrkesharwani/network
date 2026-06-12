@@ -35,5 +35,5 @@ export const useSocket = (token: string | null) => {
     };
   }, [token]);
 
-  return socket.current;
+  return socket;
 };

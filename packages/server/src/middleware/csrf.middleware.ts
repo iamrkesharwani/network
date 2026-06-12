@@ -6,9 +6,8 @@ import { env } from '../config/env.js';
 
 export const generateCsrfToken = (_req: Request, res: Response) => {
   const token = crypto.randomBytes(32).toString('hex');
-
   res.cookie('_csrf', token, {
-    httpOnly: true,
+    httpOnly: false,
     secure: env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',

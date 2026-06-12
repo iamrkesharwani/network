@@ -7,7 +7,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   token: null,
-  isInitialized: true,
+  isInitialized: false,
 };
 
 const authSlice = createSlice({
@@ -17,8 +17,11 @@ const authSlice = createSlice({
     setToken: (state, action: PayloadAction<string | null>) => {
       state.token = action.payload;
     },
+    setInitialized: (state) => {
+      state.isInitialized = true;
+    },
   },
 });
 
-export const { setToken } = authSlice.actions;
+export const { setToken, setInitialized } = authSlice.actions;
 export default authSlice.reducer;

@@ -1,25 +1,34 @@
-// import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { env } from '../config/env.js';
 import { logger } from './logger.js';
-import { Resend } from 'resend';
 import { SITE_NAME } from '@network/shared';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const resend = new Resend(env.RESEND_API_KEY);
+const isProduction = env.NODE_ENV === 'production';
 
-// const transporter = nodemailer.createTransport({
-//   host: env.SMTP_HOST || 'smtp.mailtrap.io',
-//   port: Number(env.SMTP_PORT) || 2525,
-//   auth: {
-//     user: env.SMTP_USER,
-//     pass: env.SMTP_PASS,
-//   },
-// });
+const smtpTransporter = isProduction
+  ? nodemailer.createTransport({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
+    })
+  : null;
+
+const resend = !isProduction ? new Resend(env.RESEND_API_KEY) : null;
+
+const escapeHtml = (str: string): string =>
+  str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 
 export const getHtmlTemplate = async (
   templateName: string,
@@ -34,7 +43,7 @@ export const getHtmlTemplate = async (
     );
     let html = await fs.readFile(templatePath, 'utf-8');
     for (const [key, value] of Object.entries(variables)) {
-      html = html.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      html = html.replace(new RegExp(`{{${key}}}`, 'g'), escapeHtml(value));
     }
     return html;
   } catch (error) {
@@ -48,25 +57,25 @@ export const sendEmail = async (
   subject: string,
   html: string
 ): Promise<void> => {
-  try {
-    // await transporter.sendMail({
-    //   from: env.EMAIL_FROM || '"Network App" <noreply@network.local>',
-    //   to,
-    //   subject,
-    //   html,
-    // });
+  const from = `${SITE_NAME} <${env.EMAIL_FROM}>`;
 
-    const { data, error } = await resend.emails.send({
-      from: `${SITE_NAME} <onboarding@resend.dev>`,
-      to,
-      subject,
-      html,
-    });
-    if (error) {
-      logger.error(error, `Resend API Error sending to ${to}`);
-      throw new Error('Email delivery failed at provider');
+  try {
+    if (isProduction && smtpTransporter) {
+      await smtpTransporter.sendMail({ from, to, subject, html });
+      logger.info(`Email sent to ${to} via SMTP`);
+    } else if (resend) {
+      const { data, error } = await resend.emails.send({
+        from,
+        to,
+        subject,
+        html,
+      });
+      if (error) {
+        logger.error(error, `Resend error sending to ${to}`);
+        throw new Error('Email delivery failed at provider');
+      }
+      logger.info(`Email sent to ${to} via Resend. ID: ${data?.id}`);
     }
-    logger.info(`Email sent successfully to ${to} via Resend. ID: ${data?.id}`);
   } catch (error) {
     logger.error(error, `Failed to send email to ${to}`);
     throw new Error('Email delivery failed');
@@ -78,15 +87,12 @@ export const sendOtpEmail = async (
   userName: string,
   otp: string
 ): Promise<void> => {
-  const currentYear = new Date().getFullYear().toString();
-  const firstLetter = SITE_NAME.charAt(0).toUpperCase();
-
   const html = await getHtmlTemplate('verify-email', {
     SITE_NAME,
     USER_NAME: userName,
     OTP_CODE: otp,
-    CURRENT_YEAR: currentYear,
-    FIRST_LETTER: firstLetter,
+    CURRENT_YEAR: new Date().getFullYear().toString(),
+    FIRST_LETTER: SITE_NAME.charAt(0).toUpperCase(),
   });
   await sendEmail(to, `${otp} is your ${SITE_NAME} verification code`, html);
 };

@@ -10,6 +10,8 @@ import { redisClient } from '../../config/redis.js';
 import { randomInt } from 'node:crypto';
 import { sendOtpEmail } from '../../utils/mail.js';
 
+const OTP_MAX_ATTEMPTS = 5;
+
 export const registerLocal = async (data: UserRegistrationInput) => {
   const existingUser = await User.findOne({
     $or: [{ email: data.email }, { username: data.username }],
@@ -32,10 +34,7 @@ export const registerLocal = async (data: UserRegistrationInput) => {
     authProviders: ['local'],
   });
 
-  const accessToken = await generateAccessToken(user.id, user.role);
-  const refreshToken = await generateRefreshToken(user.id);
-
-  return { user, accessToken, refreshToken };
+  return { user };
 };
 
 export const loginLocal = async (data: LoginInput) => {
@@ -49,6 +48,14 @@ export const loginLocal = async (data: LoginInput) => {
 
   if (!isValidPassword) {
     throw new ApiError(401, 'UNAUTHORIZED', 'Invalid email or password');
+  }
+
+  if (!user.isEmailVerified) {
+    throw new ApiError(
+      403,
+      'FORBIDDEN',
+      'Please verify your email address before logging in.'
+    );
   }
 
   const accessToken = await generateAccessToken(user.id, user.role);
@@ -95,25 +102,26 @@ export const logoutUser = async (token: string) => {
 
 export const sendVerificationEmail = async (email: string) => {
   const user = await User.findOne({ email });
-  if (!user) {
-    throw new ApiError(404, 'NOT_FOUND', 'User not found');
-  }
-
-  if (user.isEmailVerified) {
-    throw new ApiError(400, 'BAD_REQUEST', 'Email is already verified');
+  if (!user || user.isEmailVerified) {
+    return;
   }
 
   const otp = randomInt(100000, 1000000).toString();
   const hashedOtp = await hashPassword(otp);
 
   const tokenKey = `email_verify:${email}`;
+  const attemptsKey = `otp_attempts:${email}`;
+
   await redisClient.set(tokenKey, hashedOtp, 'EX', 900);
+  await redisClient.set(attemptsKey, '0', 'EX', 900);
 
   await sendOtpEmail(email, user.name, otp);
 };
 
 export const verifyEmailOtp = async (email: string, otp: string) => {
   const tokenKey = `email_verify:${email}`;
+  const attemptsKey = `otp_attempts:${email}`;
+
   const hashedOtp = await redisClient.get(tokenKey);
 
   if (!hashedOtp) {
@@ -124,8 +132,20 @@ export const verifyEmailOtp = async (email: string, otp: string) => {
     );
   }
 
+  const attempts = parseInt((await redisClient.get(attemptsKey)) ?? '0', 10);
+  if (attempts >= OTP_MAX_ATTEMPTS) {
+    await redisClient.del(tokenKey);
+    await redisClient.del(attemptsKey);
+    throw new ApiError(
+      429,
+      'RATE_LIMIT_EXCEEDED',
+      'Too many incorrect attempts. Please request a new verification code.'
+    );
+  }
+
   const isValid = await verifyPassword(hashedOtp, otp);
   if (!isValid) {
+    await redisClient.incr(attemptsKey);
     throw new ApiError(400, 'BAD_REQUEST', 'Incorrect verification code');
   }
 
@@ -137,5 +157,6 @@ export const verifyEmailOtp = async (email: string, otp: string) => {
   user.isEmailVerified = true;
   await user.save();
   await redisClient.del(tokenKey);
+  await redisClient.del(attemptsKey);
   return user;
 };

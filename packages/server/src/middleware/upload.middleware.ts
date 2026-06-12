@@ -1,4 +1,5 @@
 import multer from 'multer';
+import { fileTypeFromBuffer } from 'file-type';
 import { ApiError } from '../utils/ApiError.js';
 import {
   ALLOWED_VIDEO_MIME_TYPES,
@@ -6,6 +7,8 @@ import {
   ALLOWED_AVATAR_MIME_TYPES,
   MAX_AVATAR_SIZE_BYTES,
   MAX_SHORT_SIZE_BYTES,
+  ALLOWED_THUMBNAIL_MIME_TYPES,
+  MAX_THUMBNAIL_SIZE_BYTES,
 } from '@network/shared';
 
 const storage = multer.memoryStorage();
@@ -25,12 +28,26 @@ const createUploadMiddleware = (
           new ApiError(
             400,
             'VALIDATION_ERROR',
-            `Invalid file type. Allowed types: ${allowedMimeTypes.join(', ')}`
+            `Invalid file type. Allowed: ${allowedMimeTypes.join(', ')}`
           )
         );
       }
     },
   });
+};
+
+export const verifyFileMagicBytes = async (
+  file: Express.Multer.File,
+  allowedMimeTypes: readonly string[]
+): Promise<void> => {
+  const detected = await fileTypeFromBuffer(file.buffer);
+  if (!detected || !allowedMimeTypes.includes(detected.mime)) {
+    throw new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      `File content does not match declared type. Detected: ${detected?.mime ?? 'unknown'}`
+    );
+  }
 };
 
 export const uploadAvatar = createUploadMiddleware(
@@ -39,8 +56,8 @@ export const uploadAvatar = createUploadMiddleware(
 ).single('avatar');
 
 export const uploadThumbnail = createUploadMiddleware(
-  ALLOWED_AVATAR_MIME_TYPES,
-  MAX_AVATAR_SIZE_BYTES
+  ALLOWED_THUMBNAIL_MIME_TYPES,
+  MAX_THUMBNAIL_SIZE_BYTES
 ).single('thumbnail');
 
 export const uploadVideo = createUploadMiddleware(

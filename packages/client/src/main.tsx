@@ -8,9 +8,29 @@ import { Provider } from 'react-redux';
 import store from './store/store';
 import App from './App';
 import './index.css';
-import { fetchCsrfToken } from './shared/lib/axiosInstance';
+import {
+  fetchCsrfToken,
+  setAccessToken,
+  axiosInstance,
+} from './shared/lib/axiosInstance';
+import { setToken, setInitialized } from './features/auth/authSlice';
 
-fetchCsrfToken().then(() => {
+const bootstrap = async () => {
+  await fetchCsrfToken();
+  try {
+    const { data } = await axiosInstance.post<{
+      data: { accessToken: string };
+    }>('/auth/refresh');
+    const accessToken = data.data.accessToken;
+    setAccessToken(accessToken);
+    store.dispatch(setToken(accessToken));
+  } catch {
+    setAccessToken(null);
+    store.dispatch(setToken(null));
+  } finally {
+    store.dispatch(setInitialized());
+  }
+
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <Provider store={store}>
@@ -18,4 +38,6 @@ fetchCsrfToken().then(() => {
       </Provider>
     </StrictMode>
   );
-});
+};
+
+bootstrap();

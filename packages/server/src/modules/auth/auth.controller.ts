@@ -14,16 +14,14 @@ const cookieOptions = {
 
 export const registerLocal = asyncHandler(
   async (req: Request, res: Response) => {
-    const { user, accessToken, refreshToken } = await authService.registerLocal(
-      req.body
-    );
-
-    res.cookie('refreshToken', refreshToken, cookieOptions);
-
+    const { user } = await authService.registerLocal(req.body);
     res
       .status(201)
       .json(
-        new ApiResponse({ user, accessToken }, 'User registered successfully')
+        new ApiResponse(
+          { userId: user.id },
+          'Account created. Please check your email to verify your account.'
+        )
       );
   }
 );
@@ -89,7 +87,12 @@ export const requestEmailVerification = asyncHandler(
 
     res
       .status(200)
-      .json(new ApiResponse(null, 'Verification code sent successfully'));
+      .json(
+        new ApiResponse(
+          null,
+          'If an account with this email exists and is unverified, a code has been sent.'
+        )
+      );
   }
 );
 

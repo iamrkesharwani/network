@@ -42,6 +42,13 @@ export const authLimiter = createLimiter(
   'rl:auth:'
 );
 
+export const otpLimiter = createLimiter(
+  15 * 60 * 1000,
+  5,
+  'Too many OTP requests. Please wait 15 minutes before trying again.',
+  'rl:otp:'
+);
+
 export const uploadLimiter = createLimiter(
   60 * 60 * 1000,
   30,
