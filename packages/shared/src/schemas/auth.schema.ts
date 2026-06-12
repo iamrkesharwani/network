@@ -17,16 +17,16 @@ export const verifyEmailSchema = z.object({
     .regex(/^\d+$/, { message: 'OTP must contain only numbers.' }),
 });
 
-export const forgotPasswordSchema = z.object({
+export const requestResetPasswordSchema = z.object({
   email: emailValidation,
 });
 
-export const resetPasswordSchema = z.object({
-  token: z
+export const completeResetPasswordSchema = z.object({
+  email: emailValidation,
+  otp: z
     .string()
-    .trim()
-    .min(32, { message: 'Invalid token format.' })
-    .max(128, { message: 'Invalid token format.' }),
+    .length(6, { message: 'OTP must be exactly 6 digits.' })
+    .regex(/^\d+$/, { message: 'OTP must contain only numbers.' }),
   newPassword: passwordValidation,
 });
 

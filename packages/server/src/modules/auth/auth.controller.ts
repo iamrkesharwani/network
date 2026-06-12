@@ -107,3 +107,49 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json(new ApiResponse(null, 'Email verified successfully'));
 });
+
+export const requestPasswordReset = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new ApiError(400, 'BAD_REQUEST', 'Email is required');
+    }
+
+    await authService.sendPasswordResetOtp(email);
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          null,
+          'If an account with this email exists, a reset code has been sent.'
+        )
+      );
+  }
+);
+
+export const resetPassword = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      throw new ApiError(
+        400,
+        'BAD_REQUEST',
+        'Email, OTP, and new password are required'
+      );
+    }
+
+    await authService.resetPasswordWithOtp(email, otp, newPassword);
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          null,
+          'Password reset successfully. You can now log in.'
+        )
+      );
+  }
+);

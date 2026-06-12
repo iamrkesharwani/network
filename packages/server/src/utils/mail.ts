@@ -100,12 +100,13 @@ export const sendOtpEmail = async (
 export const sendPasswordResetEmail = async (
   to: string,
   userName: string,
-  resetUrl: string
+  otp: string
 ): Promise<void> => {
   const html = await getHtmlTemplate('reset-password', {
     SITE_NAME,
     USER_NAME: userName,
-    RESET_URL: resetUrl,
+    OTP_CODE: otp,
+    CURRENT_YEAR: new Date().getFullYear().toString(),
   });
-  await sendEmail(to, `Reset your ${SITE_NAME} password`, html);
+  await sendEmail(to, `${otp} is your ${SITE_NAME} password reset code`, html);
 };

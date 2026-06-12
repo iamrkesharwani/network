@@ -4,6 +4,8 @@ import {
   loginSchema,
   userRegistrationSchema,
   verifyEmailSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } from '@network/shared';
 import * as authController from './auth.controller.js';
 import {
@@ -42,6 +44,20 @@ router.post(
   otpLimiter,
   validate({ body: verifyEmailSchema }),
   authController.verifyEmail
+);
+
+router.post(
+  '/forgot-password',
+  otpLimiter,
+  validate({ body: forgotPasswordSchema }),
+  authController.requestPasswordReset
+);
+
+router.post(
+  '/reset-password',
+  otpLimiter,
+  validate({ body: resetPasswordSchema }),
+  authController.resetPassword
 );
 
 export default router;
