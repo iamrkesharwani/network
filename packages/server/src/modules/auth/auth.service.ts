@@ -7,6 +7,8 @@ import {
   generateRefreshToken,
 } from '../../utils/token.js';
 import { redisClient } from '../../config/redis.js';
+import { randomInt } from 'node:crypto';
+import { sendOtpEmail } from '../../utils/mail.js';
 
 export const registerLocal = async (data: UserRegistrationInput) => {
   const existingUser = await User.findOne({
@@ -89,4 +91,51 @@ export const logoutUser = async (token: string) => {
       await redisClient.del(`refresh_token:${userId}:${token}`);
     }
   }
+};
+
+export const sendVerificationEmail = async (email: string) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, 'NOT_FOUND', 'User not found');
+  }
+
+  if (user.isEmailVerified) {
+    throw new ApiError(400, 'BAD_REQUEST', 'Email is already verified');
+  }
+
+  const otp = randomInt(100000, 1000000).toString();
+  const hashedOtp = await hashPassword(otp);
+
+  const tokenKey = `email_verify:${email}`;
+  await redisClient.set(tokenKey, hashedOtp, 'EX', 900);
+
+  await sendOtpEmail(email, user.name, otp);
+};
+
+export const verifyEmailOtp = async (email: string, otp: string) => {
+  const tokenKey = `email_verify:${email}`;
+  const hashedOtp = await redisClient.get(tokenKey);
+
+  if (!hashedOtp) {
+    throw new ApiError(
+      400,
+      'BAD_REQUEST',
+      'Verification code expired or invalid'
+    );
+  }
+
+  const isValid = await verifyPassword(hashedOtp, otp);
+  if (!isValid) {
+    throw new ApiError(400, 'BAD_REQUEST', 'Incorrect verification code');
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, 'NOT_FOUND', 'User not found');
+  }
+
+  user.isEmailVerified = true;
+  await user.save();
+  await redisClient.del(tokenKey);
+  return user;
 };

@@ -76,3 +76,31 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json(new ApiResponse(null, 'Logged out successfully'));
 });
+
+export const requestEmailVerification = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new ApiError(400, 'BAD_REQUEST', 'Email is required');
+    }
+
+    await authService.sendVerificationEmail(email);
+
+    res
+      .status(200)
+      .json(new ApiResponse(null, 'Verification code sent successfully'));
+  }
+);
+
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const { email, otp } = req.body;
+
+  if (!otp) {
+    throw new ApiError(400, 'BAD_REQUEST', 'OTP is required');
+  }
+
+  await authService.verifyEmailOtp(email, otp);
+
+  res.status(200).json(new ApiResponse(null, 'Email verified successfully'));
+});

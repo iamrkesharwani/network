@@ -39,17 +39,21 @@ export const validateCsrfToken = (
     );
   }
 
-  const cookieBuf = Buffer.from(cookieToken as string);
-  const headerBuf = Buffer.from(headerToken);
+  try {
+    const cookieBuf = Buffer.from(cookieToken as string, 'hex');
+    const headerBuf = Buffer.from(headerToken, 'hex');
 
-  if (
-    cookieBuf.length !== headerBuf.length ||
-    !crypto.timingSafeEqual(cookieBuf, headerBuf)
-  ) {
-    return next(
-      new ApiError(403, 'FORBIDDEN', 'Invalid or missing CSRF token')
-    );
+    if (
+      cookieBuf.length !== headerBuf.length ||
+      !crypto.timingSafeEqual(cookieBuf, headerBuf)
+    ) {
+      return next(
+        new ApiError(403, 'FORBIDDEN', 'Invalid CSRF token mismatch')
+      );
+    }
+
+    next();
+  } catch (error) {
+    return next(new ApiError(403, 'FORBIDDEN', 'Malformed CSRF token'));
   }
-
-  next();
 };

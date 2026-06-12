@@ -91,9 +91,4 @@ const userSchema = new Schema<IUserDocument>(
   }
 );
 
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-userSchema.index({ googleId: 1 });
-userSchema.index({ appleId: 1 });
-
 export const User = mongoose.model<IUserDocument>('User', userSchema);

@@ -10,11 +10,11 @@ export const loginSchema = z.object({
 });
 
 export const verifyEmailSchema = z.object({
-  token: z
+  email: emailValidation,
+  otp: z
     .string()
-    .trim()
-    .min(32, { message: 'Invalid token format.' })
-    .max(128, { message: 'Invalid token format.' }),
+    .length(6, { message: 'OTP must be exactly 6 digits.' })
+    .regex(/^\d+$/, { message: 'OTP must contain only numbers.' }),
 });
 
 export const forgotPasswordSchema = z.object({

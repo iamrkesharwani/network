@@ -37,7 +37,14 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 app.get(`${API_V1_PREFIX}/csrf-token`, generateCsrfToken);
-app.use(validateCsrfToken);
+if (env.NODE_ENV === 'production') {
+  app.use(validateCsrfToken);
+} else {
+  console.warn(
+    '[SECURITY] Running in development mode: CSRF validation is disabled.'
+  );
+}
+
 app.use(API_V1_PREFIX, routes);
 app.use(errorHandler);
 

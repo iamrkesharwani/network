@@ -34,6 +34,7 @@ const envSchema = z.object({
   LOG_LEVEL: z
     .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
     .default('info'),
+  RESEND_API_KEY: z.string().startsWith('re_'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
