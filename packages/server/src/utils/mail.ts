@@ -79,12 +79,14 @@ export const sendOtpEmail = async (
   otp: string
 ): Promise<void> => {
   const currentYear = new Date().getFullYear().toString();
+  const firstLetter = SITE_NAME.charAt(0).toUpperCase();
 
   const html = await getHtmlTemplate('verify-email', {
     SITE_NAME,
     USER_NAME: userName,
     OTP_CODE: otp,
     CURRENT_YEAR: currentYear,
+    FIRST_LETTER: firstLetter,
   });
   await sendEmail(to, `${otp} is your ${SITE_NAME} verification code`, html);
 };
