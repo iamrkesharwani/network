@@ -1,0 +1,27 @@
+{
+  "name": "network",
+  "version": "1.0.0",
+  "description": "Monorepo — Social network site",
+  "author": {
+    "name": "Rahul Kesharwani"
+  },
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:client": "npm run dev --workspace=@network/client",
+    "dev:server": "npm run dev --workspace=@network/server",
+    "build:shared": "npm run build --workspace=@network/shared",
+    "build": "npm run build --workspace=@network/shared --workspace=@network/client --workspace=@network/server --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "i:client": "npm install --workspace=@network/client",
+    "i:server": "npm install --workspace=@network/server",
+    "i:shared": "npm install --workspace=@network/shared"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
