@@ -1,0 +1,63 @@
+import { z } from 'zod';
+import {
+  shortUploadSchema,
+  shortUpdateSchema,
+  initiateShortUploadSchema,
+  confirmShortUploadSchema,
+  shortFeedQuerySchema,
+  shortIdParamSchema,
+} from '../schemas/short.schema.js';
+import {
+  SHORT_VISIBILITY,
+  SHORT_STATUS,
+} from '../constants/short.constants.js';
+
+export type ShortUploadInput = z.infer<typeof shortUploadSchema>;
+export type ShortUpdateInput = z.infer<typeof shortUpdateSchema>;
+export type InitiateShortUploadInput = z.infer<
+  typeof initiateShortUploadSchema
+>;
+export type ConfirmShortUploadInput = z.infer<typeof confirmShortUploadSchema>;
+export type ShortFeedQuery = z.infer<typeof shortFeedQuerySchema>;
+export type ShortIdParam = z.infer<typeof shortIdParamSchema>;
+export type ShortVisibility = (typeof SHORT_VISIBILITY)[number];
+export type ShortStatus = (typeof SHORT_STATUS)[number];
+
+export interface IInitiateShortUploadResult {
+  shortId: string;
+  presignedUrl: string;
+  storageKey: string;
+}
+
+export interface IShort {
+  id: string;
+  userId: string;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  providerVideoId?: string;
+  playbackUrl?: string;
+  status: ShortStatus;
+  errorMessage?: string;
+  storageKey?: string;
+  tags: string[];
+  visibility: ShortVisibility;
+  views: number;
+  likes: number;
+  duration: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IShortAuthor {
+  id: string;
+  username: string;
+  avatarUrl?: string;
+}
+
+export interface IShortResponse extends Omit<
+  IShort,
+  'userId' | 'providerVideoId' | 'storageKey'
+> {
+  author: IShortAuthor;
+}
