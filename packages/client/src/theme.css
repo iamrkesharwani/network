@@ -1,0 +1,182 @@
+@layer base {
+  :root {
+    --color-primary: #f97316;
+    --color-primary-hover: #ea6c0a;
+    --color-primary-muted: rgba(249, 115, 22, 0.12);
+    --color-primary-subtle: rgba(249, 115, 22, 0.07);
+
+    --color-surface: #0d0d0f;
+    --color-surface-alt: #111113;
+    --color-surface-raised: #1a1a1d;
+    --color-surface-overlay: #242428;
+
+    --color-border: rgba(255, 255, 255, 0.09);
+    --color-border-subtle: #222226;
+
+    --color-text-primary: #f0f0ed;
+    --color-text-secondary: #a0a09c;
+    --color-text-muted: #7a7a78;
+
+    --color-icon: #c0c0bc;
+    --color-icon-active: #f97316;
+    --color-icon-hover: #e8e8e4;
+
+    --color-error: #f87171;
+    --color-error-subtle: rgba(248, 113, 113, 0.08);
+    --color-success: #4ade80;
+    --color-live: #f97316;
+    --color-verified: #60a5fa;
+
+    --font-display: 'Archivo Variable', sans-serif;
+    --font-body: 'Inter Variable', sans-serif;
+    --font-mono: 'JetBrains Mono Variable', monospace;
+  }
+
+  [data-theme='light'] {
+    --color-primary: #ea6c0a;
+    --color-primary-hover: #c45d08;
+    --color-primary-muted: rgba(234, 108, 10, 0.1);
+    --color-primary-subtle: rgba(234, 108, 10, 0.06);
+
+    --color-surface: #ffffff;
+    --color-surface-alt: #f4f4f1;
+    --color-surface-raised: #ebebe8;
+    --color-surface-overlay: #e2e2df;
+
+    --color-border: #dcdcd8;
+    --color-border-subtle: #e8e8e4;
+
+    --color-text-primary: #111110;
+    --color-text-secondary: #6a6a67;
+    --color-text-muted: #adadaa;
+
+    --color-icon: #4a4a48;
+    --color-icon-active: #ea6c0a;
+    --color-icon-hover: #111110;
+
+    --color-error: #dc2626;
+    --color-error-subtle: rgba(220, 38, 38, 0.07);
+    --color-success: #16a34a;
+    --color-live: #ea6c0a;
+    --color-verified: #2563eb;
+  }
+
+  .font-display {
+    font-stretch: 125%;
+  }
+}
+
+.entry-btn {
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+.entry-btn:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+}
+.entry-btn.email-btn:hover {
+  border-color: rgba(249, 115, 22, 0.5);
+  background: rgba(249, 115, 22, 0.08);
+}
+
+.back-link {
+  color: var(--color-text-muted);
+}
+.back-link:hover {
+  color: var(--color-text-primary);
+}
+
+.forgot a:hover,
+a.forgot:hover {
+  color: var(--color-primary);
+}
+
+.register-line a {
+  border-bottom: 1px solid var(--color-primary);
+}
+.register-line a:hover {
+  color: var(--color-primary);
+}
+
+.bg-veil {
+  background:
+    radial-gradient(
+      ellipse 70% 60% at 50% 50%,
+      rgba(13, 13, 15, 0.94) 0%,
+      rgba(13, 13, 15, 0.6) 50%,
+      rgba(13, 13, 15, 0.3) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(13, 13, 15, 0.7) 0%,
+      transparent 20%,
+      transparent 80%,
+      rgba(13, 13, 15, 0.8) 100%
+    );
+}
+
+.spotlight {
+  background: radial-gradient(
+    circle,
+    rgba(249, 115, 22, 0.08) 0%,
+    transparent 65%
+  );
+}
+
+.field-root input.field-input::placeholder {
+  color: transparent;
+}
+
+.field-root .field-label {
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.25s ease;
+  transform-origin: left top;
+}
+
+.field-root .field-input:focus + .field-label,
+.field-root .field-input:not(:placeholder-shown) + .field-label {
+  transform: translateY(-1.35rem) scale(0.72);
+  color: rgba(240, 240, 237, 0.55);
+}
+
+.field-root .field-input:focus + .field-label {
+  color: var(--color-primary);
+}
+
+.field-underline {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.field-root .field-input:focus ~ .field-underline {
+  transform: scaleX(1);
+}
+
+.submit-btn {
+  transition:
+    border-color 0.35s,
+    color 0.35s,
+    letter-spacing 0.35s;
+}
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: -1;
+}
+.submit-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: #0d0d0f;
+  letter-spacing: 0.22em;
+}
+.submit-btn:hover:not(:disabled)::before {
+  transform: scaleX(1);
+}
