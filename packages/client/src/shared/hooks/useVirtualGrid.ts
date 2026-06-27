@@ -3,7 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 
 interface UseVirtualGridOptions {
   count: number;
-  scrollRef: React.RefObject<HTMLDivElement | null>;
+  scrollRef: React.RefObject<HTMLElement | null>;
   estimateSize: (index: number) => number;
   overscan?: number;
   hasNextPage: boolean;
@@ -26,7 +26,7 @@ export const useVirtualGrid = ({
 
   const virtualizer = useVirtualizer({
     count,
-    getScrollElement: () => scrollRef.current,
+    getScrollElement: () => scrollRef.current as HTMLElement | null,
     estimateSize,
     overscan,
     measureElement: isFirefox
