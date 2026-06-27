@@ -3,8 +3,14 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
+const SIDEBAR_KEY = 'sidebar:collapsed';
+
 const PageWrapper = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    const stored = localStorage.getItem(SIDEBAR_KEY);
+    return stored === null ? true : stored === 'true';
+  });
 
   return (
     <div className="h-screen bg-surface-alt flex flex-col overflow-hidden">
@@ -14,10 +20,18 @@ const PageWrapper = () => {
         <Sidebar
           isMobileOpen={isMobileSidebarOpen}
           onMobileClose={() => setIsMobileSidebarOpen(false)}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() =>
+            setIsSidebarCollapsed((prev) => {
+              const next = !prev;
+              localStorage.setItem(SIDEBAR_KEY, String(next));
+              return next;
+            })
+          }
         />
 
         <main className="flex-1 min-w-0 overflow-y-auto">
-          <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+          <div className="w-full px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <Outlet />
           </div>
         </main>
