@@ -6,9 +6,11 @@ interface AppShellSkeletonProps {
 }
 
 const AppShellSkeleton = ({ children }: AppShellSkeletonProps) => {
+  const isCollapsed = localStorage.getItem('sidebar:collapsed') !== 'false';
+  const sidebarWidth = isCollapsed ? 'w-14' : 'w-56';
   return (
     <div
-      className="bg-surface-alt flex flex-col overflow-hidden"
+      className="bg-surface-alt flex flex-col"
       style={{ height: '100dvh' }}
       aria-hidden="true"
     >
@@ -30,26 +32,39 @@ const AppShellSkeleton = ({ children }: AppShellSkeletonProps) => {
       </header>
 
       <div className="flex flex-1 w-full min-h-0">
-        <aside className="hidden md:flex md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] w-56 flex-col bg-surface border-r border-border shrink-0">
-          <nav className="flex-1 px-3 py-4 space-y-1.5">
+        <aside
+          className={`hidden md:flex md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] ${sidebarWidth} flex-col bg-surface border-r border-border shrink-0 transition-all duration-300`}
+        >
+          <div
+            className={`h-12 border-b border-border flex items-center shrink-0 ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'}`}
+          >
+            <Skeleton className="w-5 h-5 rounded" />
+          </div>
+          <nav className="flex-1 px-2 py-4 space-y-1.5">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 px-3 py-2.5">
-                <Skeleton className="w-4.5 h-4.5 rounded shrink-0" />
-                <Skeleton className="h-3.5 w-20" />
+              <div
+                key={i}
+                className={`flex items-center py-2.5 ${isCollapsed ? 'justify-center' : 'gap-3 px-3'}`}
+              >
+                <Skeleton className="w-5 h-5 rounded shrink-0" />
+                {!isCollapsed && <Skeleton className="h-3.5 w-20" />}
               </div>
             ))}
           </nav>
-
-          <div className="px-3 py-4 border-t border-border">
-            <div className="flex items-center gap-3 px-3 py-2.5">
-              <Skeleton className="w-4.5 h-4.5 rounded shrink-0" />
-              <Skeleton className="h-3.5 w-16" />
+          <div className="px-2 py-4 border-t border-border">
+            <div
+              className={`flex items-center py-2.5 ${isCollapsed ? 'justify-center' : 'gap-3 px-3'}`}
+            >
+              <Skeleton className="w-5 h-5 rounded shrink-0" />
+              {!isCollapsed && <Skeleton className="h-3.5 w-16" />}
             </div>
           </div>
         </aside>
 
         <main className="flex-1 min-w-0 overflow-y-auto">
-          <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">{children}</div>
+          <div className="w-full px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-12">
+            {children}
+          </div>
         </main>
       </div>
     </div>
