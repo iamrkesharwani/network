@@ -6,7 +6,7 @@ import shortRoutes from '../modules/short/short.routes.js';
 const router = Router();
 
 router.use('/auth', authRoutes);
-router.use('/videos', videoRoutes);
-router.use('/shorts', shortRoutes);
+router.use('/video', videoRoutes);
+router.use('/short', shortRoutes);
 
 export default router;
