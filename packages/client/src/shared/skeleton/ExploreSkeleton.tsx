@@ -1,5 +1,5 @@
 import Skeleton from './Skeleton';
-import VideoCardSkeleton from './VideoCardSkeleton';
+import VideoCardSkeleton from './video/VideoCardSkeleton';
 
 const ExploreSkeleton = () => (
   <div className="flex flex-col gap-6">
