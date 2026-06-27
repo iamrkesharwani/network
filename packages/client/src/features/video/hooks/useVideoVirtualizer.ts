@@ -1,6 +1,5 @@
 import type { IVideoResponse } from '@network/shared';
 import { estimateRowHeight, type ColCount } from '../../../shared/utils/grid';
-import type React from 'react';
 import { useVirtualGrid } from '../../../shared/hooks/useVirtualGrid';
 
 export type SentinelRow = 'skeleton' | 'end';
@@ -9,7 +8,7 @@ export type VirtualRow = IVideoResponse[] | SentinelRow;
 interface UseVideoVirtualizerOptions {
   rows: VirtualRow[];
   cols: ColCount;
-  scrollRef: React.RefObject<HTMLDivElement | null>;
+  scrollRef: React.RefObject<HTMLElement | null>;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   onLoadMore?: () => void;

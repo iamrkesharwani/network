@@ -1,22 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ColCount } from '../../../shared/utils/grid';
 
 const getColCount = (width: number): ColCount => {
-  if (width >= 1024) return 4;
-  if (width >= 640) return 2;
+  if (width >= 900) return 4;
+  if (width >= 500) return 2;
   return 1;
 };
 
 export const useGridCols = (): ColCount => {
-  const [cols, setCols] = useState<ColCount>(() =>
-    getColCount(window.innerWidth)
-  );
+  const [cols, setCols] = useState<ColCount>(1);
+  const containerRef = useRef<Element | null>(null);
 
   useEffect(() => {
+    const main = document.querySelector('main');
+    containerRef.current = main;
+
+    const target = main ?? document.documentElement;
+    setCols(getColCount(target.clientWidth));
+
     const obs = new ResizeObserver(([e]) =>
       setCols(getColCount(e.contentRect.width))
     );
-    obs.observe(document.documentElement);
+    obs.observe(target);
     return () => obs.disconnect();
   }, []);
 
