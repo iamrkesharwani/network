@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react';
 import { cn } from '../../../shared/utils/cn';
 import { useGridCols } from '../hooks/useGridCols';
 import { useVideoVirtualizer } from '../hooks/useVideoVirtualizer';
+import { chunkIntoRows } from '../../../shared/utils/grid';
 import VideoGridRow from '../components/VideoGridRow';
 import VideoEmptyState from '../components/VideoEmptyState';
 import VideoErrorState from '../components/VideoErrorState';
 import VideoEndDivider from '../components/VideoEndDivider';
 import type { IVideoResponse } from '@network/shared';
-import { chunkIntoRows } from '../../../shared/utils/grid';
 import {
   VideoGridSkeleton,
   VideoRowSkeleton,
@@ -28,6 +28,7 @@ export interface VideoGridProps {
   className?: string;
   emptyMessage?: string;
   emptySubMessage?: string;
+  scrollRef?: React.RefObject<HTMLElement | null>;
 }
 
 const VideoGrid = ({
@@ -45,13 +46,15 @@ const VideoGrid = ({
   className,
   emptyMessage = 'No videos yet',
   emptySubMessage = "When videos are added they'll appear here.",
+  scrollRef: externalScrollRef,
 }: VideoGridProps) => {
   const resolvedIsOwner: boolean = isOwner;
   const resolvedHasNextPage: boolean = hasNextPage;
   const resolvedIsFetchingNextPage: boolean = isFetchingNextPage;
   const resolvedSkeletonCount: number = skeletonCount;
+
   const cols = useGridCols();
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const internalScrollRef = useRef<HTMLDivElement | null>(null);
   const seenIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -72,7 +75,8 @@ const VideoGrid = ({
   const virtualizer = useVideoVirtualizer({
     rows,
     cols,
-    scrollRef,
+    scrollRef: (externalScrollRef ??
+      internalScrollRef) as React.RefObject<HTMLDivElement | null>,
     hasNextPage: resolvedHasNextPage,
     isFetchingNextPage: resolvedIsFetchingNextPage,
     onLoadMore,
@@ -94,53 +98,45 @@ const VideoGrid = ({
 
   return (
     <div
-      ref={scrollRef}
-      className={cn('w-full overflow-y-auto', className)}
-      style={{ height: '100%', contain: 'strict' }}
+      ref={internalScrollRef}
+      className={cn('w-full relative', className)}
+      style={{ height: virtualizer.getTotalSize() }}
     >
-      <div
-        style={{
-          height: virtualizer.getTotalSize(),
-          width: '100%',
-          position: 'relative',
-        }}
-      >
-        {virtualizer.getVirtualItems().map((virtualRow) => {
-          const row = rows[virtualRow.index];
+      {virtualizer.getVirtualItems().map((virtualRow) => {
+        const row = rows[virtualRow.index];
 
-          return (
-            <div
-              key={virtualRow.key}
-              data-index={virtualRow.index}
-              ref={virtualizer.measureElement}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                transform: `translateY(${virtualRow.start}px)`,
-                paddingBottom: '28px',
-              }}
-            >
-              {row === 'skeleton' ? (
-                <VideoRowSkeleton cols={cols} />
-              ) : row === 'end' ? (
-                <VideoEndDivider />
-              ) : (
-                <VideoGridRow
-                  videos={row}
-                  rowIndex={virtualRow.index}
-                  cols={cols}
-                  isOwner={resolvedIsOwner}
-                  seenIds={seenIds}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
+        return (
+          <div
+            key={virtualRow.key}
+            data-index={virtualRow.index}
+            ref={virtualizer.measureElement}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              transform: `translateY(${virtualRow.start}px)`,
+              paddingBottom: '28px',
+            }}
+          >
+            {row === 'skeleton' ? (
+              <VideoRowSkeleton cols={cols} />
+            ) : row === 'end' ? (
+              <VideoEndDivider />
+            ) : (
+              <VideoGridRow
+                videos={row}
+                rowIndex={virtualRow.index}
+                cols={cols}
+                isOwner={resolvedIsOwner}
+                seenIds={seenIds}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
