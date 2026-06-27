@@ -1,13 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import rootReducer, { type RootState as RootReducerState } from './rootReducer';
 import { authApi } from '../features/auth/authApi';
+import { videoApi } from '../features/video/videoApi';
 
 export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
   configureStore({
     reducer: rootReducer,
     preloadedState,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(authApi.middleware),
+      getDefaultMiddleware().concat(authApi.middleware, videoApi.middleware),
     devTools: import.meta.env.MODE !== 'production',
   });
 
