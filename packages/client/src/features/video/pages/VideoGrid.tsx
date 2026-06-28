@@ -82,6 +82,7 @@ const VideoGrid = ({
     cols,
     scrollRef: (externalScrollRef ??
       internalScrollRef) as React.RefObject<HTMLDivElement | null>,
+    widthRef: internalScrollRef,
     hasNextPage: resolvedHasNextPage,
     isFetchingNextPage: resolvedIsFetchingNextPage,
     onLoadMore,

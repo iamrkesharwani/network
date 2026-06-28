@@ -12,6 +12,7 @@ interface UseShortVirtualizerOptions {
   rows: VirtualShortRow[];
   cols: ShortColCount;
   scrollRef: React.RefObject<HTMLElement | null>;
+  widthRef?: React.RefObject<HTMLElement | null>;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   onLoadMore?: () => void;
@@ -21,11 +22,13 @@ export const useShortVirtualizer = ({
   rows,
   cols,
   scrollRef,
+  widthRef,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
 }: UseShortVirtualizerOptions) => {
-  const containerWidth = scrollRef.current?.offsetWidth ?? window.innerWidth;
+  const containerWidth =
+    (widthRef ?? scrollRef).current?.offsetWidth ?? window.innerWidth;
 
   return useVirtualGrid({
     count: rows.length,

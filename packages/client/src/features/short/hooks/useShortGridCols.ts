@@ -8,8 +8,16 @@ const getColCount = (width: number): ShortColCount => {
   return 2;
 };
 
+const getInitialWidth = (): number => {
+  if (typeof document === 'undefined') return 0;
+  const main = document.querySelector('main');
+  return (main ?? document.documentElement).clientWidth;
+};
+
 export const useShortGridCols = (): ShortColCount => {
-  const [cols, setCols] = useState<ShortColCount>(2);
+  const [cols, setCols] = useState<ShortColCount>(() =>
+    getColCount(getInitialWidth())
+  );
   const containerRef = useRef<Element | null>(null);
 
   useEffect(() => {
@@ -17,7 +25,6 @@ export const useShortGridCols = (): ShortColCount => {
     containerRef.current = main;
 
     const target = main ?? document.documentElement;
-    setCols(getColCount(target.clientWidth));
 
     const obs = new ResizeObserver(([e]) => {
       setCols(getColCount(e.contentRect.width));

@@ -4,15 +4,14 @@ import AppShellSkeleton from '../shared/skeleton/AppShellSkeleton';
 import ExploreSkeleton from '../shared/skeleton/ExploreSkeleton';
 import ProfileSkeleton from '../shared/skeleton/ProfileSkeleton';
 import SettingsSkeleton from '../shared/skeleton/SettingsSkeleton';
-import VideoFeedSkeleton from '../shared/skeleton/video/VideoFeedSkeleton';
+import FeedSkeleton from '../shared/skeleton/feed/FeedSkeleton';
 import DefaultPageSkeleton from '../shared/skeleton/DefaultPageSkeleton';
 
 const getSkeletonForPath = (pathname: string) => {
   if (pathname.startsWith('/explore')) return ExploreSkeleton;
   if (pathname.startsWith('/profile')) return ProfileSkeleton;
   if (pathname.startsWith('/settings')) return SettingsSkeleton;
-  if (pathname.startsWith('/feed') || pathname === '/')
-    return VideoFeedSkeleton;
+  if (pathname.startsWith('/feed') || pathname === '/') return FeedSkeleton;
   return DefaultPageSkeleton;
 };
 

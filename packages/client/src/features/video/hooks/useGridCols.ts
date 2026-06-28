@@ -7,8 +7,16 @@ const getColCount = (width: number): ColCount => {
   return 1;
 };
 
+const getInitialWidth = (): number => {
+  if (typeof document === 'undefined') return 0;
+  const main = document.querySelector('main');
+  return (main ?? document.documentElement).clientWidth;
+};
+
 export const useGridCols = (): ColCount => {
-  const [cols, setCols] = useState<ColCount>(1);
+  const [cols, setCols] = useState<ColCount>(() =>
+    getColCount(getInitialWidth())
+  );
   const containerRef = useRef<Element | null>(null);
 
   useEffect(() => {
@@ -16,7 +24,6 @@ export const useGridCols = (): ColCount => {
     containerRef.current = main;
 
     const target = main ?? document.documentElement;
-    setCols(getColCount(target.clientWidth));
 
     const obs = new ResizeObserver(([e]) =>
       setCols(getColCount(e.contentRect.width))

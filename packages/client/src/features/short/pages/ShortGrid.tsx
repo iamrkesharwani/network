@@ -72,6 +72,7 @@ const ShortGrid = ({
     cols,
     scrollRef: (externalScrollRef ??
       internalScrollRef) as React.RefObject<HTMLDivElement | null>,
+    widthRef: internalScrollRef,
     hasNextPage,
     isFetchingNextPage,
     onLoadMore,

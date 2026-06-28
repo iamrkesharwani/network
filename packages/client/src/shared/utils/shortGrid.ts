@@ -1,6 +1,6 @@
-export type ColCount = 1 | 2 | 3 | 4;
+export type ShortColCount = 2 | 3 | 4 | 6;
 
-export const chunkIntoRows = <T>(arr: T[], size: ColCount): T[][] => {
+export const chunkIntoRows = <T>(arr: T[], size: ShortColCount): T[][] => {
   const rows: T[][] = [];
 
   for (let i = 0; i < arr.length; i += size) {
@@ -9,19 +9,19 @@ export const chunkIntoRows = <T>(arr: T[], size: ColCount): T[][] => {
   return rows;
 };
 
-export const estimateRowHeight = (
+export const estimateShortRowHeight = (
   containerWidth: number,
-  cols: ColCount
+  cols: ShortColCount
 ): number => {
-  const gapTotal = (cols - 1) * 16;
+  const gapTotal = (cols - 1) * 12;
   const colWidth = (containerWidth - gapTotal) / cols;
-  const thumbHeight = colWidth * (9 / 16);
+  const thumbHeight = colWidth * (16 / 9);
   return thumbHeight + 56 + 28;
 };
 
-export const COL_CLASS: Record<ColCount, string> = {
-  1: 'grid-cols-1',
+export const SHORT_COL_CLASS: Record<ShortColCount, string> = {
   2: 'grid-cols-2',
   3: 'grid-cols-3',
   4: 'grid-cols-4',
+  6: 'grid-cols-6',
 };
