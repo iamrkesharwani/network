@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
-
-const BASE_TITLE = 'Network';
+import { SITE_NAME } from '@network/shared';
 
 const usePageTitle = (title: string) => {
   useEffect(() => {
-    document.title = `${BASE_TITLE} · ${title}`;
+    document.title = `${SITE_NAME} · ${title}`;
     return () => {
-      document.title = BASE_TITLE;
+      document.title = SITE_NAME;
     };
   }, [title]);
 };

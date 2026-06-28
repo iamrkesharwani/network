@@ -50,6 +50,8 @@ const Sidebar = ({
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
+  const showLabels = isMobileOpen || !isCollapsed;
+
   const sidebarClasses = [
     'fixed inset-y-0 left-0 z-50 flex flex-col',
     'bg-surface border-r border-border',
@@ -103,11 +105,11 @@ const Sidebar = ({
               key={item.name}
               to={item.path}
               onClick={onMobileClose}
-              title={isCollapsed ? item.name : undefined}
+              title={!showLabels ? item.name : undefined}
               className={({ isActive }) =>
                 [
                   'group flex items-center rounded-lg text-sm font-medium transition-all duration-150',
-                  isCollapsed
+                  !showLabels
                     ? 'justify-center px-0 py-2.5 w-10 mx-auto'
                     : 'gap-3 px-3 py-2.5',
                   isActive
@@ -121,14 +123,14 @@ const Sidebar = ({
                   <item.icon
                     className={[
                       'shrink-0 transition-colors',
-                      isCollapsed ? 'w-5 h-5' : 'w-4.5 h-4.5',
+                      !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
                       isActive
                         ? 'text-icon-active'
                         : 'text-icon group-hover:text-icon-hover',
                     ].join(' ')}
                     strokeWidth={isActive ? 2.5 : 1.75}
                   />
-                  {!isCollapsed && item.name}
+                  {showLabels && item.name}
                 </>
               )}
             </NavLink>
@@ -140,7 +142,7 @@ const Sidebar = ({
             onClick={handleLogout}
             disabled={isLoading}
             title={
-              isCollapsed
+              !showLabels
                 ? isLoading
                   ? 'Logging out...'
                   : 'Log Out'
@@ -148,7 +150,7 @@ const Sidebar = ({
             }
             className={[
               'group flex items-center rounded-lg text-sm font-medium text-text-secondary hover:text-error hover:bg-error-subtle transition-all focus:outline-none w-full',
-              isCollapsed
+              !showLabels
                 ? 'justify-center px-0 py-2.5 w-10 mx-auto'
                 : 'gap-3 px-3 py-2.5',
             ].join(' ')}
@@ -156,11 +158,11 @@ const Sidebar = ({
             <LogOut
               className={[
                 'shrink-0 text-icon group-hover:text-error transition-colors',
-                isCollapsed ? 'w-5 h-5' : 'w-4.5 h-4.5',
+                !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
               ].join(' ')}
               strokeWidth={1.75}
             />
-            {!isCollapsed && (
+            {showLabels && (
               <span>{isLoading ? 'Logging out...' : 'Log Out'}</span>
             )}
           </button>

@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { Menu, Search, Bell, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../shared/hooks/useTheme';
 import Avatar from '../shared/components/Avatar';
+import { SITE_NAME } from '@network/shared';
+import LogoIcon from '../public/Logo.svg?react';
 
 export interface NavbarProps {
   onMobileMenuClick: () => void;
@@ -23,13 +25,9 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
         </button>
 
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <span className="text-white text-sm font-bold font-display leading-none">
-              N
-            </span>
-          </div>
-          <span className="text-base font-semibold font-display text-text-primary tracking-tight group-hover:text-primary transition-colors">
-            Network
+          <LogoIcon aria-hidden="true" className="w-7" />
+          <span className="text-[1.4rem] font-semibold font-display text-text-primary tracking-tight group-hover:text-primary transition-colors">
+            {SITE_NAME}
           </span>
         </Link>
       </div>
