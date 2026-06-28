@@ -13,6 +13,7 @@ interface UseVideoVirtualizerOptions {
   cols: ColCount;
   scrollRef: React.RefObject<HTMLElement | null>;
   widthRef?: React.RefObject<HTMLElement | null>;
+  scrollMargin?: number;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   onLoadMore?: () => void;
@@ -23,6 +24,7 @@ export const useVideoVirtualizer = ({
   cols,
   scrollRef,
   widthRef,
+  scrollMargin,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
@@ -38,6 +40,7 @@ export const useVideoVirtualizer = ({
       if (row === 'skeleton' || row === 'end') return 80;
       return estimateRowHeight(containerWidth, cols);
     },
+    scrollMargin,
     hasNextPage,
     isFetchingNextPage,
     onLoadMore,

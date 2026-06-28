@@ -6,6 +6,7 @@ interface UseVirtualGridOptions {
   scrollRef: React.RefObject<HTMLElement | null>;
   estimateSize: (index: number) => number;
   overscan?: number;
+  scrollMargin?: number;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   onLoadMore?: () => void;
@@ -16,6 +17,7 @@ export const useVirtualGrid = ({
   scrollRef,
   estimateSize,
   overscan = 3,
+  scrollMargin = 0,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
@@ -29,6 +31,7 @@ export const useVirtualGrid = ({
     getScrollElement: () => scrollRef.current as HTMLElement | null,
     estimateSize,
     overscan,
+    scrollMargin,
     measureElement: isFirefox
       ? undefined
       : (el: Element) => el?.getBoundingClientRect().height,

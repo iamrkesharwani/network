@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '../../../shared/utils/cn';
 import { useGridCols } from '../hooks/useGridCols';
 import { useVideoVirtualizer } from '../hooks/useVideoVirtualizer';
@@ -61,10 +61,35 @@ const VideoGrid = ({
   const cols: ColCount = (forceCols as ColCount) ?? autoCols;
   const internalScrollRef = useRef<HTMLDivElement | null>(null);
   const seenIds = useRef<Set<string>>(new Set());
+  const [scrollMargin, setScrollMargin] = useState(0);
 
   useEffect(() => {
     seenIds.current.clear();
   }, [cols]);
+
+  // When this grid shares a scroll container with content above it whose
+  // height can change (e.g. a hero block with async-loading thumbnails),
+  // the virtualizer's row offsets need to account for that gap — otherwise
+  // rows are positioned as if this grid started at the top of the scroll
+  // container, and they render in the wrong place (or not at all) once
+  // scrolled past that content.
+  useEffect(() => {
+    const scrollEl = externalScrollRef?.current;
+    const wrapperEl = internalScrollRef.current;
+    if (!externalScrollRef || !scrollEl || !wrapperEl) return;
+
+    const measure = () => {
+      const wrapperTop = wrapperEl.getBoundingClientRect().top;
+      const scrollTop = scrollEl.getBoundingClientRect().top;
+      setScrollMargin(wrapperTop - scrollTop + scrollEl.scrollTop);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(scrollEl);
+    observer.observe(wrapperEl);
+    return () => observer.disconnect();
+  }, [externalScrollRef]);
 
   const videoRows = chunkIntoRows(videos, cols);
 
@@ -83,6 +108,7 @@ const VideoGrid = ({
     scrollRef: (externalScrollRef ??
       internalScrollRef) as React.RefObject<HTMLDivElement | null>,
     widthRef: internalScrollRef,
+    scrollMargin: externalScrollRef ? scrollMargin : undefined,
     hasNextPage: resolvedHasNextPage,
     isFetchingNextPage: resolvedIsFetchingNextPage,
     onLoadMore,
@@ -121,7 +147,7 @@ const VideoGrid = ({
               top: 0,
               left: 0,
               width: '100%',
-              transform: `translateY(${virtualRow.start}px)`,
+              transform: `translateY(${virtualRow.start - scrollMargin}px)`,
               paddingBottom: '28px',
             }}
           >
