@@ -61,6 +61,6 @@ const makeVideo = (i: number): IVideoResponse => ({
   },
 });
 
-export const ALL_SHORTS = Array.from({ length: 10 }, (_, i) => makeShort(i));
-export const ALL_VIDEOS = Array.from({ length: 20 }, (_, i) => makeVideo(i));
+export const ALL_SHORTS = Array.from({ length: 50 }, (_, i) => makeShort(i));
+export const ALL_VIDEOS = Array.from({ length: 50 }, (_, i) => makeVideo(i));
 export const VIDEO_PAGE_SIZE = 8;
