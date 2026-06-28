@@ -45,8 +45,8 @@ export interface IShort {
   views: number;
   likes: number;
   duration: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface IShortAuthor {

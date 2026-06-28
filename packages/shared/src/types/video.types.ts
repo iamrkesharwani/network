@@ -48,8 +48,8 @@ export interface IVideo {
   views: number;
   likes: number;
   duration: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface IVideoAuthor {
