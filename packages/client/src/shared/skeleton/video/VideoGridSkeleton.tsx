@@ -1,4 +1,4 @@
-import { COL_CLASS, type ColCount } from '../../utils/grid';
+import { COL_CLASS, type ColCount } from '../../utils/videoGrid';
 import VideoCardSkeleton from './VideoCardSkeleton';
 
 interface VideoGridSkeletonProps {

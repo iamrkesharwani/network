@@ -1,4 +1,4 @@
-export type ColCount = 1 | 2 | 4;
+export type ColCount = 1 | 2 | 3 | 4;
 
 export const chunkIntoRows = <T>(arr: T[], size: ColCount): T[][] => {
   const rows: T[][] = [];
@@ -22,5 +22,6 @@ export const estimateRowHeight = (
 export const COL_CLASS: Record<ColCount, string> = {
   1: 'grid-cols-1',
   2: 'grid-cols-2',
+  3: 'grid-cols-3',
   4: 'grid-cols-4',
 };
