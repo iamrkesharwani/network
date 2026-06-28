@@ -8,7 +8,7 @@ import GuestRoute from './GuestRoute';
 import ForgotPassword from '../features/auth/pages/ForgotPassword';
 import ResetPassword from '../features/auth/pages/ResetPassword';
 import OAuthCallback from '../features/auth/pages/OAuthCallback';
-import VideoGridDev from '../features/video/__dev__/VideoGridDev';
+import FeedPage from '../features/feed/FeedPage';
 
 const Explore = () => <div className="p-8 text-xl">Explore</div>;
 const Profile = () => <div className="p-8 text-xl">Profile</div>;
@@ -34,7 +34,7 @@ export const routes: RouteObject[] = [
         element: <PageWrapper />,
         children: [
           { path: '/', element: <Navigate to="/feed" replace /> },
-          { path: '/feed', element: <VideoGridDev /> },
+          { path: '/feed', element: <FeedPage /> },
           { path: '/explore', element: <Explore /> },
           { path: '/profile', element: <Profile /> },
           { path: '/settings', element: <Settings /> },
