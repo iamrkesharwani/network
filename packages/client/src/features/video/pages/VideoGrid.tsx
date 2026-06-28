@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { cn } from '../../../shared/utils/cn';
 import { useGridCols } from '../hooks/useGridCols';
 import { useVideoVirtualizer } from '../hooks/useVideoVirtualizer';
-import { chunkIntoRows } from '../../../shared/utils/grid';
+import { chunkIntoRows, type ColCount } from '../../../shared/utils/videoGrid';
 import VideoGridRow from '../components/VideoGridRow';
 import VideoEmptyState from '../components/VideoEmptyState';
 import VideoErrorState from '../components/VideoErrorState';
@@ -29,6 +29,8 @@ export interface VideoGridProps {
   emptyMessage?: string;
   emptySubMessage?: string;
   scrollRef?: React.RefObject<HTMLElement | null>;
+  forceCols?: 1 | 2 | 3 | 4;
+  hideEndDivider?: boolean;
 }
 
 const VideoGrid = ({
@@ -47,13 +49,16 @@ const VideoGrid = ({
   emptyMessage = 'No videos yet',
   emptySubMessage = "When videos are added they'll appear here.",
   scrollRef: externalScrollRef,
+  forceCols,
+  hideEndDivider = false,
 }: VideoGridProps) => {
   const resolvedIsOwner: boolean = isOwner;
   const resolvedHasNextPage: boolean = hasNextPage;
   const resolvedIsFetchingNextPage: boolean = isFetchingNextPage;
   const resolvedSkeletonCount: number = skeletonCount;
 
-  const cols = useGridCols();
+  const autoCols = useGridCols();
+  const cols: ColCount = (forceCols as ColCount) ?? autoCols;
   const internalScrollRef = useRef<HTMLDivElement | null>(null);
   const seenIds = useRef<Set<string>>(new Set());
 
@@ -67,7 +72,7 @@ const VideoGrid = ({
     ...videoRows,
     ...(resolvedIsFetchingNextPage
       ? (['skeleton'] as const)
-      : !resolvedHasNextPage && videos.length > 0
+      : !resolvedHasNextPage && videos.length > 0 && !hideEndDivider
         ? (['end'] as const)
         : []),
   ];

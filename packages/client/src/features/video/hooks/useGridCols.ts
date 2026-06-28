@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ColCount } from '../../../shared/utils/grid';
+import type { ColCount } from '../../../shared/utils/videoGrid';
 
 const getColCount = (width: number): ColCount => {
   if (width >= 900) return 4;
