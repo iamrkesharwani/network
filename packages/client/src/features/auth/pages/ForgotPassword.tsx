@@ -11,8 +11,10 @@ import {
   type ApiErrorResponse,
   type RequestResetPasswordInput,
 } from '@network/shared';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 
 const ForgotPassword = () => {
+  usePageTitle('Forgot Password');
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
@@ -49,8 +51,8 @@ const ForgotPassword = () => {
 
         <div className="w-full flex flex-col">
           <p className="text-[0.85rem] text-[--color-text-muted] mb-6">
-            Enter your email address and we will send you a one time code to reset your
-            password.
+            Enter your email address and we will send you a one time code to
+            reset your password.
           </p>
 
           <form

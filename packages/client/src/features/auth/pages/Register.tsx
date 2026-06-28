@@ -13,8 +13,10 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import AuthLayout from '../components/AuthLayout';
 import { EmailIcon, GitHubIcon, GoogleIcon } from '../components/AuthIcons';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 
 const Register = () => {
+  usePageTitle('Register');
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [signup, { isLoading }] = useRegisterMutation();

@@ -8,10 +8,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import AuthLayout from '../components/AuthLayout';
 import { maskEmail, SITE_NAME, type ApiErrorResponse } from '@network/shared';
 import OtpInput from '../components/OtpInput';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 
 const RESEND_COOLDOWN = 60;
 
 const VerifyEmail = () => {
+  usePageTitle('Verify Email');
   const location = useLocation();
   const navigate = useNavigate();
   const { addToast } = useToast();
