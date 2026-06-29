@@ -39,7 +39,7 @@ export const confirmUpload = asyncHandler(
     const { videoId, storageKey, fileSizeBytes } =
       req.body as ConfirmVideoUploadInput;
 
-    const video = await videoService.confirmUpload(
+    const result = await videoService.confirmUpload(
       userId,
       videoId,
       storageKey,
@@ -48,7 +48,7 @@ export const confirmUpload = asyncHandler(
 
     res
       .status(200)
-      .json(new ApiResponse(video, 'Upload confirmed. Processing started.'));
+      .json(new ApiResponse(result, 'Upload confirmed. Processing started.'));
   }
 );
 
@@ -87,7 +87,7 @@ export const finaliseVideo = asyncHandler(
     if (!videoId)
       throw new ApiError(400, 'VALIDATION_ERROR', 'Video ID is required.');
 
-    const video = await videoService.finaliseVideo(
+    const result = await videoService.finaliseVideo(
       videoId,
       userId,
       req.body as VideoUploadInput
@@ -95,7 +95,7 @@ export const finaliseVideo = asyncHandler(
 
     res
       .status(200)
-      .json(new ApiResponse(video, 'Video finalised successfully'));
+      .json(new ApiResponse(result, 'Video finalised successfully'));
   }
 );
 

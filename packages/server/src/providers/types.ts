@@ -33,6 +33,7 @@ export interface NormalizedWebhookPayload {
   providerVideoId: string;
   status: VideoStatus;
   playbackUrl?: string;
+  thumbnailUrl?: string;
   duration?: number;
   errorMessage?: string;
 }
@@ -48,6 +49,8 @@ export interface IVideoProvider {
   deleteVideo(providerVideoId: string): Promise<void>;
 
   buildPlaybackUrl(providerVideoId: string): string;
+
+  buildThumbnailUrl(providerVideoId: string): string;
 
   verifyWebhookSignature(params: WebhookVerifyParams): boolean;
 

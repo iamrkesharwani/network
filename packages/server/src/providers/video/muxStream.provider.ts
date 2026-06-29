@@ -113,6 +113,10 @@ export class MuxVideoProvider implements IVideoProvider {
     return `https://stream.mux.com/${providerVideoId}.m3u8`;
   }
 
+  buildThumbnailUrl(providerVideoId: string): string {
+    return `https://image.mux.com/${providerVideoId}/thumbnail.jpg`;
+  }
+
   verifyWebhookSignature({
     rawBody,
     signatureHeader,
@@ -171,6 +175,7 @@ export class MuxVideoProvider implements IVideoProvider {
 
     if (status === 'READY' && playbackId) {
       payload.playbackUrl = this.buildPlaybackUrl(playbackId as string);
+      payload.thumbnailUrl = this.buildThumbnailUrl(playbackId as string);
     }
 
     if (duration !== undefined) {

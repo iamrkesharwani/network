@@ -79,6 +79,10 @@ const videoSchema = new Schema<IVideoDocument>(
       sparse: true,
       select: false,
     },
+    xpAwarded: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -92,6 +96,7 @@ const videoSchema = new Schema<IVideoDocument>(
         delete json['__v'];
         delete json['providerVideoId'];
         delete json['storageKey'];
+        delete json['xpAwarded'];
 
         const raw = json['userId'] as
           | {

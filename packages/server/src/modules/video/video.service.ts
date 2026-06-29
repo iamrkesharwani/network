@@ -2,11 +2,13 @@ import {
   UPLOAD_SESSION_TTL_SECONDS,
   type IInitiateVideoUploadResult,
   type IVideoResponse,
+  type IVideoActionResult,
   type InitiateVideoUploadInput,
   type VideoUpdateInput,
   type VideoUploadInput,
 } from '@network/shared';
 import * as videoRepository from './video.repository.js';
+import * as gamificationService from '../gamification/gamification.service.js';
 import {
   storageProvider,
   videoProvider,
@@ -58,7 +60,7 @@ export const confirmUpload = async (
   videoId: string,
   storageKey: string,
   fileSizeBytes: number
-): Promise<IVideoResponse> => {
+): Promise<IVideoActionResult> => {
   const sessionValue = await redisClient.get(uploadSessionKey(storageKey));
   if (sessionValue !== `${userId}:${videoId}`) {
     throw new ApiError(
@@ -97,7 +99,10 @@ export const confirmUpload = async (
   }
 
   await redisClient.del(uploadSessionKey(storageKey));
-  return toResponse(video);
+
+  const gamification = await gamificationService.awardForUploadStarted(userId);
+
+  return { video: toResponse(video), gamification };
 };
 
 export const uploadThumbnail = async (
@@ -109,7 +114,7 @@ export const finaliseVideo = async (
   videoId: string,
   userId: string,
   data: VideoUploadInput
-): Promise<IVideoResponse> => {
+): Promise<IVideoActionResult> => {
   const video = await videoRepository.findById(videoId);
   if (!video) {
     throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
@@ -118,6 +123,8 @@ export const finaliseVideo = async (
     throw new ApiError(403, 'FORBIDDEN', 'You do not own this video.');
   }
 
+  const alreadyAwarded = video.xpAwarded === true;
+
   const updated = await videoRepository.updateById(videoId, {
     title: data.title,
     category: data.category,
@@ -125,13 +132,24 @@ export const finaliseVideo = async (
     visibility: data.visibility,
     ...(data.description !== undefined && { description: data.description }),
     ...(data.thumbnailUrl !== undefined && { thumbnailUrl: data.thumbnailUrl }),
+    ...(!alreadyAwarded && { xpAwarded: true }),
   });
 
   if (!updated) {
     throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
   }
 
-  return toResponse(updated);
+  const gamification = alreadyAwarded
+    ? await gamificationService.getSnapshot(userId)
+    : await gamificationService.awardForVideoPublished(userId, {
+        tags: data.tags,
+        hasCustomThumbnail: !!data.thumbnailUrl,
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
+      });
+
+  return { video: toResponse(updated), gamification };
 };
 
 export const getVideoById = async (
@@ -224,6 +242,15 @@ export const deleteVideo = async (
 export const processWebhook = async (
   payload: NormalizedWebhookPayload
 ): Promise<void> => {
+  const existing = await videoRepository.findByProviderVideoId(
+    payload.providerVideoId
+  );
+
+  const defaultThumbnailUrl =
+    !existing?.thumbnailUrl && payload.thumbnailUrl !== undefined
+      ? payload.thumbnailUrl
+      : undefined;
+
   const video = await videoRepository.updateByProviderVideoId(
     payload.providerVideoId,
     {
@@ -231,6 +258,9 @@ export const processWebhook = async (
       ...(payload.duration !== undefined && { duration: payload.duration }),
       ...(payload.playbackUrl !== undefined && {
         playbackUrl: payload.playbackUrl,
+      }),
+      ...(defaultThumbnailUrl !== undefined && {
+        thumbnailUrl: defaultThumbnailUrl,
       }),
       ...(payload.errorMessage !== undefined && {
         errorMessage: payload.errorMessage,

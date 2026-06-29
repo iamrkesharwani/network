@@ -114,6 +114,10 @@ export class CloudflareStreamVideoProvider implements IVideoProvider {
     return `https://customer-${this.customerCode}.cloudflarestream.com/${providerVideoId}/manifest/video.m3u8`;
   }
 
+  buildThumbnailUrl(providerVideoId: string): string {
+    return `https://customer-${this.customerCode}.cloudflarestream.com/${providerVideoId}/thumbnails/thumbnail.jpg`;
+  }
+
   verifyWebhookSignature({
     rawBody,
     signatureHeader,
@@ -165,6 +169,7 @@ export class CloudflareStreamVideoProvider implements IVideoProvider {
 
     if (status === 'READY') {
       payload.playbackUrl = this.buildPlaybackUrl(b['uid']);
+      payload.thumbnailUrl = this.buildThumbnailUrl(b['uid']);
     }
 
     if (typeof b['duration'] === 'number' && b['duration'] >= 0) {

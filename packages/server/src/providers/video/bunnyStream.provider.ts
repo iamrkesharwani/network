@@ -166,6 +166,10 @@ export class BunnyStreamVideoProvider implements IVideoProvider {
     return `https://${this.cdnHostname}/${providerVideoId}/playlist.m3u8`;
   }
 
+  buildThumbnailUrl(providerVideoId: string): string {
+    return `https://${this.cdnHostname}/${providerVideoId}/thumbnail.jpg`;
+  }
+
   verifyWebhookSignature({
     rawBody,
     signatureHeader,
@@ -205,6 +209,7 @@ export class BunnyStreamVideoProvider implements IVideoProvider {
 
     if (status === 'READY') {
       payload.playbackUrl = this.buildPlaybackUrl(b['VideoGuid']);
+      payload.thumbnailUrl = this.buildThumbnailUrl(b['VideoGuid']);
     }
 
     if (duration !== undefined) {
