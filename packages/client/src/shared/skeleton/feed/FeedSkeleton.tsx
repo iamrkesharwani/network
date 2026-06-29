@@ -10,7 +10,7 @@ const FeedSkeleton = () => {
 
   if (tier === 'desktop') {
     return (
-      <div className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8">
+      <div className="-mx-4 sm:-mx-6 lg:-mx-8">
         <FeedSkeletonDesktop />
       </div>
     );
@@ -18,7 +18,7 @@ const FeedSkeleton = () => {
 
   if (tier === 'tablet') {
     return (
-      <div className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8">
+      <div className="-mx-4 sm:-mx-6 lg:-mx-8">
         {orientation === 'landscape' ? (
           <FeedSkeletonTabletLandscape />
         ) : (
