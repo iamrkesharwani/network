@@ -43,7 +43,7 @@ const FeedDesktop = () => {
           width: 'calc(22rem + 2rem)',
         }}
       >
-        <div className="h-full pt-4 sm:pt-6 lg:pt-8 pb-4 sm:pb-6 lg:pb-8 pl-4 sm:pl-6 lg:pl-8 pr-3">
+        <div className="h-full pt-4 sm:pt-6 lg:pt-8 pb-4 sm:pb-6 lg:pb-0 pl-4 sm:pl-6 lg:pl-8 pr-3">
           <ShortPlayer
             short={ALL_SHORTS[activeIndex] ?? null}
             activeIndex={activeIndex}
