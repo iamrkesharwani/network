@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
 import Field from '../components/Field';
-import { useToast } from '../../../shared/components/ToastContainer';
 import { useRegisterMutation } from '../authApi';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -15,6 +14,7 @@ import AuthLayout from '../components/AuthLayout';
 import { EmailIcon, GitHubIcon, GoogleIcon } from '../components/AuthIcons';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import SiteLogo from '../../../public/Logo.svg?react';
+import { useToast } from '../../../shared/hooks/useToast';
 
 const Register = () => {
   usePageTitle('Register');

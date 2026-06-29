@@ -7,12 +7,12 @@ import SettingsSkeleton from '../shared/skeleton/SettingsSkeleton';
 import FeedSkeleton from '../shared/skeleton/feed/FeedSkeleton';
 import DefaultPageSkeleton from '../shared/skeleton/DefaultPageSkeleton';
 
-const getSkeletonForPath = (pathname: string) => {
-  if (pathname.startsWith('/explore')) return ExploreSkeleton;
-  if (pathname.startsWith('/profile')) return ProfileSkeleton;
-  if (pathname.startsWith('/settings')) return SettingsSkeleton;
-  if (pathname.startsWith('/feed') || pathname === '/') return FeedSkeleton;
-  return DefaultPageSkeleton;
+const renderSkeletonForPath = (pathname: string) => {
+  if (pathname.startsWith('/explore')) return <ExploreSkeleton />;
+  if (pathname.startsWith('/profile')) return <ProfileSkeleton />;
+  if (pathname.startsWith('/settings')) return <SettingsSkeleton />;
+  if (pathname.startsWith('/feed') || pathname === '/') return <FeedSkeleton />;
+  return <DefaultPageSkeleton />;
 };
 
 const ProtectedRoute = () => {
@@ -22,10 +22,9 @@ const ProtectedRoute = () => {
   );
 
   if (!isInitialized) {
-    const PageSkeleton = getSkeletonForPath(location.pathname);
     return (
       <AppShellSkeleton>
-        <PageSkeleton />
+        {renderSkeletonForPath(location.pathname)}
       </AppShellSkeleton>
     );
   }

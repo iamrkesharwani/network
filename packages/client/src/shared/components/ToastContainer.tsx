@@ -1,13 +1,8 @@
-import {
-  useState,
-  useCallback,
-  useEffect,
-  createContext,
-  useContext,
-  type ReactNode,
-} from 'react';
+import { useState, useCallback, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Toast, { type ToastType } from './Toast';
+import { useIsMounted } from '../hooks/useIsMounted';
+import { ToastContext } from '../hooks/useToast';
 
 interface ToastMessage {
   id: string;
@@ -16,28 +11,9 @@ interface ToastMessage {
   duration?: number;
 }
 
-interface ToastContextType {
-  addToast: (message: string, type?: ToastType, duration?: number) => void;
-  removeToast: (id: string) => void;
-}
-
-const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
-};
-
 const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isMounted = useIsMounted();
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));

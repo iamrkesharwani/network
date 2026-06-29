@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -25,16 +25,16 @@ const variants: Record<
 const Toast = ({ id, type, message, onClose, duration = 3000 }: ToastProps) => {
   const [isLeaving, setIsLeaving] = useState(false);
 
-  const close = () => {
+  const close = useCallback(() => {
     setIsLeaving(true);
     setTimeout(() => onClose(id), 200);
-  };
+  }, [id, onClose]);
 
   useEffect(() => {
     if (!duration) return;
     const timer = setTimeout(close, duration);
     return () => clearTimeout(timer);
-  }, [id, duration]);
+  }, [duration, close]);
 
   const { icon: Icon, iconClass } = variants[type];
 

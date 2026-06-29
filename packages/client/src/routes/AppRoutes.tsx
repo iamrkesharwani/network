@@ -9,11 +9,12 @@ import ForgotPassword from '../features/auth/pages/ForgotPassword';
 import ResetPassword from '../features/auth/pages/ResetPassword';
 import OAuthCallback from '../features/auth/pages/OAuthCallback';
 import FeedPage from '../features/feed/FeedPage';
-
-const Explore = () => <div className="p-8 text-xl">Explore</div>;
-const Profile = () => <div className="p-8 text-xl">Profile</div>;
-const Settings = () => <div className="p-8 text-xl">Settings</div>;
-const NotFound = () => <div className="p-8 text-xl text-red-500">404</div>;
+import {
+  Explore,
+  Profile,
+  Settings,
+  NotFound,
+} from './__dev__/PlaceholderPages';
 
 export const routes: RouteObject[] = [
   { path: '/oauth/callback', element: <OAuthCallback /> },

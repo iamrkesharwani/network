@@ -1,5 +1,4 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useToast } from '../../../shared/components/ToastContainer';
 import { useForgotPasswordMutation } from '../authApi';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +12,7 @@ import {
 } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import SiteLogo from '../../../public/Logo.svg?react';
+import { useToast } from '../../../shared/hooks/useToast';
 
 const ForgotPassword = () => {
   usePageTitle('Forgot Password');

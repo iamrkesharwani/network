@@ -1,5 +1,4 @@
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useToast } from '../../../shared/components/ToastContainer';
 import {
   useVerifyEmailMutation,
   useSendVerificationMutation,
@@ -9,7 +8,7 @@ import AuthLayout from '../components/AuthLayout';
 import { maskEmail, SITE_NAME, type ApiErrorResponse } from '@network/shared';
 import OtpInput from '../components/OtpInput';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
-import SiteLogo from '../../../public/Logo.svg?react';
+import { useToast } from '../../../shared/hooks/useToast';
 
 const RESEND_COOLDOWN = 60;
 
@@ -82,11 +81,8 @@ const VerifyEmail = () => {
   return (
     <AuthLayout>
       <div className="w-full max-w-95 flex flex-col items-center text-center">
-        <div className="flex justify-center mb-8 gap-2">
-          <SiteLogo aria-hidden="true" className="w-7" />
-          <div className="font-display font-bold text-lg tracking-[0.22em] uppercase text-[--color-text-muted]">
-            {SITE_NAME}
-          </div>
+        <div className="font-display font-bold text-[0.7rem] tracking-[0.22em] uppercase text-[--color-text-muted] mb-8">
+          {SITE_NAME}
         </div>
 
         <h1 className="font-display font-extrabold text-[clamp(1.9rem,6vw,2.6rem)] leading-none tracking-[-0.01em] uppercase mb-10">

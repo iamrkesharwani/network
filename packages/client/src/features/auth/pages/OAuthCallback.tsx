@@ -1,5 +1,4 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useToast } from '../../../shared/components/ToastContainer';
 import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
 import { useEffect, useRef } from 'react';
 import {
@@ -8,6 +7,7 @@ import {
 } from '../../../shared/lib/axiosInstance';
 import { setCredentials } from '../authSlice';
 import Spinner from '../../../shared/components/Spinner';
+import { useToast } from '../../../shared/hooks/useToast';
 
 const OAuthCallback = () => {
   const [searchParams] = useSearchParams();

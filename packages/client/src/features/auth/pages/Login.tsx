@@ -1,6 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Field from '../components/Field';
-import { useToast } from '../../../shared/components/ToastContainer';
 import { useLoginMutation } from '../authApi';
 import React, { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -15,6 +14,7 @@ import AuthLayout from '../components/AuthLayout';
 import { EmailIcon, GitHubIcon, GoogleIcon } from '../components/AuthIcons';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import SiteLogo from '../../../public/Logo.svg?react';
+import { useToast } from '../../../shared/hooks/useToast';
 
 const Login = () => {
   usePageTitle('Login');
@@ -114,7 +114,7 @@ const Login = () => {
       <div className="w-full max-w-95 flex flex-col items-center text-center">
         <div className="flex justify-center mb-8 gap-2">
           <SiteLogo aria-hidden="true" className="w-7" />
-          <div className="font-display font-bold text-lg tracking-[0.22em] uppercase text-[--color-text-muted]">
+          <div className="font-display font-bold text-[0.7rem] tracking-[0.22em] uppercase text-[--color-text-muted]">
             {SITE_NAME}
           </div>
         </div>

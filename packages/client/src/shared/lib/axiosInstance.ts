@@ -10,12 +10,12 @@ let currentAccessToken: string | null = null;
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value: string | null) => void;
-  reject: (reason?: any) => void;
+  reject: (reason?: AxiosError) => void;
 }> = [];
 let isFetchingCsrf = false;
 let csrfQueue: Array<{
   resolve: () => void;
-  reject: (reason?: any) => void;
+  reject: (reason?: AxiosError) => void;
 }> = [];
 
 const processCsrfQueue = (error: AxiosError | null) => {

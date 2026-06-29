@@ -1,16 +1,13 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { VIDEO_SOURCES } from '@network/shared';
+import { useIsMounted } from '../../../shared/hooks/useIsMounted';
 
 interface AuthLayoutProps {
   children: ReactNode;
 }
 
 const VideoGrid = () => {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isMounted = useIsMounted();
 
   return (
     <div
