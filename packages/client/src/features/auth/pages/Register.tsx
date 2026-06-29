@@ -14,6 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import AuthLayout from '../components/AuthLayout';
 import { EmailIcon, GitHubIcon, GoogleIcon } from '../components/AuthIcons';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
+import SiteLogo from '../../../public/Logo.svg?react';
 
 const Register = () => {
   usePageTitle('Register');
@@ -115,8 +116,11 @@ const Register = () => {
   return (
     <AuthLayout>
       <div className="w-full max-w-95 flex flex-col items-center text-center">
-        <div className="font-display font-bold text-[0.7rem] tracking-[0.22em] uppercase text-[--color-text-muted] mb-8">
-          {SITE_NAME}
+        <div className="flex justify-center mb-8 gap-2">
+          <SiteLogo aria-hidden="true" className="w-7" />
+          <div className="font-display font-bold text-lg tracking-[0.22em] uppercase text-[--color-text-muted]">
+            {SITE_NAME}
+          </div>
         </div>
 
         <h1 className="font-display font-extrabold text-[clamp(1.9rem,6vw,2.6rem)] leading-none tracking-[-0.01em] uppercase mb-10">
