@@ -6,6 +6,7 @@ import shortReducer from '../features/short/shortSlice';
 import { authApi } from '../features/auth/authApi';
 import { videoApi } from '../features/video/videoApi';
 import { shortApi } from '../features/short/shortApi';
+import { gamificationApi } from '../features/gamification/gamificationApi';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   [authApi.reducerPath]: authApi.reducer,
   [videoApi.reducerPath]: videoApi.reducer,
   [shortApi.reducerPath]: shortApi.reducer,
+  [gamificationApi.reducerPath]: gamificationApi.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

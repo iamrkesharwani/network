@@ -8,6 +8,7 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
+  UploadCloud,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLogoutMutation } from '../features/auth/authApi';
@@ -45,6 +46,7 @@ const Sidebar = ({
 
   const navItems = [
     { name: 'Feed', path: '/feed', icon: Home },
+    { name: 'Upload', path: '/upload', icon: UploadCloud },
     { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Profile', path: '/profile', icon: User },
     { name: 'Settings', path: '/settings', icon: Settings },

@@ -3,6 +3,7 @@ import rootReducer, { type RootState as RootReducerState } from './rootReducer';
 import { authApi } from '../features/auth/authApi';
 import { videoApi } from '../features/video/videoApi';
 import { shortApi } from '../features/short/shortApi';
+import { gamificationApi } from '../features/gamification/gamificationApi';
 
 export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
   configureStore({
@@ -12,7 +13,8 @@ export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
       getDefaultMiddleware().concat(
         authApi.middleware,
         videoApi.middleware,
-        shortApi.middleware
+        shortApi.middleware,
+        gamificationApi.middleware
       ),
     devTools: import.meta.env.MODE !== 'production',
   });
