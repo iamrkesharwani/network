@@ -18,6 +18,7 @@ import { redisClient } from '../../config/redis.js';
 import { logger } from '../../utils/logger.js';
 import type { IVideoDocument } from './video.model.js';
 import { ApiError } from '../../utils/ApiError.js';
+import { getOwnerId } from '../../utils/getOwnerId.js';
 import type { NormalizedWebhookPayload } from '../../providers/types.js';
 import type { Requester } from './video.types.js';
 
@@ -119,7 +120,7 @@ export const finaliseVideo = async (
   if (!video) {
     throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
   }
-  if (video.userId.toString() !== userId) {
+  if (getOwnerId(video.userId) !== userId) {
     throw new ApiError(403, 'FORBIDDEN', 'You do not own this video.');
   }
 
@@ -160,7 +161,7 @@ export const getVideoById = async (
 
   if (!video) throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
 
-  const isOwner = requester?.id === video.userId.toString();
+  const isOwner = requester?.id === getOwnerId(video.userId);
   const isAdmin = requester?.role === 'admin';
   const canBypassRestrictions = isOwner || isAdmin;
 
@@ -194,7 +195,7 @@ export const updateVideo = async (
   const video = await videoRepository.findById(videoId);
   if (!video) throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
 
-  if (video.userId.toString() !== requester.id && requester.role !== 'admin') {
+  if (getOwnerId(video.userId) !== requester.id && requester.role !== 'admin') {
     throw new ApiError(403, 'FORBIDDEN', 'You cannot edit this video.');
   }
 
@@ -217,7 +218,7 @@ export const deleteVideo = async (
   const video = await videoRepository.findById(videoId);
   if (!video) throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
 
-  if (video.userId.toString() !== requester.id && requester.role !== 'admin') {
+  if (getOwnerId(video.userId) !== requester.id && requester.role !== 'admin') {
     throw new ApiError(403, 'FORBIDDEN', 'You cannot delete this video.');
   }
 

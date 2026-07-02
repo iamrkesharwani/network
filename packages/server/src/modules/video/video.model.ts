@@ -44,6 +44,7 @@ const videoSchema = new Schema<IVideoDocument>(
       type: String,
       enum: VIDEO_CATEGORIES,
       required: true,
+      default: 'OTHER',
     },
     tags: {
       type: [String],
@@ -108,14 +109,18 @@ const videoSchema = new Schema<IVideoDocument>(
           | string
           | undefined;
 
-        if (
-          raw &&
-          typeof raw === 'object' &&
-          '_id' in raw &&
-          'username' in raw
-        ) {
+        const rawId =
+          raw && typeof raw === 'object'
+            ? '_id' in raw
+              ? raw._id.toString()
+              : 'id' in raw
+                ? String((raw as { id: unknown }).id)
+                : undefined
+            : undefined;
+
+        if (raw && typeof raw === 'object' && rawId && 'username' in raw) {
           json['author'] = {
-            id: raw._id.toString(),
+            id: rawId,
             username: raw.username,
             ...(raw.avatarUrl !== undefined && {
               avatarUrl: raw.avatarUrl,

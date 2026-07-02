@@ -75,7 +75,7 @@ export const updateById = (
   data: UpdateShortData
 ): Promise<IShortDocument | null> =>
   ShortModel.findByIdAndUpdate(id, data, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   })
     .populate('userId', 'username avatarUrl')
@@ -86,7 +86,7 @@ export const updateByProviderVideoId = (
   data: WebhookUpdateData
 ): Promise<IShortDocument | null> =>
   ShortModel.findOneAndUpdate({ providerVideoId }, data, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   }).exec();
 

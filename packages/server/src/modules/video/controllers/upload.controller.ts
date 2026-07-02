@@ -104,7 +104,7 @@ export const handleWebhook = asyncHandler(
     const signatureHeader =
       (req.headers['webhook-signature'] as string | undefined) ??
       (req.headers['mux-signature'] as string | undefined) ??
-      (req.headers['bunny-signature'] as string | undefined);
+      (req.headers['x-bunnystream-signature'] as string | undefined);
 
     const isValid = videoProvider.verifyWebhookSignature({
       rawBody: req.rawBody,

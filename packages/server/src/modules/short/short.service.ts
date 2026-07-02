@@ -16,6 +16,7 @@ import { redisClient } from '../../config/redis.js';
 import { logger } from '../../utils/logger.js';
 import type { IShortDocument } from './short.model.js';
 import { ApiError } from '../../utils/ApiError.js';
+import { getOwnerId } from '../../utils/getOwnerId.js';
 import type { NormalizedWebhookPayload } from '../../providers/types.js';
 import type { Requester } from './short.types.js';
 
@@ -114,7 +115,7 @@ export const finaliseShort = async (
   if (!short) {
     throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
   }
-  if (short.userId.toString() !== userId) {
+  if (getOwnerId(short.userId) !== userId) {
     throw new ApiError(403, 'FORBIDDEN', 'You do not own this short.');
   }
 
@@ -141,7 +142,7 @@ export const getShortById = async (
 
   if (!short) throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
 
-  const isOwner = requester?.id === short.userId.toString();
+  const isOwner = requester?.id === getOwnerId(short.userId);
   const isAdmin = requester?.role === 'admin';
   const canBypassRestrictions = isOwner || isAdmin;
 
@@ -175,7 +176,7 @@ export const updateShort = async (
   const short = await shortRepository.findById(shortId);
   if (!short) throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
 
-  if (short.userId.toString() !== requester.id && requester.role !== 'admin') {
+  if (getOwnerId(short.userId) !== requester.id && requester.role !== 'admin') {
     throw new ApiError(403, 'FORBIDDEN', 'You cannot edit this short.');
   }
 
@@ -197,7 +198,7 @@ export const deleteShort = async (
   const short = await shortRepository.findById(shortId);
   if (!short) throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
 
-  if (short.userId.toString() !== requester.id && requester.role !== 'admin') {
+  if (getOwnerId(short.userId) !== requester.id && requester.role !== 'admin') {
     throw new ApiError(403, 'FORBIDDEN', 'You cannot delete this short.');
   }
 

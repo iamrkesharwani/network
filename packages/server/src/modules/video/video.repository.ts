@@ -72,16 +72,18 @@ export const updateById = (
   data: UpdateVideoData
 ): Promise<IVideoDocument | null> =>
   VideoModel.findByIdAndUpdate(id, data, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
-  }).exec();
+  })
+    .populate('userId', 'username avatarUrl')
+    .exec();
 
 export const updateByProviderVideoId = (
   providerVideoId: string,
   data: WebhookUpdateData
 ): Promise<IVideoDocument | null> =>
   VideoModel.findOneAndUpdate({ providerVideoId }, data, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   }).exec();
 

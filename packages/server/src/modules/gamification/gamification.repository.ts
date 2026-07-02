@@ -9,7 +9,7 @@ export const getOrCreate = (userId: string): Promise<IGamificationDocument> =>
   GamificationModel.findOneAndUpdate(
     { userId: new mongoose.Types.ObjectId(userId) },
     { $setOnInsert: { xp: 0, uploadsCount: 0, achievements: [] } },
-    { new: true, upsert: true }
+    { returnDocument: 'after', upsert: true }
   ).exec();
 
 export const findByUserId = (
@@ -26,14 +26,14 @@ export const addXp = (
   GamificationModel.findOneAndUpdate(
     { userId: new mongoose.Types.ObjectId(userId) },
     { $inc: { xp: amount } },
-    { new: true, upsert: true }
+    { returnDocument: 'after', upsert: true }
   ).exec();
 
 export const incrementUploadsCount = (userId: string): Promise<number> =>
   GamificationModel.findOneAndUpdate(
     { userId: new mongoose.Types.ObjectId(userId) },
     { $inc: { uploadsCount: 1 } },
-    { new: true, upsert: true }
+    { returnDocument: 'after', upsert: true }
   )
     .exec()
     .then((doc) => doc.uploadsCount);
