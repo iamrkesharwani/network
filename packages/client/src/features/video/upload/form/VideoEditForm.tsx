@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { Loader2, Rocket, Save } from 'lucide-react';
@@ -73,10 +73,10 @@ const VideoEditForm = ({
     watch,
     setValue,
     formState: { errors },
-  } = useForm<VideoFormValues, any, VideoUploadInput>({
+  } = useForm<VideoFormValues, unknown, VideoUploadInput>({
     resolver: zodResolver(
       mode === 'finalise' ? videoUploadSchema : videoUpdateSchema
-    ) as any,
+    ) as Resolver<VideoFormValues, unknown, VideoUploadInput>,
     defaultValues: {
       title: initialValues?.title ?? '',
       description: initialValues?.description ?? '',

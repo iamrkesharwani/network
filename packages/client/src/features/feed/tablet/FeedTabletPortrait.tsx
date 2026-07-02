@@ -1,37 +1,61 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useShort } from '../../short/useShort';
 import ShortPlayer from '../../short/pages/ShortPlayer';
 import VideoGrid from '../../video/pages/VideoGrid';
-import {
-  ALL_SHORTS,
-  ALL_VIDEOS,
-  VIDEO_PAGE_SIZE,
-} from '../__dev__/feedMockData';
+import { useLiveVideoFeed } from '../hooks/useLiveVideoFeed';
+import { useLiveShortsFeed } from '../hooks/useLiveShortsFeed';
+import { SHORTS_PREFETCH_THRESHOLD } from '../feedConfig';
 import type { ColCount } from '../../../shared/utils/videoGrid';
 
 const FeedTabletPortrait = () => {
   const { activeIndex, goNext, goPrev, updateCurrentShort } = useShort();
   const mainScrollRef = useRef<HTMLElement | null>(null);
 
-  const [videoPage, setVideoPage] = useState(1);
-  const [videoLoading, setVideoLoading] = useState(false);
-  const videos = ALL_VIDEOS.slice(0, videoPage * VIDEO_PAGE_SIZE);
-  const hasNextVideoPage = videos.length < ALL_VIDEOS.length;
+  const {
+    items: videos,
+    hasNextPage: hasNextVideoPage,
+    isFetchingNextPage: videoLoading,
+    isLoading: videosInitialLoading,
+    isError: videosErrored,
+    loadMore: loadMoreVideos,
+    retry: retryVideos,
+  } = useLiveVideoFeed();
+
+  const {
+    items: shorts,
+    hasNextPage: hasNextShortsPage,
+    isFetchingNextPage: shortsLoadingMore,
+    loadMore: loadMoreShorts,
+  } = useLiveShortsFeed();
 
   useEffect(() => {
-    updateCurrentShort(ALL_SHORTS[activeIndex] ?? null);
-  }, [activeIndex]);
+    updateCurrentShort(shorts[activeIndex] ?? null);
+  }, [activeIndex, shorts]);
+
+  useEffect(() => {
+    if (
+      hasNextShortsPage &&
+      !shortsLoadingMore &&
+      activeIndex >= shorts.length - SHORTS_PREFETCH_THRESHOLD
+    ) {
+      loadMoreShorts();
+    }
+  }, [
+    activeIndex,
+    shorts.length,
+    hasNextShortsPage,
+    shortsLoadingMore,
+    loadMoreShorts,
+  ]);
 
   useEffect(() => {
     mainScrollRef.current = document.querySelector('main');
   }, []);
 
-  const handleLoadMore = () => {
-    setVideoLoading(true);
-    setTimeout(() => {
-      setVideoPage((p) => p + 1);
-      setVideoLoading(false);
-    }, 800);
+  const handleShortNext = () => {
+    if (activeIndex < shorts.length - 1 || hasNextShortsPage) {
+      goNext();
+    }
   };
 
   return (
@@ -45,10 +69,10 @@ const FeedTabletPortrait = () => {
       >
         <div className="h-full pt-4 sm:pt-6 lg:pt-8 pb-4 sm:pb-6 lg:pb-0 pl-4 sm:pl-6 lg:pl-8 pr-3">
           <ShortPlayer
-            short={ALL_SHORTS[activeIndex] ?? null}
+            short={shorts[activeIndex] ?? null}
             activeIndex={activeIndex}
-            total={ALL_SHORTS.length}
-            onNext={goNext}
+            total={shorts.length}
+            onNext={handleShortNext}
             onPrev={goPrev}
             className="h-full"
           />
@@ -58,9 +82,12 @@ const FeedTabletPortrait = () => {
       <div className="flex-1 min-w-0 -mt-4 sm:-mt-6 lg:-mt-8 pt-4 sm:pt-6 lg:pt-8 px-4 sm:px-6 lg:px-8 pl-0">
         <VideoGrid
           videos={videos}
+          isLoading={videosInitialLoading}
+          isError={videosErrored}
+          onRetry={retryVideos}
           hasNextPage={hasNextVideoPage}
           isFetchingNextPage={videoLoading}
-          onLoadMore={handleLoadMore}
+          onLoadMore={loadMoreVideos}
           scrollRef={mainScrollRef as React.RefObject<HTMLElement | null>}
           forceCols={1 as ColCount}
         />

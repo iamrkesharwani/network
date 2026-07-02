@@ -57,6 +57,23 @@ export const shortApi = createApi({
         method: 'GET',
         params,
       }),
+      serializeQueryArgs: ({ endpointName }) => endpointName,
+      merge: (currentCache, newData, { arg }) => {
+        if (arg.page === 1) {
+          currentCache.data = newData.data;
+          currentCache.meta = newData.meta;
+          return;
+        }
+        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        for (const item of newData.data) {
+          if (!existingIds.has(item.id)) {
+            currentCache.data.push(item);
+          }
+        }
+        currentCache.meta = newData.meta;
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        currentArg?.page !== previousArg?.page,
       providesTags: ['Short'],
     }),
 
