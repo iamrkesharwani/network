@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { type ZodType, ZodError } from 'zod';
 import { ApiError } from '../utils/ApiError.js';
+import { logger } from '../utils/logger.js';
 
 interface ValidationSchemas {
   body?: ZodType<unknown>;
@@ -19,9 +20,14 @@ export const validate = (schemas: ValidationSchemas) => {
         req.body = await schemas.body.parseAsync(req.body);
       }
       if (schemas.query) {
-        req.query = (await schemas.query.parseAsync(
-          req.query
-        )) as unknown as typeof req.query;
+        const parsedQuery = await schemas.query.parseAsync(req.query);
+        
+        Object.defineProperty(req, 'query', {
+          value: parsedQuery,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
       }
       if (schemas.params) {
         req.params = (await schemas.params.parseAsync(
@@ -45,11 +51,23 @@ export const validate = (schemas: ValidationSchemas) => {
           new ApiError(400, 'VALIDATION_ERROR', 'Invalid request data', details)
         );
       } else {
+        logger.error(
+          {
+            err: error,
+            method: req.method,
+            path: req.originalUrl,
+          },
+          'Unexpected error during request validation'
+        );
+
         next(
           new ApiError(
             500,
             'INTERNAL_SERVER_ERROR',
-            'Validation processing failed'
+            'Validation processing failed',
+            undefined,
+            true,
+            error instanceof Error ? error.stack : undefined
           )
         );
       }

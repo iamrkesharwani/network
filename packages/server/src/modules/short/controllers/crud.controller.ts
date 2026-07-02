@@ -1,9 +1,5 @@
 import type { Request, Response } from 'express';
-import type {
-  ShortFeedQuery,
-  ShortUpdateInput,
-  IShortResponse,
-} from '@network/shared';
+import type { ShortFeedQuery, ShortUpdateInput } from '@network/shared';
 import { asyncHandler } from '../../../utils/asyncHandler.js';
 import * as shortService from '../short.service.js';
 import { ApiPaginatedResponse } from '../../../utils/ApiPaginatedResponse.js';
@@ -20,13 +16,11 @@ export const getFeed = asyncHandler(async (req: Request, res: Response) => {
   const { page, limit } = getFeedQuery(req);
   const result = await shortService.getPublicFeed(page, limit);
 
-  const serialised = result.data.map((doc) => doc.toJSON() as IShortResponse);
-
   res
     .status(200)
     .json(
       new ApiPaginatedResponse(
-        serialised,
+        result.data,
         result.meta,
         'Feed fetched successfully'
       )
@@ -41,13 +35,11 @@ export const getMine = asyncHandler(async (req: Request, res: Response) => {
   const { page, limit } = getFeedQuery(req);
   const result = await shortService.getMyShorts(req.user.id, page, limit);
 
-  const serialised = result.data.map((doc) => doc.toJSON() as IShortResponse);
-
   res
     .status(200)
     .json(
       new ApiPaginatedResponse(
-        serialised,
+        result.data,
         result.meta,
         'Your shorts fetched successfully'
       )

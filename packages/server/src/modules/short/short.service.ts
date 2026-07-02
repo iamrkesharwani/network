@@ -14,7 +14,7 @@ import {
 } from '../../providers/provider.js';
 import { redisClient } from '../../config/redis.js';
 import { logger } from '../../utils/logger.js';
-import type { IShortDocument } from './short.model.js';
+import { ShortModel, type IShortDocument } from './short.model.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { getOwnerId } from '../../utils/getOwnerId.js';
 import type { NormalizedWebhookPayload } from '../../providers/types.js';
@@ -25,6 +25,11 @@ const uploadSessionKey = (storageKey: string): string =>
 
 const toResponse = (doc: IShortDocument): IShortResponse =>
   doc.toJSON() as IShortResponse;
+
+const toResponseFromLean = (doc: IShortDocument): IShortResponse =>
+  ShortModel.hydrate(doc, undefined, {
+    hydratedPopulatedDocs: true,
+  }).toJSON() as unknown as IShortResponse;
 
 export const initiateUpload = async (
   userId: string,
@@ -162,11 +167,19 @@ export const getShortById = async (
   return toResponse(short);
 };
 
-export const getPublicFeed = (page: number, limit: number) =>
-  shortRepository.findPublicFeed(page, limit);
+export const getPublicFeed = async (page: number, limit: number) => {
+  const result = await shortRepository.findPublicFeed(page, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
 
-export const getMyShorts = (userId: string, page: number, limit: number) =>
-  shortRepository.findByUserId(userId, page, limit);
+export const getMyShorts = async (
+  userId: string,
+  page: number,
+  limit: number
+) => {
+  const result = await shortRepository.findByUserId(userId, page, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
 
 export const updateShort = async (
   shortId: string,

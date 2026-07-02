@@ -16,7 +16,7 @@ import {
 } from '../../providers/provider.js';
 import { redisClient } from '../../config/redis.js';
 import { logger } from '../../utils/logger.js';
-import type { IVideoDocument } from './video.model.js';
+import { VideoModel, type IVideoDocument } from './video.model.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { getOwnerId } from '../../utils/getOwnerId.js';
 import type { NormalizedWebhookPayload } from '../../providers/types.js';
@@ -27,6 +27,11 @@ const uploadSessionKey = (storageKey: string): string =>
 
 const toResponse = (doc: IVideoDocument): IVideoResponse =>
   doc.toJSON() as IVideoResponse;
+
+const toResponseFromLean = (doc: IVideoDocument): IVideoResponse =>
+  VideoModel.hydrate(doc, undefined, {
+    hydratedPopulatedDocs: true,
+  }).toJSON() as unknown as IVideoResponse;
 
 export const initiateUpload = async (
   userId: string,
@@ -181,11 +186,19 @@ export const getVideoById = async (
   return toResponse(video);
 };
 
-export const getPublicFeed = (page: number, limit: number) =>
-  videoRepository.findPublicFeed(page, limit);
+export const getPublicFeed = async (page: number, limit: number) => {
+  const result = await videoRepository.findPublicFeed(page, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
 
-export const getMyVideos = (userId: string, page: number, limit: number) =>
-  videoRepository.findByUserId(userId, page, limit);
+export const getMyVideos = async (
+  userId: string,
+  page: number,
+  limit: number
+) => {
+  const result = await videoRepository.findByUserId(userId, page, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
 
 export const updateVideo = async (
   videoId: string,
