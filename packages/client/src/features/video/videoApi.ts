@@ -4,6 +4,7 @@ import type {
   ApiResponse,
   PaginatedResponse,
   IVideoResponse,
+  IVideoActionResult,
   IInitiateVideoUploadResult,
   InitiateVideoUploadInput,
   ConfirmVideoUploadInput,
@@ -29,7 +30,7 @@ export const videoApi = createApi({
     }),
 
     confirmUpload: builder.mutation<
-      ApiResponse<IVideoResponse>,
+      ApiResponse<IVideoActionResult>,
       ConfirmVideoUploadInput
     >({
       query: (data) => ({
@@ -52,7 +53,7 @@ export const videoApi = createApi({
     }),
 
     finaliseVideo: builder.mutation<
-      ApiResponse<IVideoResponse>,
+      ApiResponse<IVideoActionResult>,
       { videoId: string } & VideoUploadInput
     >({
       query: ({ videoId, ...data }) => ({

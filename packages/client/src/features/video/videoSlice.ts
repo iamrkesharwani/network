@@ -38,7 +38,7 @@ const videoSlice = createSlice({
       .addMatcher(
         videoApi.endpoints.finaliseVideo.matchFulfilled,
         (state, action) => {
-          state.currentVideo = action.payload.data;
+          state.currentVideo = action.payload.data.video;
           state.isUploading = false;
           state.uploadProgress = 100;
         }
