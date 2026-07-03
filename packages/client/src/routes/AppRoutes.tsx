@@ -11,6 +11,7 @@ import OAuthCallback from '../features/auth/pages/OAuthCallback';
 import FeedPage from '../features/feed/FeedPage';
 import UploadHub from '../features/upload/UploadHub';
 import VideoUploadWizard from '../features/video/form/VideoUploadWizard';
+import ShortUploadWizard from '../features/short/form/ShortUploadWizard';
 import {
   Explore,
   Profile,
@@ -40,6 +41,7 @@ export const routes: RouteObject[] = [
           { path: '/feed', element: <FeedPage /> },
           { path: '/upload', element: <UploadHub /> },
           { path: '/upload/video', element: <VideoUploadWizard /> },
+          { path: '/upload/short', element: <ShortUploadWizard /> },
           { path: '/explore', element: <Explore /> },
           { path: '/profile', element: <Profile /> },
           { path: '/settings', element: <Settings /> },

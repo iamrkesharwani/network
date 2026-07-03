@@ -1,20 +1,18 @@
 import { useState, useEffect } from 'react';
 import type { WizardStep } from '../../../shared/upload/UploadSteps';
-import type { ICreatorEvent, IVideoResponse } from '@network/shared';
+import type { IShortResponse } from '@network/shared';
 import {
-  useDeleteVideoMutation,
-  useGetVideoByIdQuery,
+  useDeleteShortMutation,
+  useGetShortByIdQuery,
   useUploadThumbnailMutation,
-} from '../videoApi';
-import { useRawUpload } from '../hooks/useVideoUpload';
-import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
-import BadgeToast from '../../creator/components/BadgeToast';
+} from '../shortApi';
+import { useRawShortUpload } from '../hooks/useShortUpload';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
 import UploadStepper from '../../upload/UploadStepper';
 import { AnimatePresence, motion } from 'framer-motion';
 import MediaDropzone from '../../upload/MediaDropzone';
 import UploadThumbnailStep from '../../upload/UploadThumbnailStep';
-import VideoEditForm from './VideoEditForm';
+import ShortEditForm from './ShortEditForm';
 import SuccessStep from '../../upload/SuccessStep';
 import ConfirmModal from '../../../shared/components/ConfirmModal';
 
@@ -24,16 +22,15 @@ const stepVariants = {
   exit: { opacity: 0, x: -24 },
 };
 
-const VideoUploadWizard = () => {
+const ShortUploadWizard = () => {
   const [step, setStep] = useState<WizardStep>('drop');
-  const [videoId, setVideoId] = useState<string | null>(null);
+  const [shortId, setShortId] = useState<string | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>();
-  const [finalVideo, setFinalVideo] = useState<IVideoResponse | null>(null);
+  const [finalShort, setFinalShort] = useState<IShortResponse | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [isAbandoning, setIsAbandoning] = useState(false);
 
-  const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
-  const [deleteVideo] = useDeleteVideoMutation();
+  const [deleteShort] = useDeleteShortMutation();
   const [uploadThumbnail] = useUploadThumbnailMutation();
 
   const handleThumbnailUpload = async (file: File) => {
@@ -48,45 +45,41 @@ const VideoUploadWizard = () => {
     startUpload,
     cancelUpload,
     reset: resetUpload,
-  } = useRawUpload();
+  } = useRawShortUpload();
 
-  const shouldPoll = !!videoId && step !== 'launch' && step !== 'drop';
-  const { data: videoData } = useGetVideoByIdQuery(videoId ?? '', {
+  const shouldPoll = !!shortId && step !== 'launch' && step !== 'drop';
+  const { data: shortData } = useGetShortByIdQuery(shortId ?? '', {
     skip: !shouldPoll,
     pollingInterval: shouldPoll ? 5000 : 0,
   });
-  const processingStatus = videoData?.data.status;
-  const providerThumbnail = videoData?.data.thumbnailUrl;
+  const processingStatus = shortData?.data.status;
+  const providerThumbnail = shortData?.data.thumbnailUrl;
 
   useEffect(() => {
     if (uploadState.stage === 'done' && uploadState.videoId) {
-      setVideoId(uploadState.videoId);
+      setShortId(uploadState.videoId);
       setStep('thumbnail');
     }
   }, [uploadState.stage, uploadState.videoId]);
 
-  const handleDetailsSuccess = (
-    video: IVideoResponse,
-    creatorEvent?: ICreatorEvent | null
-  ) => {
-    setFinalVideo(video);
-    celebrate(creatorEvent ?? null);
+  const handleDetailsSuccess = (short: IShortResponse) => {
+    setFinalShort(short);
     setStep('launch');
   };
 
   const resetWizard = () => {
     setStep('drop');
-    setVideoId(null);
+    setShortId(null);
     setThumbnailUrl(undefined);
-    setFinalVideo(null);
+    setFinalShort(null);
     resetUpload();
   };
 
   const handleAbandon = async () => {
     setIsAbandoning(true);
-    if (videoId) {
+    if (shortId) {
       try {
-        await deleteVideo(videoId).unwrap();
+        await deleteShort(shortId).unwrap();
       } catch {}
     }
     setIsAbandoning(false);
@@ -96,11 +89,9 @@ const VideoUploadWizard = () => {
 
   return (
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
-      <BadgeToast item={celebration} onDismiss={dismiss} />
-
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-xl font-bold font-display text-text-primary">
-          Upload a video
+          Upload a short
         </h1>
         {step !== 'drop' && step !== 'launch' && (
           <button
@@ -119,12 +110,12 @@ const VideoUploadWizard = () => {
           {processingStatus === 'READY' ? (
             <>
               <CheckCircle2 className="w-3.5 h-3.5 text-success" />
-              Your video has finished processing
+              Your short has finished processing
             </>
           ) : (
             <>
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Processing your video in the background…
+              Processing your short in the background…
             </>
           )}
         </div>
@@ -147,13 +138,13 @@ const VideoUploadWizard = () => {
                 state={uploadState}
                 onFileSelect={startUpload}
                 onCancel={cancelUpload}
-                title="Drag & drop your video"
-                subtitle="or click to browse · MP4, MOV, WebM, MKV · up to 5GB"
+                title="Drag & drop your short"
+                subtitle="or click to browse · MP4, MOV, WebM, MKV · vertical, up to 60s"
                 accept="video/mp4,video/quicktime,video/webm,video/x-matroska"
               />
             )}
 
-            {step === 'thumbnail' && videoId && (
+            {step === 'thumbnail' && shortId && (
               <UploadThumbnailStep
                 value={thumbnailUrl}
                 onChange={setThumbnailUrl}
@@ -162,20 +153,20 @@ const VideoUploadWizard = () => {
               />
             )}
 
-            {step === 'details' && videoId && (
-              <VideoEditForm
+            {step === 'details' && shortId && (
+              <ShortEditForm
                 mode="finalise"
-                videoId={videoId}
+                shortId={shortId}
                 thumbnailUrl={thumbnailUrl}
                 onSuccess={handleDetailsSuccess}
               />
             )}
 
-            {step === 'launch' && finalVideo && (
+            {step === 'launch' && finalShort && (
               <SuccessStep
-                title={finalVideo.title}
-                visibility={finalVideo.visibility}
-                viewUrl={`/video/${finalVideo.id}`}
+                title={finalShort.title}
+                visibility={finalShort.visibility}
+                viewUrl={`/short/${finalShort.id}`}
                 onUploadAnother={resetWizard}
               />
             )}
@@ -194,7 +185,7 @@ const VideoUploadWizard = () => {
         onClose={() => setShowLeaveConfirm(false)}
         onConfirm={handleAbandon}
         title="Discard this upload?"
-        description="This will delete the video you just uploaded and reset the wizard. This can't be undone."
+        description="This will delete the short you just uploaded and reset the wizard. This can't be undone."
         confirmLabel="Discard"
         intent="danger"
         isLoading={isAbandoning}
@@ -203,4 +194,4 @@ const VideoUploadWizard = () => {
   );
 };
 
-export default VideoUploadWizard;
+export default ShortUploadWizard;

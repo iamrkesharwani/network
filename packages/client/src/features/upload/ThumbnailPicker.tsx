@@ -5,24 +5,25 @@ import {
   ALLOWED_THUMBNAIL_MIME_TYPES,
   MAX_THUMBNAIL_SIZE_BYTES,
 } from '@network/shared';
-import { useUploadThumbnailMutation } from '../video/videoApi';
 import { cn } from '../../shared/utils/cn';
 
 interface ThumbnailPickerProps {
   value: string | undefined;
   onChange: (url: string | undefined) => void;
   previewFallbackUrl?: string;
+  uploadThumbnail: (file: File) => Promise<string>;
 }
 
 const ThumbnailPicker = ({
   value,
   onChange,
   previewFallbackUrl,
+  uploadThumbnail,
 }: ThumbnailPickerProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploadThumbnail, { isLoading }] = useUploadThumbnailMutation();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -40,14 +41,14 @@ const ThumbnailPicker = ({
       return;
     }
 
-    const formData = new FormData();
-    formData.append('thumbnail', file);
-
+    setIsLoading(true);
     try {
-      const result = await uploadThumbnail(formData).unwrap();
-      onChange(result.data.thumbnailUrl);
+      const thumbnailUrl = await uploadThumbnail(file);
+      onChange(thumbnailUrl);
     } catch {
       setError("Couldn't upload that image. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 

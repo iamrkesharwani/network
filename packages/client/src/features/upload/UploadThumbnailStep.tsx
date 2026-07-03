@@ -5,12 +5,14 @@ interface UploadThumbnailStepProps {
   value: string | undefined;
   onChange: (url: string | undefined) => void;
   onContinue: () => void;
+  uploadThumbnail: (file: File) => Promise<string>;
 }
 
 const UploadThumbnailStep = ({
   value,
   onChange,
   onContinue,
+  uploadThumbnail,
 }: UploadThumbnailStepProps) => {
   return (
     <div className="flex flex-col items-center text-center w-full max-w-md mx-auto">
@@ -22,7 +24,11 @@ const UploadThumbnailStep = ({
         video automatically.
       </p>
 
-      <ThumbnailPicker value={value} onChange={onChange} />
+      <ThumbnailPicker
+        value={value}
+        onChange={onChange}
+        uploadThumbnail={uploadThumbnail}
+      />
 
       <div className="mt-7 flex items-center gap-3">
         {!value && (

@@ -5,27 +5,24 @@ import { motion } from 'framer-motion';
 import { Loader2, Rocket, Save } from 'lucide-react';
 import type { z } from 'zod';
 import {
-  videoUploadSchema,
-  videoUpdateSchema,
-  type VideoUploadInput,
-  type IVideoResponse,
-  type ICreatorEvent,
-  type VideoCategory,
-  type VideoVisibility,
+  shortUploadSchema,
+  shortUpdateSchema,
+  type ShortUploadInput,
+  type IShortResponse,
+  type ShortVisibility,
 } from '@network/shared';
 import {
-  useFinaliseVideoMutation,
-  useUpdateVideoMutation,
+  useFinaliseShortMutation,
+  useUpdateShortMutation,
   useUploadThumbnailMutation,
-} from '../videoApi';
+} from '../shortApi';
 import FloatingInput from '../../upload/FloatingInput';
 import FloatingTextarea from '../../upload/FloatingTextarea';
-import CategoryPicker from '../../upload/CategoryPicker';
 import TagInput from '../../upload/TagInput';
 import VisibilitySelector from '../../upload/VisibilitySelector';
 import ThumbnailPicker from '../../upload/ThumbnailPicker';
 
-type VideoFormValues = z.input<typeof videoUploadSchema>;
+type ShortFormValues = z.input<typeof shortUploadSchema>;
 
 function extractErrorMessage(err: unknown): string {
   if (
@@ -45,28 +42,28 @@ function extractErrorMessage(err: unknown): string {
   return 'Something went wrong. Please try again.';
 }
 
-interface VideoEditFormProps {
+interface ShortEditFormProps {
   mode: 'finalise' | 'edit';
-  videoId: string;
+  shortId: string;
   thumbnailUrl?: string;
-  initialValues?: Partial<VideoUploadInput>;
-  onSuccess: (
-    video: IVideoResponse,
-    creatorEvent?: ICreatorEvent | null
-  ) => void;
+  initialValues?: Partial<ShortUploadInput>;
+  onSuccess: (short: IShortResponse) => void;
 }
 
-const VideoEditForm = ({
+const ShortEditForm = ({
   mode,
-  videoId,
+  shortId,
   thumbnailUrl,
   initialValues,
   onSuccess,
-}: VideoEditFormProps) => {
-  const [finaliseVideo, { isLoading: isFinalising }] =
-    useFinaliseVideoMutation();
-  const [updateVideo, { isLoading: isUpdating }] = useUpdateVideoMutation();
+}: ShortEditFormProps) => {
+  const [finaliseShort, { isLoading: isFinalising }] =
+    useFinaliseShortMutation();
+  const [updateShort, { isLoading: isUpdating }] = useUpdateShortMutation();
   const [uploadThumbnail] = useUploadThumbnailMutation();
+
+  const isSubmitting = isFinalising || isUpdating;
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleThumbnailUpload = async (file: File) => {
     const formData = new FormData();
@@ -75,9 +72,6 @@ const VideoEditForm = ({
     return result.data.thumbnailUrl;
   };
 
-  const isSubmitting = isFinalising || isUpdating;
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
   const {
     register,
     handleSubmit,
@@ -85,16 +79,15 @@ const VideoEditForm = ({
     watch,
     setValue,
     formState: { errors },
-  } = useForm<VideoFormValues, unknown, VideoUploadInput>({
+  } = useForm<ShortFormValues, unknown, ShortUploadInput>({
     resolver: zodResolver(
-      mode === 'finalise' ? videoUploadSchema : videoUpdateSchema
-    ) as Resolver<VideoFormValues, unknown, VideoUploadInput>,
+      mode === 'finalise' ? shortUploadSchema : shortUpdateSchema
+    ) as Resolver<ShortFormValues, unknown, ShortUploadInput>,
     defaultValues: {
       title: initialValues?.title ?? '',
       description: initialValues?.description ?? '',
-      category: initialValues?.category as VideoCategory | undefined,
       tags: initialValues?.tags ?? [],
-      visibility: initialValues?.visibility ?? ('public' as VideoVisibility),
+      visibility: initialValues?.visibility ?? ('public' as ShortVisibility),
       thumbnailUrl: initialValues?.thumbnailUrl ?? thumbnailUrl,
     },
   });
@@ -102,38 +95,29 @@ const VideoEditForm = ({
   const title = watch('title') ?? '';
   const description = watch('description') ?? '';
   const tags = watch('tags') ?? [];
-  const category = watch('category');
   const editThumbnailUrl = watch('thumbnailUrl');
 
   const completeness = useMemo(() => {
     let score = 0;
-    if (title.trim().length >= 5) score += 25;
+    if (title.trim().length >= 5) score += 35;
     if (description.trim().length >= 20) score += 25;
-    if (category) score += 25;
-    if (tags.length >= 1) score += 15;
-    if (editThumbnailUrl || thumbnailUrl) score += 10;
+    if (tags.length >= 1) score += 25;
+    if (editThumbnailUrl || thumbnailUrl) score += 15;
     return Math.min(100, score);
-  }, [
-    title,
-    description,
-    category,
-    tags.length,
-    editThumbnailUrl,
-    thumbnailUrl,
-  ]);
+  }, [title, description, tags.length, editThumbnailUrl, thumbnailUrl]);
 
-  const onSubmit = async (data: VideoUploadInput) => {
+  const onSubmit = async (data: ShortUploadInput) => {
     setSubmitError(null);
     try {
       if (mode === 'finalise') {
-        const result = await finaliseVideo({
-          videoId,
+        const result = await finaliseShort({
+          shortId,
           ...data,
           thumbnailUrl: thumbnailUrl ?? data.thumbnailUrl,
         }).unwrap();
-        onSuccess(result.data.video, result.data.creatorEvent);
+        onSuccess(result.data);
       } else {
-        const result = await updateVideo({ videoId, ...data }).unwrap();
+        const result = await updateShort({ shortId, ...data }).unwrap();
         onSuccess(result.data);
       }
     } catch (err) {
@@ -170,27 +154,10 @@ const VideoEditForm = ({
 
       <FloatingTextarea
         label="Description (optional)"
-        rows={4}
+        rows={3}
         {...register('description')}
         error={errors.description?.message}
-        counter={{ current: description.length, max: 5000 }}
-        hint={
-          description.length >= 50
-            ? undefined
-            : 'A description of 50+ characters helps viewers find your video'
-        }
-      />
-
-      <Controller
-        control={control}
-        name="category"
-        render={({ field }) => (
-          <CategoryPicker
-            value={field.value as VideoCategory | undefined}
-            onChange={field.onChange}
-            error={errors.category?.message}
-          />
-        )}
+        counter={{ current: description.length, max: 500 }}
       />
 
       <Controller
@@ -210,7 +177,7 @@ const VideoEditForm = ({
         name="visibility"
         render={({ field }) => (
           <VisibilitySelector
-            value={(field.value as VideoVisibility) ?? 'public'}
+            value={(field.value as ShortVisibility) ?? 'public'}
             onChange={field.onChange}
           />
         )}
@@ -247,10 +214,10 @@ const VideoEditForm = ({
         ) : (
           <Save className="w-4 h-4" />
         )}
-        {mode === 'finalise' ? 'Publish video' : 'Save changes'}
+        {mode === 'finalise' ? 'Publish short' : 'Save changes'}
       </button>
     </form>
   );
 };
 
-export default VideoEditForm;
+export default ShortEditForm;

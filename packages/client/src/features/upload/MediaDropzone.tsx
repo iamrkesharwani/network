@@ -8,9 +8,9 @@ import {
   RING_STROKE,
   formatBytes,
   formatEta,
+  type UploadState,
 } from '@network/shared';
 import { cn } from '../../shared/utils/cn';
-import type { UploadState } from '../video/hooks/useVideoUpload';
 
 interface MediaDropzoneProps {
   state: UploadState;

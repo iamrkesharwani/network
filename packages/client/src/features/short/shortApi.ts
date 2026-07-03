@@ -39,12 +39,24 @@ export const shortApi = createApi({
       }),
     }),
 
+    uploadThumbnail: builder.mutation<
+      ApiResponse<{ thumbnailUrl: string }>,
+      FormData
+    >({
+      query: (data) => ({
+        url: '/thumbnail',
+        method: 'POST',
+        data,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+    }),
+
     finaliseShort: builder.mutation<
       ApiResponse<IShortResponse>,
       { shortId: string } & ShortUploadInput
     >({
-      query: (data) => ({
-        url: `${data.shortId}/finalise`,
+      query: ({ shortId, ...data }) => ({
+        url: `${shortId}/finalise`,
         method: 'POST',
         data,
       }),
@@ -86,7 +98,7 @@ export const shortApi = createApi({
         method: 'GET',
         params,
       }),
-      providesTags: ['Short'],
+      providesTags: ['MyShorts'],
     }),
 
     getShortById: builder.query<ApiResponse<IShortResponse>, string>({
@@ -131,6 +143,7 @@ export const shortApi = createApi({
 export const {
   useInitiateUploadMutation,
   useConfirmUploadMutation,
+  useUploadThumbnailMutation,
   useFinaliseShortMutation,
   useGetFeedQuery,
   useGetMyShortsQuery,
