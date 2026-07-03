@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Globe, Link2, Lock } from 'lucide-react';
 import { type VideoVisibility } from '@network/shared';
-import { cn } from '../../../../shared/utils/cn';
+import { cn } from '../../../shared/utils/cn';
 
 const OPTIONS: {
   value: VideoVisibility;

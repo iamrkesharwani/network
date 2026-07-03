@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { VIDEO_CATEGORIES, type VideoCategory } from '@network/shared';
-import { cn } from '../../../../shared/utils/cn';
-import { CategoryMeta } from '../../../../shared/upload/CategoryMeta';
+import { cn } from '../../../shared/utils/cn';
+import { CategoryMeta } from '../../../shared/upload/CategoryMeta';
 
 interface CategoryPickerProps {
   value: VideoCategory | undefined;

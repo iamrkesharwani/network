@@ -17,7 +17,7 @@ import {
 import {
   useFinaliseVideoMutation,
   useUpdateVideoMutation,
-} from '../../videoApi';
+} from '../../video/videoApi';
 import FloatingInput from '../components/FloatingInput';
 import FloatingTextarea from '../components/FloatingTextarea';
 import CategoryPicker from '../components/CategoryPicker';

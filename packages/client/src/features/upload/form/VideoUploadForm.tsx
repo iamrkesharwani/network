@@ -8,13 +8,13 @@ import {
   formatEta,
   MILESTONES,
 } from '@network/shared';
-import { useRawUpload } from '../../hooks/useRawUpload';
+import { useRawUpload } from '../../video/hooks/useRawUpload';
 import { useEffect, useRef, useState } from 'react';
-import { fireMilestoneBurst } from '../../../gamification/confetti';
+import { fireMilestoneBurst } from '../../gamification/confetti';
 import type { DragEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, FileVideo, UploadCloud, X } from 'lucide-react';
-import { cn } from '../../../../shared/utils/cn';
+import { cn } from '../../../shared/utils/cn';
 
 interface VideoUploadFormProps {
   onUploaded: (videoId: string, gamification: IGamificationEvent) => void;

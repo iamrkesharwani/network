@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
-import { cn } from '../../../../shared/utils/cn';
+import { cn } from '../../../shared/utils/cn';
 import {
   UploadSteps,
   type WizardStep,
-} from '../../../../shared/upload/UploadSteps';
+} from '../../../shared/upload/UploadSteps';
 
 interface UploadStepperProps {
   current: WizardStep;

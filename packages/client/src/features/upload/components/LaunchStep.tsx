@@ -2,8 +2,8 @@ import { Eye, PartyPopper, Upload } from 'lucide-react';
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { fireSuccessBurst } from '../../../gamification/confetti';
-import AchievementCatalogGrid from '../../../gamification/components/AchievementCatalogGrid';
+import { fireSuccessBurst } from '../../gamification/confetti';
+import AchievementCatalogGrid from '../../gamification/components/AchievementCatalogGrid';
 import type { IGamificationEvent, IVideoResponse } from '@network/shared';
 
 interface LaunchStepProps {

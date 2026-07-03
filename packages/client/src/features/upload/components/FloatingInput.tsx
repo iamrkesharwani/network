@@ -1,5 +1,5 @@
 import React, { forwardRef, useId, type ReactNode } from 'react';
-import { cn } from '../../../../shared/utils/cn';
+import { cn } from '../../../shared/utils/cn';
 
 interface BaseProps {
   label: string;

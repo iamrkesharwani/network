@@ -5,8 +5,8 @@ import {
   ALLOWED_THUMBNAIL_MIME_TYPES,
   MAX_THUMBNAIL_SIZE_BYTES,
 } from '@network/shared';
-import { useUploadThumbnailMutation } from '../../videoApi';
-import { cn } from '../../../../shared/utils/cn';
+import { useUploadThumbnailMutation } from '../../video/videoApi';
+import { cn } from '../../../shared/utils/cn';
 
 interface ThumbnailPickerProps {
   value: string | undefined;

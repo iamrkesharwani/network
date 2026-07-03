@@ -6,12 +6,12 @@ import { useGamificationCelebration } from '../../gamification/hooks/useGamifica
 import AchievementPopup from '../../gamification/components/AchievementPopup';
 import LevelUpModal from '../../gamification/components/LevelUpModal';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
-import UploadStepper from '../upload/components/UploadStepper';
+import UploadStepper from '../../upload/components/UploadStepper';
 import { AnimatePresence, motion } from 'framer-motion';
-import VideoUploadForm from '../upload/form/VideoUploadForm';
-import UploadThumbnailStep from '../upload/components/UploadThumbnailStep';
-import VideoEditForm from '../upload/form/VideoEditForm';
-import LaunchStep from '../upload/components/LaunchStep';
+import VideoUploadForm from '../../upload/form/VideoUploadForm';
+import UploadThumbnailStep from '../../upload/components/UploadThumbnailStep';
+import VideoEditForm from '../../upload/form/VideoEditForm';
+import LaunchStep from '../../upload/components/LaunchStep';
 import ConfirmModal from '../../../shared/components/ConfirmModal';
 
 const stepVariants = {
