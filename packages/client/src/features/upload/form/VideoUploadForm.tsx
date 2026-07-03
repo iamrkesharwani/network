@@ -1,52 +1,35 @@
 import {
-  type IGamificationEvent,
   RING_SIZE,
   RING_CIRCUMFERENCE,
   RING_RADIUS,
   RING_STROKE,
   formatBytes,
   formatEta,
-  MILESTONES,
 } from '@network/shared';
 import { useRawUpload } from '../../video/hooks/useRawUpload';
-import { useEffect, useRef, useState } from 'react';
-import { fireMilestoneBurst } from '../../gamification/confetti';
+import { useEffect, useState } from 'react';
 import type { DragEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, FileVideo, UploadCloud, X } from 'lucide-react';
 import { cn } from '../../../shared/utils/cn';
 
 interface VideoUploadFormProps {
-  onUploaded: (videoId: string, gamification: IGamificationEvent) => void;
+  onUploaded: (videoId: string) => void;
 }
 
 const VideoUploadForm = ({ onUploaded }: VideoUploadFormProps) => {
   const { state, startUpload, cancelUpload } = useRawUpload();
   const [isDragging, setIsDragging] = useState(false);
-  const firedMilestones = useRef<Set<number>>(new Set());
 
   useEffect(() => {
-    if (state.stage === 'done' && state.videoId && state.gamification) {
-      onUploaded(state.videoId, state.gamification);
+    if (state.stage === 'done' && state.videoId) {
+      onUploaded(state.videoId);
     }
   }, [state.stage]);
-
-  useEffect(() => {
-    for (const milestone of MILESTONES) {
-      if (
-        state.progressPercent >= milestone &&
-        !firedMilestones.current.has(milestone)
-      ) {
-        firedMilestones.current.add(milestone);
-        fireMilestoneBurst();
-      }
-    }
-  }, [state.progressPercent]);
 
   const handleFiles = (files: FileList | null) => {
     const file = files?.[0];
     if (file) {
-      firedMilestones.current = new Set();
       startUpload(file);
     }
   };

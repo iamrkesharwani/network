@@ -2,21 +2,15 @@ import { Eye, PartyPopper, Upload } from 'lucide-react';
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { fireSuccessBurst } from '../../gamification/confetti';
-import AchievementCatalogGrid from '../../gamification/components/AchievementCatalogGrid';
-import type { IGamificationEvent, IVideoResponse } from '@network/shared';
+import { fireSuccessBurst } from '../../../shared/utils/confetti';
+import type { IVideoResponse } from '@network/shared';
 
 interface LaunchStepProps {
   video: IVideoResponse;
-  gamification: IGamificationEvent | null;
   onUploadAnother: () => void;
 }
 
-const LaunchStep = ({
-  video,
-  gamification,
-  onUploadAnother,
-}: LaunchStepProps) => {
+const LaunchStep = ({ video, onUploadAnother }: LaunchStepProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,24 +35,6 @@ const LaunchStep = ({
         "{video.title}" has been published
         {video.visibility !== 'public' ? ` (${video.visibility})` : ''}.
       </p>
-
-      {gamification && gamification.xpAwarded > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary-muted px-4 py-1.5 text-sm font-semibold text-primary"
-        >
-          +{gamification.xpAwarded} XP earned
-        </motion.div>
-      )}
-
-      <div className="mt-9 w-full">
-        <p className="text-xs font-medium text-text-secondary mb-3 text-left">
-          Your trophy case
-        </p>
-        <AchievementCatalogGrid />
-      </div>
 
       <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
         <button

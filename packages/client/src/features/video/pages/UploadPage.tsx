@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import type { WizardStep } from '../../../shared/upload/UploadSteps';
-import type { IGamificationEvent, IVideoResponse } from '@network/shared';
+import type { ICreatorEvent, IVideoResponse } from '@network/shared';
 import { useDeleteVideoMutation, useGetVideoByIdQuery } from '../videoApi';
-import { useGamificationCelebration } from '../../gamification/hooks/useGamificationCelebration';
-import AchievementPopup from '../../gamification/components/AchievementPopup';
-import LevelUpModal from '../../gamification/components/LevelUpModal';
+import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
+import BadgeToast from '../../creator/components/BadgeToast';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
 import UploadStepper from '../../upload/components/UploadStepper';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -25,18 +24,10 @@ const UploadPage = () => {
   const [videoId, setVideoId] = useState<string | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>();
   const [finalVideo, setFinalVideo] = useState<IVideoResponse | null>(null);
-  const [finalGamification, setFinalGamification] =
-    useState<IGamificationEvent | null>(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [isAbandoning, setIsAbandoning] = useState(false);
 
-  const {
-    currentAchievement,
-    levelUp,
-    celebrate,
-    dismissAchievement,
-    dismissLevelUp,
-  } = useGamificationCelebration();
+  const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
 
   const [deleteVideo] = useDeleteVideoMutation();
 
@@ -48,24 +39,17 @@ const UploadPage = () => {
   const processingStatus = videoData?.data.status;
   const providerThumbnail = videoData?.data.thumbnailUrl;
 
-  const handleUploaded = (
-    newVideoId: string,
-    gamification: IGamificationEvent
-  ) => {
+  const handleUploaded = (newVideoId: string) => {
     setVideoId(newVideoId);
-    celebrate(gamification);
     setStep('thumbnail');
   };
 
   const handleDetailsSuccess = (
     video: IVideoResponse,
-    gamification?: IGamificationEvent
+    creatorEvent?: ICreatorEvent | null
   ) => {
     setFinalVideo(video);
-    if (gamification) {
-      setFinalGamification(gamification);
-      celebrate(gamification);
-    }
+    celebrate(creatorEvent ?? null);
     setStep('launch');
   };
 
@@ -74,7 +58,6 @@ const UploadPage = () => {
     setVideoId(null);
     setThumbnailUrl(undefined);
     setFinalVideo(null);
-    setFinalGamification(null);
   };
 
   const handleAbandon = async () => {
@@ -91,12 +74,7 @@ const UploadPage = () => {
 
   return (
     <div className="relative mx-auto max-w-2xl pb-20">
-      <AchievementPopup
-        achievement={currentAchievement}
-        onDismiss={dismissAchievement}
-      />
-
-      <LevelUpModal level={levelUp?.level ?? null} onDismiss={dismissLevelUp} />
+      <BadgeToast item={celebration} onDismiss={dismiss} />
 
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-xl font-bold font-display text-text-primary">
@@ -162,11 +140,7 @@ const UploadPage = () => {
             )}
 
             {step === 'launch' && finalVideo && (
-              <LaunchStep
-                video={finalVideo}
-                gamification={finalGamification}
-                onUploadAnother={resetWizard}
-              />
+              <LaunchStep video={finalVideo} onUploadAnother={resetWizard} />
             )}
           </motion.div>
         </AnimatePresence>

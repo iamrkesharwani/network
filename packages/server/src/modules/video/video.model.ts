@@ -80,7 +80,7 @@ const videoSchema = new Schema<IVideoDocument>(
       sparse: true,
       select: false,
     },
-    xpAwarded: {
+    metricsRecorded: {
       type: Boolean,
       default: false,
     },
@@ -97,7 +97,7 @@ const videoSchema = new Schema<IVideoDocument>(
         delete json['__v'];
         delete json['providerVideoId'];
         delete json['storageKey'];
-        delete json['xpAwarded'];
+        delete json['metricsRecorded'];
 
         const raw = json['userId'] as
           | {

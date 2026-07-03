@@ -87,8 +87,16 @@ export const updateByProviderVideoId = (
     runValidators: true,
   }).exec();
 
-export const incrementViews = (id: string): Promise<unknown> =>
-  VideoModel.updateOne({ _id: id }, { $inc: { views: 1 } }).exec();
+export const incrementViews = (
+  id: string
+): Promise<{ views: number; userId: mongoose.Types.ObjectId } | null> =>
+  VideoModel.findOneAndUpdate(
+    { _id: id },
+    { $inc: { views: 1 } },
+    { returnDocument: 'after', projection: { views: 1, userId: 1 } }
+  )
+    .lean()
+    .exec();
 
 export const deleteById = (id: string): Promise<IVideoDocument | null> =>
   VideoModel.findByIdAndDelete(id).select('+storageKey').exec();

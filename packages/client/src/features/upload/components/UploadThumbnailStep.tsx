@@ -18,8 +18,8 @@ const UploadThumbnailStep = ({
         Pick a thumbnail
       </h2>
       <p className="mt-1 mb-6 text-xs text-text-muted max-w-xs">
-        Upload a custom thumbnail for +20 XP, or skip it — we'll grab a frame
-        from your video automatically.
+        Upload a custom thumbnail, or skip it — we'll grab a frame from your
+        video automatically.
       </p>
 
       <ThumbnailPicker value={value} onChange={onChange} />

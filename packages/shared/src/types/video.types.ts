@@ -12,7 +12,7 @@ import {
   VIDEO_VISIBILITY,
   VIDEO_STATUS,
 } from '../constants/video.constants.js';
-import type { IGamificationEvent } from './gamification.types.js';
+import type { ICreatorEvent } from './creator.types.js';
 
 export type VideoUploadInput = z.infer<typeof videoUploadSchema>;
 export type VideoUpdateInput = z.infer<typeof videoUpdateSchema>;
@@ -43,7 +43,7 @@ export interface IVideo {
   status: VideoStatus;
   errorMessage?: string;
   storageKey?: string;
-  xpAwarded?: boolean;
+  metricsRecorded?: boolean;
   category: VideoCategory;
   tags: string[];
   visibility: VideoVisibility;
@@ -62,12 +62,12 @@ export interface IVideoAuthor {
 
 export interface IVideoResponse extends Omit<
   IVideo,
-  'userId' | 'providerVideoId' | 'storageKey' | 'xpAwarded'
+  'userId' | 'providerVideoId' | 'storageKey' | 'metricsRecorded'
 > {
   author: IVideoAuthor;
 }
 
 export interface IVideoActionResult {
   video: IVideoResponse;
-  gamification: IGamificationEvent;
+  creatorEvent: ICreatorEvent | null;
 }

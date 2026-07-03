@@ -4,7 +4,6 @@ import { useTheme } from '../shared/hooks/useTheme';
 import Avatar from '../shared/components/Avatar';
 import { SITE_NAME } from '@network/shared';
 import LogoIcon from '../public/Logo.svg?react';
-import XpBar from '../features/gamification/components/XpBar';
 
 export interface NavbarProps {
   onMobileMenuClick: () => void;
@@ -45,8 +44,6 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
       </div>
 
       <div className="flex items-center gap-1 ml-auto shrink-0">
-        <XpBar />
-
         <Link
           to="/upload"
           className="flex items-center gap-1.5 mr-1 px-3 h-9 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-hover transition-colors"

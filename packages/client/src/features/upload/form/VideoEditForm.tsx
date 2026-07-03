@@ -9,11 +9,10 @@ import {
   videoUpdateSchema,
   type VideoUploadInput,
   type IVideoResponse,
-  type IGamificationEvent,
+  type ICreatorEvent,
   type VideoCategory,
   type VideoVisibility,
 } from '@network/shared';
-
 import {
   useFinaliseVideoMutation,
   useUpdateVideoMutation,
@@ -50,7 +49,10 @@ interface VideoEditFormProps {
   videoId: string;
   thumbnailUrl?: string;
   initialValues?: Partial<VideoUploadInput>;
-  onSuccess: (video: IVideoResponse, gamification?: IGamificationEvent) => void;
+  onSuccess: (
+    video: IVideoResponse,
+    creatorEvent?: ICreatorEvent | null
+  ) => void;
 }
 
 const VideoEditForm = ({
@@ -63,6 +65,7 @@ const VideoEditForm = ({
   const [finaliseVideo, { isLoading: isFinalising }] =
     useFinaliseVideoMutation();
   const [updateVideo, { isLoading: isUpdating }] = useUpdateVideoMutation();
+
   const isSubmitting = isFinalising || isUpdating;
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -119,7 +122,7 @@ const VideoEditForm = ({
           ...data,
           thumbnailUrl: thumbnailUrl ?? data.thumbnailUrl,
         }).unwrap();
-        onSuccess(result.data.video, result.data.gamification);
+        onSuccess(result.data.video, result.data.creatorEvent);
       } else {
         const result = await updateVideo({ videoId, ...data }).unwrap();
         onSuccess(result.data);
@@ -164,8 +167,8 @@ const VideoEditForm = ({
         counter={{ current: description.length, max: 5000 }}
         hint={
           description.length >= 50
-            ? '+15 XP for a solid description'
-            : 'Write 50+ characters for bonus XP'
+            ? undefined
+            : 'A description of 50+ characters helps viewers find your video'
         }
       />
 

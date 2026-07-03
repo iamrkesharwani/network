@@ -4,7 +4,6 @@ import {
   MAX_VIDEO_SIZE_BYTES,
   MAX_VIDEO_DURATION_SECONDS,
   ALLOWED_VIDEO_MIME_TYPES,
-  type IGamificationEvent,
 } from '@network/shared';
 import {
   useInitiateUploadMutation,
@@ -12,9 +11,6 @@ import {
   useDeleteVideoMutation,
 } from '../videoApi';
 
-// A bare axios client with no baseURL/auth interceptors — the presigned
-// URL is an absolute, pre-signed request to the storage provider, and
-// must be sent exactly as signed (no extra auth/CSRF headers).
 const rawHttp = axios.create();
 
 export type UploadStage =
@@ -37,7 +33,6 @@ export interface UploadState {
   speedBytesPerSec: number;
   etaSeconds: number | null;
   error: string | null;
-  gamification: IGamificationEvent | null;
 }
 
 const initialState: UploadState = {
@@ -50,7 +45,6 @@ const initialState: UploadState = {
   speedBytesPerSec: 0,
   etaSeconds: null,
   error: null,
-  gamification: null,
 };
 
 const readVideoDuration = (file: File): Promise<number | undefined> =>
@@ -59,7 +53,6 @@ const readVideoDuration = (file: File): Promise<number | undefined> =>
     video.preload = 'metadata';
     const url = URL.createObjectURL(file);
     video.src = url;
-
     const cleanup = () => URL.revokeObjectURL(url);
 
     video.onloadedmetadata = () => {
@@ -69,6 +62,7 @@ const readVideoDuration = (file: File): Promise<number | undefined> =>
       cleanup();
       resolve(duration);
     };
+
     video.onerror = () => {
       cleanup();
       resolve(undefined);
@@ -123,7 +117,6 @@ export const useRawUpload = () => {
       });
 
       const durationSeconds = await readVideoDuration(file);
-
       if (durationSeconds && durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
         setState({
           ...initialState,
@@ -147,6 +140,7 @@ export const useRawUpload = () => {
           mimeType: file.type as (typeof ALLOWED_VIDEO_MIME_TYPES)[number],
           ...(durationSeconds !== undefined && { durationSeconds }),
         }).unwrap();
+
         videoId = initResult.data.videoId;
         presignedUrl = initResult.data.presignedUrl;
         storageKey = initResult.data.storageKey;
@@ -172,11 +166,12 @@ export const useRawUpload = () => {
             const loaded = event.loaded;
             const total = event.total ?? file.size;
             const now = performance.now();
-
             const lastSample = speedSampleRef.current;
+
             if (lastSample) {
               const dt = (now - lastSample.time) / 1000;
               const dBytes = loaded - lastSample.loaded;
+
               if (dt > 0.15) {
                 const instantSpeed = dBytes / dt;
                 smoothedSpeedRef.current =
@@ -222,7 +217,7 @@ export const useRawUpload = () => {
       setState((prev) => ({ ...prev, stage: 'confirming' }));
 
       try {
-        const confirmResult = await confirmUpload({
+        await confirmUpload({
           videoId,
           storageKey,
           fileSizeBytes: file.size,
@@ -232,7 +227,6 @@ export const useRawUpload = () => {
           ...prev,
           stage: 'done',
           progressPercent: 100,
-          gamification: confirmResult.data.gamification,
         }));
       } catch {
         setState((prev) => ({

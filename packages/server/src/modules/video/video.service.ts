@@ -8,7 +8,7 @@ import {
   type VideoUploadInput,
 } from '@network/shared';
 import * as videoRepository from './video.repository.js';
-import * as gamificationService from '../gamification/gamification.service.js';
+import * as creatorService from '../creator/creator.service.js';
 import {
   storageProvider,
   videoProvider,
@@ -106,9 +106,8 @@ export const confirmUpload = async (
 
   await redisClient.del(uploadSessionKey(storageKey));
 
-  const gamification = await gamificationService.awardForUploadStarted(userId);
-
-  return { video: toResponse(video), gamification };
+  // Starting an upload earns nothing under the Creator Metrics system.
+  return { video: toResponse(video), creatorEvent: null };
 };
 
 export const uploadThumbnail = async (
@@ -129,7 +128,7 @@ export const finaliseVideo = async (
     throw new ApiError(403, 'FORBIDDEN', 'You do not own this video.');
   }
 
-  const alreadyAwarded = video.xpAwarded === true;
+  const alreadyRecorded = video.metricsRecorded === true;
 
   const updated = await videoRepository.updateById(videoId, {
     title: data.title,
@@ -138,24 +137,18 @@ export const finaliseVideo = async (
     visibility: data.visibility,
     ...(data.description !== undefined && { description: data.description }),
     ...(data.thumbnailUrl !== undefined && { thumbnailUrl: data.thumbnailUrl }),
-    ...(!alreadyAwarded && { xpAwarded: true }),
+    ...(!alreadyRecorded && { metricsRecorded: true }),
   });
 
   if (!updated) {
     throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
   }
 
-  const gamification = alreadyAwarded
-    ? await gamificationService.getSnapshot(userId)
-    : await gamificationService.awardForVideoPublished(userId, {
-        tags: data.tags,
-        hasCustomThumbnail: !!data.thumbnailUrl,
-        ...(data.description !== undefined && {
-          description: data.description,
-        }),
-      });
+  const creatorEvent = alreadyRecorded
+    ? null
+    : await creatorService.recordPublish(userId);
 
-  return { video: toResponse(updated), gamification };
+  return { video: toResponse(updated), creatorEvent };
 };
 
 export const getVideoById = async (
@@ -178,8 +171,19 @@ export const getVideoById = async (
   if (!isOwner) {
     videoRepository
       .incrementViews(videoId)
+      .then((updated) => {
+        if (!updated) return;
+        return creatorService.onViewsIncremented(
+          getOwnerId(updated.userId),
+          videoId,
+          updated.views
+        );
+      })
       .catch((e) =>
-        logger.error(e, `Failed to increment views for ${videoId}`)
+        logger.error(
+          e,
+          `Failed to increment views/creator metrics for ${videoId}`
+        )
       );
   }
 
