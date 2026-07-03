@@ -1,8 +1,6 @@
 import { Eye, PartyPopper, Upload } from 'lucide-react';
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { fireSuccessBurst } from '../../../shared/utils/confetti';
 import type { IVideoResponse } from '@network/shared';
 
 interface LaunchStepProps {
@@ -13,30 +11,58 @@ interface LaunchStepProps {
 const LaunchStep = ({ video, onUploadAnother }: LaunchStepProps) => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fireSuccessBurst();
-  }, []);
-
   return (
     <div className="flex flex-col items-center text-center w-full max-w-lg mx-auto">
+      <div className="relative mb-6 mt-4">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0.5 }}
+          animate={{ scale: 2.5, opacity: 0 }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }}
+          className="absolute inset-0 rounded-full bg-primary/30"
+        />
+
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0.5 }}
+          animate={{ scale: 2, opacity: 0 }}
+          transition={{
+            duration: 1.5,
+            delay: 0.4,
+            repeat: Infinity,
+            ease: 'easeOut',
+          }}
+          className="absolute inset-0 rounded-full bg-primary/40"
+        />
+
+        <motion.div
+          initial={{ scale: 0, rotate: -15 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          className="relative flex items-center justify-center w-20 h-20 rounded-full bg-primary text-white shadow-xl shadow-primary/30 z-10"
+        >
+          <PartyPopper className="w-9 h-9" />
+        </motion.div>
+      </div>
+
       <motion.div
-        initial={{ scale: 0.6, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-        className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-white mb-5"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
       >
-        <PartyPopper className="w-7 h-7" />
+        <h2 className="text-2xl font-bold font-display text-text-primary">
+          You're live!
+        </h2>
+        <p className="mt-1.5 text-sm text-text-muted max-w-sm">
+          "{video.title}" has been published
+          {video.visibility !== 'public' ? ` (${video.visibility})` : ''}.
+        </p>
       </motion.div>
 
-      <h2 className="text-2xl font-bold font-display text-text-primary">
-        You're live!
-      </h2>
-      <p className="mt-1.5 text-sm text-text-muted max-w-sm">
-        "{video.title}" has been published
-        {video.visibility !== 'public' ? ` (${video.visibility})` : ''}.
-      </p>
-
-      <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mt-9 flex flex-wrap items-center justify-center gap-3"
+      >
         <button
           type="button"
           onClick={() => navigate(`/video/${video.id}`)}
@@ -54,7 +80,7 @@ const LaunchStep = ({ video, onUploadAnother }: LaunchStepProps) => {
           <Upload className="w-4 h-4" />
           Upload another
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -1,11 +1,21 @@
-import ContributionGraph from '../../features/creator/components/ContributionGraph';
+import Contribution from '../../features/creator/components/Contribution';
 import BadgeShowcase from '../../features/creator/components/BadgeShowcase';
 import { useGetMyProfileQuery } from '../../features/creator/creatorApi';
+import { Loader2 } from 'lucide-react';
 
 export const Explore = () => <div className="p-8 text-xl">Explore</div>;
 
 export const Profile = () => {
-  const { data } = useGetMyProfileQuery();
+  const { data, isLoading } = useGetMyProfileQuery();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const uploadActivity = data?.data.uploadActivity ?? [];
 
   return (
@@ -18,7 +28,7 @@ export const Profile = () => {
         <p className="text-xs font-medium text-text-secondary mb-3">
           Publishing activity
         </p>
-        <ContributionGraph uploadActivity={uploadActivity} />
+        <Contribution uploadActivity={uploadActivity} />
       </div>
 
       <div>
