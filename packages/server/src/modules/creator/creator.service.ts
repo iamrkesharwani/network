@@ -31,6 +31,20 @@ export const recordPublish = async (userId: string): Promise<ICreatorEvent> => {
     }
   }
 
+  if (publishCount === 10) {
+    const unlocked = await creatorRepository.unlockBadge(
+      userId,
+      'TENTH_UPLOAD'
+    );
+    if (unlocked) {
+      newBadgeIds.push('TENTH_UPLOAD');
+      await creatorRepository.incrementTrustScore(
+        userId,
+        TRUST_POINTS.TENTH_UPLOAD_BADGE
+      );
+    }
+  }
+
   const distinctDays =
     await creatorRepository.countDistinctActivityDays(userId);
   if (distinctDays === CONSISTENT_CREATOR_DISTINCT_DAYS) {

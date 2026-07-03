@@ -1,11 +1,15 @@
 export const BADGE_CATALOG = {
   FIRST_UPLOAD: {
-    label: 'First Upload',
-    description: 'Published their first video',
+    label: '1st Upload',
+    description: '1 video',
+  },
+  TENTH_UPLOAD: {
+    label: '10th Upload',
+    description: '10 videos',
   },
   CONSISTENT_CREATOR: {
-    label: 'Consistent Creator',
-    description: 'Published on 10 different days',
+    label: 'Consistent',
+    description: '10 active days',
   },
 } as const;
 
@@ -52,6 +56,7 @@ export const TRUST_POINTS = {
   VIDEO_MILESTONE: 5,
   CREATOR_MILESTONE: 15,
   FIRST_UPLOAD_BADGE: 50,
+  TENTH_UPLOAD_BADGE: 25,
   CONSISTENT_CREATOR_BADGE: 25,
 } as const;
 
