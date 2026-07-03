@@ -1,3 +1,6 @@
+import { useState, type DragEvent } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertTriangle, FileVideo, UploadCloud, X } from 'lucide-react';
 import {
   RING_SIZE,
   RING_CIRCUMFERENCE,
@@ -6,31 +9,32 @@ import {
   formatBytes,
   formatEta,
 } from '@network/shared';
-import { useRawUpload } from '../../video/hooks/useRawUpload';
-import { useEffect, useState } from 'react';
-import type { DragEvent } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { AlertTriangle, FileVideo, UploadCloud, X } from 'lucide-react';
-import { cn } from '../../../shared/utils/cn';
+import { cn } from '../../shared/utils/cn';
+import type { UploadState } from '../video/hooks/useVideoUpload';
 
-interface VideoUploadFormProps {
-  onUploaded: (videoId: string) => void;
+interface MediaDropzoneProps {
+  state: UploadState;
+  onFileSelect: (file: File) => void;
+  onCancel: () => void;
+  title?: string;
+  subtitle?: string;
+  accept?: string;
 }
 
-const VideoUploadForm = ({ onUploaded }: VideoUploadFormProps) => {
-  const { state, startUpload, cancelUpload } = useRawUpload();
+const MediaDropzone = ({
+  state,
+  onFileSelect,
+  onCancel,
+  title = 'Drag & drop your media',
+  subtitle = 'or click to browse',
+  accept = 'video/mp4,video/quicktime,video/webm',
+}: MediaDropzoneProps) => {
   const [isDragging, setIsDragging] = useState(false);
-
-  useEffect(() => {
-    if (state.stage === 'done' && state.videoId) {
-      onUploaded(state.videoId);
-    }
-  }, [state.stage]);
 
   const handleFiles = (files: FileList | null) => {
     const file = files?.[0];
     if (file) {
-      startUpload(file);
+      onFileSelect(file);
     }
   };
 
@@ -121,7 +125,7 @@ const VideoUploadForm = ({ onUploaded }: VideoUploadFormProps) => {
 
         <button
           type="button"
-          onClick={cancelUpload}
+          onClick={onCancel}
           className="mt-6 flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-error transition-colors cursor-pointer"
         >
           <X className="w-3.5 h-3.5" />
@@ -140,7 +144,7 @@ const VideoUploadForm = ({ onUploaded }: VideoUploadFormProps) => {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
-        onClick={() => document.getElementById('video-file-input')?.click()}
+        onClick={() => document.getElementById('media-file-input')?.click()}
         className={cn(
           'relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed py-16 px-6 text-center cursor-pointer transition-colors',
           isDragging
@@ -149,9 +153,9 @@ const VideoUploadForm = ({ onUploaded }: VideoUploadFormProps) => {
         )}
       >
         <input
-          id="video-file-input"
+          id="media-file-input"
           type="file"
-          accept="video/mp4,video/quicktime,video/webm,video/x-matroska"
+          accept={accept}
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
@@ -176,11 +180,9 @@ const VideoUploadForm = ({ onUploaded }: VideoUploadFormProps) => {
 
         <div>
           <p className="text-base font-semibold text-text-primary font-display">
-            {isDragging ? 'Drop it like it’s hot' : 'Drag & drop your video'}
+            {isDragging ? 'Drop it like it’s hot' : title}
           </p>
-          <p className="mt-1 text-xs text-text-muted">
-            or click to browse · MP4, MOV, WebM, MKV · up to 5GB
-          </p>
+          <p className="mt-1 text-xs text-text-muted">{subtitle}</p>
         </div>
       </div>
 
@@ -201,4 +203,4 @@ const VideoUploadForm = ({ onUploaded }: VideoUploadFormProps) => {
   );
 };
 
-export default VideoUploadForm;
+export default MediaDropzone;

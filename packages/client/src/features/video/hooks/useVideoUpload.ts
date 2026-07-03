@@ -4,6 +4,7 @@ import {
   MAX_VIDEO_SIZE_BYTES,
   MAX_VIDEO_DURATION_SECONDS,
   ALLOWED_VIDEO_MIME_TYPES,
+  type UploadState,
 } from '@network/shared';
 import {
   useInitiateUploadMutation,
@@ -12,28 +13,6 @@ import {
 } from '../videoApi';
 
 const rawHttp = axios.create();
-
-export type UploadStage =
-  | 'idle'
-  | 'validating'
-  | 'requesting'
-  | 'uploading'
-  | 'confirming'
-  | 'done'
-  | 'error'
-  | 'cancelled';
-
-export interface UploadState {
-  stage: UploadStage;
-  file: File | null;
-  videoId: string | null;
-  progressPercent: number;
-  uploadedBytes: number;
-  totalBytes: number;
-  speedBytesPerSec: number;
-  etaSeconds: number | null;
-  error: string | null;
-}
 
 const initialState: UploadState = {
   stage: 'idle',

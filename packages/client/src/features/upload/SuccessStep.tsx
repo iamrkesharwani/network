@@ -1,14 +1,20 @@
 import { Eye, PartyPopper, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import type { IVideoResponse } from '@network/shared';
 
-interface LaunchStepProps {
-  video: IVideoResponse;
+interface SuccessStepProps {
+  title: string;
+  visibility: string;
+  viewUrl: string;
   onUploadAnother: () => void;
 }
 
-const LaunchStep = ({ video, onUploadAnother }: LaunchStepProps) => {
+const SuccessStep = ({
+  title,
+  visibility,
+  viewUrl,
+  onUploadAnother,
+}: SuccessStepProps) => {
   const navigate = useNavigate();
 
   return (
@@ -52,8 +58,8 @@ const LaunchStep = ({ video, onUploadAnother }: LaunchStepProps) => {
           You're live!
         </h2>
         <p className="mt-1.5 text-sm text-text-muted max-w-sm">
-          "{video.title}" has been published
-          {video.visibility !== 'public' ? ` (${video.visibility})` : ''}.
+          "{title}" has been published
+          {visibility !== 'public' ? ` (${visibility})` : ''}.
         </p>
       </motion.div>
 
@@ -65,11 +71,11 @@ const LaunchStep = ({ video, onUploadAnother }: LaunchStepProps) => {
       >
         <button
           type="button"
-          onClick={() => navigate(`/video/${video.id}`)}
+          onClick={() => navigate(viewUrl)}
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-hover transition-colors cursor-pointer"
         >
           <Eye className="w-4 h-4" />
-          View video
+          View
         </button>
 
         <button
@@ -85,4 +91,4 @@ const LaunchStep = ({ video, onUploadAnother }: LaunchStepProps) => {
   );
 };
 
-export default LaunchStep;
+export default SuccessStep;

@@ -13,16 +13,13 @@ import {
   type VideoCategory,
   type VideoVisibility,
 } from '@network/shared';
-import {
-  useFinaliseVideoMutation,
-  useUpdateVideoMutation,
-} from '../../video/videoApi';
-import FloatingInput from '../components/FloatingInput';
-import FloatingTextarea from '../components/FloatingTextarea';
-import CategoryPicker from '../components/CategoryPicker';
-import TagInput from '../components/TagInput';
-import VisibilitySelector from '../components/VisibilitySelector';
-import ThumbnailPicker from '../components/ThumbnailPicker';
+import { useFinaliseVideoMutation, useUpdateVideoMutation } from '../videoApi';
+import FloatingInput from '../../upload/FloatingInput';
+import FloatingTextarea from '../../upload/FloatingTextarea';
+import CategoryPicker from '../../upload/CategoryPicker';
+import TagInput from '../../upload/TagInput';
+import VisibilitySelector from '../../upload/VisibilitySelector';
+import ThumbnailPicker from '../../upload/ThumbnailPicker';
 
 type VideoFormValues = z.input<typeof videoUploadSchema>;
 

@@ -1,5 +1,5 @@
 import React, { forwardRef, useId, type ReactNode } from 'react';
-import { cn } from '../../../shared/utils/cn';
+import { cn } from '../../shared/utils/cn';
 
 interface BaseProps {
   label: string;
@@ -9,9 +9,9 @@ interface BaseProps {
   counter?: { current: number; max: number };
 }
 
-const FloatingInput = forwardRef<
-  HTMLInputElement,
-  BaseProps & React.InputHTMLAttributes<HTMLInputElement>
+const FloatingTextarea = forwardRef<
+  HTMLTextAreaElement,
+  BaseProps & React.TextareaHTMLAttributes<HTMLTextAreaElement>
 >(
   (
     { label, error, hint, containerClassName, counter, className, ...props },
@@ -22,7 +22,7 @@ const FloatingInput = forwardRef<
       <div
         className={cn('relative mb-6 text-left field-root', containerClassName)}
       >
-        <input
+        <textarea
           ref={ref}
           id={id}
           placeholder=" "
@@ -30,10 +30,10 @@ const FloatingInput = forwardRef<
           aria-describedby={error ? `${id}-error` : undefined}
           className={cn(
             'field-input',
-            'w-full bg-transparent border-0 border-b border-white/9',
+            'w-full bg-transparent border-0 border-b border-white/9 resize-none',
             'text-[--color-text-primary] text-base font-medium',
-            'py-[0.55rem] pb-[0.65rem] px-[0.1rem] pr-8',
-            'outline-none transition-colors duration-300',
+            'py-[0.55rem] pb-[0.65rem] px-[0.1rem]',
+            'outline-none transition-colors duration-300 placeholder:text-transparent',
             error && 'border-[--color-error]',
             className
           )}
@@ -86,6 +86,6 @@ const FloatingInput = forwardRef<
   }
 );
 
-FloatingInput.displayName = 'FloatingInput';
+FloatingTextarea.displayName = 'FloatingTextarea';
 
-export default FloatingInput;
+export default FloatingTextarea;

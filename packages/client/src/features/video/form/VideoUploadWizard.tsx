@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { WizardStep } from '../../../shared/upload/UploadSteps';
 import type { ICreatorEvent, IVideoResponse } from '@network/shared';
 import { useDeleteVideoMutation, useGetVideoByIdQuery } from '../videoApi';
+import { useRawUpload } from '../hooks/useVideoUpload';
 import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
 import BadgeToast from '../../creator/components/BadgeToast';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
-import UploadStepper from '../../upload/components/UploadStepper';
+import UploadStepper from '../../upload/UploadStepper';
 import { AnimatePresence, motion } from 'framer-motion';
-import VideoUploadForm from '../../upload/form/VideoUploadForm';
-import UploadThumbnailStep from '../../upload/components/UploadThumbnailStep';
-import VideoEditForm from '../../upload/form/VideoEditForm';
-import LaunchStep from '../../upload/components/LaunchStep';
+import MediaDropzone from '../../upload/MediaDropzone';
+import UploadThumbnailStep from '../../upload/UploadThumbnailStep';
+import VideoEditForm from './VideoEditForm';
+import SuccessStep from '../../upload/SuccessStep';
 import ConfirmModal from '../../../shared/components/ConfirmModal';
 
 const stepVariants = {
@@ -19,7 +20,7 @@ const stepVariants = {
   exit: { opacity: 0, x: -24 },
 };
 
-const UploadPage = () => {
+const VideoUploadWizard = () => {
   const [step, setStep] = useState<WizardStep>('drop');
   const [videoId, setVideoId] = useState<string | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>();
@@ -28,8 +29,14 @@ const UploadPage = () => {
   const [isAbandoning, setIsAbandoning] = useState(false);
 
   const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
-
   const [deleteVideo] = useDeleteVideoMutation();
+
+  const {
+    state: uploadState,
+    startUpload,
+    cancelUpload,
+    reset: resetUpload,
+  } = useRawUpload();
 
   const shouldPoll = !!videoId && step !== 'launch' && step !== 'drop';
   const { data: videoData } = useGetVideoByIdQuery(videoId ?? '', {
@@ -39,10 +46,12 @@ const UploadPage = () => {
   const processingStatus = videoData?.data.status;
   const providerThumbnail = videoData?.data.thumbnailUrl;
 
-  const handleUploaded = (newVideoId: string) => {
-    setVideoId(newVideoId);
-    setStep('thumbnail');
-  };
+  useEffect(() => {
+    if (uploadState.stage === 'done' && uploadState.videoId) {
+      setVideoId(uploadState.videoId);
+      setStep('thumbnail');
+    }
+  }, [uploadState.stage, uploadState.videoId]);
 
   const handleDetailsSuccess = (
     video: IVideoResponse,
@@ -58,6 +67,7 @@ const UploadPage = () => {
     setVideoId(null);
     setThumbnailUrl(undefined);
     setFinalVideo(null);
+    resetUpload();
   };
 
   const handleAbandon = async () => {
@@ -73,7 +83,7 @@ const UploadPage = () => {
   };
 
   return (
-    <div className="relative mx-auto max-w-2xl pb-20">
+    <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
       <BadgeToast item={celebration} onDismiss={dismiss} />
 
       <div className="flex items-center justify-between mb-2">
@@ -87,7 +97,7 @@ const UploadPage = () => {
             className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-error transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
-            Start over
+            Cancel & discard
           </button>
         )}
       </div>
@@ -120,7 +130,16 @@ const UploadPage = () => {
             exit="exit"
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
-            {step === 'drop' && <VideoUploadForm onUploaded={handleUploaded} />}
+            {step === 'drop' && (
+              <MediaDropzone
+                state={uploadState}
+                onFileSelect={startUpload}
+                onCancel={cancelUpload}
+                title="Drag & drop your video"
+                subtitle="or click to browse · MP4, MOV, WebM, MKV · up to 5GB"
+                accept="video/mp4,video/quicktime,video/webm,video/x-matroska"
+              />
+            )}
 
             {step === 'thumbnail' && videoId && (
               <UploadThumbnailStep
@@ -140,7 +159,12 @@ const UploadPage = () => {
             )}
 
             {step === 'launch' && finalVideo && (
-              <LaunchStep video={finalVideo} onUploadAnother={resetWizard} />
+              <SuccessStep
+                title={finalVideo.title}
+                visibility={finalVideo.visibility}
+                viewUrl={`/video/${finalVideo.id}`}
+                onUploadAnother={resetWizard}
+              />
             )}
           </motion.div>
         </AnimatePresence>
@@ -166,4 +190,4 @@ const UploadPage = () => {
   );
 };
 
-export default UploadPage;
+export default VideoUploadWizard;
