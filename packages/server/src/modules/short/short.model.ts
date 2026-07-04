@@ -69,6 +69,10 @@ const shortSchema = new Schema<IShortDocument>(
       sparse: true,
       select: false,
     },
+    metricsRecorded: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -82,6 +86,7 @@ const shortSchema = new Schema<IShortDocument>(
         delete json['__v'];
         delete json['providerVideoId'];
         delete json['storageKey'];
+        delete json['metricsRecorded'];
 
         const raw = json['userId'] as
           | {

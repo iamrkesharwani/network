@@ -3,11 +3,13 @@ import {
   MAX_SHORT_DURATION_SECONDS,
   type IInitiateShortUploadResult,
   type IShortResponse,
+  type IShortActionResult,
   type InitiateShortUploadInput,
   type ShortUpdateInput,
   type ShortUploadInput,
 } from '@network/shared';
 import * as shortRepository from './short.repository.js';
+import * as creatorService from '../creator/creator.service.js';
 import {
   storageProvider,
   videoProvider,
@@ -117,7 +119,7 @@ export const finaliseShort = async (
   shortId: string,
   userId: string,
   data: ShortUploadInput
-): Promise<IShortResponse> => {
+): Promise<IShortActionResult> => {
   const short = await shortRepository.findById(shortId);
   if (!short) {
     throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
@@ -126,19 +128,26 @@ export const finaliseShort = async (
     throw new ApiError(403, 'FORBIDDEN', 'You do not own this short.');
   }
 
+  const alreadyRecorded = short.metricsRecorded === true;
+
   const updated = await shortRepository.updateById(shortId, {
     title: data.title,
     tags: data.tags,
     visibility: data.visibility,
     ...(data.description !== undefined && { description: data.description }),
     ...(data.thumbnailUrl !== undefined && { thumbnailUrl: data.thumbnailUrl }),
+    ...(!alreadyRecorded && { metricsRecorded: true }),
   });
 
   if (!updated) {
     throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
   }
 
-  return toResponse(updated);
+  const creatorEvent = alreadyRecorded
+    ? null
+    : await creatorService.recordPublish(userId, 'short');
+
+  return { short: toResponse(updated), creatorEvent };
 };
 
 export const getShortById = async (
@@ -161,8 +170,19 @@ export const getShortById = async (
   if (!isOwner) {
     shortRepository
       .incrementViews(shortId)
+      .then((updated) => {
+        if (!updated) return;
+        return creatorService.recordViewIncrement(
+          getOwnerId(updated.userId),
+          shortId,
+          updated.views
+        );
+      })
       .catch((e) =>
-        logger.error(e, `Failed to increment views for short ${shortId}`)
+        logger.error(
+          e,
+          `Failed to increment views/creator metrics for short ${shortId}`
+        )
       );
   }
 

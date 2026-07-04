@@ -109,6 +109,24 @@ export const incrementPublishCount = (userId: string): Promise<number> =>
     .exec()
     .then((doc) => doc.publishCount);
 
+export const incrementVideoPublishCount = (userId: string): Promise<number> =>
+  CreatorModel.findOneAndUpdate(
+    { userId: new mongoose.Types.ObjectId(userId) },
+    { $inc: { videoPublishCount: 1 } },
+    { returnDocument: 'after', upsert: true }
+  )
+    .exec()
+    .then((doc) => doc.videoPublishCount);
+
+export const incrementShortPublishCount = (userId: string): Promise<number> =>
+  CreatorModel.findOneAndUpdate(
+    { userId: new mongoose.Types.ObjectId(userId) },
+    { $inc: { shortPublishCount: 1 } },
+    { returnDocument: 'after', upsert: true }
+  )
+    .exec()
+    .then((doc) => doc.shortPublishCount);
+
 export const pushActivity = (
   userId: string,
   date: Date

@@ -146,7 +146,7 @@ export const finaliseVideo = async (
 
   const creatorEvent = alreadyRecorded
     ? null
-    : await creatorService.recordPublish(userId);
+    : await creatorService.recordPublish(userId, 'video');
 
   return { video: toResponse(updated), creatorEvent };
 };
@@ -173,7 +173,7 @@ export const getVideoById = async (
       .incrementViews(videoId)
       .then((updated) => {
         if (!updated) return;
-        return creatorService.onViewsIncremented(
+        return creatorService.recordViewIncrement(
           getOwnerId(updated.userId),
           videoId,
           updated.views

@@ -9,6 +9,7 @@ import {
   shortUpdateSchema,
   type ShortUploadInput,
   type IShortResponse,
+  type ICreatorEvent,
   type ShortVisibility,
 } from '@network/shared';
 import {
@@ -47,7 +48,10 @@ interface ShortEditFormProps {
   shortId: string;
   thumbnailUrl?: string;
   initialValues?: Partial<ShortUploadInput>;
-  onSuccess: (short: IShortResponse) => void;
+  onSuccess: (
+    short: IShortResponse,
+    creatorEvent?: ICreatorEvent | null
+  ) => void;
 }
 
 const ShortEditForm = ({
@@ -115,7 +119,7 @@ const ShortEditForm = ({
           ...data,
           thumbnailUrl: thumbnailUrl ?? data.thumbnailUrl,
         }).unwrap();
-        onSuccess(result.data);
+        onSuccess(result.data.short, result.data.creatorEvent);
       } else {
         const result = await updateShort({ shortId, ...data }).unwrap();
         onSuccess(result.data);

@@ -10,9 +10,18 @@ import {
 } from '@network/shared';
 import * as creatorRepository from './creator.repository.js';
 
-export const recordPublish = async (userId: string): Promise<ICreatorEvent> => {
+export const recordPublish = async (
+  userId: string,
+  contentType: 'video' | 'short'
+): Promise<ICreatorEvent> => {
   await creatorRepository.pushActivity(userId, new Date());
   await creatorRepository.incrementTrustScore(userId, TRUST_POINTS.PUBLISH);
+
+  if (contentType === 'video') {
+    await creatorRepository.incrementVideoPublishCount(userId);
+  } else {
+    await creatorRepository.incrementShortPublishCount(userId);
+  }
 
   const newBadgeIds: (keyof typeof BADGE_CATALOG)[] = [];
 
@@ -74,18 +83,18 @@ export const recordPublish = async (userId: string): Promise<ICreatorEvent> => {
   };
 };
 
-export const onViewsIncremented = async (
+export const recordViewIncrement = async (
   userId: string,
-  videoId: string,
-  newVideoViews: number
+  contentId: string,
+  newContentViews: number
 ): Promise<void> => {
   const newTotalViews = await creatorRepository.incrementTotalViews(userId, 1);
 
   for (const milestone of VIDEO_MILESTONE_LIST) {
-    if (newVideoViews >= milestone.threshold) {
+    if (newContentViews >= milestone.threshold) {
       const unlocked = await creatorRepository.unlockVideoMilestone(
         userId,
-        videoId,
+        contentId,
         milestone.id
       );
       if (unlocked) {
@@ -146,5 +155,7 @@ export const getProfile = async (userId: string): Promise<ICreatorProfile> => {
     })),
     unlockedFeatures: doc.unlockedFeatures,
     uploadActivity: doc.uploadActivity.map((d) => d.toISOString()),
+    videoPublishCount: doc.videoPublishCount,
+    shortPublishCount: doc.shortPublishCount,
   };
 };

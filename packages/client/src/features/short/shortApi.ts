@@ -5,6 +5,7 @@ import type {
   ConfirmShortUploadInput,
   IInitiateShortUploadResult,
   InitiateShortUploadInput,
+  IShortActionResult,
   IShortResponse,
   PaginatedResponse,
   ShortFeedQuery,
@@ -52,7 +53,7 @@ export const shortApi = createApi({
     }),
 
     finaliseShort: builder.mutation<
-      ApiResponse<IShortResponse>,
+      ApiResponse<IShortActionResult>,
       { shortId: string } & ShortUploadInput
     >({
       query: ({ shortId, ...data }) => ({

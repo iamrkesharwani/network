@@ -94,39 +94,58 @@ const VideoUploadWizard = () => {
     resetWizard();
   };
 
+  const isUploadingStage =
+    step === 'drop' &&
+    ['validating', 'requesting', 'uploading', 'confirming'].includes(
+      uploadState.stage
+    );
+
+  const isProcessing =
+    (step === 'thumbnail' || step === 'details') &&
+    !!processingStatus &&
+    processingStatus !== 'READY';
+
+  const isProcessingDone =
+    (step === 'thumbnail' || step === 'details') &&
+    processingStatus === 'READY';
+
+  const statusLabel = isUploadingStage
+    ? 'Uploading your video in the background…'
+    : isProcessing
+      ? 'Processing your video in the background…'
+      : 'Your video has finished processing';
+
+  const showStatusBar = isUploadingStage || isProcessing || isProcessingDone;
+
   return (
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
       <BadgeToast item={celebration} onDismiss={dismiss} />
 
-      <div className="flex items-center justify-between mb-2">
-        <h1 className="text-xl font-bold font-display text-text-primary">
-          Upload a video
-        </h1>
-        {step !== 'drop' && step !== 'launch' && (
+      <h1 className="text-xl font-bold font-display text-text-primary text-center mb-2">
+        Upload a video
+      </h1>
+
+      {showStatusBar && (
+        <div className="mb-6 flex items-center justify-center gap-3 text-xs text-text-muted">
+          <span className="flex items-center gap-2">
+            {isProcessingDone ? (
+              <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+            ) : (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            )}
+            {statusLabel}
+          </span>
+
           <button
             type="button"
-            onClick={() => setShowLeaveConfirm(true)}
-            className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-error transition-colors cursor-pointer"
+            onClick={() =>
+              isUploadingStage ? cancelUpload() : setShowLeaveConfirm(true)
+            }
+            className="flex items-center gap-1 font-medium text-text-muted hover:text-error transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
-            Cancel & discard
+            Cancel
           </button>
-        )}
-      </div>
-
-      {(step === 'thumbnail' || step === 'details') && processingStatus && (
-        <div className="mb-6 flex items-center gap-2 text-xs text-text-muted">
-          {processingStatus === 'READY' ? (
-            <>
-              <CheckCircle2 className="w-3.5 h-3.5 text-success" />
-              Your video has finished processing
-            </>
-          ) : (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Processing your video in the background…
-            </>
-          )}
         </div>
       )}
 

@@ -11,6 +11,7 @@ import {
   SHORT_VISIBILITY,
   SHORT_STATUS,
 } from '../constants/short.constants.js';
+import type { ICreatorEvent } from './creator.types.js';
 
 export type ShortUploadInput = z.infer<typeof shortUploadSchema>;
 export type ShortUpdateInput = z.infer<typeof shortUpdateSchema>;
@@ -40,6 +41,7 @@ export interface IShort {
   status: ShortStatus;
   errorMessage?: string;
   storageKey?: string;
+  metricsRecorded?: boolean;
   tags: string[];
   visibility: ShortVisibility;
   views: number;
@@ -57,7 +59,12 @@ export interface IShortAuthor {
 
 export interface IShortResponse extends Omit<
   IShort,
-  'userId' | 'providerVideoId' | 'storageKey'
+  'userId' | 'providerVideoId' | 'storageKey' | 'metricsRecorded'
 > {
   author: IShortAuthor;
+}
+
+export interface IShortActionResult {
+  short: IShortResponse;
+  creatorEvent: ICreatorEvent | null;
 }

@@ -33,6 +33,8 @@ export interface ICreatorProfile {
   creatorMilestones: Array<{ id: CreatorMilestoneId; unlockedAt: string }>;
   unlockedFeatures: string[];
   uploadActivity: string[];
+  videoPublishCount: number;
+  shortPublishCount: number;
 }
 
 export interface ICreatorCatalog {

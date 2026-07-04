@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clapperboard, Flame } from 'lucide-react';
+import { Calendar, Clapperboard, Flame, Lock, Zap } from 'lucide-react';
 
 interface ContributionProps {
   uploadActivity: string[];
+  videoPublishCount: number;
+  shortPublishCount: number;
 }
 
 const DAYS_OF_WEEK = [
@@ -16,7 +18,11 @@ const DAYS_OF_WEEK = [
   'Saturdays',
 ];
 
-const Contribution = ({ uploadActivity }: ContributionProps) => {
+const Contribution = ({
+  uploadActivity,
+  videoPublishCount,
+  shortPublishCount,
+}: ContributionProps) => {
   const stats = useMemo(() => {
     const total = uploadActivity.length;
 
@@ -82,17 +88,27 @@ const Contribution = ({ uploadActivity }: ContributionProps) => {
   if (uploadActivity.length === 0) {
     return (
       <div className="flex items-center justify-center p-6 rounded-xl border border-border border-dashed bg-surface-overlay text-sm text-text-muted">
-        No uploads yet. Publish your first video!
+        No uploads yet. Publish your first video, short or post!
       </div>
     );
   }
 
-  const cards = [
+  const contentCards = [
     {
-      label: 'Total Publishes',
-      value: stats.total,
+      key: 'video',
+      label: 'Video',
+      value: videoPublishCount,
       icon: Clapperboard,
     },
+    {
+      key: 'short',
+      label: 'Short',
+      value: shortPublishCount,
+      icon: Zap,
+    },
+  ];
+
+  const summaryCards = [
     {
       label: 'Most Active',
       value: stats.bestDay,
@@ -106,8 +122,64 @@ const Contribution = ({ uploadActivity }: ContributionProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
-      {cards.map((card, i) => {
+    <div className="flex flex-col gap-3 w-full">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full">
+        {contentCards.map((card, i) => {
+          const Icon = card.icon;
+          return (
+            <motion.div
+              key={card.key}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: i * 0.08,
+                type: 'spring',
+                stiffness: 300,
+                damping: 24,
+              }}
+              className="flex flex-col items-center sm:items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border border-border bg-surface shadow-sm"
+            >
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-primary-muted text-primary">
+                <Icon className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col items-center sm:items-start">
+                <p className="text-lg sm:text-xl font-bold font-display text-text-primary mb-0.5 truncate">
+                  {card.value}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-center sm:text-left font-medium text-text-muted uppercase tracking-wider">
+                  {card.label}
+                </p>
+              </div>
+            </motion.div>
+          );
+        })}
+
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: contentCards.length * 0.08,
+            type: 'spring',
+            stiffness: 300,
+            damping: 24,
+          }}
+          className="relative flex flex-col items-center sm:items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border border-border border-dashed bg-surface-overlay opacity-60"
+        >
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface text-text-muted">
+            <Lock className="w-3.5 h-3.5" />
+          </div>
+          <div className="flex flex-col items-center sm:items-start">
+            <p className="text-[10px] sm:text-[11px] text-center sm:text-left font-medium text-text-muted uppercase tracking-wider">
+              Post stats
+            </p>
+            <p className="text-[10px] text-center sm:text-left text-text-muted">
+              Coming soon
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
+      {summaryCards.map((card, i) => {
         const Icon = card.icon;
         return (
           <motion.div
@@ -115,24 +187,24 @@ const Contribution = ({ uploadActivity }: ContributionProps) => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              delay: i * 0.08,
+              delay: (contentCards.length + 1 + i) * 0.08,
               type: 'spring',
               stiffness: 300,
               damping: 24,
             }}
-            className="flex justify-between sm:justify-center sm:flex-col gap-3 p-4 rounded-xl border border-border bg-surface shadow-sm"
+            className="flex justify-between items-center gap-3 p-4 rounded-xl border border-border bg-surface shadow-sm w-full"
           >
-            <div className="w-9 h-9 rounded-full flex items-center justify-center bg-primary-muted text-primary">
-              <Icon className="w-4 h-4" />
-            </div>
-            <div className='flex flex-col'>
-              <p className="text-xl text-right sm:text-left font-bold font-display text-text-primary mb-0.5 truncate">
-                {card.value}
-              </p>
-              <p className="text-[11px] text-right sm:text-left font-medium text-text-muted uppercase tracking-wider">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center bg-primary-muted text-primary">
+                <Icon className="w-4 h-4" />
+              </div>
+              <p className="text-[11px] font-medium text-text-muted uppercase tracking-wider">
                 {card.label}
               </p>
             </div>
+            <p className="text-xl font-bold font-display text-text-primary truncate">
+              {card.value}
+            </p>
           </motion.div>
         );
       })}

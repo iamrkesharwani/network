@@ -43,7 +43,7 @@ const shortSlice = createSlice({
       .addMatcher(
         shortApi.endpoints.finaliseShort.matchFulfilled,
         (state, action) => {
-          state.currentShort = action.payload.data;
+          state.currentShort = action.payload.data.short;
           state.isUploading = false;
           state.uploadProgress = 100;
         }

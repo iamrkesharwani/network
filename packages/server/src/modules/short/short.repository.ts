@@ -92,8 +92,16 @@ export const updateByProviderVideoId = (
     .select('+storageKey')
     .exec();
 
-export const incrementViews = (id: string): Promise<unknown> =>
-  ShortModel.updateOne({ _id: id }, { $inc: { views: 1 } }).exec();
+export const incrementViews = (
+  id: string
+): Promise<{ views: number; userId: mongoose.Types.ObjectId } | null> =>
+  ShortModel.findOneAndUpdate(
+    { _id: id },
+    { $inc: { views: 1 } },
+    { returnDocument: 'after', projection: { views: 1, userId: 1 } }
+  )
+    .lean()
+    .exec();
 
 export const deleteById = (id: string): Promise<IShortDocument | null> =>
   ShortModel.findByIdAndDelete(id).select('+storageKey').exec();

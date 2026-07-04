@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import type { WizardStep } from '../../../shared/upload/UploadSteps';
-import type { IShortResponse } from '@network/shared';
+import type { ICreatorEvent, IShortResponse } from '@network/shared';
 import {
   useDeleteShortMutation,
   useGetShortByIdQuery,
   useUploadThumbnailMutation,
 } from '../shortApi';
 import { useRawShortUpload } from '../hooks/useShortUpload';
+import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
+import BadgeToast from '../../creator/components/BadgeToast';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
 import UploadStepper from '../../upload/UploadStepper';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -30,6 +32,7 @@ const ShortUploadWizard = () => {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [isAbandoning, setIsAbandoning] = useState(false);
 
+  const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
   const [deleteShort] = useDeleteShortMutation();
   const [uploadThumbnail] = useUploadThumbnailMutation();
 
@@ -62,8 +65,12 @@ const ShortUploadWizard = () => {
     }
   }, [uploadState.stage, uploadState.videoId]);
 
-  const handleDetailsSuccess = (short: IShortResponse) => {
+  const handleDetailsSuccess = (
+    short: IShortResponse,
+    creatorEvent?: ICreatorEvent | null
+  ) => {
     setFinalShort(short);
+    celebrate(creatorEvent ?? null);
     setStep('launch');
   };
 
@@ -87,37 +94,58 @@ const ShortUploadWizard = () => {
     resetWizard();
   };
 
+  const isUploadingStage =
+    step === 'drop' &&
+    ['validating', 'requesting', 'uploading', 'confirming'].includes(
+      uploadState.stage
+    );
+
+  const isProcessing =
+    (step === 'thumbnail' || step === 'details') &&
+    !!processingStatus &&
+    processingStatus !== 'READY';
+
+  const isProcessingDone =
+    (step === 'thumbnail' || step === 'details') &&
+    processingStatus === 'READY';
+
+  const statusLabel = isUploadingStage
+    ? 'Uploading your short in the background…'
+    : isProcessing
+      ? 'Processing your short in the background…'
+      : 'Your short has finished processing';
+
+  const showStatusBar = isUploadingStage || isProcessing || isProcessingDone;
+
   return (
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
-      <div className="flex items-center justify-between mb-2">
-        <h1 className="text-xl font-bold font-display text-text-primary">
-          Upload a short
-        </h1>
-        {step !== 'drop' && step !== 'launch' && (
+      <BadgeToast item={celebration} onDismiss={dismiss} />
+
+      <h1 className="text-xl font-bold font-display text-text-primary text-center mb-2">
+        Upload a short
+      </h1>
+
+      {showStatusBar && (
+        <div className="mb-6 flex items-center justify-center gap-3 text-xs text-text-muted">
+          <span className="flex items-center gap-2">
+            {isProcessingDone ? (
+              <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+            ) : (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            )}
+            {statusLabel}
+          </span>
+
           <button
             type="button"
-            onClick={() => setShowLeaveConfirm(true)}
-            className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-error transition-colors cursor-pointer"
+            onClick={() =>
+              isUploadingStage ? cancelUpload() : setShowLeaveConfirm(true)
+            }
+            className="flex items-center gap-1 font-medium text-text-muted hover:text-error transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
-            Cancel & discard
+            Cancel
           </button>
-        )}
-      </div>
-
-      {(step === 'thumbnail' || step === 'details') && processingStatus && (
-        <div className="mb-6 flex items-center gap-2 text-xs text-text-muted">
-          {processingStatus === 'READY' ? (
-            <>
-              <CheckCircle2 className="w-3.5 h-3.5 text-success" />
-              Your short has finished processing
-            </>
-          ) : (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Processing your short in the background…
-            </>
-          )}
         </div>
       )}
 

@@ -15,6 +15,8 @@ export const Profile = () => {
   }
 
   const uploadActivity = data?.data.uploadActivity ?? [];
+  const videoPublishCount = data?.data.videoPublishCount ?? 0;
+  const shortPublishCount = data?.data.shortPublishCount ?? 0;
 
   return (
     <div className="p-8 max-w-3xl mx-auto space-y-8">
@@ -26,7 +28,11 @@ export const Profile = () => {
         <p className="text-xs font-medium text-text-secondary mb-3">
           Publishing activity
         </p>
-        <Contribution uploadActivity={uploadActivity} />
+        <Contribution
+          uploadActivity={uploadActivity}
+          videoPublishCount={videoPublishCount}
+          shortPublishCount={shortPublishCount}
+        />
       </div>
 
       <div>
