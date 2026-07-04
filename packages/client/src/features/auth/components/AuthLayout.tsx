@@ -1,37 +1,15 @@
 import type { ReactNode } from 'react';
-import { VIDEO_SOURCES } from '@network/shared';
-import { useIsMounted } from '../../../shared/hooks/useIsMounted';
 
 interface AuthLayoutProps {
   children: ReactNode;
 }
 
 const VideoGrid = () => {
-  const isMounted = useIsMounted();
-
   return (
     <div
       className="fixed inset-0 z-0 grid grid-cols-4 grid-rows-3 gap-0.5"
       aria-hidden="true"
-    >
-      {VIDEO_SOURCES.map((src, i) =>
-        isMounted ? (
-          <video
-            key={i}
-            className="w-full h-full object-cover"
-            style={{ filter: 'grayscale(40%) brightness(0.45)' }}
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src={src} type="video/mp4" />
-          </video>
-        ) : (
-          <div key={i} className="w-full h-full bg-[--color-surface-raised]" />
-        )
-      )}
-    </div>
+    ></div>
   );
 };
 
