@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import routes from './routes/route.js';
+import routes from './route.js';
 import { API_V1_PREFIX } from '@network/shared';
 import { env } from './config/env.js';
 import { apiLimiter } from './middleware/rateLimit.middleware.js';
@@ -62,7 +62,7 @@ const rawWebhookBody = (
 };
 
 app.use(
-  [`${API_V1_PREFIX}/video/webhook`, `${API_V1_PREFIX}/short/webhook`],
+  `${API_V1_PREFIX}/webhook/media`,
   express.raw({ type: 'application/json', limit: '1mb' }),
   rawWebhookBody
 );

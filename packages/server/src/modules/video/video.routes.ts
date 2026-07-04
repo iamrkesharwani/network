@@ -1,10 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../../middleware/validate.middleware.js';
 import { requireAuth, optionalAuth } from '../../middleware/auth.middleware.js';
-import {
-  uploadLimiter,
-  webhookLimiter,
-} from '../../middleware/rateLimit.middleware.js';
+import { uploadLimiter } from '../../middleware/rateLimit.middleware.js';
 import { uploadThumbnail } from '../../middleware/upload.middleware.js';
 import {
   initiateVideoUploadSchema,
@@ -43,8 +40,6 @@ router.post(
   uploadThumbnail,
   videoUploadController.uploadThumbnail
 );
-
-router.post('/webhook', webhookLimiter, videoUploadController.handleWebhook);
 
 router.post(
   '/:videoId/finalise',

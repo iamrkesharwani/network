@@ -286,6 +286,15 @@ export const processWebhook = async (
     return true;
   }
 
+  const existing = await shortRepository.findByProviderVideoId(
+    payload.providerVideoId
+  );
+
+  const defaultThumbnailUrl =
+    !existing?.thumbnailUrl && payload.thumbnailUrl !== undefined
+      ? payload.thumbnailUrl
+      : undefined;
+
   const short = await shortRepository.updateByProviderVideoId(
     payload.providerVideoId,
     {
@@ -293,6 +302,9 @@ export const processWebhook = async (
       ...(payload.duration !== undefined && { duration: payload.duration }),
       ...(payload.playbackUrl !== undefined && {
         playbackUrl: payload.playbackUrl,
+      }),
+      ...(defaultThumbnailUrl !== undefined && {
+        thumbnailUrl: defaultThumbnailUrl,
       }),
       ...(payload.errorMessage !== undefined && {
         errorMessage: payload.errorMessage,

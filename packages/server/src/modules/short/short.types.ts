@@ -7,6 +7,7 @@ export interface WebhookUpdateData {
   status: ShortStatus;
   duration?: number;
   playbackUrl?: string;
+  thumbnailUrl?: string;
   errorMessage?: string;
 }
 
