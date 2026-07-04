@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import {
   Home,
-  Compass,
   User,
   Settings,
   LogOut,
@@ -47,7 +46,6 @@ const Sidebar = ({
   const navItems = [
     { name: 'Feed', path: '/feed', icon: Home },
     { name: 'Upload', path: '/upload', icon: UploadCloud },
-    { name: 'Explore', path: '/explore', icon: Compass },
     { name: 'Profile', path: '/profile', icon: User },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];

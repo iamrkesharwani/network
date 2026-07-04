@@ -45,6 +45,7 @@ export const initiateUpload = async (
 
   const { url: presignedUrl, key: storageKey } =
     await storageProvider.presignUpload(
+      'video',
       userId,
       videoId,
       data.mimeType,
@@ -76,7 +77,7 @@ export const confirmUpload = async (
     );
   }
 
-  if (!storageProvider.isOwnedKey(storageKey, userId, videoId)) {
+  if (!storageProvider.isOwnedKey(storageKey, 'video', userId, videoId)) {
     throw new ApiError(403, 'FORBIDDEN', 'Invalid storage key.');
   }
 

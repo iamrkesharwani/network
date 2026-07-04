@@ -5,12 +5,17 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import crypto from 'node:crypto';
 import {
   RAW_UPLOAD_KEY_PREFIX,
   RAW_UPLOAD_PRESIGNED_URL_TTL_SECONDS,
 } from '@network/shared';
 import { logger } from '../../utils/logger.js';
-import type { IStorageProvider, PresignUploadResult } from '../types.js';
+import type {
+  IStorageProvider,
+  PresignUploadResult,
+  RawUploadMediaType,
+} from '../types.js';
 
 export interface S3Config {
   region: string;
@@ -38,21 +43,42 @@ export class S3StorageProvider implements IStorageProvider {
     });
   }
 
-  private buildKey(userId: string, videoId: string): string {
-    return `${RAW_UPLOAD_KEY_PREFIX}/${userId}/${videoId}`;
+  private buildKeyPrefix(
+    mediaType: RawUploadMediaType,
+    userId: string,
+    videoId: string
+  ): string {
+    return `${RAW_UPLOAD_KEY_PREFIX}/${mediaType}/${userId}/${videoId}`;
   }
 
-  isOwnedKey(key: string, userId: string, videoId: string): boolean {
-    return key === this.buildKey(userId, videoId);
+  private buildKey(
+    mediaType: RawUploadMediaType,
+    userId: string,
+    videoId: string
+  ): string {
+    const hash = crypto.randomBytes(4).toString('hex');
+    return `${this.buildKeyPrefix(mediaType, userId, videoId)}-${hash}`;
+  }
+
+  isOwnedKey(
+    key: string,
+    mediaType: RawUploadMediaType,
+    userId: string,
+    videoId: string
+  ): boolean {
+    return key.startsWith(
+      `${this.buildKeyPrefix(mediaType, userId, videoId)}-`
+    );
   }
 
   async presignUpload(
+    mediaType: RawUploadMediaType,
     userId: string,
     videoId: string,
     contentType: string,
     contentLength: number
   ): Promise<PresignUploadResult> {
-    const key = this.buildKey(userId, videoId);
+    const key = this.buildKey(mediaType, userId, videoId);
 
     const command = new PutObjectCommand({
       Bucket: this.bucketName,

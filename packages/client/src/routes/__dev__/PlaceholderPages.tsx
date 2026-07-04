@@ -3,8 +3,6 @@ import BadgeShowcase from '../../features/creator/components/BadgeShowcase';
 import { useGetMyProfileQuery } from '../../features/creator/creatorApi';
 import { Loader2 } from 'lucide-react';
 
-export const Explore = () => <div className="p-8 text-xl">Explore</div>;
-
 export const Profile = () => {
   const { data, isLoading } = useGetMyProfileQuery();
 

@@ -44,6 +44,7 @@ export const initiateUpload = async (
 
   const { url: presignedUrl, key: storageKey } =
     await storageProvider.presignUpload(
+      'short',
       userId,
       shortId,
       data.mimeType,
@@ -75,7 +76,7 @@ export const confirmUpload = async (
     );
   }
 
-  if (!storageProvider.isOwnedKey(storageKey, userId, shortId)) {
+  if (!storageProvider.isOwnedKey(storageKey, 'short', userId, shortId)) {
     throw new ApiError(403, 'FORBIDDEN', 'Invalid storage key.');
   }
 

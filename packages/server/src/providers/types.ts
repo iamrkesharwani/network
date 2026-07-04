@@ -1,5 +1,7 @@
 import type { VideoStatus } from '@network/shared';
 
+export type RawUploadMediaType = 'video' | 'short';
+
 export interface PresignUploadResult {
   url: string;
   key: string;
@@ -7,6 +9,7 @@ export interface PresignUploadResult {
 
 export interface IStorageProvider {
   presignUpload(
+    mediaType: RawUploadMediaType,
     userId: string,
     videoId: string,
     contentType: string,
@@ -17,7 +20,12 @@ export interface IStorageProvider {
 
   deleteObject(key: string): Promise<void>;
 
-  isOwnedKey(key: string, userId: string, videoId: string): boolean;
+  isOwnedKey(
+    key: string,
+    mediaType: RawUploadMediaType,
+    userId: string,
+    videoId: string
+  ): boolean;
 }
 
 export interface IngestVideoResult {

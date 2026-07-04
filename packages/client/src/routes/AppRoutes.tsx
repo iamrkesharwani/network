@@ -13,7 +13,6 @@ import UploadHub from '../features/upload/UploadHub';
 import VideoUploadWizard from '../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../features/short/form/ShortUploadWizard';
 import {
-  Explore,
   Profile,
   Settings,
   NotFound,
@@ -42,7 +41,6 @@ export const routes: RouteObject[] = [
           { path: '/upload', element: <UploadHub /> },
           { path: '/upload/video', element: <VideoUploadWizard /> },
           { path: '/upload/short', element: <ShortUploadWizard /> },
-          { path: '/explore', element: <Explore /> },
           { path: '/profile', element: <Profile /> },
           { path: '/settings', element: <Settings /> },
         ],
