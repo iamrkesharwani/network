@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import { useMediaStatusSocket } from '../shared/hooks/useMediaStatusSocket';
 
 const SIDEBAR_KEY = 'sidebar:collapsed';
 
 const PageWrapper = () => {
+  useMediaStatusSocket();
+
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
     const stored = localStorage.getItem(SIDEBAR_KEY);

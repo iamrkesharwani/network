@@ -17,6 +17,7 @@ import UploadThumbnailStep from '../../upload/UploadThumbnailStep';
 import VideoEditForm from './VideoEditForm';
 import SuccessStep from '../../upload/SuccessStep';
 import ConfirmModal from '../../../shared/components/ConfirmModal';
+import { cn } from '../../../shared/utils/cn';
 
 const stepVariants = {
   initial: { opacity: 0, x: 24 },
@@ -50,13 +51,22 @@ const VideoUploadWizard = () => {
     reset: resetUpload,
   } = useRawUpload();
 
-  const shouldPoll = !!videoId && step !== 'launch' && step !== 'drop';
+  const [isProcessingTerminal, setIsProcessingTerminal] = useState(false);
+
+  const shouldPoll = !!videoId && step !== 'drop';
   const { data: videoData } = useGetVideoByIdQuery(videoId ?? '', {
     skip: !shouldPoll,
-    pollingInterval: shouldPoll ? 5000 : 0,
+    pollingInterval: shouldPoll && !isProcessingTerminal ? 5000 : 0,
   });
   const processingStatus = videoData?.data.status;
   const providerThumbnail = videoData?.data.thumbnailUrl;
+  const errorMessage = videoData?.data.errorMessage ?? finalVideo?.errorMessage;
+
+  useEffect(() => {
+    if (processingStatus === 'READY' || processingStatus === 'FAILED') {
+      setIsProcessingTerminal(true);
+    }
+  }, [processingStatus]);
 
   useEffect(() => {
     if (uploadState.stage === 'done' && uploadState.videoId) {
@@ -79,6 +89,7 @@ const VideoUploadWizard = () => {
     setVideoId(null);
     setThumbnailUrl(undefined);
     setFinalVideo(null);
+    setIsProcessingTerminal(false);
     resetUpload();
   };
 
@@ -151,7 +162,12 @@ const VideoUploadWizard = () => {
 
       <UploadStepper current={step} />
 
-      <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+      <div
+        className={cn(
+          'rounded-2xl border border-border bg-surface p-6 sm:p-8',
+          step !== 'details' && 'min-h-72'
+        )}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -195,6 +211,8 @@ const VideoUploadWizard = () => {
                 title={finalVideo.title}
                 visibility={finalVideo.visibility}
                 viewUrl={`/video/${finalVideo.id}`}
+                status={processingStatus ?? finalVideo.status}
+                errorMessage={errorMessage}
                 onUploadAnother={resetWizard}
               />
             )}

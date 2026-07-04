@@ -6,3 +6,4 @@ export const OTP_MAX_ATTEMPTS = 5;
 export const OTP_REQUEST_COOLDOWN_SECONDS = 60;
 export const MAX_GENERATION_ATTEMPTS = 5;
 export const CSRF_EXEMPT_PATHS = ['/auth/refresh', '/auth/logout'];
+export type MediaProcessingStatus = 'UPLOADING' | 'PROCESSING' | 'READY' | 'FAILED';

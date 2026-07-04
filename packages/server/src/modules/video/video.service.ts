@@ -6,6 +6,7 @@ import {
   type InitiateVideoUploadInput,
   type VideoUpdateInput,
   type VideoUploadInput,
+  type IMediaStatusEvent,
 } from '@network/shared';
 import * as videoRepository from './video.repository.js';
 import * as creatorService from '../creator/creator.service.js';
@@ -19,6 +20,7 @@ import { logger } from '../../utils/logger.js';
 import { VideoModel, type IVideoDocument } from './video.model.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { getOwnerId } from '../../utils/getOwnerId.js';
+import { emitToUser } from '../../config/socket.js';
 import type { NormalizedWebhookPayload } from '../../providers/types.js';
 import type { Requester } from './video.types.js';
 
@@ -285,6 +287,26 @@ export const processWebhook = async (
       }),
     }
   );
+
+  if (video) {
+    const mediaStatusEvent: IMediaStatusEvent = {
+      id: video._id.toString(),
+      mediaType: 'video',
+      title: video.title,
+      status: video.status,
+      duration: video.duration,
+      ...(video.playbackUrl !== undefined && {
+        playbackUrl: video.playbackUrl,
+      }),
+      ...(video.thumbnailUrl !== undefined && {
+        thumbnailUrl: video.thumbnailUrl,
+      }),
+      ...(video.errorMessage !== undefined && {
+        errorMessage: video.errorMessage,
+      }),
+    };
+    emitToUser(getOwnerId(video.userId), 'media:status', mediaStatusEvent);
+  }
 
   return !!video;
 };

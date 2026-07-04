@@ -17,6 +17,7 @@ import UploadThumbnailStep from '../../upload/UploadThumbnailStep';
 import ShortEditForm from './ShortEditForm';
 import SuccessStep from '../../upload/SuccessStep';
 import ConfirmModal from '../../../shared/components/ConfirmModal';
+import { cn } from '../../../shared/utils/cn';
 
 const stepVariants = {
   initial: { opacity: 0, x: 24 },
@@ -50,13 +51,22 @@ const ShortUploadWizard = () => {
     reset: resetUpload,
   } = useRawShortUpload();
 
-  const shouldPoll = !!shortId && step !== 'launch' && step !== 'drop';
+  const [isProcessingTerminal, setIsProcessingTerminal] = useState(false);
+
+  const shouldPoll = !!shortId && step !== 'drop';
   const { data: shortData } = useGetShortByIdQuery(shortId ?? '', {
     skip: !shouldPoll,
-    pollingInterval: shouldPoll ? 5000 : 0,
+    pollingInterval: shouldPoll && !isProcessingTerminal ? 5000 : 0,
   });
   const processingStatus = shortData?.data.status;
   const providerThumbnail = shortData?.data.thumbnailUrl;
+  const errorMessage = shortData?.data.errorMessage ?? finalShort?.errorMessage;
+
+  useEffect(() => {
+    if (processingStatus === 'READY' || processingStatus === 'FAILED') {
+      setIsProcessingTerminal(true);
+    }
+  }, [processingStatus]);
 
   useEffect(() => {
     if (uploadState.stage === 'done' && uploadState.videoId) {
@@ -79,6 +89,7 @@ const ShortUploadWizard = () => {
     setShortId(null);
     setThumbnailUrl(undefined);
     setFinalShort(null);
+    setIsProcessingTerminal(false);
     resetUpload();
   };
 
@@ -151,7 +162,12 @@ const ShortUploadWizard = () => {
 
       <UploadStepper current={step} />
 
-      <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+      <div
+        className={cn(
+          'rounded-2xl border border-border bg-surface p-6 sm:p-8',
+          step !== 'details' && 'min-h-72'
+        )}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -195,6 +211,8 @@ const ShortUploadWizard = () => {
                 title={finalShort.title}
                 visibility={finalShort.visibility}
                 viewUrl={`/short/${finalShort.id}`}
+                status={processingStatus ?? finalShort.status}
+                errorMessage={errorMessage}
                 onUploadAnother={resetWizard}
               />
             )}

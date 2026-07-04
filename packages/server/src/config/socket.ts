@@ -98,3 +98,15 @@ export const getIO = (): SocketIOServer => {
   }
   return io;
 };
+
+export const emitToUser = (
+  userId: string,
+  event: string,
+  payload: unknown
+): void => {
+  try {
+    getIO().to(`user:${userId}`).emit(event, payload);
+  } catch (error) {
+    logger.warn(error, `Failed to emit "${event}" to user:${userId}`);
+  }
+};

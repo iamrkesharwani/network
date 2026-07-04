@@ -7,6 +7,7 @@ import {
   type InitiateShortUploadInput,
   type ShortUpdateInput,
   type ShortUploadInput,
+  type IMediaStatusEvent,
 } from '@network/shared';
 import * as shortRepository from './short.repository.js';
 import * as creatorService from '../creator/creator.service.js';
@@ -20,6 +21,7 @@ import { logger } from '../../utils/logger.js';
 import { ShortModel, type IShortDocument } from './short.model.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { getOwnerId } from '../../utils/getOwnerId.js';
+import { emitToUser } from '../../config/socket.js';
 import type { NormalizedWebhookPayload } from '../../providers/types.js';
 import type { Requester } from './short.types.js';
 
@@ -304,6 +306,28 @@ export const processWebhook = async (
         );
     }
 
+    const rejectedStatusEvent: IMediaStatusEvent = {
+      id: rejected._id.toString(),
+      mediaType: 'short',
+      title: rejected.title,
+      status: rejected.status,
+      duration: rejected.duration,
+      ...(rejected.playbackUrl !== undefined && {
+        playbackUrl: rejected.playbackUrl,
+      }),
+      ...(rejected.thumbnailUrl !== undefined && {
+        thumbnailUrl: rejected.thumbnailUrl,
+      }),
+      ...(rejected.errorMessage !== undefined && {
+        errorMessage: rejected.errorMessage,
+      }),
+    };
+    emitToUser(
+      getOwnerId(rejected.userId),
+      'media:status',
+      rejectedStatusEvent
+    );
+
     return true;
   }
 
@@ -332,6 +356,26 @@ export const processWebhook = async (
       }),
     }
   );
+
+  if (short) {
+    const mediaStatusEvent: IMediaStatusEvent = {
+      id: short._id.toString(),
+      mediaType: 'short',
+      title: short.title,
+      status: short.status,
+      duration: short.duration,
+      ...(short.playbackUrl !== undefined && {
+        playbackUrl: short.playbackUrl,
+      }),
+      ...(short.thumbnailUrl !== undefined && {
+        thumbnailUrl: short.thumbnailUrl,
+      }),
+      ...(short.errorMessage !== undefined && {
+        errorMessage: short.errorMessage,
+      }),
+    };
+    emitToUser(getOwnerId(short.userId), 'media:status', mediaStatusEvent);
+  }
 
   return !!short;
 };

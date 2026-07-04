@@ -9,6 +9,7 @@ export * from './types/creator.types.js';
 export * from './types/short.types.js';
 export * from './types/user.types.js';
 export * from './types/video.types.js';
+export * from './types/socket.types.js';
 
 export * from './constants/api.constants.js';
 export * from './constants/error.constants.js';

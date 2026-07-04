@@ -21,9 +21,13 @@ const BunnyVideoStatus = {
   Processing: 1,
   Encoding: 2,
   Finished: 3,
-  Error: 4,
-  UploadFailed: 5,
-  Captions: 6,
+  ResolutionFinished: 4,
+  Failed: 5,
+  PresignedUploadStarted: 6,
+  PresignedUploadFinished: 7,
+  PresignedUploadFailed: 8,
+  CaptionsGenerated: 9,
+  TitleOrDescriptionGenerated: 10,
 } as const;
 
 const STATUS_MAP: Record<number, VideoStatus> = {
@@ -31,9 +35,13 @@ const STATUS_MAP: Record<number, VideoStatus> = {
   [BunnyVideoStatus.Processing]: 'PROCESSING',
   [BunnyVideoStatus.Encoding]: 'PROCESSING',
   [BunnyVideoStatus.Finished]: 'READY',
-  [BunnyVideoStatus.Error]: 'FAILED',
-  [BunnyVideoStatus.UploadFailed]: 'PROCESSING',
-  [BunnyVideoStatus.Captions]: 'PROCESSING',
+  [BunnyVideoStatus.ResolutionFinished]: 'READY',
+  [BunnyVideoStatus.Failed]: 'FAILED',
+  [BunnyVideoStatus.PresignedUploadStarted]: 'PROCESSING',
+  [BunnyVideoStatus.PresignedUploadFinished]: 'PROCESSING',
+  [BunnyVideoStatus.PresignedUploadFailed]: 'FAILED',
+  [BunnyVideoStatus.CaptionsGenerated]: 'PROCESSING',
+  [BunnyVideoStatus.TitleOrDescriptionGenerated]: 'PROCESSING',
 };
 
 export class BunnyStreamVideoProvider implements IVideoProvider {

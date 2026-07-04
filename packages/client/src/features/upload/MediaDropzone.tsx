@@ -65,7 +65,7 @@ const MediaDropzone = ({
             : 'Uploading…';
 
     return (
-      <div className="flex flex-col items-center justify-center py-10">
+      <div className="flex flex-col items-center justify-center min-h-88 py-10">
         <div
           className="relative"
           style={{ width: RING_SIZE, height: RING_SIZE }}
@@ -146,7 +146,7 @@ const MediaDropzone = ({
         onDrop={onDrop}
         onClick={() => document.getElementById('media-file-input')?.click()}
         className={cn(
-          'relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed py-16 px-6 text-center cursor-pointer transition-colors',
+          'relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed min-h-64 px-6 text-center cursor-pointer transition-colors',
           isDragging
             ? 'border-primary bg-primary-subtle'
             : 'border-border bg-surface-raised hover:border-primary/40'
