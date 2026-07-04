@@ -1,5 +1,6 @@
 import {
   SHORT_UPLOAD_SESSION_TTL_SECONDS,
+  MAX_SHORT_DURATION_SECONDS,
   type IInitiateShortUploadResult,
   type IShortResponse,
   type InitiateShortUploadInput,
@@ -239,6 +240,55 @@ export const deleteShort = async (
 export const processWebhook = async (
   payload: NormalizedWebhookPayload
 ): Promise<void> => {
+  if (
+    payload.status === 'READY' &&
+    payload.duration !== undefined &&
+    payload.duration > MAX_SHORT_DURATION_SECONDS
+  ) {
+    const rejected = await shortRepository.updateByProviderVideoId(
+      payload.providerVideoId,
+      {
+        status: 'FAILED',
+        duration: payload.duration,
+        errorMessage: `Shorts must be ${MAX_SHORT_DURATION_SECONDS} seconds or less (received ${payload.duration}s).`,
+      }
+    );
+
+    if (!rejected) {
+      logger.warn(
+        `Webhook for unknown providerVideoId: ${payload.providerVideoId}`
+      );
+      return;
+    }
+
+    logger.warn(
+      { shortId: rejected._id.toString(), duration: payload.duration },
+      'Rejected short upload: exceeds max short duration'
+    );
+
+    await videoProvider
+      .deleteVideo(payload.providerVideoId)
+      .catch((e) =>
+        logger.warn(
+          e,
+          `Failed to delete oversized short asset ${payload.providerVideoId}`
+        )
+      );
+
+    if (rejected.storageKey) {
+      await storageProvider
+        .deleteObject(rejected.storageKey)
+        .catch((e) =>
+          logger.warn(
+            e,
+            `Failed to delete oversized short storage object ${rejected.storageKey}`
+          )
+        );
+    }
+
+    return;
+  }
+
   const short = await shortRepository.updateByProviderVideoId(
     payload.providerVideoId,
     {

@@ -40,25 +40,34 @@ app.use(
   })
 );
 
-app.use(
-  `${API_V1_PREFIX}/videos/webhook`,
-  express.raw({ type: 'application/json', limit: '1mb' }),
-  (req: Request, _res: Response, next: NextFunction) => {
-    req.rawBody = req.body as Buffer;
-    next();
+const rawWebhookBody = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+): void => {
+  const buf = req.body as Buffer;
+  req.rawBody = buf;
+
+  if (buf && buf.length > 0) {
+    try {
+      req.body = JSON.parse(buf.toString('utf-8'));
+    } catch {
+      req.body = {};
+    }
+  } else {
+    req.body = {};
   }
-);
+
+  next();
+};
 
 app.use(
-  express.json({
-    limit: '10kb',
-    verify: (req: Request, _res, buf) => {
-      if (req.originalUrl.includes('/webhook')) {
-        req.rawBody = buf;
-      }
-    },
-  })
+  [`${API_V1_PREFIX}/video/webhook`, `${API_V1_PREFIX}/short/webhook`],
+  express.raw({ type: 'application/json', limit: '1mb' }),
+  rawWebhookBody
 );
+
+app.use(express.json({ limit: '10kb' }));
 
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());

@@ -117,6 +117,8 @@ export class MuxVideoProvider implements IVideoProvider {
     return `https://image.mux.com/${providerVideoId}/thumbnail.jpg`;
   }
 
+  private static readonly WEBHOOK_TOLERANCE_SECONDS = 5 * 60;
+
   verifyWebhookSignature({
     rawBody,
     signatureHeader,
@@ -130,6 +132,14 @@ export class MuxVideoProvider implements IVideoProvider {
     }
 
     if (!parts['t'] || !parts['v1']) return false;
+
+    const timestamp = Number(parts['t']);
+    if (!Number.isFinite(timestamp)) return false;
+
+    const ageSeconds = Math.abs(Date.now() / 1000 - timestamp);
+    if (ageSeconds > MuxVideoProvider.WEBHOOK_TOLERANCE_SECONDS) {
+      return false;
+    }
 
     const expected = crypto
       .createHmac('sha256', this.webhookSecret)

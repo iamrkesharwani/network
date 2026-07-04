@@ -88,7 +88,9 @@ export const updateByProviderVideoId = (
   ShortModel.findOneAndUpdate({ providerVideoId }, data, {
     returnDocument: 'after',
     runValidators: true,
-  }).exec();
+  })
+    .select('+storageKey')
+    .exec();
 
 export const incrementViews = (id: string): Promise<unknown> =>
   ShortModel.updateOne({ _id: id }, { $inc: { views: 1 } }).exec();

@@ -118,6 +118,8 @@ export class CloudflareStreamVideoProvider implements IVideoProvider {
     return `https://customer-${this.customerCode}.cloudflarestream.com/${providerVideoId}/thumbnails/thumbnail.jpg`;
   }
 
+  private static readonly WEBHOOK_TOLERANCE_SECONDS = 5 * 60;
+
   verifyWebhookSignature({
     rawBody,
     signatureHeader,
@@ -134,6 +136,14 @@ export class CloudflareStreamVideoProvider implements IVideoProvider {
     const time = parts.get('time')?.[0];
     const signatures = parts.get('sig1');
     if (!time || !signatures?.length) return false;
+
+    const timestamp = Number(time);
+    if (!Number.isFinite(timestamp)) return false;
+
+    const ageSeconds = Math.abs(Date.now() / 1000 - timestamp);
+    if (ageSeconds > CloudflareStreamVideoProvider.WEBHOOK_TOLERANCE_SECONDS) {
+      return false;
+    }
 
     const expected = crypto
       .createHmac('sha256', this.webhookSecret)
