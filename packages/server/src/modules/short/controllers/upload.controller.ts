@@ -11,6 +11,7 @@ import { ApiError } from '../../../utils/ApiError.js';
 import { verifyFileMagicBytes } from '../../../middleware/upload.middleware.js';
 import { logger } from '../../../utils/logger.js';
 import * as shortService from '../short.service.js';
+import * as videoService from '../../video/video.service.js';
 import { videoProvider } from '../../../providers/provider.js';
 
 export const initiateUpload = asyncHandler(
@@ -123,7 +124,16 @@ export const handleWebhook = asyncHandler(
       return;
     }
 
-    await shortService.processWebhook(payload);
+    const handled = await shortService.processWebhook(payload);
+
+    if (!handled) {
+      const handledByVideo = await videoService.processWebhook(payload);
+      if (!handledByVideo) {
+        logger.warn(
+          `Webhook for unknown providerVideoId: ${payload.providerVideoId}`
+        );
+      }
+    }
 
     res.status(200).json(new ApiResponse(null, 'Acknowledged'));
   }

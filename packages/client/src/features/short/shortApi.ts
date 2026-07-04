@@ -56,7 +56,7 @@ export const shortApi = createApi({
       { shortId: string } & ShortUploadInput
     >({
       query: ({ shortId, ...data }) => ({
-        url: `${shortId}/finalise`,
+        url: `/${shortId}/finalise`,
         method: 'POST',
         data,
       }),

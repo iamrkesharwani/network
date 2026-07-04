@@ -106,7 +106,6 @@ export const confirmUpload = async (
 
   await redisClient.del(uploadSessionKey(storageKey));
 
-  // Starting an upload earns nothing under the Creator Metrics system.
   return { video: toResponse(video), creatorEvent: null };
 };
 
@@ -259,7 +258,7 @@ export const deleteVideo = async (
 
 export const processWebhook = async (
   payload: NormalizedWebhookPayload
-): Promise<void> => {
+): Promise<boolean> => {
   const existing = await videoRepository.findByProviderVideoId(
     payload.providerVideoId
   );
@@ -286,9 +285,5 @@ export const processWebhook = async (
     }
   );
 
-  if (!video) {
-    logger.warn(
-      `Webhook for unknown providerVideoId: ${payload.providerVideoId}`
-    );
-  }
+  return !!video;
 };

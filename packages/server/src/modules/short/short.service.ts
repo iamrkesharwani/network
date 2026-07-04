@@ -239,7 +239,7 @@ export const deleteShort = async (
 
 export const processWebhook = async (
   payload: NormalizedWebhookPayload
-): Promise<void> => {
+): Promise<boolean> => {
   if (
     payload.status === 'READY' &&
     payload.duration !== undefined &&
@@ -255,10 +255,7 @@ export const processWebhook = async (
     );
 
     if (!rejected) {
-      logger.warn(
-        `Webhook for unknown providerVideoId: ${payload.providerVideoId}`
-      );
-      return;
+      return false;
     }
 
     logger.warn(
@@ -286,7 +283,7 @@ export const processWebhook = async (
         );
     }
 
-    return;
+    return true;
   }
 
   const short = await shortRepository.updateByProviderVideoId(
@@ -303,9 +300,5 @@ export const processWebhook = async (
     }
   );
 
-  if (!short) {
-    logger.warn(
-      `Webhook for unknown providerVideoId: ${payload.providerVideoId}`
-    );
-  }
+  return !!short;
 };
