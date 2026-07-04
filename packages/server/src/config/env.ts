@@ -1,21 +1,14 @@
 import { z } from 'zod';
 import 'dotenv/config';
 import { logger } from '../utils/logger.js';
-
-const STORAGE_PROVIDERS = [
-  'r2',
-  's3',
-  'backblaze',
-  'digitalocean',
-  'bunny-storage',
-  'azure',
-] as const;
-const VIDEO_PROVIDERS = ['cloudflare', 'mux', 'bunny-stream'] as const;
-const IMAGE_PROVIDERS = ['cloudflare', 's3-cdn'] as const;
+import {
+  IMAGE_PROVIDERS,
+  SEVEN_DAYS_MS,
+  STORAGE_PROVIDERS,
+  VIDEO_PROVIDERS,
+} from '@network/shared';
 
 type StorageProvider = (typeof STORAGE_PROVIDERS)[number];
-
-const SEVEN_DAYS_MS = 604800000;
 
 const baseSchema = z.object({
   NODE_ENV: z
