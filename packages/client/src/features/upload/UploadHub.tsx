@@ -75,7 +75,7 @@ const UploadHub = () => {
                   stiffness: 300,
                   damping: 24,
                 }}
-                className="relative flex h-24 sm:h-auto sm:aspect-4/5 flex-col justify-end overflow-hidden rounded-2xl sm:rounded-3xl border border-white/5 bg-neutral-900 p-4 sm:p-6 group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-white"
+                className="relative flex h-24 sm:h-auto sm:aspect-4/5 flex-col justify-end overflow-hidden rounded-2xl sm:rounded-3xl border border-border bg-surface p-4 sm:p-6 shadow-sm transition-colors group-hover:border-primary/30 group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-primary"
               >
                 <motion.div
                   className={cn(
@@ -108,10 +108,10 @@ const UploadHub = () => {
                 </motion.div>
 
                 <div className="relative">
-                  <h2 className="text-lg sm:text-2xl font-bold font-display text-white">
+                  <h2 className="text-lg sm:text-2xl font-bold font-display text-text-primary">
                     {option.title}
                   </h2>
-                  <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-white/50">
+                  <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-text-muted">
                     {option.description}
                   </p>
                 </div>

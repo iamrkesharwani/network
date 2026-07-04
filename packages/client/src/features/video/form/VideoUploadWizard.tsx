@@ -121,7 +121,7 @@ const VideoUploadWizard = () => {
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
       <BadgeToast item={celebration} onDismiss={dismiss} />
 
-      <h1 className="text-xl font-bold font-display text-text-primary text-center mb-2">
+      <h1 className="text-xl font-bold font-display text-text-primary text-center mb-8">
         Upload a video
       </h1>
 
