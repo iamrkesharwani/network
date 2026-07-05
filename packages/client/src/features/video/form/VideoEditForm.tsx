@@ -1,9 +1,6 @@
-import { useMemo, useState } from 'react';
-import { Controller, useForm, type Resolver } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Loader2, Rocket, Save } from 'lucide-react';
-import type { z } from 'zod';
 import {
   videoUploadSchema,
   videoUpdateSchema,
@@ -18,6 +15,11 @@ import {
   useUpdateVideoMutation,
   useUploadThumbnailMutation,
 } from '../videoApi';
+import {
+  useMediaEditForm,
+  createThumbnailUploader,
+  type CompletenessRule,
+} from '../../upload/hooks/useMediaEditForm';
 import FloatingInput from '../../upload/components/FloatingInput';
 import FloatingTextarea from '../../upload/components/FloatingTextarea';
 import CategoryPicker from '../../upload/components/CategoryPicker';
@@ -25,25 +27,14 @@ import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
 import ThumbnailPicker from '../../upload/components/ThumbnailPicker';
 
-type VideoFormValues = z.input<typeof videoUploadSchema>;
-
-function extractErrorMessage(err: unknown): string {
-  if (
-    err &&
-    typeof err === 'object' &&
-    'data' in err &&
-    err.data &&
-    typeof err.data === 'object' &&
-    'error' in err.data &&
-    err.data.error &&
-    typeof err.data.error === 'object' &&
-    'message' in err.data.error &&
-    typeof err.data.error.message === 'string'
-  ) {
-    return err.data.error.message;
-  }
-  return 'Something went wrong. Please try again.';
-}
+type VideoFormValues = {
+  title: string;
+  description?: string;
+  category?: VideoCategory;
+  tags?: string[];
+  visibility?: VideoVisibility;
+  thumbnailUrl?: string;
+};
 
 interface VideoEditFormProps {
   mode: 'finalise' | 'edit';
@@ -55,6 +46,16 @@ interface VideoEditFormProps {
     creatorEvent?: ICreatorEvent | null
   ) => void;
 }
+
+const videoCompletenessRules = (
+  thumbnailUrl?: string
+): CompletenessRule<VideoFormValues>[] => [
+  { weight: 25, isMet: (v) => (v.title ?? '').trim().length >= 5 },
+  { weight: 25, isMet: (v) => (v.description ?? '').trim().length >= 20 },
+  { weight: 25, isMet: (v) => !!v.category },
+  { weight: 15, isMet: (v) => (v.tags?.length ?? 0) >= 1 },
+  { weight: 10, isMet: (v) => !!(v.thumbnailUrl || thumbnailUrl) },
+];
 
 const VideoEditForm = ({
   mode,
@@ -68,27 +69,21 @@ const VideoEditForm = ({
   const [updateVideo, { isLoading: isUpdating }] = useUpdateVideoMutation();
   const [uploadThumbnail] = useUploadThumbnailMutation();
 
-  const handleThumbnailUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('thumbnail', file);
-    const result = await uploadThumbnail(formData).unwrap();
-    return result.data.thumbnailUrl;
-  };
+  const handleThumbnailUpload = createThumbnailUploader(uploadThumbnail);
 
   const isSubmitting = isFinalising || isUpdating;
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
-    handleSubmit,
     control,
     watch,
     setValue,
     formState: { errors },
-  } = useForm<VideoFormValues, unknown, VideoUploadInput>({
-    resolver: zodResolver(
-      mode === 'finalise' ? videoUploadSchema : videoUpdateSchema
-    ) as Resolver<VideoFormValues, unknown, VideoUploadInput>,
+    completeness,
+    submitError,
+    submit,
+  } = useMediaEditForm<VideoFormValues, VideoUploadInput>({
+    schema: mode === 'finalise' ? videoUploadSchema : videoUpdateSchema,
     defaultValues: {
       title: initialValues?.title ?? '',
       description: initialValues?.description ?? '',
@@ -97,52 +92,29 @@ const VideoEditForm = ({
       visibility: initialValues?.visibility ?? ('public' as VideoVisibility),
       thumbnailUrl: initialValues?.thumbnailUrl ?? thumbnailUrl,
     },
+    completenessRules: videoCompletenessRules(thumbnailUrl),
   });
 
   const title = watch('title') ?? '';
   const description = watch('description') ?? '';
-  const tags = watch('tags') ?? [];
-  const category = watch('category');
   const editThumbnailUrl = watch('thumbnailUrl');
 
-  const completeness = useMemo(() => {
-    let score = 0;
-    if (title.trim().length >= 5) score += 25;
-    if (description.trim().length >= 20) score += 25;
-    if (category) score += 25;
-    if (tags.length >= 1) score += 15;
-    if (editThumbnailUrl || thumbnailUrl) score += 10;
-    return Math.min(100, score);
-  }, [
-    title,
-    description,
-    category,
-    tags.length,
-    editThumbnailUrl,
-    thumbnailUrl,
-  ]);
-
-  const onSubmit = async (data: VideoUploadInput) => {
-    setSubmitError(null);
-    try {
-      if (mode === 'finalise') {
-        const result = await finaliseVideo({
-          videoId,
-          ...data,
-          thumbnailUrl: thumbnailUrl ?? data.thumbnailUrl,
-        }).unwrap();
-        onSuccess(result.data.video, result.data.creatorEvent);
-      } else {
-        const result = await updateVideo({ videoId, ...data }).unwrap();
-        onSuccess(result.data);
-      }
-    } catch (err) {
-      setSubmitError(extractErrorMessage(err));
+  const onSubmit = submit(async (data) => {
+    if (mode === 'finalise') {
+      const result = await finaliseVideo({
+        videoId,
+        ...data,
+        thumbnailUrl: thumbnailUrl ?? data.thumbnailUrl,
+      }).unwrap();
+      onSuccess(result.data.video, result.data.creatorEvent);
+    } else {
+      const result = await updateVideo({ videoId, ...data }).unwrap();
+      onSuccess(result.data);
     }
-  };
+  });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-lg mx-auto">
+    <form onSubmit={onSubmit} className="w-full max-w-lg mx-auto">
       <div className="mb-7">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs font-medium text-text-secondary">

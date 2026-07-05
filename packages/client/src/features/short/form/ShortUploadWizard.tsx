@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
-import type { WizardStep } from '../../../shared/upload/UploadSteps';
-import type { ICreatorEvent, IShortResponse } from '@network/shared';
+import type { IShortResponse } from '@network/shared';
 import {
   useDeleteShortMutation,
   useGetShortByIdQuery,
   useUploadThumbnailMutation,
 } from '../shortApi';
 import { useRawShortUpload } from '../hooks/useShortUpload';
-import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
+import { useMediaUploadWizard } from '../../upload/hooks/useMediaUploadWizard';
 import BadgeToast from '../../creator/components/BadgeToast';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
 import UploadStepper from '../../upload/components/UploadStepper';
@@ -26,111 +24,47 @@ const stepVariants = {
 };
 
 const ShortUploadWizard = () => {
-  const [step, setStep] = useState<WizardStep>('drop');
-  const [shortId, setShortId] = useState<string | null>(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>();
-  const [finalShort, setFinalShort] = useState<IShortResponse | null>(null);
-  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
-  const [isAbandoning, setIsAbandoning] = useState(false);
-
-  const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
   const [deleteShort] = useDeleteShortMutation();
   const [uploadThumbnail] = useUploadThumbnailMutation();
-
-  const handleThumbnailUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('thumbnail', file);
-    const result = await uploadThumbnail(formData).unwrap();
-    return result.data.thumbnailUrl;
-  };
+  const upload = useRawShortUpload();
 
   const {
-    state: uploadState,
+    step,
+    setStep,
+    mediaId: shortId,
+    thumbnailUrl,
+    setThumbnailUrl,
+    finalMedia: finalShort,
+    showLeaveConfirm,
+    setShowLeaveConfirm,
+    isAbandoning,
+    celebration,
+    dismissCelebration,
+    uploadState,
     startUpload,
     cancelUpload,
-    reset: resetUpload,
-  } = useRawShortUpload();
-
-  const [isProcessingTerminal, setIsProcessingTerminal] = useState(false);
-
-  const shouldPoll = !!shortId && step !== 'drop';
-  const { data: shortData } = useGetShortByIdQuery(shortId ?? '', {
-    skip: !shouldPoll,
-    pollingInterval: shouldPoll && !isProcessingTerminal ? 5000 : 0,
+    handleThumbnailUpload,
+    handleDetailsSuccess,
+    resetWizard,
+    handleAbandon,
+    processingStatus,
+    providerThumbnail,
+    errorMessage,
+    isUploadingStage,
+    isProcessingDone,
+    statusLabel,
+    showStatusBar,
+  } = useMediaUploadWizard<IShortResponse>({
+    mediaLabel: 'short',
+    upload,
+    useGetByIdQuery: useGetShortByIdQuery,
+    deleteMedia: deleteShort,
+    uploadThumbnail,
   });
-  const processingStatus = shortData?.data.status;
-  const providerThumbnail = shortData?.data.thumbnailUrl;
-  const errorMessage = shortData?.data.errorMessage ?? finalShort?.errorMessage;
-
-  useEffect(() => {
-    if (processingStatus === 'READY' || processingStatus === 'FAILED') {
-      setIsProcessingTerminal(true);
-    }
-  }, [processingStatus]);
-
-  useEffect(() => {
-    if (uploadState.stage === 'done' && uploadState.videoId) {
-      setShortId(uploadState.videoId);
-      setStep('thumbnail');
-    }
-  }, [uploadState.stage, uploadState.videoId]);
-
-  const handleDetailsSuccess = (
-    short: IShortResponse,
-    creatorEvent?: ICreatorEvent | null
-  ) => {
-    setFinalShort(short);
-    celebrate(creatorEvent ?? null);
-    setStep('launch');
-  };
-
-  const resetWizard = () => {
-    setStep('drop');
-    setShortId(null);
-    setThumbnailUrl(undefined);
-    setFinalShort(null);
-    setIsProcessingTerminal(false);
-    resetUpload();
-  };
-
-  const handleAbandon = async () => {
-    setIsAbandoning(true);
-    if (shortId) {
-      try {
-        await deleteShort(shortId).unwrap();
-      } catch {}
-    }
-    setIsAbandoning(false);
-    setShowLeaveConfirm(false);
-    resetWizard();
-  };
-
-  const isUploadingStage =
-    step === 'drop' &&
-    ['validating', 'requesting', 'uploading', 'confirming'].includes(
-      uploadState.stage
-    );
-
-  const isProcessing =
-    (step === 'thumbnail' || step === 'details') &&
-    !!processingStatus &&
-    processingStatus !== 'READY';
-
-  const isProcessingDone =
-    (step === 'thumbnail' || step === 'details') &&
-    processingStatus === 'READY';
-
-  const statusLabel = isUploadingStage
-    ? 'Uploading your short in the background…'
-    : isProcessing
-      ? 'Processing your short in the background…'
-      : 'Your short has finished processing';
-
-  const showStatusBar = isUploadingStage || isProcessing || isProcessingDone;
 
   return (
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
-      <BadgeToast item={celebration} onDismiss={dismiss} />
+      <BadgeToast item={celebration} onDismiss={dismissCelebration} />
 
       <h1 className="text-xl font-bold font-display text-text-primary text-center mb-8">
         Upload a short

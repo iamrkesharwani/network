@@ -1,86 +1,28 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import React from 'react';
 import Field from '../components/Field';
-import { useRegisterMutation } from '../authApi';
-import React, { useCallback, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import {
-  userRegistrationSchema,
-  SITE_NAME,
-  type UserRegistrationInput,
-  type ApiErrorResponse,
-} from '@network/shared';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { SITE_NAME } from '@network/shared';
 import AuthLayout from '../components/AuthLayout';
 import { EmailIcon, GitHubIcon, GoogleIcon } from '../components/AuthIcons';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import SiteLogo from '../../../public/Logo.svg?react';
-import { useToast } from '../../../shared/hooks/useToast';
+import { useOAuthRedirect } from '../hooks/useOAuthRedirect';
+import { useEntryDisclosure } from '../hooks/useEntryDisclosure';
+import { useRegisterForm } from '../hooks/useRegisterForm';
 
 const Register = () => {
   usePageTitle('Register');
-  const navigate = useNavigate();
-  const { addToast } = useToast();
-  const [signup, { isLoading }] = useRegisterMutation();
 
-  const [entryCollapsed, setEntryCollapsed] = useState(false);
-  const [formOpen, setFormOpen] = useState(false);
-  const [backVisible, setBackVisible] = useState(false);
-
-  const t1 = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const t2 = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const emailEntryBtnRef = useRef<HTMLButtonElement>(null);
-
-  const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL || '/api/v1'}/auth/google`;
-  };
-
-  const handleGithubLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL || '/api/v1'}/auth/github`;
-  };
-
+  const { handleGoogleLogin, handleGithubLogin } = useOAuthRedirect();
+  const { register, setFocus, errors, isLoading, onSubmit } = useRegisterForm();
   const {
-    register,
-    handleSubmit,
-    setFocus,
-    formState: { errors },
-  } = useForm<UserRegistrationInput>({
-    resolver: zodResolver(userRegistrationSchema),
-  });
-
-  const openEmailForm = useCallback(() => {
-    if (t1.current) clearTimeout(t1.current);
-    (document.activeElement as HTMLElement | null)?.blur();
-    setEntryCollapsed(true);
-    t1.current = setTimeout(() => {
-      setFormOpen(true);
-      setBackVisible(true);
-      setFocus('name');
-    }, 180);
-  }, [setFocus]);
-
-  const closeEmailForm = useCallback(() => {
-    if (t2.current) clearTimeout(t2.current);
-    (document.activeElement as HTMLElement | null)?.blur();
-    setFormOpen(false);
-    setBackVisible(false);
-    t2.current = setTimeout(() => {
-      setEntryCollapsed(false);
-      emailEntryBtnRef.current?.focus();
-    }, 100);
-  }, []);
-
-  const onSubmit = async (data: UserRegistrationInput) => {
-    try {
-      await signup(data).unwrap();
-      addToast('Registration successful! Please check your email.', 'success');
-      navigate('/verify-email', { state: { email: data.email } });
-    } catch (err: unknown) {
-      const msg =
-        (err as { data?: ApiErrorResponse })?.data?.error?.message ??
-        'Something went wrong. Try again.';
-      addToast(msg, 'error');
-    }
-  };
+    entryCollapsed,
+    formOpen,
+    backVisible,
+    emailEntryBtnRef,
+    openEmailForm,
+    closeEmailForm,
+  } = useEntryDisclosure(() => setFocus('name'));
 
   const oauthBtn =
     'entry-btn w-full flex items-center justify-center gap-2.5 px-5 py-[0.825rem] ' +
@@ -175,7 +117,7 @@ const Register = () => {
           className="w-full flex flex-col"
         >
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={onSubmit}
             className="pt-6 w-full flex flex-col"
             noValidate
           >

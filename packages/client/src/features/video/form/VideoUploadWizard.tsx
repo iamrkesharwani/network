@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
-import type { WizardStep } from '../../../shared/upload/UploadSteps';
-import type { ICreatorEvent, IVideoResponse } from '@network/shared';
+import type { IVideoResponse } from '@network/shared';
 import {
   useDeleteVideoMutation,
   useGetVideoByIdQuery,
   useUploadThumbnailMutation,
 } from '../videoApi';
 import { useRawUpload } from '../hooks/useVideoUpload';
-import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
+import { useMediaUploadWizard } from '../../upload/hooks/useMediaUploadWizard';
 import BadgeToast from '../../creator/components/BadgeToast';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
 import UploadStepper from '../../upload/components/UploadStepper';
@@ -26,111 +24,47 @@ const stepVariants = {
 };
 
 const VideoUploadWizard = () => {
-  const [step, setStep] = useState<WizardStep>('drop');
-  const [videoId, setVideoId] = useState<string | null>(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>();
-  const [finalVideo, setFinalVideo] = useState<IVideoResponse | null>(null);
-  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
-  const [isAbandoning, setIsAbandoning] = useState(false);
-
-  const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
   const [deleteVideo] = useDeleteVideoMutation();
   const [uploadThumbnail] = useUploadThumbnailMutation();
-
-  const handleThumbnailUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('thumbnail', file);
-    const result = await uploadThumbnail(formData).unwrap();
-    return result.data.thumbnailUrl;
-  };
+  const upload = useRawUpload();
 
   const {
-    state: uploadState,
+    step,
+    setStep,
+    mediaId: videoId,
+    thumbnailUrl,
+    setThumbnailUrl,
+    finalMedia: finalVideo,
+    showLeaveConfirm,
+    setShowLeaveConfirm,
+    isAbandoning,
+    celebration,
+    dismissCelebration,
+    uploadState,
     startUpload,
     cancelUpload,
-    reset: resetUpload,
-  } = useRawUpload();
-
-  const [isProcessingTerminal, setIsProcessingTerminal] = useState(false);
-
-  const shouldPoll = !!videoId && step !== 'drop';
-  const { data: videoData } = useGetVideoByIdQuery(videoId ?? '', {
-    skip: !shouldPoll,
-    pollingInterval: shouldPoll && !isProcessingTerminal ? 5000 : 0,
+    handleThumbnailUpload,
+    handleDetailsSuccess,
+    resetWizard,
+    handleAbandon,
+    processingStatus,
+    providerThumbnail,
+    errorMessage,
+    isUploadingStage,
+    isProcessingDone,
+    statusLabel,
+    showStatusBar,
+  } = useMediaUploadWizard<IVideoResponse>({
+    mediaLabel: 'video',
+    upload,
+    useGetByIdQuery: useGetVideoByIdQuery,
+    deleteMedia: deleteVideo,
+    uploadThumbnail,
   });
-  const processingStatus = videoData?.data.status;
-  const providerThumbnail = videoData?.data.thumbnailUrl;
-  const errorMessage = videoData?.data.errorMessage ?? finalVideo?.errorMessage;
-
-  useEffect(() => {
-    if (processingStatus === 'READY' || processingStatus === 'FAILED') {
-      setIsProcessingTerminal(true);
-    }
-  }, [processingStatus]);
-
-  useEffect(() => {
-    if (uploadState.stage === 'done' && uploadState.videoId) {
-      setVideoId(uploadState.videoId);
-      setStep('thumbnail');
-    }
-  }, [uploadState.stage, uploadState.videoId]);
-
-  const handleDetailsSuccess = (
-    video: IVideoResponse,
-    creatorEvent?: ICreatorEvent | null
-  ) => {
-    setFinalVideo(video);
-    celebrate(creatorEvent ?? null);
-    setStep('launch');
-  };
-
-  const resetWizard = () => {
-    setStep('drop');
-    setVideoId(null);
-    setThumbnailUrl(undefined);
-    setFinalVideo(null);
-    setIsProcessingTerminal(false);
-    resetUpload();
-  };
-
-  const handleAbandon = async () => {
-    setIsAbandoning(true);
-    if (videoId) {
-      try {
-        await deleteVideo(videoId).unwrap();
-      } catch {}
-    }
-    setIsAbandoning(false);
-    setShowLeaveConfirm(false);
-    resetWizard();
-  };
-
-  const isUploadingStage =
-    step === 'drop' &&
-    ['validating', 'requesting', 'uploading', 'confirming'].includes(
-      uploadState.stage
-    );
-
-  const isProcessing =
-    (step === 'thumbnail' || step === 'details') &&
-    !!processingStatus &&
-    processingStatus !== 'READY';
-
-  const isProcessingDone =
-    (step === 'thumbnail' || step === 'details') &&
-    processingStatus === 'READY';
-
-  const statusLabel = isUploadingStage
-    ? 'Uploading your video in the background…'
-    : isProcessing
-      ? 'Processing your video in the background…'
-      : 'Your video has finished processing';
-
-  const showStatusBar = isUploadingStage || isProcessing || isProcessingDone;
 
   return (
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
-      <BadgeToast item={celebration} onDismiss={dismiss} />
+      <BadgeToast item={celebration} onDismiss={dismissCelebration} />
 
       <h1 className="text-xl font-bold font-display text-text-primary text-center mb-8">
         Upload a video
