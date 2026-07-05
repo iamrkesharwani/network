@@ -7,7 +7,7 @@ import {
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
 import { ApiError } from '../../utils/ApiError.js';
-import * as creatorService from './creator.service.js';
+import { getProfile } from './services/creator.profile.service.js';
 
 export const getMyProfile = asyncHandler(
   async (req: Request, res: Response) => {
@@ -16,7 +16,7 @@ export const getMyProfile = asyncHandler(
       throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
     }
 
-    const profile = await creatorService.getProfile(userId);
+    const profile = await getProfile(userId);
 
     res
       .status(200)
