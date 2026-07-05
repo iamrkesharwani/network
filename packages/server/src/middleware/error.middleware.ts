@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import * as Sentry from '@sentry/node';
 import { ApiError } from '../utils/ApiError.js';
 import type { ApiErrorResponse } from '@network/shared';
-import { env } from '../config/env.js';
+import { env } from '../env/env.js';
 import { logger } from '../utils/logger.js';
 
 export const errorHandler = (

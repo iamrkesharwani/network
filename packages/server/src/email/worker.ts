@@ -1,7 +1,7 @@
 import { Worker, type Job } from 'bullmq';
 import { SITE_NAME } from '@network/shared';
 import { logger } from '../utils/logger.js';
-import { env } from '../config/env.js';
+import { env } from '../env/env.js';
 import { bullMqConnection } from './connection.js';
 import { transporter } from './transporter.js';
 import { getHtmlTemplate } from './templates.js';

@@ -1,4 +1,4 @@
-import { env } from '../config/env.js';
+import { env } from '../env/env.js';
 import { logger } from '../utils/logger.js';
 
 import { R2StorageProvider } from './storage/r2.provider.js';

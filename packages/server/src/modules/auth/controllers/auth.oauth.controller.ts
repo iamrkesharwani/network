@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { env } from '../../../config/env.js';
+import { env } from '../../../env/env.js';
 import { asyncHandler } from '../../../utils/asyncHandler.js';
 import { decodeIdToken, generateCodeVerifier, generateState } from 'arctic';
 import { github, google } from '../../../config/oauth.js';

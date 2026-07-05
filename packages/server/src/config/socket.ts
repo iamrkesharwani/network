@@ -3,7 +3,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { jwtVerify } from 'jose';
 import type { Server } from 'node:http';
 import { pubClient, subClient } from './redis.js';
-import { env } from './env.js';
+import { env } from '../env/env.js';
 import { logger } from '../utils/logger.js';
 
 interface SocketUser {

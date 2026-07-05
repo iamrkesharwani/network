@@ -1,7 +1,7 @@
 import dns from 'node:dns';
 import mongoose from 'mongoose';
 import { logger } from '../utils/logger.js';
-import { env } from './env.js';
+import { env } from '../env/env.js';
 
 if (env.NODE_ENV === 'development') {
   dns.setServers(['1.1.1.1', '8.8.8.8']);

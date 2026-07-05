@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import routes from './route.js';
 import { API_V1_PREFIX } from '@network/shared';
-import { env } from './config/env.js';
+import { env } from './env/env.js';
 import { apiLimiter } from './middleware/rateLimit.middleware.js';
 import { errorHandler } from './middleware/error.middleware.js';
 import {

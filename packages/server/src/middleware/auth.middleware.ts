@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { jwtVerify } from 'jose';
 import { ApiError } from '../utils/ApiError.js';
-import { env } from '../config/env.js';
+import { env } from '../env/env.js';
 
 const JWT_SECRET_BUFFER = new TextEncoder().encode(env.JWT_SECRET);
 

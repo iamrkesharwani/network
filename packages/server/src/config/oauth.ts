@@ -1,5 +1,5 @@
 import { Google, GitHub } from 'arctic';
-import { env } from './env.js';
+import { env } from '../env/env.js';
 
 export const google = new Google(
   env.GOOGLE_CLIENT_ID,

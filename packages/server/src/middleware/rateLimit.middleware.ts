@@ -2,7 +2,7 @@ import rateLimit from 'express-rate-limit';
 import RedisStore, { type RedisReply } from 'rate-limit-redis';
 import { redisClient } from '../config/redis.js';
 import { ApiError } from '../utils/ApiError.js';
-import { env } from '../config/env.js';
+import { env } from '../env/env.js';
 import type { RequestHandler } from 'express';
 
 const noopLimiter: RequestHandler = (_req, _res, next) => next();

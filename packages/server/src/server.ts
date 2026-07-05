@@ -11,7 +11,7 @@ import {
 } from './config/redis.js';
 import { initSocket } from './config/socket.js';
 import { logger } from './utils/logger.js';
-import { env } from './config/env.js';
+import { env } from './env/env.js';
 import { startEmailWorker } from './email/email.js';
 
 const port = env.PORT;

@@ -1,5 +1,5 @@
 import { Redis, type RedisOptions } from 'ioredis';
-import { env } from './env.js';
+import { env } from '../env/env.js';
 import { logger } from '../utils/logger.js';
 
 const redisOptions: RedisOptions = {

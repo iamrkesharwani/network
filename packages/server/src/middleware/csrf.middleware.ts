@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import crypto from 'node:crypto';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
-import { env } from '../config/env.js';
+import { env } from '../env/env.js';
 import { CSRF_EXEMPT_PATHS } from '@network/shared';
 
 export const setCsrfCookie = (res: Response) => {

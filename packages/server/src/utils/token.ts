@@ -1,7 +1,7 @@
 import { SignJWT } from 'jose';
 import { randomBytes } from 'node:crypto';
 import { redisClient } from '../config/redis.js';
-import { env } from '../config/env.js';
+import { env } from '../env/env.js';
 
 export const generateAccessToken = async (
   userId: string,
