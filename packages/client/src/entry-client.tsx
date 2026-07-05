@@ -10,7 +10,7 @@ import { createAppStore } from './store/store';
 import App from './App';
 import './index.css';
 import { routes } from './routes/AppRoutes';
-import SessionResolver from './shared/lib/SessionResolver';
+import SessionResolver from './shared/lib/sessionResolver';
 
 const store = createAppStore({
   auth: {
