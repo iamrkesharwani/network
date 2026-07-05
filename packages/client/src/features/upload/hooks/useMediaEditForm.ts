@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { useForm, type FieldValues, type Resolver } from 'react-hook-form';
+import { useForm, type DefaultValues, type FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { ZodTypeAny } from 'zod';
+import type { z } from 'zod';
 
 export function extractErrorMessage(err: unknown): string {
   if (
@@ -54,7 +54,7 @@ export interface MediaEditFormConfig<
   TFormValues extends FieldValues,
   TInput extends FieldValues,
 > {
-  schema: ZodTypeAny;
+  schema: z.ZodType<TInput, TFormValues>;
   defaultValues: TFormValues;
   completenessRules: CompletenessRule<TFormValues>[];
 }
@@ -67,8 +67,8 @@ export function useMediaEditForm<
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const form = useForm<TFormValues, unknown, TInput>({
-    resolver: zodResolver(schema) as Resolver<TFormValues, unknown, TInput>,
-    defaultValues,
+    resolver: zodResolver(schema),
+    defaultValues: defaultValues as DefaultValues<TFormValues>,
   });
 
   const watchedValues = form.watch();
