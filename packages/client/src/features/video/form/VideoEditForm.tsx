@@ -18,12 +18,12 @@ import {
   useUpdateVideoMutation,
   useUploadThumbnailMutation,
 } from '../videoApi';
-import FloatingInput from '../../upload/FloatingInput';
-import FloatingTextarea from '../../upload/FloatingTextarea';
-import CategoryPicker from '../../upload/CategoryPicker';
-import TagInput from '../../upload/TagInput';
-import VisibilitySelector from '../../upload/VisibilitySelector';
-import ThumbnailPicker from '../../upload/ThumbnailPicker';
+import FloatingInput from '../../upload/components/FloatingInput';
+import FloatingTextarea from '../../upload/components/FloatingTextarea';
+import CategoryPicker from '../../upload/components/CategoryPicker';
+import TagInput from '../../upload/components/TagInput';
+import VisibilitySelector from '../../upload/components/VisibilitySelector';
+import ThumbnailPicker from '../../upload/components/ThumbnailPicker';
 
 type VideoFormValues = z.input<typeof videoUploadSchema>;
 

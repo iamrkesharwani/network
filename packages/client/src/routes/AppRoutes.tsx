@@ -9,14 +9,10 @@ import ForgotPassword from '../features/auth/pages/ForgotPassword';
 import ResetPassword from '../features/auth/pages/ResetPassword';
 import OAuthCallback from '../features/auth/pages/OAuthCallback';
 import FeedPage from '../features/feed/FeedPage';
-import UploadHub from '../features/upload/UploadHub';
+import UploadHub from '../features/upload/components/UploadHub';
 import VideoUploadWizard from '../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../features/short/form/ShortUploadWizard';
-import {
-  Profile,
-  Settings,
-  NotFound,
-} from './__dev__/PlaceholderPages';
+import { Profile, Settings, NotFound } from './__dev__/PlaceholderPages';
 
 export const routes: RouteObject[] = [
   { path: '/oauth/callback', element: <OAuthCallback /> },

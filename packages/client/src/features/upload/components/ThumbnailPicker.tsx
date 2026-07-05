@@ -5,7 +5,7 @@ import {
   ALLOWED_THUMBNAIL_MIME_TYPES,
   MAX_THUMBNAIL_SIZE_BYTES,
 } from '@network/shared';
-import { cn } from '../../shared/utils/cn';
+import { cn } from '../../../shared/utils/cn';
 
 interface ThumbnailPickerProps {
   value: string | undefined;

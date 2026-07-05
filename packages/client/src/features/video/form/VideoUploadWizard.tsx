@@ -10,12 +10,12 @@ import { useRawUpload } from '../hooks/useVideoUpload';
 import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
 import BadgeToast from '../../creator/components/BadgeToast';
 import { CheckCircle2, Loader2, X } from 'lucide-react';
-import UploadStepper from '../../upload/UploadStepper';
+import UploadStepper from '../../upload/components/UploadStepper';
 import { AnimatePresence, motion } from 'framer-motion';
-import MediaDropzone from '../../upload/MediaDropzone';
-import UploadThumbnailStep from '../../upload/UploadThumbnailStep';
+import MediaDropzone from '../../upload/components/MediaDropzone';
+import UploadThumbnailStep from '../../upload/components/UploadThumbnailStep';
 import VideoEditForm from './VideoEditForm';
-import SuccessStep from '../../upload/SuccessStep';
+import SuccessStep from '../../upload/components/SuccessStep';
 import ConfirmModal from '../../../shared/components/ConfirmModal';
 import { cn } from '../../../shared/utils/cn';
 

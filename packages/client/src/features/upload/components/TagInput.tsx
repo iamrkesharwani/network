@@ -1,7 +1,7 @@
 import { useState, type KeyboardEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { cn } from '../../shared/utils/cn';
+import { cn } from '../../../shared/utils/cn';
 import {
   TAG_REGEX,
   MAX_TAGS,

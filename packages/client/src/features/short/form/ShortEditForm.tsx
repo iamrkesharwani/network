@@ -17,11 +17,11 @@ import {
   useUpdateShortMutation,
   useUploadThumbnailMutation,
 } from '../shortApi';
-import FloatingInput from '../../upload/FloatingInput';
-import FloatingTextarea from '../../upload/FloatingTextarea';
-import TagInput from '../../upload/TagInput';
-import VisibilitySelector from '../../upload/VisibilitySelector';
-import ThumbnailPicker from '../../upload/ThumbnailPicker';
+import FloatingInput from '../../upload/components/FloatingInput';
+import FloatingTextarea from '../../upload/components/FloatingTextarea';
+import TagInput from '../../upload/components/TagInput';
+import VisibilitySelector from '../../upload/components/VisibilitySelector';
+import ThumbnailPicker from '../../upload/components/ThumbnailPicker';
 
 type ShortFormValues = z.input<typeof shortUploadSchema>;
 

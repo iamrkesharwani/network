@@ -10,7 +10,7 @@ import {
   formatEta,
   type UploadState,
 } from '@network/shared';
-import { cn } from '../../shared/utils/cn';
+import { cn } from '../../../shared/utils/cn';
 
 interface MediaDropzoneProps {
   state: UploadState;

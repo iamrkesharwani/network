@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Clapperboard, Smartphone, FileText } from 'lucide-react';
-import { cn } from '../../shared/utils/cn';
+import { cn } from '../../../shared/utils/cn';
 
 const UPLOAD_OPTIONS = [
   {
