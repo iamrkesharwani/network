@@ -17,7 +17,14 @@ import {
 import * as authCoreController from './controllers/auth.core.controller.js';
 import * as authPasswordController from './controllers/auth.password.controller.js';
 import * as authVerifyController from './controllers/auth.verify.controller.js';
-import * as authOAuthController from './controllers/auth.oauth.controller.js';
+import {
+  googleCallback,
+  googleRedirect,
+} from './oauth/google.oauth.controller.js';
+import {
+  githubCallback,
+  githubRedirect,
+} from './oauth/github.oauth.controller.js';
 
 const router = Router();
 
@@ -73,10 +80,10 @@ router.post(
   authPasswordController.completePasswordReset
 );
 
-router.get('/google', authLimiter, authOAuthController.googleRedirect);
-router.get('/google/callback', authOAuthController.googleCallback);
+router.get('/google', authLimiter, googleRedirect);
+router.get('/google/callback', googleCallback);
 
-router.get('/github', authLimiter, authOAuthController.githubRedirect);
-router.get('/github/callback', authOAuthController.githubCallback);
+router.get('/github', authLimiter, githubRedirect);
+router.get('/github/callback', githubCallback);
 
 export default router;
