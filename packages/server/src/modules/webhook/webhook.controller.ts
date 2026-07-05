@@ -1,11 +1,11 @@
 import type { Request, Response } from 'express';
 import * as videoService from '../video/video.service.js';
-import * as shortService from '../short/short.service.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { videoProvider } from '../../providers/provider.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { ApiResponse } from '../../utils/ApiResponse.js';
 import { logger } from '../../utils/logger.js';
+import { processWebhook } from '../short/services/short.webhook.service.js';
 
 export const handleMediaWebhook = asyncHandler(
   async (req: Request, res: Response) => {
@@ -37,7 +37,7 @@ export const handleMediaWebhook = asyncHandler(
     const handledAsVideo = await videoService.processWebhook(payload);
     const handledAsShort = handledAsVideo
       ? false
-      : await shortService.processWebhook(payload);
+      : await processWebhook(payload);
 
     if (!handledAsVideo && !handledAsShort) {
       logger.warn(

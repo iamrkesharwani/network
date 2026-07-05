@@ -22,7 +22,7 @@ router.post(
   requireAuth,
   uploadLimiter,
   validate({ body: initiateShortUploadSchema }),
-  shortUploadController.initiateUpload
+  shortUploadController.initUpload
 );
 
 router.post(
@@ -30,7 +30,7 @@ router.post(
   requireAuth,
   uploadLimiter,
   validate({ body: confirmShortUploadSchema }),
-  shortUploadController.confirmUpload
+  shortUploadController.confUpload
 );
 
 router.post(
@@ -38,7 +38,7 @@ router.post(
   requireAuth,
   uploadLimiter,
   uploadThumbnail,
-  shortUploadController.uploadThumbnail
+  shortUploadController.uploadTheThumbnail
 );
 
 router.post(
@@ -46,7 +46,7 @@ router.post(
   requireAuth,
   uploadLimiter,
   validate({ params: shortIdParamSchema, body: shortUploadSchema }),
-  shortUploadController.finaliseShort
+  shortUploadController.finalShort
 );
 
 router.get(

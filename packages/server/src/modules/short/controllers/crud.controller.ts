@@ -1,10 +1,16 @@
 import type { Request, Response } from 'express';
 import type { ShortFeedQuery, ShortUpdateInput } from '@network/shared';
 import { asyncHandler } from '../../../utils/asyncHandler.js';
-import * as shortService from '../short.service.js';
 import { ApiPaginatedResponse } from '../../../utils/ApiPaginatedResponse.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { ApiResponse } from '../../../utils/ApiResponse.js';
+import {
+  deleteShort,
+  getMyShorts,
+  getPublicFeed,
+  getShortById,
+  updateShort,
+} from '../services/short.crud.service.js';
 
 const getFeedQuery = (req: Request): ShortFeedQuery =>
   req.query as unknown as ShortFeedQuery;
@@ -14,7 +20,7 @@ const getShortIdParam = (req: Request): string =>
 
 export const getFeed = asyncHandler(async (req: Request, res: Response) => {
   const { page, limit } = getFeedQuery(req);
-  const result = await shortService.getPublicFeed(page, limit);
+  const result = await getPublicFeed(page, limit);
 
   res
     .status(200)
@@ -33,7 +39,7 @@ export const getMine = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const { page, limit } = getFeedQuery(req);
-  const result = await shortService.getMyShorts(req.user.id, page, limit);
+  const result = await getMyShorts(req.user.id, page, limit);
 
   res
     .status(200)
@@ -47,7 +53,7 @@ export const getMine = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getById = asyncHandler(async (req: Request, res: Response) => {
-  const short = await shortService.getShortById(getShortIdParam(req), req.user);
+  const short = await getShortById(getShortIdParam(req), req.user);
 
   res.status(200).json(new ApiResponse(short, 'Short fetched successfully'));
 });
@@ -57,7 +63,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
   }
 
-  const short = await shortService.updateShort(
+  const short = await updateShort(
     getShortIdParam(req),
     req.user,
     req.body as ShortUpdateInput
@@ -71,7 +77,7 @@ export const remove = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
   }
 
-  await shortService.deleteShort(getShortIdParam(req), req.user);
+  await deleteShort(getShortIdParam(req), req.user);
 
   res.status(200).json(new ApiResponse(null, 'Short deleted successfully'));
 });
