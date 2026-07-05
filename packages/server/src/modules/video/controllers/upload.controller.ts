@@ -9,6 +9,12 @@ import { asyncHandler } from '../../../utils/asyncHandler.js';
 import { ApiResponse } from '../../../utils/ApiResponse.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { verifyFileMagicBytes } from '../../../middleware/upload.middleware.js';
+import {
+  confirmUpload,
+  finaliseVideo,
+  initiateUpload,
+  uploadThumbnail,
+} from '../services/video.upload.service.js';
 
 export const initiateTheUpload = asyncHandler(
   async (req: Request, res: Response) => {
@@ -36,7 +42,7 @@ export const confirmTheUpload = asyncHandler(
     const { videoId, storageKey, fileSizeBytes } =
       req.body as ConfirmVideoUploadInput;
 
-    const result = await videoService.confirmUpload(
+    const result = await confirmUpload(
       userId,
       videoId,
       storageKey,
@@ -61,7 +67,7 @@ export const uploadTheThumbnail = asyncHandler(
 
     await verifyFileMagicBytes(req.file, ALLOWED_THUMBNAIL_MIME_TYPES);
 
-    const thumbnailUrl = await videoService.uploadThumbnail(
+    const thumbnailUrl = await uploadThumbnail(
       req.file.buffer,
       req.file.mimetype
     );
@@ -84,7 +90,7 @@ export const finaliseTheVideo = asyncHandler(
     if (!videoId)
       throw new ApiError(400, 'VALIDATION_ERROR', 'Video ID is required.');
 
-    const result = await videoService.finaliseVideo(
+    const result = await finaliseVideo(
       videoId,
       userId,
       req.body as VideoUploadInput

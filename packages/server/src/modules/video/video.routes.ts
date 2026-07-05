@@ -22,7 +22,7 @@ router.post(
   requireAuth,
   uploadLimiter,
   validate({ body: initiateVideoUploadSchema }),
-  videoUploadController.initiateUpload
+  videoUploadController.initiateTheUpload
 );
 
 router.post(
@@ -30,7 +30,7 @@ router.post(
   requireAuth,
   uploadLimiter,
   validate({ body: confirmVideoUploadSchema }),
-  videoUploadController.confirmUpload
+  videoUploadController.confirmTheUpload
 );
 
 router.post(
@@ -38,7 +38,7 @@ router.post(
   requireAuth,
   uploadLimiter,
   uploadThumbnail,
-  videoUploadController.uploadThumbnail
+  videoUploadController.uploadTheThumbnail
 );
 
 router.post(
@@ -46,7 +46,7 @@ router.post(
   requireAuth,
   uploadLimiter,
   validate({ params: videoIdParamSchema, body: videoUploadSchema }),
-  videoUploadController.finaliseVideo
+  videoUploadController.finaliseTheVideo
 );
 
 router.get(
