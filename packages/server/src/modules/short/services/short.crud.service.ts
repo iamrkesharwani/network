@@ -1,6 +1,5 @@
 import type { IShortResponse, ShortUpdateInput } from '@network/shared';
 import * as shortRepository from '../short.repository.js';
-import * as creatorService from '../../creator/creator.service.js';
 import {
   storageProvider,
   videoProvider,
@@ -11,6 +10,7 @@ import { ApiError } from '../../../utils/ApiError.js';
 import { getOwnerId } from '../../../utils/getOwnerId.js';
 import type { Requester } from '../short.types.js';
 import { toResponse, toResponseFromLean } from './short.mappers.js';
+import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
 
 export const getShortById = async (
   shortId: string,
@@ -34,7 +34,7 @@ export const getShortById = async (
       .incrementViews(shortId)
       .then((updated) => {
         if (!updated) return;
-        return creatorService.recordViewIncrement(
+        return recordViewIncrement(
           getOwnerId(updated.userId),
           shortId,
           updated.views

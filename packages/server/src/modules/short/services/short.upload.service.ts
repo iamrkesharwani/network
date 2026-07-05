@@ -7,7 +7,6 @@ import {
   type ShortUploadInput,
 } from '@network/shared';
 import * as shortRepository from '../short.repository.js';
-import * as creatorService from '../../creator/creator.service.js';
 import {
   storageProvider,
   videoProvider,
@@ -17,6 +16,7 @@ import { redisClient } from '../../../config/redis.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { getOwnerId } from '../../../utils/getOwnerId.js';
 import { uploadSessionKey, toResponse } from './short.mappers.js';
+import { recordPublish } from '../../creator/services/creator.publish.service.js';
 
 export const initiateUpload = async (
   userId: string,
@@ -129,7 +129,7 @@ export const finaliseShort = async (
 
   const creatorEvent = alreadyRecorded
     ? null
-    : await creatorService.recordPublish(userId, 'short');
+    : await recordPublish(userId, 'short');
 
   return { short: toResponse(updated), creatorEvent };
 };

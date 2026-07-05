@@ -6,7 +6,6 @@ import {
   type VideoUploadInput,
 } from '@network/shared';
 import * as videoRepository from '../video.repository.js';
-import * as creatorService from '../../creator/creator.service.js';
 import {
   storageProvider,
   videoProvider,
@@ -16,6 +15,7 @@ import { redisClient } from '../../../config/redis.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { getOwnerId } from '../../../utils/getOwnerId.js';
 import { uploadSessionKey, toResponse } from './video.mappers.js';
+import { recordPublish } from '../../creator/services/creator.publish.service.js';
 
 export const initiateUpload = async (
   userId: string,
@@ -130,7 +130,7 @@ export const finaliseVideo = async (
 
   const creatorEvent = alreadyRecorded
     ? null
-    : await creatorService.recordPublish(userId, 'video');
+    : await recordPublish(userId, 'video');
 
   return { video: toResponse(updated), creatorEvent };
 };

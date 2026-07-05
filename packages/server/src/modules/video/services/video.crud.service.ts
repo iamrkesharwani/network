@@ -1,6 +1,5 @@
 import type { IVideoResponse, VideoUpdateInput } from '@network/shared';
 import * as videoRepository from '../video.repository.js';
-import * as creatorService from '../../creator/creator.service.js';
 import {
   storageProvider,
   videoProvider,
@@ -11,6 +10,7 @@ import { ApiError } from '../../../utils/ApiError.js';
 import { getOwnerId } from '../../../utils/getOwnerId.js';
 import type { Requester } from '../video.types.js';
 import { toResponse, toResponseFromLean } from './video.mappers.js';
+import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
 
 export const getVideoById = async (
   videoId: string,
@@ -34,7 +34,7 @@ export const getVideoById = async (
       .incrementViews(videoId)
       .then((updated) => {
         if (!updated) return;
-        return creatorService.recordViewIncrement(
+        return recordViewIncrement(
           getOwnerId(updated.userId),
           videoId,
           updated.views
