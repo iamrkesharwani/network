@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express';
 import type { VideoFeedQuery, VideoUpdateInput } from '@network/shared';
 import { asyncHandler } from '../../../utils/asyncHandler.js';
-import * as videoService from '../video.service.js';
 import { ApiPaginatedResponse } from '../../../utils/ApiPaginatedResponse.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { ApiResponse } from '../../../utils/ApiResponse.js';

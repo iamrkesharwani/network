@@ -4,7 +4,7 @@ import { getOwnerId } from '../../../utils/getOwnerId.js';
 import { emitToUser } from '../../../config/socket.js';
 import type { NormalizedWebhookPayload } from '../../../providers/types.js';
 
-export const processWebhook = async (
+export const videoProcessWebhook = async (
   payload: NormalizedWebhookPayload
 ): Promise<boolean> => {
   const existing = await videoRepository.findByProviderVideoId(

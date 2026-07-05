@@ -9,15 +9,14 @@ import { asyncHandler } from '../../../utils/asyncHandler.js';
 import { ApiResponse } from '../../../utils/ApiResponse.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { verifyFileMagicBytes } from '../../../middleware/upload.middleware.js';
-import * as videoService from '../video.service.js';
 
-export const initiateUpload = asyncHandler(
+export const initiateTheUpload = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?.id;
     if (!userId)
       throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
 
-    const result = await videoService.initiateUpload(
+    const result = await initiateUpload(
       userId,
       req.body as InitiateVideoUploadInput
     );
@@ -28,7 +27,7 @@ export const initiateUpload = asyncHandler(
   }
 );
 
-export const confirmUpload = asyncHandler(
+export const confirmTheUpload = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?.id;
     if (!userId)
@@ -50,7 +49,7 @@ export const confirmUpload = asyncHandler(
   }
 );
 
-export const uploadThumbnail = asyncHandler(
+export const uploadTheThumbnail = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.file) {
       throw new ApiError(
@@ -75,7 +74,7 @@ export const uploadThumbnail = asyncHandler(
   }
 );
 
-export const finaliseVideo = asyncHandler(
+export const finaliseTheVideo = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?.id;
     if (!userId)

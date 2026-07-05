@@ -16,38 +16,42 @@ import {
   uploadThumbnail,
 } from '../services/short.upload.service.js';
 
-export const initUpload = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user)
-    throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+export const initiateTheUpload = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user)
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
 
-  const result = await initiateUpload(
-    req.user.id,
-    req.body as InitiateShortUploadInput
-  );
+    const result = await initiateUpload(
+      req.user.id,
+      req.body as InitiateShortUploadInput
+    );
 
-  res
-    .status(201)
-    .json(new ApiResponse(result, 'Upload session created successfully'));
-});
+    res
+      .status(201)
+      .json(new ApiResponse(result, 'Upload session created successfully'));
+  }
+);
 
-export const confUpload = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user)
-    throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+export const confirmTheUpload = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user)
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
 
-  const { shortId, storageKey, fileSizeBytes } =
-    req.body as ConfirmShortUploadInput;
+    const { shortId, storageKey, fileSizeBytes } =
+      req.body as ConfirmShortUploadInput;
 
-  const short = await confirmUpload(
-    req.user.id,
-    shortId,
-    storageKey,
-    fileSizeBytes
-  );
+    const short = await confirmUpload(
+      req.user.id,
+      shortId,
+      storageKey,
+      fileSizeBytes
+    );
 
-  res
-    .status(200)
-    .json(new ApiResponse(short, 'Upload confirmed. Processing started.'));
-});
+    res
+      .status(200)
+      .json(new ApiResponse(short, 'Upload confirmed. Processing started.'));
+  }
+);
 
 export const uploadTheThumbnail = asyncHandler(
   async (req: Request, res: Response) => {
@@ -74,19 +78,23 @@ export const uploadTheThumbnail = asyncHandler(
   }
 );
 
-export const finalShort = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user)
-    throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+export const finaliseTheShort = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user)
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
 
-  const { shortId } = req.params as { shortId: string };
-  if (!shortId)
-    throw new ApiError(400, 'VALIDATION_ERROR', 'Short ID is required.');
+    const { shortId } = req.params as { shortId: string };
+    if (!shortId)
+      throw new ApiError(400, 'VALIDATION_ERROR', 'Short ID is required.');
 
-  const short = await finaliseShort(
-    shortId,
-    req.user.id,
-    req.body as ShortUploadInput
-  );
+    const short = await finaliseShort(
+      shortId,
+      req.user.id,
+      req.body as ShortUploadInput
+    );
 
-  res.status(200).json(new ApiResponse(short, 'Short finalised successfully'));
-});
+    res
+      .status(200)
+      .json(new ApiResponse(short, 'Short finalised successfully'));
+  }
+);
