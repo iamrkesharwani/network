@@ -1,6 +1,6 @@
 import type { VideoStatus } from '@network/shared';
 
-export type RawUploadMediaType = 'video' | 'short';
+export type RawUploadMediaType = 'video' | 'short' | 'post';
 
 export interface PresignUploadResult {
   url: string;
