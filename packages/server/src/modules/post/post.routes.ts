@@ -1,0 +1,88 @@
+import { Router } from 'express';
+import { validate } from '../../middleware/validate.middleware.js';
+import { requireAuth, optionalAuth } from '../../middleware/auth.middleware.js';
+import { uploadLimiter } from '../../middleware/rateLimit.middleware.js';
+import { uploadPostImage } from '../../middleware/upload.middleware.js';
+import {
+  createPostSchema,
+  initiatePostVideoUploadSchema,
+  confirmPostVideoUploadSchema,
+  postFinaliseSchema,
+  postUpdateSchema,
+  postFeedQuerySchema,
+  postIdParamSchema,
+} from '@network/shared';
+
+import * as postCrudController from './controllers/crud.controller.js';
+import * as postUploadController from './controllers/upload.controller.js';
+
+const router = Router();
+
+router.post(
+  '/',
+  requireAuth,
+  uploadLimiter,
+  uploadPostImage,
+  validate({ body: createPostSchema }),
+  postUploadController.createThePost
+);
+
+router.post(
+  '/initiate-video-upload',
+  requireAuth,
+  uploadLimiter,
+  validate({ body: initiatePostVideoUploadSchema }),
+  postUploadController.initiateTheVideoUpload
+);
+
+router.post(
+  '/confirm-video-upload',
+  requireAuth,
+  uploadLimiter,
+  validate({ body: confirmPostVideoUploadSchema }),
+  postUploadController.confirmTheVideoUpload
+);
+
+router.post(
+  '/:postId/finalise',
+  requireAuth,
+  uploadLimiter,
+  validate({ params: postIdParamSchema, body: postFinaliseSchema }),
+  postUploadController.finaliseThePost
+);
+
+router.get(
+  '/feed',
+  validate({ query: postFeedQuerySchema }),
+  postCrudController.getFeed
+);
+
+router.get(
+  '/mine',
+  requireAuth,
+  validate({ query: postFeedQuerySchema }),
+  postCrudController.getMine
+);
+
+router.get(
+  '/:postId',
+  optionalAuth,
+  validate({ params: postIdParamSchema }),
+  postCrudController.getById
+);
+
+router.patch(
+  '/:postId',
+  requireAuth,
+  validate({ params: postIdParamSchema, body: postUpdateSchema }),
+  postCrudController.update
+);
+
+router.delete(
+  '/:postId',
+  requireAuth,
+  validate({ params: postIdParamSchema }),
+  postCrudController.remove
+);
+
+export default router;

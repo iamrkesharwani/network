@@ -6,6 +6,8 @@ import {
   MAX_AVATAR_SIZE_BYTES,
   ALLOWED_THUMBNAIL_MIME_TYPES,
   MAX_THUMBNAIL_SIZE_BYTES,
+  ALLOWED_POST_IMAGE_MIME_TYPES,
+  MAX_POST_IMAGE_SIZE_BYTES,
 } from '@network/shared';
 
 const memStorage = multer.memoryStorage();
@@ -57,3 +59,8 @@ export const uploadThumbnail = createMemUploadMiddleware(
   ALLOWED_THUMBNAIL_MIME_TYPES,
   MAX_THUMBNAIL_SIZE_BYTES
 ).single('thumbnail');
+
+export const uploadPostImage = createMemUploadMiddleware(
+  ALLOWED_POST_IMAGE_MIME_TYPES,
+  MAX_POST_IMAGE_SIZE_BYTES
+).single('image');

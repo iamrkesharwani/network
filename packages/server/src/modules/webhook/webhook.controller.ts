@@ -6,6 +6,7 @@ import { ApiResponse } from '../../utils/ApiResponse.js';
 import { logger } from '../../utils/logger.js';
 import { shortProcessWebhook } from '../short/services/short.webhook.service.js';
 import { videoProcessWebhook } from '../video/services/video.webhook.service.js';
+import { postProcessWebhook } from '../post/services/post.webhook.service.js';
 
 export const handleMediaWebhook = asyncHandler(
   async (req: Request, res: Response) => {
@@ -35,11 +36,17 @@ export const handleMediaWebhook = asyncHandler(
     }
 
     const handledAsVideo = await videoProcessWebhook(payload);
+
     const handledAsShort = handledAsVideo
       ? false
       : await shortProcessWebhook(payload);
 
-    if (!handledAsVideo && !handledAsShort) {
+    const handledAsPost =
+      handledAsVideo || handledAsShort
+        ? false
+        : await postProcessWebhook(payload);
+
+    if (!handledAsVideo && !handledAsShort && !handledAsPost) {
       logger.warn(
         `Webhook for unknown providerVideoId: ${payload.providerVideoId}`
       );
