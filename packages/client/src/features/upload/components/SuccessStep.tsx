@@ -123,11 +123,6 @@ const SuccessStep = ({
             <Eye className="w-4 h-4" />
             View
           </button>
-          {!isReady && (
-            <span className="text-[0.65rem] text-text-muted">
-              Player coming soon
-            </span>
-          )}
         </div>
 
         <button
