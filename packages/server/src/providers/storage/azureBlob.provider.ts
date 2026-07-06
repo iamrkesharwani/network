@@ -8,12 +8,16 @@ import crypto from 'node:crypto';
 import {
   RAW_UPLOAD_KEY_PREFIX,
   RAW_UPLOAD_PRESIGNED_URL_TTL_SECONDS,
+  MULTIPART_SESSION_TTL_SECONDS,
 } from '@network/shared';
 import { logger } from '../../utils/logger.js';
 import type {
   IStorageProvider,
   PresignUploadResult,
   RawUploadMediaType,
+  CreateMultipartUploadResult,
+  PresignPartResult,
+  CompletedUploadPart,
 } from '../types.js';
 
 export interface AzureBlobConfig {
@@ -118,6 +122,82 @@ export class AzureBlobStorageProvider implements IStorageProvider {
       await containerClient.deleteBlob(key);
     } catch (error) {
       logger.warn(error, `Azure Blob: failed to delete blob ${key}`);
+    }
+  }
+
+  private buildBlockId(partNumber: number): string {
+    const padded = String(partNumber).padStart(6, '0');
+    return Buffer.from(padded).toString('base64');
+  }
+
+  async createMultipartUpload(
+    mediaType: RawUploadMediaType,
+    userId: string,
+    videoId: string,
+    _contentType: string
+  ): Promise<CreateMultipartUploadResult> {
+    const key = this.buildKey(mediaType, userId, videoId);
+    const providerUploadId = crypto.randomBytes(16).toString('hex');
+    return { storageKey: key, providerUploadId };
+  }
+
+  async presignPart(
+    storageKey: string,
+    _providerUploadId: string,
+    partNumber: number
+  ): Promise<PresignPartResult> {
+    const blockId = this.buildBlockId(partNumber);
+
+    const expiresOn = new Date(
+      Date.now() + MULTIPART_SESSION_TTL_SECONDS * 1000
+    );
+
+    const sasToken = generateBlobSASQueryParameters(
+      {
+        containerName: this.containerName,
+        blobName: storageKey,
+        permissions: BlobSASPermissions.parse('w'),
+        expiresOn,
+      },
+      this.credential
+    ).toString();
+
+    const uploadUrl =
+      `https://${this.accountName}.blob.core.windows.net/${this.containerName}/${storageKey}` +
+      `?comp=block&blockid=${encodeURIComponent(blockId)}&${sasToken}`;
+
+    return { uploadUrl, blockId };
+  }
+
+  async completeMultipartUpload(
+    storageKey: string,
+    _providerUploadId: string,
+    parts: CompletedUploadPart[]
+  ): Promise<void> {
+    const blockIds = [...parts]
+      .sort((a, b) => a.partNumber - b.partNumber)
+      .map((part) => this.buildBlockId(part.partNumber));
+
+    const containerClient = this.client.getContainerClient(this.containerName);
+    const blockBlobClient = containerClient.getBlockBlobClient(storageKey);
+
+    await blockBlobClient.commitBlockList(blockIds);
+  }
+
+  async abortMultipartUpload(
+    storageKey: string,
+    _providerUploadId: string
+  ): Promise<void> {
+    try {
+      const containerClient = this.client.getContainerClient(
+        this.containerName
+      );
+      await containerClient.deleteBlob(storageKey);
+    } catch (error) {
+      logger.warn(
+        error,
+        `Azure Blob: failed to abort multipart upload ${storageKey}`
+      );
     }
   }
 }

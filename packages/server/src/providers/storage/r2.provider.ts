@@ -3,6 +3,10 @@ import {
   DeleteObjectCommand,
   PutObjectCommand,
   GetObjectCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'node:crypto';
@@ -15,6 +19,9 @@ import type {
   IStorageProvider,
   PresignUploadResult,
   RawUploadMediaType,
+  CreateMultipartUploadResult,
+  PresignPartResult,
+  CompletedUploadPart,
 } from '../types.js';
 
 interface R2Config {
@@ -107,6 +114,90 @@ export class R2StorageProvider implements IStorageProvider {
       );
     } catch (error) {
       logger.warn(error, `R2: failed to delete object ${key}`);
+    }
+  }
+
+  async createMultipartUpload(
+    mediaType: RawUploadMediaType,
+    userId: string,
+    videoId: string,
+    contentType: string
+  ): Promise<CreateMultipartUploadResult> {
+    const key = this.buildKey(mediaType, userId, videoId);
+
+    const result = await this.client.send(
+      new CreateMultipartUploadCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        ContentType: contentType,
+      })
+    );
+
+    if (!result.UploadId) {
+      throw new Error('R2: CreateMultipartUpload did not return an UploadId.');
+    }
+
+    return { storageKey: key, providerUploadId: result.UploadId };
+  }
+
+  async presignPart(
+    storageKey: string,
+    providerUploadId: string,
+    partNumber: number
+  ): Promise<PresignPartResult> {
+    const command = new UploadPartCommand({
+      Bucket: this.bucketName,
+      Key: storageKey,
+      UploadId: providerUploadId,
+      PartNumber: partNumber,
+    });
+
+    const uploadUrl = await getSignedUrl(this.client, command, {
+      expiresIn: RAW_UPLOAD_PRESIGNED_URL_TTL_SECONDS,
+    });
+
+    return { uploadUrl };
+  }
+
+  async completeMultipartUpload(
+    storageKey: string,
+    providerUploadId: string,
+    parts: CompletedUploadPart[]
+  ): Promise<void> {
+    const sortedParts = [...parts].sort((a, b) => a.partNumber - b.partNumber);
+
+    await this.client.send(
+      new CompleteMultipartUploadCommand({
+        Bucket: this.bucketName,
+        Key: storageKey,
+        UploadId: providerUploadId,
+        MultipartUpload: {
+          Parts: sortedParts.map((part) => ({
+            PartNumber: part.partNumber,
+            ETag: part.etag,
+          })),
+        },
+      })
+    );
+  }
+
+  async abortMultipartUpload(
+    storageKey: string,
+    providerUploadId: string
+  ): Promise<void> {
+    try {
+      await this.client.send(
+        new AbortMultipartUploadCommand({
+          Bucket: this.bucketName,
+          Key: storageKey,
+          UploadId: providerUploadId,
+        })
+      );
+    } catch (error) {
+      logger.warn(
+        error,
+        `R2: failed to abort multipart upload ${storageKey} (${providerUploadId})`
+      );
     }
   }
 }

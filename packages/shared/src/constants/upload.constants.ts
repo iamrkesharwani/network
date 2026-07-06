@@ -19,3 +19,9 @@ export interface UploadState {
   etaSeconds: number | null;
   error: string | null;
 }
+
+export const MULTIPART_MEDIA_TYPES = ['video', 'short', 'post'] as const;
+export const MULTIPART_PART_SIZE_BYTES = 8 * 1024 * 1024;
+export const MULTIPART_MIN_PART_SIZE_BYTES = 5 * 1024 * 1024;
+export const MULTIPART_SESSION_TTL_SECONDS = 60 * 60 * 24;
+export const MULTIPART_MAX_RETRY_ATTEMPTS_PER_PART = 3;
