@@ -3,6 +3,7 @@ import rootReducer, { type RootState as RootReducerState } from './rootReducer';
 import { authApi } from '../features/auth/authApi';
 import { videoApi } from '../features/video/videoApi';
 import { shortApi } from '../features/short/shortApi';
+import { postApi } from '../features/post/postApi';
 import { creatorApi } from '../features/creator/creatorApi';
 
 export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
@@ -14,6 +15,7 @@ export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
         authApi.middleware,
         videoApi.middleware,
         shortApi.middleware,
+        postApi.middleware,
         creatorApi.middleware
       ),
     devTools: import.meta.env.MODE !== 'production',

@@ -6,6 +6,7 @@ import shortReducer from '../features/short/shortSlice';
 import { authApi } from '../features/auth/authApi';
 import { videoApi } from '../features/video/videoApi';
 import { shortApi } from '../features/short/shortApi';
+import { postApi } from '../features/post/postApi';
 import { creatorApi } from '../features/creator/creatorApi';
 
 const rootReducer = combineReducers({
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
   [authApi.reducerPath]: authApi.reducer,
   [videoApi.reducerPath]: videoApi.reducer,
   [shortApi.reducerPath]: shortApi.reducer,
+  [postApi.reducerPath]: postApi.reducer,
   [creatorApi.reducerPath]: creatorApi.reducer,
 });
 

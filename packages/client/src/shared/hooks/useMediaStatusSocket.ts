@@ -6,6 +6,7 @@ import { useSocket } from './useSocket';
 import { useToast } from './useToast';
 import { videoApi } from '../../features/video/videoApi';
 import { shortApi } from '../../features/short/shortApi';
+import { postApi } from '../../features/post/postApi';
 
 export const useMediaStatusSocket = (): void => {
   const { accessToken } = useAppSelector((state) => state.auth);
@@ -26,7 +27,7 @@ export const useMediaStatusSocket = (): void => {
             'Video',
           ])
         );
-      } else {
+      } else if (event.mediaType === 'short') {
         dispatch(
           shortApi.util.invalidateTags([
             { type: 'Short', id: event.id },
@@ -34,12 +35,22 @@ export const useMediaStatusSocket = (): void => {
             'Short',
           ])
         );
+      } else {
+        dispatch(
+          postApi.util.invalidateTags([
+            { type: 'Post', id: event.id },
+            'MyPosts',
+            'Post',
+          ])
+        );
       }
 
+      const label = event.title ? `"${event.title}"` : 'Your post';
+
       if (event.status === 'READY') {
-        addToast(`"${event.title}" is now live`, 'success');
+        addToast(`${label} is now live`, 'success');
       } else if (event.status === 'FAILED') {
-        addToast(`Processing failed for "${event.title}"`, 'error');
+        addToast(`Processing failed for ${label}`, 'error');
       }
     };
 
