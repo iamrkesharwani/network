@@ -1,5 +1,5 @@
 import { ApiError } from './ApiError.js';
-import { MAX_GENERATION_ATTEMPTS } from '@network/shared';
+import { USERNAME_MAX_GENERATION_ATTEMPTS } from '@network/shared';
 
 export const generateUsername = (name: string): string => {
   const base = name
@@ -14,7 +14,7 @@ export const generateUniqueUsername = async (
   name: string,
   isTaken: (candidate: string) => Promise<boolean>
 ): Promise<string> => {
-  for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
+  for (let attempt = 0; attempt < USERNAME_MAX_GENERATION_ATTEMPTS; attempt++) {
     const candidate = generateUsername(name);
     if (!(await isTaken(candidate))) {
       return candidate;

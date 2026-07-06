@@ -6,5 +6,4 @@ export const ALLOWED_AVATAR_MIME_TYPES = [
 ];
 export const USER_ROLES = ['user', 'moderator', 'admin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
-export const AUTH_PROVIDERS = ['local', 'google', 'github'] as const;
-export type AuthProvider = (typeof AUTH_PROVIDERS)[number];
+export const USERNAME_MAX_GENERATION_ATTEMPTS = 5;

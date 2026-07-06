@@ -8,4 +8,3 @@ export const STORAGE_PROVIDERS = [
 ] as const;
 export const VIDEO_PROVIDERS = ['cloudflare', 'mux', 'bunny-stream'] as const;
 export const IMAGE_PROVIDERS = ['cloudflare', 's3-cdn'] as const;
-export const SEVEN_DAYS_MS = 604800000;
