@@ -35,6 +35,7 @@ export interface ICreatorProfile {
   uploadActivity: string[];
   videoPublishCount: number;
   shortPublishCount: number;
+  postPublishCount: number;
 }
 
 export interface ICreatorCatalog {
