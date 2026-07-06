@@ -146,6 +146,7 @@ postSchema.pre('validate', function () {
 });
 
 postSchema.index({ status: 1, visibility: 1, createdAt: -1 });
+
 postSchema.index({ userId: 1, status: 1, createdAt: -1 });
 
 export const PostModel = mongoose.model<IPostDocument>('Post', postSchema);
