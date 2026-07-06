@@ -51,6 +51,15 @@ export const incrementShortPublishCount = (userId: string): Promise<number> =>
     .exec()
     .then((doc) => doc.shortPublishCount);
 
+export const incrementPostPublishCount = (userId: string): Promise<number> =>
+  CreatorModel.findOneAndUpdate(
+    { userId: new mongoose.Types.ObjectId(userId) },
+    { $inc: { postPublishCount: 1 } },
+    { returnDocument: 'after', upsert: true }
+  )
+    .exec()
+    .then((doc) => doc.postPublishCount);
+
 export const pushActivity = (
   userId: string,
   date: Date

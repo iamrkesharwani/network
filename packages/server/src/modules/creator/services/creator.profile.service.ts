@@ -21,5 +21,6 @@ export const getProfile = async (userId: string): Promise<ICreatorProfile> => {
     uploadActivity: doc.uploadActivity.map((d) => d.toISOString()),
     videoPublishCount: doc.videoPublishCount,
     shortPublishCount: doc.shortPublishCount,
+    postPublishCount: doc.postPublishCount,
   };
 };

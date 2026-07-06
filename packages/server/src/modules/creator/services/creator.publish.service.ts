@@ -9,15 +9,17 @@ import { evaluateTrustTiers } from './creator.trust.service.js';
 
 export const recordPublish = async (
   userId: string,
-  contentType: 'video' | 'short'
+  contentType: 'video' | 'short' | 'post'
 ): Promise<ICreatorEvent> => {
   await creatorRepository.pushActivity(userId, new Date());
   await creatorRepository.incrementTrustScore(userId, TRUST_POINTS.PUBLISH);
 
   if (contentType === 'video') {
     await creatorRepository.incrementVideoPublishCount(userId);
-  } else {
+  } else if (contentType === 'short') {
     await creatorRepository.incrementShortPublishCount(userId);
+  } else {
+    await creatorRepository.incrementPostPublishCount(userId);
   }
 
   const newBadgeIds: (keyof typeof BADGE_CATALOG)[] = [];

@@ -32,6 +32,7 @@ export interface ICreatorDocument extends Document {
   publishCount: number;
   videoPublishCount: number;
   shortPublishCount: number;
+  postPublishCount: number;
   unlockedFeatures: string[];
   badges: IBadgeSubdoc[];
   videoMilestones: IVideoMilestoneSubdoc[];
@@ -77,6 +78,7 @@ const creatorSchema = new Schema<ICreatorDocument>(
     publishCount: { type: Number, default: 0, min: 0 },
     videoPublishCount: { type: Number, default: 0, min: 0 },
     shortPublishCount: { type: Number, default: 0, min: 0 },
+    postPublishCount: { type: Number, default: 0, min: 0 },
     unlockedFeatures: {
       type: [String],
       enum: TRUST_FEATURE_IDS,
