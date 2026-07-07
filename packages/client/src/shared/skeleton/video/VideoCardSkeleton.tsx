@@ -1,4 +1,4 @@
-import Skeleton from '../Skeleton';
+import Skeleton from '../gen/Skeleton';
 
 const VideoCardSkeleton = () => (
   <div className="flex flex-col gap-2.5">

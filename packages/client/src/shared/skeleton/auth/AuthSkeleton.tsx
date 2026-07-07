@@ -1,5 +1,5 @@
-import AuthLayout from '../../features/auth/components/AuthLayout';
-import Skeleton from './Skeleton';
+import AuthLayout from '../../../features/auth/components/AuthLayout';
+import Skeleton from '../gen/Skeleton';
 
 const buttonShell =
   'w-full flex items-center justify-center gap-2.5 px-5 py-[0.825rem] rounded-[10px] border border-white/9 bg-[--color-surface-raised]';

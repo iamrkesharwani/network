@@ -1,8 +1,8 @@
-import FeedSkeletonDesktop from './desktop/FeedSkeletonDesktop';
-import FeedSkeletonTabletLandscape from './tablet/FeedSkeletonTabletLandscape';
-import FeedSkeletonTabletPortrait from './tablet/FeedSkeletonTabletPortrait';
-import FeedSkeletonMobilePortrait from './mobile/FeedSkeletonMobilePortrait';
-import FeedSkeletonMobileLandscape from './mobile/FeedSkeletonMobileLandscape';
+import FeedSkeletonDesktop from '../feed/desktop/FeedSkeletonDesktop';
+import FeedSkeletonTabletLandscape from '../feed/tablet/FeedSkeletonTabletLandscape';
+import FeedSkeletonTabletPortrait from '../feed/tablet/FeedSkeletonTabletPortrait';
+import FeedSkeletonMobilePortrait from '../feed/mobile/FeedSkeletonMobilePortrait';
+import FeedSkeletonMobileLandscape from '../feed/mobile/FeedSkeletonMobileLandscape';
 import { useFeedLayout } from '../../../features/feed/hooks/useFeedLayout';
 
 const FeedSkeleton = () => {

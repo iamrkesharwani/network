@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import AuthSkeleton from '../shared/skeleton/AuthSkeleton';
+import AuthSkeleton from '../shared/skeleton/auth/AuthSkeleton';
 import { useAppSelector } from '../shared/hooks/useAppSelector';
 
 const GuestRoute = () => {
