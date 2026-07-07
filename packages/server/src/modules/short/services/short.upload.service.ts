@@ -7,16 +7,13 @@ import {
   type ShortUploadInput,
 } from '@network/shared';
 import * as shortRepository from '../short.repository.js';
-import {
-  storageProvider,
-  videoProvider,
-  imageProvider,
-} from '../../../providers/provider.js';
+import { storageProvider, imageProvider } from '../../../providers/provider.js';
 import { redisClient } from '../../../config/redis.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { getOwnerId } from '../../../utils/getOwnerId.js';
 import { uploadSessionKey, toResponse } from './short.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
+import { ingestFromStorage } from '../../upload/services/upload.ingest.service.js';
 
 export const initiateUpload = async (
   userId: string,
@@ -71,10 +68,8 @@ export const confirmUpload = async (
     throw new ApiError(404, 'NOT_FOUND', 'Short record not found.');
   }
 
-  const storageUrl = await storageProvider.buildAccessUrl(storageKey);
-
-  const { providerVideoId } = await videoProvider.ingestFromUrl({
-    storageUrl,
+  const { providerVideoId } = await ingestFromStorage({
+    storageKey,
     fileName: placeholder.title,
     fileSizeBytes,
     userId,

@@ -7,16 +7,13 @@ import {
   type PostFinaliseInput,
 } from '@network/shared';
 import * as postRepository from '../post.repository.js';
-import {
-  storageProvider,
-  videoProvider,
-  imageProvider,
-} from '../../../providers/provider.js';
+import { storageProvider, imageProvider } from '../../../providers/provider.js';
 import { redisClient } from '../../../config/redis.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { getOwnerId } from '../../../utils/getOwnerId.js';
 import { uploadSessionKey, toResponse } from './post.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
+import { ingestFromStorage } from '../../upload/services/upload.ingest.service.js';
 
 export const createPost = async (
   userId: string,
@@ -101,10 +98,8 @@ export const confirmVideoUpload = async (
     throw new ApiError(404, 'NOT_FOUND', 'Post record not found.');
   }
 
-  const storageUrl = await storageProvider.buildAccessUrl(storageKey);
-
-  const { providerVideoId } = await videoProvider.ingestFromUrl({
-    storageUrl,
+  const { providerVideoId } = await ingestFromStorage({
+    storageKey,
     fileName: `post-${postId}`,
     fileSizeBytes,
     userId,
