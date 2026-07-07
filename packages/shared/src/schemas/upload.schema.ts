@@ -80,6 +80,14 @@ export const abortMultipartUploadSchema = z.object({
   sessionId: sessionIdSchema,
 });
 
+export const completePartSchema = z.object({
+  etag: etagSchema,
+  size: z
+    .number()
+    .int()
+    .positive({ message: 'size must be a positive integer.' }),
+});
+
 export const mediaIdParamSchema = z.object({
   mediaId: z.string().refine(isValidObjectId, {
     message: 'Invalid media ID.',

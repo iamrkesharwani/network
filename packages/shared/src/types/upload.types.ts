@@ -6,6 +6,7 @@ import {
   presignPartParamSchema,
   completeMultipartUploadSchema,
   abortMultipartUploadSchema,
+  completePartSchema,
   mediaIdParamSchema,
 } from '../schemas/upload.schema.js';
 import { MULTIPART_MEDIA_TYPES } from '../constants/upload.constants.js';
@@ -28,6 +29,7 @@ export type CompleteMultipartUploadInput = z.infer<
 export type AbortMultipartUploadInput = z.infer<
   typeof abortMultipartUploadSchema
 >;
+export type CompletePartInput = z.infer<typeof completePartSchema>;
 export type MediaIdParam = z.infer<typeof mediaIdParamSchema>;
 
 export type MultipartSessionStatus = 'active' | 'completed' | 'aborted';
