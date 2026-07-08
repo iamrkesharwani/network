@@ -1,5 +1,5 @@
 import type { IShortResponse } from '@network/shared';
-import { SHORTS_FEED_PAGE_SIZE } from '../feedConfig';
+import { SHORTS_FEED_PAGE_SIZE } from '@network/shared';
 import { useLiveFeed, type UseLiveFeedResult } from './useLiveFeed';
 import { shortApi } from '../../short/shortApi';
 

@@ -8,7 +8,7 @@ import PostCard from '../../post/pages/PostCard';
 import { useLiveVideoFeed } from '../hooks/useLiveVideoFeed';
 import { useLiveShortsFeed } from '../hooks/useLiveShortsFeed';
 import { useLivePostFeed } from '../hooks/useLivePostFeed';
-import { SHORTS_PREFETCH_THRESHOLD } from '../feedConfig';
+import { SHORTS_PREFETCH_THRESHOLD } from '@network/shared';
 import { buildFeedBlocks } from '../mobile/buildFeedBlocks';
 import type { ColCount } from '../../../shared/utils/videoGrid';
 
