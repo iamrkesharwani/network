@@ -8,7 +8,7 @@ import {
   changeEmailSchema,
   refreshSchema,
 } from '../schemas/auth.schema.js';
-import { AUTH_PROVIDERS } from '../constants/user.constants.js';
+import { AUTH_PROVIDERS } from '../constants/auth.constants.js'; 
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;

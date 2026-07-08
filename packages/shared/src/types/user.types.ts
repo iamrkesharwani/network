@@ -3,7 +3,8 @@ import {
   userRegistrationSchema,
   userProfileUpdateSchema,
 } from '../schemas/user.schema.js';
-import { AUTH_PROVIDERS, USER_ROLES } from '../constants/user.constants.js';
+import { AUTH_PROVIDERS } from '../constants/auth.constants.js';
+import { USER_ROLES } from '../constants/user.constants.js';
 
 export type UserRegistrationInput = z.infer<typeof userRegistrationSchema>;
 export type UserProfileUpdateInput = z.infer<typeof userProfileUpdateSchema>;
