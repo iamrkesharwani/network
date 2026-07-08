@@ -3,12 +3,16 @@ import { useInView } from 'react-intersection-observer';
 import { useShort } from '../../short/useShort';
 import { useLiveVideoFeed } from '../hooks/useLiveVideoFeed';
 import { useLiveShortsFeed } from '../hooks/useLiveShortsFeed';
+import { useLivePostFeed } from '../hooks/useLivePostFeed';
 import { buildFeedBlocks } from './buildFeedBlocks';
 import ShortThumbnail from './ShortThumbnail';
 import VideoGrid from '../../video/pages/VideoGrid';
+import PostGrid from '../../post/pages/PostGrid';
+import PostCard from '../../post/pages/PostCard';
 
 const SHORTS_PER_BLOCK = 2;
 const VIDEOS_PER_BLOCK = 6;
+const POSTS_PER_BLOCK = 2;
 
 const FeedMobilePortrait = () => {
   const { activeIndex, goToIndex } = useShort();
@@ -31,6 +35,13 @@ const FeedMobilePortrait = () => {
     loadMore: loadMoreShorts,
   } = useLiveShortsFeed();
 
+  const {
+    items: posts,
+    hasNextPage: hasNextPostsPage,
+    isFetchingNextPage: postsLoadingMore,
+    loadMore: loadMorePosts,
+  } = useLivePostFeed();
+
   const { ref: shortsSentinelRef } = useInView({
     onChange: (inView) => {
       if (inView && hasNextShortsPage && !shortsLoadingMore) {
@@ -39,16 +50,27 @@ const FeedMobilePortrait = () => {
     },
   });
 
+  const { ref: postsSentinelRef } = useInView({
+    onChange: (inView) => {
+      if (inView && hasNextPostsPage && !postsLoadingMore) {
+        loadMorePosts();
+      }
+    },
+  });
+
   useEffect(() => {
     mainScrollRef.current = document.querySelector('main');
   }, []);
 
-  const { blocks, remainingShorts, shortsInBlocks } = buildFeedBlocks(
-    shorts,
-    videos,
-    SHORTS_PER_BLOCK,
-    VIDEOS_PER_BLOCK
-  );
+  const { blocks, remainingShorts, shortsInBlocks, remainingPosts } =
+    buildFeedBlocks(
+      shorts,
+      videos,
+      posts,
+      SHORTS_PER_BLOCK,
+      VIDEOS_PER_BLOCK,
+      POSTS_PER_BLOCK
+    );
 
   return (
     <div className="flex flex-col gap-5 w-full">
@@ -71,6 +93,7 @@ const FeedMobilePortrait = () => {
         <>
           {blocks.map((block, blockIdx) => {
             if (block.type === 'shorts') {
+              if (block.items.length === 0) return null;
               return (
                 <div
                   key={`shorts-${blockIdx}`}
@@ -88,6 +111,20 @@ const FeedMobilePortrait = () => {
                     );
                   })}
                 </div>
+              );
+            }
+
+            if (block.type === 'posts') {
+              if (block.items.length === 0) return null;
+              return (
+                <PostGrid
+                  key={`posts-${blockIdx}`}
+                  posts={block.items}
+                  scrollRef={
+                    mainScrollRef as React.RefObject<HTMLElement | null>
+                  }
+                  hideEndDivider
+                />
               );
             }
 
@@ -136,6 +173,20 @@ const FeedMobilePortrait = () => {
                   />
                 )}
               </div>
+            </div>
+          )}
+
+          {remainingPosts.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+                More Posts
+              </p>
+              {remainingPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+              {hasNextPostsPage && (
+                <div ref={postsSentinelRef} className="h-4" aria-hidden />
+              )}
             </div>
           )}
         </>

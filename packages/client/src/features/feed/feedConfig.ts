@@ -1,3 +1,0 @@
-export const VIDEO_FEED_PAGE_SIZE = 12;
-export const SHORTS_FEED_PAGE_SIZE = 20;
-export const SHORTS_PREFETCH_THRESHOLD = 3;

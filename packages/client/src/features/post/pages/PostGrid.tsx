@@ -29,6 +29,7 @@ export interface PostGridProps {
   emptyMessage?: string;
   emptySubMessage?: string;
   scrollRef?: React.RefObject<HTMLElement | null>;
+  hideEndDivider?: boolean;
 }
 
 const estimatePostHeight = (post: IPostResponse): number => {
@@ -53,6 +54,7 @@ const PostGrid = ({
   emptyMessage = 'No posts yet',
   emptySubMessage = "When posts are added they'll appear here.",
   scrollRef: externalScrollRef,
+  hideEndDivider = false,
 }: PostGridProps) => {
   const internalScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = (externalScrollRef ??
@@ -62,7 +64,7 @@ const PostGrid = ({
     ...posts,
     ...(isFetchingNextPage
       ? (['skeleton'] as const)
-      : !hasNextPage && posts.length > 0
+      : !hasNextPage && posts.length > 0 && !hideEndDivider
         ? (['end'] as const)
         : []),
   ];
