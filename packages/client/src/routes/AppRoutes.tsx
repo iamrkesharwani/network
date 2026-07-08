@@ -12,6 +12,8 @@ import FeedPage from '../features/feed/FeedPage';
 import UploadHub from '../features/upload/components/UploadHub';
 import VideoUploadWizard from '../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../features/short/form/ShortUploadWizard';
+import PostComposer from '../features/post/form/PostComposer';
+import PostsFeedPage from '../features/post/pages/PostsFeedPage';
 import { Profile, Settings, NotFound } from './__dev__/PlaceholderPages';
 
 export const routes: RouteObject[] = [
@@ -37,6 +39,8 @@ export const routes: RouteObject[] = [
           { path: '/upload', element: <UploadHub /> },
           { path: '/upload/video', element: <VideoUploadWizard /> },
           { path: '/upload/short', element: <ShortUploadWizard /> },
+          { path: '/upload/post', element: <PostComposer /> },
+          { path: '/posts', element: <PostsFeedPage /> },
           { path: '/profile', element: <Profile /> },
           { path: '/settings', element: <Settings /> },
         ],
