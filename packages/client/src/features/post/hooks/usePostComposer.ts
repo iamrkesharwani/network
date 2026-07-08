@@ -110,7 +110,17 @@ export const usePostComposer = ({
           'Video uploaded, but finalising the post failed. Please retry.'
         );
       });
-  }, [attachment.kind, videoUpload.state.stage, videoUpload.state.videoId]);
+  }, [
+    attachment.kind,
+    videoUpload.state.stage,
+    videoUpload.state.videoId,
+    finalisePost,
+    onPublished,
+    reset,
+    tags,
+    text,
+    visibility,
+  ]);
 
   const isUploadingVideo =
     attachment.kind === 'video' &&

@@ -9,10 +9,11 @@ import ShortThumbnail from './ShortThumbnail';
 import VideoGrid from '../../video/pages/VideoGrid';
 import PostGrid from '../../post/pages/PostGrid';
 import PostCard from '../../post/pages/PostCard';
-
-const SHORTS_PER_BLOCK = 2;
-const VIDEOS_PER_BLOCK = 6;
-const POSTS_PER_BLOCK = 2;
+import {
+  MOB_SHORTS_PER_BLOCK,
+  MOB_VIDEOS_PER_BLOCK,
+  MOB_POSTS_PER_BLOCK,
+} from '@network/shared';
 
 const FeedMobilePortrait = () => {
   const { activeIndex, goToIndex } = useShort();
@@ -67,9 +68,9 @@ const FeedMobilePortrait = () => {
       shorts,
       videos,
       posts,
-      SHORTS_PER_BLOCK,
-      VIDEOS_PER_BLOCK,
-      POSTS_PER_BLOCK
+      MOB_SHORTS_PER_BLOCK,
+      MOB_VIDEOS_PER_BLOCK,
+      MOB_POSTS_PER_BLOCK
     );
 
   return (

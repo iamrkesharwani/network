@@ -1,6 +1,7 @@
+import { useCallback } from 'react';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import { useAppDispatch } from '../../shared/hooks/useAppDispatch';
-import type { IShortResponse } from '../../../../shared/src';
+import type { IShortResponse } from '@network/shared';
 import {
   clearUploadState,
   setActiveIndex,
@@ -13,31 +14,40 @@ export const useShort = () => {
   const { currentShort, uploadProgress, isUploading, activeIndex } =
     useAppSelector((state) => state.short);
 
-  const updateCurrentShort = (short: IShortResponse | null) => {
-    dispatch(setCurrentShort(short));
-  };
+  const updateCurrentShort = useCallback(
+    (short: IShortResponse | null) => {
+      dispatch(setCurrentShort(short));
+    },
+    [dispatch]
+  );
 
-  const updateUploadProgress = (progress: number) => {
-    dispatch(setUploadProgress(progress));
-  };
+  const updateUploadProgress = useCallback(
+    (progress: number) => {
+      dispatch(setUploadProgress(progress));
+    },
+    [dispatch]
+  );
 
-  const resetUpload = () => {
+  const resetUpload = useCallback(() => {
     dispatch(clearUploadState());
-  };
+  }, [dispatch]);
 
-  const goToIndex = (index: number) => {
-    dispatch(setActiveIndex(index));
-  };
+  const goToIndex = useCallback(
+    (index: number) => {
+      dispatch(setActiveIndex(index));
+    },
+    [dispatch]
+  );
 
-  const goNext = () => {
+  const goNext = useCallback(() => {
     dispatch(setActiveIndex(activeIndex + 1));
-  };
+  }, [dispatch, activeIndex]);
 
-  const goPrev = () => {
+  const goPrev = useCallback(() => {
     if (activeIndex > 0) {
       dispatch(setActiveIndex(activeIndex - 1));
     }
-  };
+  }, [dispatch, activeIndex]);
 
   return {
     currentShort,

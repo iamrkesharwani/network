@@ -9,10 +9,11 @@ import { buildFeedBlocks } from './buildFeedBlocks';
 import { useLiveVideoFeed } from '../hooks/useLiveVideoFeed';
 import { useLiveShortsFeed } from '../hooks/useLiveShortsFeed';
 import { useLivePostFeed } from '../hooks/useLivePostFeed';
-
-const SHORTS_PER_BLOCK = 4;
-const VIDEOS_PER_BLOCK = 6;
-const POSTS_PER_BLOCK = 2;
+import {
+  MOB_SHORTS_PER_BLOCK,
+  MOB_VIDEOS_PER_BLOCK,
+  MOB_POSTS_PER_BLOCK,
+} from '@network/shared';
 
 const FeedMobileLandscape = () => {
   const { activeIndex, goToIndex } = useShort();
@@ -67,9 +68,9 @@ const FeedMobileLandscape = () => {
       shorts,
       videos,
       posts,
-      SHORTS_PER_BLOCK,
-      VIDEOS_PER_BLOCK,
-      POSTS_PER_BLOCK
+      MOB_SHORTS_PER_BLOCK,
+      MOB_VIDEOS_PER_BLOCK,
+      MOB_POSTS_PER_BLOCK
     );
 
   return (

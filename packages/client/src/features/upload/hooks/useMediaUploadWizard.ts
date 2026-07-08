@@ -109,7 +109,9 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     if (mediaId) {
       try {
         await deleteMedia(mediaId).unwrap();
-      } catch {}
+      } catch (error) {
+        console.error('Failed to delete abandoned media:', error);
+      }
     }
     setIsAbandoning(false);
     setShowLeaveConfirm(false);

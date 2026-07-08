@@ -79,7 +79,9 @@ const ShortEditForm = ({
     submitError,
     submit,
   } = useMediaEditForm<ShortFormValues, ShortUploadInput>({
-    schema: mode === 'finalise' ? shortUploadSchema : shortUpdateSchema,
+    schema: (mode === 'finalise'
+      ? shortUploadSchema
+      : shortUpdateSchema) as typeof shortUploadSchema,
     defaultValues: {
       title: initialValues?.title ?? '',
       description: initialValues?.description ?? '',

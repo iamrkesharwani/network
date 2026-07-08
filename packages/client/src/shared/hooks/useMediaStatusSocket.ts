@@ -59,5 +59,5 @@ export const useMediaStatusSocket = (): void => {
     return () => {
       socket.off('media:status', handleMediaStatus);
     };
-  }, [accessToken, dispatch, addToast]);
+  }, [accessToken, dispatch, addToast, socketRef]);
 };

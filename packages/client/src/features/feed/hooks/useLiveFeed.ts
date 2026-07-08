@@ -43,7 +43,7 @@ export const useLiveFeed = <T extends { id: string }>(
   const loadMore = useCallback(() => {
     if (!hasNextPage || isFetching) return;
     setPage((p) => p + 1);
-  }, [page, refetch]);
+  }, [hasNextPage, isFetching]);
 
   const retry = useCallback(() => {
     if (page === 1) {

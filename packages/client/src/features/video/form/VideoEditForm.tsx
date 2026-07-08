@@ -83,7 +83,9 @@ const VideoEditForm = ({
     submitError,
     submit,
   } = useMediaEditForm<VideoFormValues, VideoUploadInput>({
-    schema: mode === 'finalise' ? videoUploadSchema : videoUpdateSchema,
+    schema: (mode === 'finalise'
+      ? videoUploadSchema
+      : videoUpdateSchema) as typeof videoUploadSchema,
     defaultValues: {
       title: initialValues?.title ?? '',
       description: initialValues?.description ?? '',

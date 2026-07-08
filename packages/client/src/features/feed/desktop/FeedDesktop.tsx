@@ -9,9 +9,9 @@ import { useLiveVideoFeed } from '../hooks/useLiveVideoFeed';
 import { useLiveShortsFeed } from '../hooks/useLiveShortsFeed';
 import { useLivePostFeed } from '../hooks/useLivePostFeed';
 import {
-  POSTS_PER_BLOCK,
+  DESK_TAB_POSTS_PER_BLOCK,
   SHORTS_PREFETCH_THRESHOLD,
-  VIDEOS_PER_BLOCK,
+  DESK_TAB_VIDEOS_PER_BLOCK,
 } from '@network/shared';
 import { buildFeedBlocks } from '../mobile/buildFeedBlocks';
 import type { ColCount } from '../../../shared/utils/videoGrid';
@@ -54,7 +54,7 @@ const FeedDesktop = () => {
 
   useEffect(() => {
     updateCurrentShort(shorts[activeIndex] ?? null);
-  }, [activeIndex, shorts]);
+  }, [activeIndex, shorts, updateCurrentShort]);
 
   useEffect(() => {
     if (
@@ -87,8 +87,8 @@ const FeedDesktop = () => {
     videos,
     posts,
     0,
-    VIDEOS_PER_BLOCK,
-    POSTS_PER_BLOCK
+    DESK_TAB_VIDEOS_PER_BLOCK,
+    DESK_TAB_POSTS_PER_BLOCK
   );
 
   return (
