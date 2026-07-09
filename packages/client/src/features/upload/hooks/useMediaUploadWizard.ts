@@ -4,8 +4,16 @@ import type {
   ApiResponse,
   ICreatorEvent,
   MediaProcessingStatus,
+  MultipartMediaType,
   UploadState,
 } from '@network/shared';
+import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
+import { useAppSelector } from '../../../shared/hooks/useAppSelector';
+import {
+  resetWizardState,
+  selectWizardState,
+  setWizardState,
+} from '../uploadSlice';
 import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
 import { createThumbnailUploader } from './useMediaEditForm';
 
@@ -28,6 +36,7 @@ export interface UploadHookResult {
 export interface MediaUploadWizardConfig<
   TMediaResponse extends BaseMediaResponse,
 > {
+  mediaType: MultipartMediaType;
   mediaLabel: string;
   upload: UploadHookResult;
   useGetByIdQuery: (
@@ -43,8 +52,14 @@ export interface MediaUploadWizardConfig<
 export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
   config: MediaUploadWizardConfig<TMediaResponse>
 ) => {
-  const { mediaLabel, upload, useGetByIdQuery, deleteMedia, uploadThumbnail } =
-    config;
+  const {
+    mediaType,
+    mediaLabel,
+    upload,
+    useGetByIdQuery,
+    deleteMedia,
+    uploadThumbnail,
+  } = config;
   const {
     state: uploadState,
     startUpload,
@@ -52,10 +67,11 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     reset: resetUpload,
   } = upload;
 
-  const [step, setStep] = useState<WizardStep>('drop');
-  const [mediaId, setMediaId] = useState<string | null>(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | undefined>();
-  const [finalMedia, setFinalMedia] = useState<TMediaResponse | null>(null);
+  const dispatch = useAppDispatch();
+  const wizard = useAppSelector(selectWizardState(mediaType));
+  const { step, mediaId, thumbnailUrl, finalMedia: finalMediaRaw } = wizard;
+  const finalMedia = finalMediaRaw as TMediaResponse | null;
+
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [isAbandoning, setIsAbandoning] = useState(false);
   const [isProcessingTerminal, setIsProcessingTerminal] = useState(false);
@@ -63,6 +79,14 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
   const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
 
   const handleThumbnailUpload = createThumbnailUploader(uploadThumbnail);
+
+  const setStep = (nextStep: WizardStep) => {
+    dispatch(setWizardState({ mediaType, patch: { step: nextStep } }));
+  };
+
+  const setThumbnailUrl = (url: string | undefined) => {
+    dispatch(setWizardState({ mediaType, patch: { thumbnailUrl: url } }));
+  };
 
   const shouldPoll = !!mediaId && step !== 'drop';
   const { data: mediaData } = useGetByIdQuery(mediaId ?? '', {
@@ -80,26 +104,59 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
   }, [processingStatus]);
 
   useEffect(() => {
+    dispatch(
+      setWizardState({
+        mediaType,
+        patch: {
+          stage: uploadState.stage,
+          progressPercent: uploadState.progressPercent,
+          sessionId: uploadState.sessionId,
+          fingerprint: uploadState.fingerprint,
+          uploadedParts: uploadState.uploadedParts,
+          totalParts: uploadState.totalParts,
+        },
+      })
+    );
+  }, [
+    dispatch,
+    mediaType,
+    uploadState.stage,
+    uploadState.progressPercent,
+    uploadState.sessionId,
+    uploadState.fingerprint,
+    uploadState.uploadedParts,
+    uploadState.totalParts,
+  ]);
+
+  useEffect(() => {
     if (uploadState.stage === 'done' && uploadState.videoId) {
-      setMediaId(uploadState.videoId);
-      setStep('thumbnail');
+      dispatch(
+        setWizardState({
+          mediaType,
+          patch: { mediaId: uploadState.videoId, step: 'thumbnail' },
+        })
+      );
     }
-  }, [uploadState.stage, uploadState.videoId]);
+  }, [dispatch, mediaType, uploadState.stage, uploadState.videoId]);
 
   const handleDetailsSuccess = (
     media: TMediaResponse,
     creatorEvent?: ICreatorEvent | null
   ) => {
-    setFinalMedia(media);
+    dispatch(
+      setWizardState({
+        mediaType,
+        patch: {
+          finalMedia: media as unknown as Record<string, unknown>,
+          step: 'launch',
+        },
+      })
+    );
     celebrate(creatorEvent ?? null);
-    setStep('launch');
   };
 
   const resetWizard = () => {
-    setStep('drop');
-    setMediaId(null);
-    setThumbnailUrl(undefined);
-    setFinalMedia(null);
+    dispatch(resetWizardState({ mediaType }));
     setIsProcessingTerminal(false);
     resetUpload();
   };

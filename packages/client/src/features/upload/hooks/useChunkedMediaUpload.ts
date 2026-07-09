@@ -27,6 +27,10 @@ const initialState: UploadState = {
   speedBytesPerSec: 0,
   etaSeconds: null,
   error: null,
+  sessionId: null,
+  fingerprint: null,
+  uploadedParts: [],
+  totalParts: 0,
 };
 
 const readVideoDuration = (file: File): Promise<number | undefined> =>
@@ -251,6 +255,7 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
       setState((prev) => ({ ...prev, stage: 'requesting' }));
 
       const fingerprint = computeFileFingerprint(file);
+      setState((prev) => ({ ...prev, fingerprint }));
 
       let sessionId: string;
       let mediaId: string;
@@ -305,7 +310,14 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
       }
 
       sessionIdRef.current = sessionId;
-      setState((prev) => ({ ...prev, stage: 'uploading', videoId: mediaId }));
+      setState((prev) => ({
+        ...prev,
+        stage: 'uploading',
+        videoId: mediaId,
+        sessionId,
+        totalParts,
+        uploadedParts: completedParts.map((part) => part.partNumber),
+      }));
 
       const completedByNumber = new Map(
         completedParts.map((part) => [part.partNumber, part.etag])
@@ -339,6 +351,10 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
           completedByNumber.set(partNumber, etag);
           baseUploadedBytes += end - start;
           reportProgress(baseUploadedBytes, file.size);
+          setState((prev) => ({
+            ...prev,
+            uploadedParts: Array.from(completedByNumber.keys()),
+          }));
         }
       } catch (err) {
         if (cancelledRef.current || (err as Error)?.message === 'cancelled') {

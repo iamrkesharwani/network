@@ -18,6 +18,10 @@ export interface UploadState {
   speedBytesPerSec: number;
   etaSeconds: number | null;
   error: string | null;
+  sessionId: string | null;
+  fingerprint: string | null;
+  uploadedParts: number[];
+  totalParts: number;
 }
 
 export const MULTIPART_MEDIA_TYPES = ['video', 'short', 'post'] as const;

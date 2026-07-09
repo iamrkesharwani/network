@@ -55,6 +55,7 @@ const VideoUploadWizard = () => {
     statusLabel,
     showStatusBar,
   } = useMediaUploadWizard<IVideoResponse>({
+    mediaType: 'video',
     mediaLabel: 'video',
     upload,
     useGetByIdQuery: useGetVideoByIdQuery,

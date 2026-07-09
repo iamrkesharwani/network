@@ -55,6 +55,7 @@ const ShortUploadWizard = () => {
     statusLabel,
     showStatusBar,
   } = useMediaUploadWizard<IShortResponse>({
+    mediaType: 'short',
     mediaLabel: 'short',
     upload,
     useGetByIdQuery: useGetShortByIdQuery,
