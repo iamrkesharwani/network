@@ -1,5 +1,10 @@
 import mongoose, { Schema, type Document } from 'mongoose';
-import { USER_ROLES, AUTH_PROVIDERS, type IUser } from '@network/shared';
+import {
+  USER_ROLES,
+  AUTH_PROVIDERS,
+  EMAIL_MAX_LENGTH,
+  type IUser,
+} from '@network/shared';
 
 export interface IUserDocument extends IUser, Document {
   password?: string;
@@ -30,6 +35,7 @@ const userSchema = new Schema<IUserDocument>(
       unique: true,
       trim: true,
       lowercase: true,
+      maxlength: EMAIL_MAX_LENGTH,
     },
     password: {
       type: String,

@@ -23,3 +23,16 @@ export const generateRefreshToken = async (userId: string): Promise<string> => {
   await redisClient.set(tokenKey, 'valid', 'EX', SEVEN_DAYS_SECONDS);
   return token;
 };
+
+export const revokeAllRefreshTokensForUser = async (
+  userId: string
+): Promise<void> => {
+  const pattern = `refresh_token:${userId}:*`;
+  const stream = redisClient.scanStream({ match: pattern, count: 100 });
+
+  for await (const keys of stream as AsyncIterable<string[]>) {
+    if (keys.length > 0) {
+      await redisClient.del(...keys);
+    }
+  }
+};

@@ -21,7 +21,7 @@ const createLimiter = (
   message: string,
   prefix: string
 ): RequestHandler => {
-  if (env.NODE_ENV === 'development') return noopLimiter;
+  if (env.DISABLE_RATE_LIMIT) return noopLimiter;
 
   return rateLimit({
     store: createStore(prefix),

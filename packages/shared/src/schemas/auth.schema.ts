@@ -1,12 +1,21 @@
 import { z } from 'zod';
 import { userRegistrationSchema } from './user.schema.js';
+import { PASSWORD_MAX_LENGTH } from '../constants/user.constants.js';
 
 const passwordValidation = userRegistrationSchema.shape.password;
 const emailValidation = userRegistrationSchema.shape.email;
 
+const currentPasswordValidation = z
+  .string()
+  .min(1, 'Password is required.')
+  .max(
+    PASSWORD_MAX_LENGTH,
+    `Password cannot exceed ${PASSWORD_MAX_LENGTH} characters.`
+  );
+
 export const loginSchema = z.object({
   email: emailValidation,
-  password: z.string().min(1, 'Password is required.'),
+  password: currentPasswordValidation,
 });
 
 export const verifyEmailSchema = z.object({
@@ -34,7 +43,7 @@ export const completeResetPasswordSchema = z.object({
 
 export const changePasswordSchema = z
   .object({
-    oldPassword: z.string().min(1, 'Current password is required.'),
+    oldPassword: currentPasswordValidation,
     newPassword: passwordValidation,
   })
   .refine((data) => data.oldPassword !== data.newPassword, {
@@ -44,7 +53,7 @@ export const changePasswordSchema = z
 
 export const changeEmailSchema = z.object({
   newEmail: emailValidation,
-  password: z.string().min(1, 'Password is required to confirm email change.'),
+  password: currentPasswordValidation,
 });
 
 export const refreshSchema = z.object({

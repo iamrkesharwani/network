@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
 export const appEnvSchema = z.object({
-  NODE_ENV: z
-    .enum(['development', 'production', 'test'])
-    .default('development'),
+  NODE_ENV: z.enum(['development', 'production', 'test']),
 
   PORT: z.coerce.number().default(5000),
 
@@ -12,6 +10,11 @@ export const appEnvSchema = z.object({
   CLIENT_URL: z.url(),
 
   TRUST_PROXY_HOPS: z.string().default('1'),
+  
+  DISABLE_RATE_LIMIT: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
 
   LOG_LEVEL: z
     .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])

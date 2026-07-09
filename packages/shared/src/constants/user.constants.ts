@@ -8,3 +8,6 @@ export const USER_ROLES = ['user', 'moderator', 'admin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 export const DEFAULT_USER_ROLE: UserRole = 'user';
 export const USERNAME_MAX_GENERATION_ATTEMPTS = 5;
+export const EMAIL_MAX_LENGTH = 254;
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 128;

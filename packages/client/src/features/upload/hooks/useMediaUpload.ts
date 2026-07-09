@@ -14,6 +14,12 @@ const initialState: UploadState = {
   speedBytesPerSec: 0,
   etaSeconds: null,
   error: null,
+  // Multipart-only fields — unused by this single-PUT flow.
+  sessionId: null,
+  fingerprint: null,
+  uploadedParts: [],
+  totalParts: 0,
+  storageKey: null,
 };
 
 const readVideoDuration = (file: File): Promise<number | undefined> =>

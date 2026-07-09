@@ -3,6 +3,7 @@ import { ApiError } from '../../../core/utils/ApiError.js';
 import { hashPassword, verifyPassword } from '../../../core/utils/hash.js';
 import { redisClient } from '../../../core/config/redis.js';
 import { randomInt } from 'node:crypto';
+import { revokeAllRefreshTokensForUser } from '../../../core/utils/token.js';
 import { queuePasswordResetEmail } from '../../email/email.js';
 import { tryStartOtpCooldown } from '../../../core/utils/otpCooldown.js';
 import {
@@ -30,6 +31,8 @@ export const changePassword = async (
   }
 
   await authRepository.updatePassword(user, await hashPassword(newPassword));
+
+  await revokeAllRefreshTokensForUser(user.id);
 };
 
 export const requestPasswordReset = async (email: string) => {
@@ -50,7 +53,12 @@ export const requestPasswordReset = async (email: string) => {
   const tokenKey = `pwd_reset_verify:${email}`;
   const attemptsKey = `pwd_reset_attempts:${email}`;
 
-  await redisClient.set(tokenKey, hashedOtp, 'EX', OTP_VERIFICATION_TTL_SECONDS);
+  await redisClient.set(
+    tokenKey,
+    hashedOtp,
+    'EX',
+    OTP_VERIFICATION_TTL_SECONDS
+  );
   await redisClient.set(attemptsKey, '0', 'EX', OTP_VERIFICATION_TTL_SECONDS);
 
   await queuePasswordResetEmail({ to: email, userName: user.name, otp });
@@ -93,6 +101,8 @@ export const completePasswordReset = async (
   }
 
   await authRepository.updatePassword(user, await hashPassword(newPassword));
+
+  await revokeAllRefreshTokensForUser(user.id);
 
   await redisClient.del(tokenKey);
   await redisClient.del(attemptsKey);

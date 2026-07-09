@@ -159,6 +159,11 @@ const PostComposer = () => {
                 speedBytesPerSec: 0,
                 etaSeconds: null,
                 error: attachmentError,
+                sessionId: null,
+                fingerprint: null,
+                uploadedParts: [],
+                totalParts: 0,
+                storageKey: null,
               }}
               onFileSelect={handleFileSelect}
               onCancel={() => setAttachmentError(null)}

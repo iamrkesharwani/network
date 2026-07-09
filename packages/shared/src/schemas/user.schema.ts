@@ -1,4 +1,9 @@
 import { z } from 'zod';
+import {
+  EMAIL_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MAX_LENGTH,
+} from '../constants/user.constants.js';
 
 export const userRegistrationSchema = z.object({
   name: z
@@ -29,13 +34,23 @@ export const userRegistrationSchema = z.object({
     .trim()
     .toLowerCase()
     .min(1, 'Email is required.')
+    .max(
+      EMAIL_MAX_LENGTH,
+      `Email cannot exceed ${EMAIL_MAX_LENGTH} characters.`
+    )
     .email('Enter a valid email address.'),
 
   password: z
     .string()
     .min(1, 'Password is required.')
-    .min(8, 'Password must be at least 8 characters.')
-    .max(128, 'Password cannot exceed 128 characters.')
+    .min(
+      PASSWORD_MIN_LENGTH,
+      `Password must be at least ${PASSWORD_MIN_LENGTH} characters.`
+    )
+    .max(
+      PASSWORD_MAX_LENGTH,
+      `Password cannot exceed ${PASSWORD_MAX_LENGTH} characters.`
+    )
     .regex(/[A-Z]/, 'Include at least one uppercase letter.')
     .regex(/[a-z]/, 'Include at least one lowercase letter.')
     .regex(/[0-9]/, 'Include at least one number.')
