@@ -183,6 +183,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
       })
     );
     celebrate(creatorEvent ?? null);
+    clearPointer();
   };
 
   const resetWizard = () => {

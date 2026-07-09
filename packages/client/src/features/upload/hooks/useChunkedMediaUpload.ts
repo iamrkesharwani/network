@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import axios from 'axios';
 import {
   MULTIPART_MAX_RETRY_ATTEMPTS_PER_PART,
+  MULTIPART_UPLOAD_CONCURRENCY_LIMIT,
   type UploadState,
   type MultipartMediaType,
 } from '@network/shared';
@@ -100,17 +101,19 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
 
   const [state, setState] = useState<UploadState>(initialState);
   const cancelledRef = useRef(false);
-  const currentPartControllerRef = useRef<AbortController | null>(null);
+  const activeControllersRef = useRef<Set<AbortController>>(new Set());
   const sessionIdRef = useRef<string | null>(null);
   const speedSampleRef = useRef<{ time: number; loaded: number } | null>(null);
   const smoothedSpeedRef = useRef(0);
+  const partProgressRef = useRef<Map<number, number>>(new Map());
 
   const reset = useCallback(() => {
     cancelledRef.current = false;
-    currentPartControllerRef.current = null;
+    activeControllersRef.current.clear();
     sessionIdRef.current = null;
     speedSampleRef.current = null;
     smoothedSpeedRef.current = 0;
+    partProgressRef.current.clear();
     setState(initialState);
   }, []);
 
@@ -154,12 +157,20 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
     []
   );
 
+  const reportAggregateProgress = useCallback(
+    (totalBytes: number) => {
+      let uploaded = 0;
+      for (const bytes of partProgressRef.current.values()) uploaded += bytes;
+      reportProgress(Math.min(uploaded, totalBytes), totalBytes);
+    },
+    [reportProgress]
+  );
+
   const uploadPart = useCallback(
     async (
       sessionId: string,
       partNumber: number,
       blob: Blob,
-      baseUploadedBytes: number,
       totalBytes: number
     ): Promise<{ partNumber: number; etag: string }> => {
       let lastError: unknown;
@@ -173,6 +184,9 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
           throw new Error('cancelled');
         }
 
+        const controller = new AbortController();
+        activeControllersRef.current.add(controller);
+
         try {
           const presignResult = await presignUploadPart({
             sessionId,
@@ -180,13 +194,11 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
           }).unwrap();
           const presigned = presignResult.data;
 
-          const controller = new AbortController();
-          currentPartControllerRef.current = controller;
-
           const response = await rawHttp.put(presigned.uploadUrl, blob, {
             signal: controller.signal,
             onUploadProgress: (event) => {
-              reportProgress(baseUploadedBytes + event.loaded, totalBytes);
+              partProgressRef.current.set(partNumber, event.loaded);
+              reportAggregateProgress(totalBytes);
             },
           });
 
@@ -208,6 +220,9 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
             size: blob.size,
           }).unwrap();
 
+          partProgressRef.current.set(partNumber, blob.size);
+          reportAggregateProgress(totalBytes);
+
           return { partNumber, etag };
         } catch (err) {
           if (cancelledRef.current || axios.isCancel(err)) {
@@ -217,12 +232,14 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
           if (attempt < MULTIPART_MAX_RETRY_ATTEMPTS_PER_PART) {
             await sleep(500 * 2 ** (attempt - 1));
           }
+        } finally {
+          activeControllersRef.current.delete(controller);
         }
       }
 
       throw lastError ?? new Error(`Part ${partNumber} failed after retries`);
     },
-    [presignUploadPart, completeUploadPart, reportProgress]
+    [presignUploadPart, completeUploadPart, reportAggregateProgress]
   );
 
   const startUpload = useCallback(
@@ -328,41 +345,62 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
         completedParts.map((part) => [part.partNumber, part.etag])
       );
 
-      let baseUploadedBytes = 0;
+      partProgressRef.current.clear();
+      const pendingParts: number[] = [];
       for (let n = 1; n <= totalParts; n += 1) {
         if (completedByNumber.has(n)) {
           const [start, end] = partRange(n, partSize, file.size);
-          baseUploadedBytes += end - start;
+          partProgressRef.current.set(n, end - start);
+        } else {
+          pendingParts.push(n);
         }
       }
-      reportProgress(baseUploadedBytes, file.size);
+      reportAggregateProgress(file.size);
 
       try {
-        for (let partNumber = 1; partNumber <= totalParts; partNumber += 1) {
-          if (completedByNumber.has(partNumber)) continue;
-          if (cancelledRef.current) throw new Error('cancelled');
+        let nextIndex = 0;
+        const runWorker = async () => {
+          for (;;) {
+            if (cancelledRef.current) throw new Error('cancelled');
+            const partNumber = pendingParts[nextIndex];
+            nextIndex += 1;
+            if (partNumber === undefined) return;
 
-          const [start, end] = partRange(partNumber, partSize, file.size);
-          const blob = file.slice(start, end);
+            const [start, end] = partRange(partNumber, partSize, file.size);
+            const blob = file.slice(start, end);
 
-          const { etag } = await uploadPart(
-            sessionId,
-            partNumber,
-            blob,
-            baseUploadedBytes,
-            file.size
-          );
+            const { etag } = await uploadPart(
+              sessionId,
+              partNumber,
+              blob,
+              file.size
+            );
 
-          completedByNumber.set(partNumber, etag);
-          baseUploadedBytes += end - start;
-          reportProgress(baseUploadedBytes, file.size);
-          setState((prev) => ({
-            ...prev,
-            uploadedParts: Array.from(completedByNumber.keys()),
-          }));
-        }
+            completedByNumber.set(partNumber, etag);
+            setState((prev) => ({
+              ...prev,
+              uploadedParts: Array.from(completedByNumber.keys()),
+            }));
+          }
+        };
+
+        const workerCount = Math.min(
+          MULTIPART_UPLOAD_CONCURRENCY_LIMIT,
+          pendingParts.length
+        );
+        await Promise.all(
+          Array.from({ length: workerCount }, () => runWorker())
+        );
       } catch (err) {
-        if (cancelledRef.current || (err as Error)?.message === 'cancelled') {
+        const wasCancelled =
+          cancelledRef.current || (err as Error)?.message === 'cancelled';
+
+        activeControllersRef.current.forEach((controller) =>
+          controller.abort()
+        );
+        activeControllersRef.current.clear();
+
+        if (wasCancelled) {
           setState((prev) => ({ ...prev, stage: 'cancelled' }));
         } else {
           setState((prev) => ({
@@ -407,14 +445,15 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
       initiateMultipartUpload,
       resumeMultipartUpload,
       completeMultipartUpload,
-      reportProgress,
+      reportAggregateProgress,
       uploadPart,
     ]
   );
 
   const cancelUpload = useCallback(() => {
     cancelledRef.current = true;
-    currentPartControllerRef.current?.abort();
+    activeControllersRef.current.forEach((controller) => controller.abort());
+    activeControllersRef.current.clear();
 
     const { videoId: id } = state;
     const sessionId = sessionIdRef.current;

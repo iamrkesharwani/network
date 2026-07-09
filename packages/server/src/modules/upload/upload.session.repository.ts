@@ -1,5 +1,8 @@
 import type { IMultipartUploadSession, UploadPart } from '@network/shared';
-import { MULTIPART_SESSION_TTL_SECONDS } from '@network/shared';
+import {
+  MULTIPART_SESSION_TTL_SECONDS,
+  MULTIPART_SESSION_REAP_GRACE_SECONDS,
+} from '@network/shared';
 import { redisClient } from '../../config/redis.js';
 
 export const multipartSessionKey = (sessionId: string): string =>
@@ -10,6 +13,17 @@ export const multipartFingerprintKey = (
   fingerprint: string
 ): string => `upload:fingerprint:${userId}:${fingerprint}`;
 
+export const multipartSessionIndexKey = 'upload:sessions:index';
+
+// The session hash is kept alive slightly past its logical TTL so the
+// reaper can still read it (mediaId, storageKey, etc.) to clean up the
+// provider-side multipart upload and the DB placeholder before it's gone.
+const sessionKeyTtlSeconds =
+  MULTIPART_SESSION_TTL_SECONDS + MULTIPART_SESSION_REAP_GRACE_SECONDS;
+
+const indexScore = (): number =>
+  Date.now() + MULTIPART_SESSION_TTL_SECONDS * 1000;
+
 export const createSession = async (
   session: IMultipartUploadSession
 ): Promise<void> => {
@@ -18,7 +32,7 @@ export const createSession = async (
       multipartSessionKey(session.sessionId),
       JSON.stringify(session),
       'EX',
-      MULTIPART_SESSION_TTL_SECONDS
+      sessionKeyTtlSeconds
     ),
     redisClient.set(
       multipartFingerprintKey(session.userId, session.fingerprint),
@@ -26,6 +40,7 @@ export const createSession = async (
       'EX',
       MULTIPART_SESSION_TTL_SECONDS
     ),
+    redisClient.zadd(multipartSessionIndexKey, indexScore(), session.sessionId),
   ]);
 };
 
@@ -52,12 +67,13 @@ export const saveSession = async (
       multipartSessionKey(session.sessionId),
       JSON.stringify(session),
       'EX',
-      MULTIPART_SESSION_TTL_SECONDS
+      sessionKeyTtlSeconds
     ),
     redisClient.expire(
       multipartFingerprintKey(session.userId, session.fingerprint),
       MULTIPART_SESSION_TTL_SECONDS
     ),
+    redisClient.zadd(multipartSessionIndexKey, indexScore(), session.sessionId),
   ]);
 };
 
@@ -90,5 +106,17 @@ export const deleteSession = async (
   await Promise.all([
     redisClient.del(multipartSessionKey(sessionId)),
     redisClient.del(multipartFingerprintKey(userId, fingerprint)),
+    redisClient.zrem(multipartSessionIndexKey, sessionId),
   ]);
+};
+
+// Session ids whose logical TTL has passed. The underlying hash may still
+// exist (see sessionKeyTtlSeconds grace period) so callers can inspect it
+// before it's evicted by Redis.
+export const getExpiredSessionIds = async (): Promise<string[]> => {
+  return redisClient.zrangebyscore(multipartSessionIndexKey, 0, Date.now());
+};
+
+export const removeFromIndex = async (sessionId: string): Promise<void> => {
+  await redisClient.zrem(multipartSessionIndexKey, sessionId);
 };

@@ -13,6 +13,8 @@ import { initSocket } from './config/socket.js';
 import { logger } from './utils/logger.js';
 import { env } from './env/env.js';
 import { startEmailWorker } from './email/email.js';
+import { startUploadReaperWorker } from './modules/upload/upload.reaper.worker.js';
+import { scheduleUploadSessionReaper } from './modules/upload/upload.reaper.queue.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -23,6 +25,8 @@ const startServer = async () => {
     await initRedis();
     initSocket(httpServer);
     startEmailWorker();
+    startUploadReaperWorker();
+    await scheduleUploadSessionReaper();
 
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Server listening on port ${port}`);
