@@ -128,9 +128,6 @@ const shortSchema = new Schema<IShortDocument>(
   }
 );
 
-// Trailing _id (descending) matches the cursor-pagination sort/filter in
-// utils/paginate.ts so feed reads stay index-covered instead of falling
-// back to an in-memory sort once a collection grows past a few pages.
 shortSchema.index({ status: 1, visibility: 1, _id: -1 });
 shortSchema.index({ userId: 1, status: 1, _id: -1 });
 

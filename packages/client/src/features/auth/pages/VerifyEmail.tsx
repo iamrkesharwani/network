@@ -5,12 +5,15 @@ import {
 } from '../authApi';
 import React, { useState, useEffect, useRef } from 'react';
 import AuthLayout from '../components/AuthLayout';
-import { maskEmail, SITE_NAME, type ApiErrorResponse } from '@network/shared';
+import {
+  maskEmail,
+  RESEND_COOLDOWN,
+  SITE_NAME,
+  type ApiErrorResponse,
+} from '@network/shared';
 import OtpInput from '../components/OtpInput';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useToast } from '../../../shared/hooks/useToast';
-
-const RESEND_COOLDOWN = 60;
 
 const VerifyEmail = () => {
   usePageTitle('Verify Email');

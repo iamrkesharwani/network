@@ -3,10 +3,6 @@ import { logger } from '../../../utils/logger.js';
 import * as uploadSessionRepository from '../upload.session.repository.js';
 import { getMediaAdapter } from '../upload.media.registry.js';
 
-// Cleans up multipart upload sessions that were never completed or aborted
-// (browser closed mid-upload, network dropped, etc.): aborts the
-// provider-side multipart upload and deletes the orphaned DB placeholder,
-// then removes the session bookkeeping from Redis.
 export const reapExpiredSessions = async (): Promise<number> => {
   const sessionIds = await uploadSessionRepository.getExpiredSessionIds();
   let reaped = 0;

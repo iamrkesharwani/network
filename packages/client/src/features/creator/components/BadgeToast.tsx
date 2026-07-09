@@ -2,13 +2,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Award, Flame, TrendingUp } from 'lucide-react';
 import { useEffect } from 'react';
 import type { CelebrationItem } from '../hooks/useCreatorCelebration';
+import { AUTO_DISMISS_MS } from '@network/shared';
 
 interface BadgeToastProps {
   item: CelebrationItem | null;
   onDismiss: () => void;
 }
-
-const AUTO_DISMISS_MS = 4200;
 
 const ICONS: Record<CelebrationItem['kind'], typeof Award> = {
   badge: Award,

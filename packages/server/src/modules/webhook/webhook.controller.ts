@@ -50,18 +50,12 @@ export const handleMediaWebhook = asyncHandler(
       return;
     }
 
-    // The common case: we already know which module owns this
-    // providerVideoId (set at ingest time), so route to it directly instead
-    // of probing video -> short -> post on every single webhook event.
     const knownMediaType = await getProviderMediaType(payload.providerVideoId);
     let handledType: MultipartMediaType | null = null;
 
     if (knownMediaType && (await webhookHandlers[knownMediaType](payload))) {
       handledType = knownMediaType;
     } else {
-      // Index miss (never set, expired, or stale): fall back to the
-      // exhaustive probe so a webhook is never silently dropped, and
-      // self-heal the index for next time.
       for (const [mediaType, handler] of Object.entries(webhookHandlers) as [
         MultipartMediaType,
         (typeof webhookHandlers)[MultipartMediaType],

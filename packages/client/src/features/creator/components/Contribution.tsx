@@ -1,22 +1,13 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clapperboard, Flame, Lock, Zap } from 'lucide-react';
+import { DAYS_OF_WEEK } from '@network/shared';
 
 interface ContributionProps {
   uploadActivity: string[];
   videoPublishCount: number;
   shortPublishCount: number;
 }
-
-const DAYS_OF_WEEK = [
-  'Sundays',
-  'Mondays',
-  'Tuesdays',
-  'Wednesdays',
-  'Thursdays',
-  'Fridays',
-  'Saturdays',
-];
 
 const Contribution = ({
   uploadActivity,

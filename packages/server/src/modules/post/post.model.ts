@@ -145,9 +145,6 @@ postSchema.pre('validate', function () {
   }
 });
 
-// Trailing _id (descending) matches the cursor-pagination sort/filter in
-// utils/paginate.ts so feed reads stay index-covered instead of falling
-// back to an in-memory sort once a collection grows past a few pages.
 postSchema.index({ status: 1, visibility: 1, _id: -1 });
 
 postSchema.index({ userId: 1, status: 1, _id: -1 });

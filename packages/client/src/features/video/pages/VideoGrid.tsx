@@ -67,12 +67,6 @@ const VideoGrid = ({
     seenIds.current.clear();
   }, [cols]);
 
-  // When this grid shares a scroll container with content above it whose
-  // height can change (e.g. a hero block with async-loading thumbnails),
-  // the virtualizer's row offsets need to account for that gap — otherwise
-  // rows are positioned as if this grid started at the top of the scroll
-  // container, and they render in the wrong place (or not at all) once
-  // scrolled past that content.
   useEffect(() => {
     const scrollEl = externalScrollRef?.current;
     const wrapperEl = internalScrollRef.current;

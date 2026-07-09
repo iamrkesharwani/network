@@ -216,12 +216,6 @@ export const completeMultipartUpload = async (
     throw new ApiError(404, 'NOT_FOUND', 'Media record not found.');
   }
 
-  // Handing the file off to the video/image provider is a slow, unreliable
-  // external call (Cloudflare/Mux/Bunny). Do it off the request path so the
-  // client gets an immediate response and a flaky provider call doesn't hold
-  // an HTTP connection (and this worker's event loop) hostage; a worker
-  // retries it with backoff and reports outcome over the media:status socket
-  // event instead.
   await enqueueMediaIngest({
     mediaType: session.mediaType,
     mediaId: session.mediaId,

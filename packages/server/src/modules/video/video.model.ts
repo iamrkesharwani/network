@@ -139,9 +139,6 @@ const videoSchema = new Schema<IVideoDocument>(
   }
 );
 
-// Trailing _id (descending) matches the cursor-pagination sort/filter in
-// utils/paginate.ts so feed reads stay index-covered instead of falling
-// back to an in-memory sort once a collection grows past a few pages.
 videoSchema.index({
   status: 1,
   visibility: 1,
