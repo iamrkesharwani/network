@@ -22,6 +22,7 @@ export interface UploadState {
   fingerprint: string | null;
   uploadedParts: number[];
   totalParts: number;
+  storageKey: string | null;
 }
 
 export const MULTIPART_MEDIA_TYPES = ['video', 'short', 'post'] as const;
@@ -29,3 +30,4 @@ export const MULTIPART_PART_SIZE_BYTES = 8 * 1024 * 1024;
 export const MULTIPART_MIN_PART_SIZE_BYTES = 5 * 1024 * 1024;
 export const MULTIPART_SESSION_TTL_SECONDS = 60 * 60 * 24;
 export const MULTIPART_MAX_RETRY_ATTEMPTS_PER_PART = 3;
+export const PERSISTED_UPLOAD_POINTER_TTL_MS = 24 * 60 * 60 * 1000;

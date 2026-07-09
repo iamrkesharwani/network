@@ -16,6 +16,11 @@ import {
 } from '../uploadSlice';
 import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
 import { createThumbnailUploader } from './useMediaEditForm';
+import {
+  saveUploadPointer,
+  loadUploadPointer,
+  clearUploadPointer,
+} from '../utils/uploadPersistence';
 
 export interface BaseMediaResponse {
   id: string;
@@ -139,6 +144,64 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     }
   }, [dispatch, mediaType, uploadState.stage, uploadState.videoId]);
 
+  useEffect(() => {
+    if (wizard.sessionId || wizard.mediaId) return;
+
+    const pointer = loadUploadPointer(mediaType);
+    if (!pointer) return;
+
+    dispatch(
+      setWizardState({
+        mediaType,
+        patch: {
+          step: pointer.step as WizardStep,
+          mediaId: pointer.mediaId || null,
+          sessionId: pointer.sessionId,
+          fingerprint: pointer.fingerprint,
+          uploadedParts: pointer.uploadedParts.map((part) => part.partNumber),
+          totalParts: pointer.totalParts,
+        },
+      })
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!uploadState.sessionId || !uploadState.storageKey) return;
+
+    const existing = loadUploadPointer(mediaType);
+
+    saveUploadPointer({
+      mediaType,
+      sessionId: uploadState.sessionId,
+      mediaId: uploadState.videoId ?? wizard.mediaId ?? existing?.mediaId ?? '',
+      fingerprint: uploadState.fingerprint ?? existing?.fingerprint ?? '',
+      storageKey: uploadState.storageKey,
+      fileName: uploadState.file?.name ?? existing?.fileName ?? '',
+      fileSizeBytes:
+        uploadState.file?.size ??
+        existing?.fileSizeBytes ??
+        uploadState.totalBytes,
+      uploadedParts: uploadState.uploadedParts.map((partNumber) => ({
+        partNumber,
+        etag: '',
+      })),
+      totalParts: uploadState.totalParts,
+      step,
+    });
+  }, [
+    mediaType,
+    step,
+    wizard.mediaId,
+    uploadState.sessionId,
+    uploadState.storageKey,
+    uploadState.videoId,
+    uploadState.fingerprint,
+    uploadState.file,
+    uploadState.totalBytes,
+    uploadState.uploadedParts,
+    uploadState.totalParts,
+  ]);
+
   const handleDetailsSuccess = (
     media: TMediaResponse,
     creatorEvent?: ICreatorEvent | null
@@ -159,6 +222,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     dispatch(resetWizardState({ mediaType }));
     setIsProcessingTerminal(false);
     resetUpload();
+    clearUploadPointer(mediaType);
   };
 
   const handleAbandon = async () => {

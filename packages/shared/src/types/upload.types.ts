@@ -106,4 +106,5 @@ export interface IPersistedUploadPointer {
   uploadedParts: { partNumber: number; etag: string }[];
   totalParts: number;
   step: string;
+  savedAt: number;
 }

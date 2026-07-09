@@ -31,6 +31,7 @@ const initialState: UploadState = {
   fingerprint: null,
   uploadedParts: [],
   totalParts: 0,
+  storageKey: null,
 };
 
 const readVideoDuration = (file: File): Promise<number | undefined> =>
@@ -261,6 +262,7 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
       let mediaId: string;
       let partSize: number;
       let totalParts: number;
+      let storageKey: string;
       let completedParts: { partNumber: number; etag: string }[] = [];
 
       try {
@@ -272,6 +274,7 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
         mediaId = resumed.mediaId;
         partSize = resumed.partSize;
         totalParts = resumed.totalParts;
+        storageKey = resumed.storageKey;
         completedParts = resumed.uploadedParts;
       } catch (err) {
         const status = (err as { status?: number })?.status;
@@ -299,6 +302,7 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
           mediaId = initiated.mediaId;
           partSize = initiated.partSize;
           totalParts = initiated.totalParts;
+          storageKey = initiated.storageKey;
         } catch {
           setState((prev) => ({
             ...prev,
@@ -316,6 +320,7 @@ export const useChunkedMediaUpload = (config: ChunkedMediaUploadConfig) => {
         videoId: mediaId,
         sessionId,
         totalParts,
+        storageKey,
         uploadedParts: completedParts.map((part) => part.partNumber),
       }));
 
