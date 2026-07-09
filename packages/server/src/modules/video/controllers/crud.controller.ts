@@ -19,8 +19,8 @@ const getVideoIdParam = (req: Request): string =>
   req.params['videoId'] as string;
 
 export const getFeed = asyncHandler(async (req: Request, res: Response) => {
-  const { page, limit } = getFeedQuery(req);
-  const result = await getPublicFeed(page, limit);
+  const { cursor, limit } = getFeedQuery(req);
+  const result = await getPublicFeed(cursor ?? null, limit);
 
   res
     .status(200)
@@ -39,8 +39,8 @@ export const getMine = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
   }
 
-  const { page, limit } = getFeedQuery(req);
-  const result = await getMyVideos(userId, page, limit);
+  const { cursor, limit } = getFeedQuery(req);
+  const result = await getMyVideos(userId, cursor ?? null, limit);
 
   res
     .status(200)

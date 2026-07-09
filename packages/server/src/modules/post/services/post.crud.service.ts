@@ -50,17 +50,17 @@ export const getPostById = async (
   return toResponse(post);
 };
 
-export const getPublicFeed = async (page: number, limit: number) => {
-  const result = await postRepository.findPublicFeed(page, limit);
+export const getPublicFeed = async (cursor: string | null, limit: number) => {
+  const result = await postRepository.findPublicFeed(cursor, limit);
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 
 export const getMyPosts = async (
   userId: string,
-  page: number,
+  cursor: string | null,
   limit: number
 ) => {
-  const result = await postRepository.findByUserId(userId, page, limit);
+  const result = await postRepository.findByUserId(userId, cursor, limit);
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 

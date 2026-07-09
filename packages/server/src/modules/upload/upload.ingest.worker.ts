@@ -1,0 +1,100 @@
+import { Worker, type Job } from 'bullmq';
+import type { IMediaStatusEvent } from '@network/shared';
+import { bullMqConnection } from '../../email/connection.js';
+import { logger } from '../../utils/logger.js';
+import { emitToUser } from '../../config/socket.js';
+import { setProviderMediaType } from '../webhook/provider-media-index.repository.js';
+import { getMediaAdapter } from './upload.media.registry.js';
+import { ingestFromStorage } from './services/upload.ingest.service.js';
+import {
+  MEDIA_INGEST_QUEUE_NAME,
+  type MediaIngestJobData,
+} from './upload.ingest.queue.js';
+
+const processIngestJob = async (
+  job: Job<MediaIngestJobData>
+): Promise<void> => {
+  const { mediaType, mediaId, userId, storageKey, fileName, fileSizeBytes } =
+    job.data;
+
+  const { providerVideoId } = await ingestFromStorage({
+    storageKey,
+    fileName,
+    fileSizeBytes,
+    userId,
+  });
+
+  await setProviderMediaType(providerVideoId, mediaType);
+
+  const adapter = getMediaAdapter(mediaType);
+  const marked = await adapter.markProcessing(mediaId, {
+    providerVideoId,
+    storageKey,
+  });
+
+  if (!marked) {
+    logger.warn(
+      `Media ingest: placeholder ${mediaId} (${mediaType}) vanished before it could be marked processing`
+    );
+    return;
+  }
+
+  const statusEvent: IMediaStatusEvent = {
+    id: mediaId,
+    mediaType,
+    status: 'PROCESSING',
+  };
+  emitToUser(userId, 'media:status', statusEvent);
+};
+
+export const startMediaIngestWorker = (): Worker<MediaIngestJobData> => {
+  const worker = new Worker<MediaIngestJobData>(
+    MEDIA_INGEST_QUEUE_NAME,
+    processIngestJob,
+    {
+      connection: bullMqConnection,
+      concurrency: 10,
+    }
+  );
+
+  worker.on('failed', async (job, error) => {
+    if (!job) return;
+
+    const isFinal = job.attemptsMade >= (job.opts.attempts ?? 1);
+    const level = isFinal ? 'error' : 'warn';
+    logger[level](
+      error,
+      `Media ingest job ${isFinal ? 'dead-lettered' : 'will retry'}: mediaId=${job.data.mediaId} attempt=${job.attemptsMade}/${job.opts.attempts}`
+    );
+
+    if (!isFinal) return;
+
+    try {
+      const adapter = getMediaAdapter(job.data.mediaType);
+      await adapter.markFailed(
+        job.data.mediaId,
+        'We could not process this upload. Please try uploading again.'
+      );
+
+      const statusEvent: IMediaStatusEvent = {
+        id: job.data.mediaId,
+        mediaType: job.data.mediaType,
+        status: 'FAILED',
+        errorMessage: 'We could not process this upload. Please try again.',
+      };
+      emitToUser(job.data.userId, 'media:status', statusEvent);
+    } catch (markError) {
+      logger.error(
+        markError,
+        `Failed to mark media ${job.data.mediaId} as FAILED after exhausting ingest retries`
+      );
+    }
+  });
+
+  worker.on('error', (error) => {
+    logger.error(error, 'Media ingest worker connection error');
+  });
+
+  logger.info('Media ingest worker started (concurrency=10)');
+  return worker;
+};

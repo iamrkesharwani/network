@@ -15,6 +15,7 @@ import { env } from './env/env.js';
 import { startEmailWorker } from './email/email.js';
 import { startUploadReaperWorker } from './modules/upload/upload.reaper.worker.js';
 import { scheduleUploadSessionReaper } from './modules/upload/upload.reaper.queue.js';
+import { startMediaIngestWorker } from './modules/upload/upload.ingest.worker.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -25,6 +26,7 @@ const startServer = async () => {
     await initRedis();
     initSocket(httpServer);
     startEmailWorker();
+    startMediaIngestWorker();
     startUploadReaperWorker();
     await scheduleUploadSessionReaper();
 

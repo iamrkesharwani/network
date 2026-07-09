@@ -12,7 +12,7 @@ import { storageProvider } from '../../../providers/provider.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import * as uploadSessionRepository from '../upload.session.repository.js';
 import { getMediaAdapter } from '../upload.media.registry.js';
-import { ingestFromStorage } from './upload.ingest.service.js';
+import { enqueueMediaIngest } from '../upload.ingest.queue.js';
 
 const requireOwnedActiveSession = async (
   userId: string,
@@ -216,21 +216,20 @@ export const completeMultipartUpload = async (
     throw new ApiError(404, 'NOT_FOUND', 'Media record not found.');
   }
 
-  const { providerVideoId } = await ingestFromStorage({
+  // Handing the file off to the video/image provider is a slow, unreliable
+  // external call (Cloudflare/Mux/Bunny). Do it off the request path so the
+  // client gets an immediate response and a flaky provider call doesn't hold
+  // an HTTP connection (and this worker's event loop) hostage; a worker
+  // retries it with backoff and reports outcome over the media:status socket
+  // event instead.
+  await enqueueMediaIngest({
+    mediaType: session.mediaType,
+    mediaId: session.mediaId,
+    userId,
     storageKey: session.storageKey,
     fileName: placeholder.ingestFileName,
     fileSizeBytes: session.fileSizeBytes,
-    userId,
   });
-
-  const marked = await adapter.markProcessing(session.mediaId, {
-    providerVideoId,
-    storageKey: session.storageKey,
-  });
-
-  if (!marked) {
-    throw new ApiError(404, 'NOT_FOUND', 'Media record not found.');
-  }
 
   await uploadSessionRepository.deleteSession(
     session.sessionId,

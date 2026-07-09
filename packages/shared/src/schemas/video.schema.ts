@@ -112,7 +112,10 @@ export const videoUploadSchema = z.object({
 export const videoUpdateSchema = videoUploadSchema.partial();
 
 export const videoFeedQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
+  cursor: z
+    .string()
+    .refine(isValidObjectId, { message: 'Invalid cursor.' })
+    .optional(),
   limit: z.coerce
     .number()
     .int()

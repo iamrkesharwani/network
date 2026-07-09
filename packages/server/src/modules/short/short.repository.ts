@@ -30,14 +30,13 @@ export const findByProviderVideoId = (
   ShortModel.findOne({ providerVideoId }).exec();
 
 export const findPublicFeed = async (
-  page: number,
+  cursor: string | null,
   limit: number
 ): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     ShortModel,
     { status: 'READY', visibility: 'public' },
-    { createdAt: -1 },
-    page,
+    cursor,
     limit
   );
 
@@ -51,14 +50,13 @@ export const findPublicFeed = async (
 
 export const findByUserId = async (
   userId: string,
-  page: number,
+  cursor: string | null,
   limit: number
 ): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     ShortModel,
     { userId: new mongoose.Types.ObjectId(userId) },
-    { createdAt: -1 },
-    page,
+    cursor,
     limit
   );
 

@@ -107,7 +107,10 @@ export const shortUploadSchema = z.object({
 export const shortUpdateSchema = shortUploadSchema.partial();
 
 export const shortFeedQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
+  cursor: z
+    .string()
+    .refine(isValidObjectId, { message: 'Invalid cursor.' })
+    .optional(),
   limit: z.coerce
     .number()
     .int()

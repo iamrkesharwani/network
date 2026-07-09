@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import type { PaginatedResponse } from '@network/shared';
 
 interface FeedQueryArgs {
-  page: number;
+  cursor?: string;
   limit: number;
 }
 
@@ -30,10 +30,11 @@ export const useLiveFeed = <T extends { id: string }>(
   useFeedQuery: UseFeedQueryHook<T>,
   limit: number
 ) => {
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [isFirstPage, setIsFirstPage] = useState(true);
 
   const { data, isLoading, isError, isFetching, refetch } = useFeedQuery({
-    page,
+    ...(cursor !== undefined && { cursor }),
     limit,
   });
 
@@ -41,22 +42,24 @@ export const useLiveFeed = <T extends { id: string }>(
   const hasNextPage = data?.meta.hasNextPage ?? false;
 
   const loadMore = useCallback(() => {
-    if (!hasNextPage || isFetching) return;
-    setPage((p) => p + 1);
-  }, [hasNextPage, isFetching]);
+    if (!hasNextPage || isFetching || !data?.meta.nextCursor) return;
+    setIsFirstPage(false);
+    setCursor(data.meta.nextCursor);
+  }, [hasNextPage, isFetching, data?.meta.nextCursor]);
 
   const retry = useCallback(() => {
-    if (page === 1) {
+    if (isFirstPage) {
       refetch();
     } else {
-      setPage(1);
+      setIsFirstPage(true);
+      setCursor(undefined);
     }
-  }, [page, refetch]);
+  }, [isFirstPage, refetch]);
 
   return {
     items,
-    isLoading: isLoading && page === 1,
-    isFetchingNextPage: isFetching && page > 1,
+    isLoading: isLoading && isFirstPage,
+    isFetchingNextPage: isFetching && !isFirstPage,
     isError,
     hasNextPage,
     loadMore,

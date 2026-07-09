@@ -56,14 +56,13 @@ export const findByProviderVideoId = (
 };
 
 export const findPublicFeed = async (
-  page: number,
+  cursor: string | null,
   limit: number
 ): Promise<Omit<PaginatedResponse<IPostDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     PostModel,
     { status: 'READY', visibility: 'public' },
-    { createdAt: -1 },
-    page,
+    cursor,
     limit
   );
 
@@ -77,14 +76,13 @@ export const findPublicFeed = async (
 
 export const findByUserId = async (
   userId: string,
-  page: number,
+  cursor: string | null,
   limit: number
 ): Promise<Omit<PaginatedResponse<IPostDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     PostModel,
     { userId: new mongoose.Types.ObjectId(userId) },
-    { createdAt: -1 },
-    page,
+    cursor,
     limit
   );
 

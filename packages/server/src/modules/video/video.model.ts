@@ -139,16 +139,19 @@ const videoSchema = new Schema<IVideoDocument>(
   }
 );
 
+// Trailing _id (descending) matches the cursor-pagination sort/filter in
+// utils/paginate.ts so feed reads stay index-covered instead of falling
+// back to an in-memory sort once a collection grows past a few pages.
 videoSchema.index({
   status: 1,
   visibility: 1,
-  createdAt: -1,
+  _id: -1,
 });
 
 videoSchema.index({
   userId: 1,
   status: 1,
-  createdAt: -1,
+  _id: -1,
 });
 
 export const VideoModel = mongoose.model<IVideoDocument>('Video', videoSchema);

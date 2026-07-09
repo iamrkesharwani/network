@@ -72,7 +72,7 @@ export const shortApi = createApi({
       }),
       serializeQueryArgs: ({ endpointName }) => endpointName,
       merge: (currentCache, newData, { arg }) => {
-        if (arg.page === 1) {
+        if (arg.cursor === undefined) {
           currentCache.data = newData.data;
           currentCache.meta = newData.meta;
           return;
@@ -86,7 +86,7 @@ export const shortApi = createApi({
         currentCache.meta = newData.meta;
       },
       forceRefetch: ({ currentArg, previousArg }) =>
-        currentArg?.page !== previousArg?.page,
+        currentArg?.cursor !== previousArg?.cursor,
       providesTags: ['Short'],
     }),
 

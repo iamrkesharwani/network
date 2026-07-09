@@ -51,17 +51,17 @@ export const getShortById = async (
   return toResponse(short);
 };
 
-export const getPublicFeed = async (page: number, limit: number) => {
-  const result = await shortRepository.findPublicFeed(page, limit);
+export const getPublicFeed = async (cursor: string | null, limit: number) => {
+  const result = await shortRepository.findPublicFeed(cursor, limit);
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 
 export const getMyShorts = async (
   userId: string,
-  page: number,
+  cursor: string | null,
   limit: number
 ) => {
-  const result = await shortRepository.findByUserId(userId, page, limit);
+  const result = await shortRepository.findByUserId(userId, cursor, limit);
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 

@@ -32,6 +32,8 @@ export interface MultipartMediaAdapter {
     data: { providerVideoId: string; storageKey: string }
   ): Promise<boolean>;
 
+  markFailed(id: string, errorMessage: string): Promise<boolean>;
+
   deletePlaceholder(id: string): Promise<void>;
 }
 
@@ -61,6 +63,14 @@ const videoAdapter: MultipartMediaAdapter = {
       providerVideoId: data.providerVideoId,
       storageKey: data.storageKey,
       status: 'PROCESSING',
+    });
+    return !!updated;
+  },
+
+  markFailed: async (id, errorMessage) => {
+    const updated = await videoRepository.updateById(id, {
+      status: 'FAILED',
+      errorMessage,
     });
     return !!updated;
   },
@@ -100,6 +110,14 @@ const shortAdapter: MultipartMediaAdapter = {
     return !!updated;
   },
 
+  markFailed: async (id, errorMessage) => {
+    const updated = await shortRepository.updateById(id, {
+      status: 'FAILED',
+      errorMessage,
+    });
+    return !!updated;
+  },
+
   deletePlaceholder: async (id) => {
     await shortRepository.deleteById(id);
   },
@@ -125,6 +143,14 @@ const postAdapter: MultipartMediaAdapter = {
       providerVideoId: data.providerVideoId,
       storageKey: data.storageKey,
       status: 'PROCESSING',
+    });
+    return !!updated;
+  },
+
+  markFailed: async (id, errorMessage) => {
+    const updated = await postRepository.updateById(id, {
+      status: 'FAILED',
+      errorMessage,
     });
     return !!updated;
   },

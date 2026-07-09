@@ -51,17 +51,17 @@ export const getVideoById = async (
   return toResponse(video);
 };
 
-export const getPublicFeed = async (page: number, limit: number) => {
-  const result = await videoRepository.findPublicFeed(page, limit);
+export const getPublicFeed = async (cursor: string | null, limit: number) => {
+  const result = await videoRepository.findPublicFeed(cursor, limit);
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 
 export const getMyVideos = async (
   userId: string,
-  page: number,
+  cursor: string | null,
   limit: number
 ) => {
-  const result = await videoRepository.findByUserId(userId, page, limit);
+  const result = await videoRepository.findByUserId(userId, cursor, limit);
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 
