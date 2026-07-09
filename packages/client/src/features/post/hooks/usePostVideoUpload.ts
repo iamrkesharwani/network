@@ -3,12 +3,8 @@ import {
   MAX_POST_VIDEO_DURATION_SECONDS,
   ALLOWED_POST_VIDEO_MIME_TYPES,
 } from '@network/shared';
-import {
-  useInitiateVideoUploadMutation,
-  useConfirmVideoUploadMutation,
-  useDeletePostMutation,
-} from '../postApi';
-import { useMediaUpload } from '../../upload/hooks/useMediaUpload';
+import { useDeletePostMutation } from '../postApi';
+import { useChunkedMediaUpload } from '../../upload/hooks/useChunkedMediaUpload';
 
 export const validatePostVideoFile = (file: File): string | null => {
   if (
@@ -26,23 +22,14 @@ export const validatePostVideoFile = (file: File): string | null => {
 };
 
 export const useRawPostVideoUpload = () => {
-  const [initiateVideoUpload] = useInitiateVideoUploadMutation();
-  const [confirmVideoUpload] = useConfirmVideoUploadMutation();
   const [deletePost] = useDeletePostMutation();
 
-  return useMediaUpload({
+  return useChunkedMediaUpload({
+    mediaType: 'post',
     validate: validatePostVideoFile,
     maxDurationSeconds: MAX_POST_VIDEO_DURATION_SECONDS,
     durationErrorMessage:
       'That video is too long. Post videos must be under 60 seconds.',
-    getInitiatedId: (initResult) => initResult.data.postId as string,
-    buildConfirmArgs: ({ id, storageKey, fileSizeBytes }) => ({
-      postId: id,
-      storageKey,
-      fileSizeBytes,
-    }),
-    initiateUpload: initiateVideoUpload,
-    confirmUpload: confirmVideoUpload,
     deleteMedia: deletePost,
   });
 };

@@ -3,12 +3,8 @@ import {
   MAX_SHORT_DURATION_SECONDS,
   ALLOWED_SHORT_MIME_TYPES,
 } from '@network/shared';
-import {
-  useInitiateUploadMutation,
-  useConfirmUploadMutation,
-  useDeleteShortMutation,
-} from '../shortApi';
-import { useMediaUpload } from '../../upload/hooks/useMediaUpload';
+import { useDeleteShortMutation } from '../shortApi';
+import { useChunkedMediaUpload } from '../../upload/hooks/useChunkedMediaUpload';
 
 export const validateShortFile = (file: File): string | null => {
   if (
@@ -26,23 +22,14 @@ export const validateShortFile = (file: File): string | null => {
 };
 
 export const useRawShortUpload = () => {
-  const [initiateUpload] = useInitiateUploadMutation();
-  const [confirmUpload] = useConfirmUploadMutation();
   const [deleteShort] = useDeleteShortMutation();
 
-  return useMediaUpload({
+  return useChunkedMediaUpload({
+    mediaType: 'short',
     validate: validateShortFile,
     maxDurationSeconds: MAX_SHORT_DURATION_SECONDS,
     durationErrorMessage:
       'That video is too long. Shorts must be under 60 seconds.',
-    getInitiatedId: (initResult) => initResult.data.shortId as string,
-    buildConfirmArgs: ({ id, storageKey, fileSizeBytes }) => ({
-      shortId: id,
-      storageKey,
-      fileSizeBytes,
-    }),
-    initiateUpload,
-    confirmUpload,
     deleteMedia: deleteShort,
   });
 };

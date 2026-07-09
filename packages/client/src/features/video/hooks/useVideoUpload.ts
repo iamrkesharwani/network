@@ -3,12 +3,8 @@ import {
   MAX_VIDEO_DURATION_SECONDS,
   ALLOWED_VIDEO_MIME_TYPES,
 } from '@network/shared';
-import {
-  useInitiateUploadMutation,
-  useConfirmUploadMutation,
-  useDeleteVideoMutation,
-} from '../videoApi';
-import { useMediaUpload } from '../../upload/hooks/useMediaUpload';
+import { useDeleteVideoMutation } from '../videoApi';
+import { useChunkedMediaUpload } from '../../upload/hooks/useChunkedMediaUpload';
 
 export const validateVideoFile = (file: File): string | null => {
   if (
@@ -26,23 +22,14 @@ export const validateVideoFile = (file: File): string | null => {
 };
 
 export const useRawUpload = () => {
-  const [initiateUpload] = useInitiateUploadMutation();
-  const [confirmUpload] = useConfirmUploadMutation();
   const [deleteVideo] = useDeleteVideoMutation();
 
-  return useMediaUpload({
+  return useChunkedMediaUpload({
+    mediaType: 'video',
     validate: validateVideoFile,
     maxDurationSeconds: MAX_VIDEO_DURATION_SECONDS,
     durationErrorMessage:
       'That video is too long. The max duration is 10 hours.',
-    getInitiatedId: (initResult) => initResult.data.videoId as string,
-    buildConfirmArgs: ({ id, storageKey, fileSizeBytes }) => ({
-      videoId: id,
-      storageKey,
-      fileSizeBytes,
-    }),
-    initiateUpload,
-    confirmUpload,
     deleteMedia: deleteVideo,
   });
 };
