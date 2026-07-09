@@ -1,8 +1,11 @@
-import type { IMediaStatusEvent } from '@network/shared';
+import {
+  MEDIA_STATUS_SOCKET_EVENT,
+  type IMediaStatusEvent,
+} from '@network/shared';
 import * as videoRepository from '../video.repository.js';
-import { getOwnerId } from '../../../utils/getOwnerId.js';
-import { emitToUser } from '../../../config/socket.js';
-import type { NormalizedWebhookPayload } from '../../../providers/types.js';
+import { getOwnerId } from '../../../core/utils/getOwnerId.js';
+import { emitToUser } from '../../../core/config/socket.js';
+import type { NormalizedWebhookPayload } from '../../../core/providers/types.js';
 
 export const videoProcessWebhook = async (
   payload: NormalizedWebhookPayload
@@ -50,7 +53,11 @@ export const videoProcessWebhook = async (
         errorMessage: video.errorMessage,
       }),
     };
-    emitToUser(getOwnerId(video.userId), 'media:status', mediaStatusEvent);
+    emitToUser(
+      getOwnerId(video.userId),
+      MEDIA_STATUS_SOCKET_EVENT,
+      mediaStatusEvent
+    );
   }
 
   return !!video;

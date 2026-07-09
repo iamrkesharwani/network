@@ -1,3 +1,6 @@
+export const VIDEO_TITLE_MAX_LENGTH = 100;
+export const VIDEO_DESCRIPTION_MAX_LENGTH = 5000;
+
 export const MAX_VIDEO_SIZE_BYTES = 5 * 1024 * 1024 * 1024;
 export const ALLOWED_VIDEO_MIME_TYPES = [
   'video/mp4',

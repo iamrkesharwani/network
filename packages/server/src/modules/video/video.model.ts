@@ -3,6 +3,8 @@ import {
   VIDEO_CATEGORIES,
   VIDEO_VISIBILITY,
   VIDEO_STATUS,
+  VIDEO_TITLE_MAX_LENGTH,
+  VIDEO_DESCRIPTION_MAX_LENGTH,
   type IVideo,
 } from '@network/shared';
 
@@ -22,12 +24,12 @@ const videoSchema = new Schema<IVideoDocument>(
       type: String,
       required: true,
       trim: true,
-      maxlength: 100,
+      maxlength: VIDEO_TITLE_MAX_LENGTH,
     },
     description: {
       type: String,
       trim: true,
-      maxlength: 5000,
+      maxlength: VIDEO_DESCRIPTION_MAX_LENGTH,
     },
     thumbnailUrl: {
       type: String,

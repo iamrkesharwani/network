@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Avatar from '../../../shared/components/Avatar';
+import Avatar from '../../../shared/ui-kit/Avatar';
 import PostCardMenu from './PostCardMenu';
 import { getRelativeDate, type IPostResponse } from '@network/shared';
 

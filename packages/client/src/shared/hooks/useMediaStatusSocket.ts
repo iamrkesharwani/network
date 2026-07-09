@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
-import type { IMediaStatusEvent } from '@network/shared';
+import {
+  MEDIA_STATUS_SOCKET_EVENT,
+  type IMediaStatusEvent,
+} from '@network/shared';
 import { useAppSelector } from './useAppSelector';
 import { useAppDispatch } from './useAppDispatch';
 import { useSocket } from './useSocket';
@@ -54,10 +57,10 @@ export const useMediaStatusSocket = (): void => {
       }
     };
 
-    socket.on('media:status', handleMediaStatus);
+    socket.on(MEDIA_STATUS_SOCKET_EVENT, handleMediaStatus);
 
     return () => {
-      socket.off('media:status', handleMediaStatus);
+      socket.off(MEDIA_STATUS_SOCKET_EVENT, handleMediaStatus);
     };
   }, [accessToken, dispatch, addToast, socketRef]);
 };

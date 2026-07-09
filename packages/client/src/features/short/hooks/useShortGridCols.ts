@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ShortColCount } from '../../../shared/utils/shortGrid';
+import type { ShortColCount } from '../utils/shortGrid';
 
 const getColCount = (width: number): ShortColCount => {
   if (width >= 1100) return 6;

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import React from 'react';
 import Field from '../components/Field';
-import { SITE_NAME } from '@network/shared';
+import { SITE_NAME, CLIENT_ROUTES } from '@network/shared';
 import AuthLayout from '../components/AuthLayout';
 import { EmailIcon, GitHubIcon, GoogleIcon } from '../components/AuthIcons';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
@@ -185,7 +185,7 @@ const Register = () => {
         <p className="register-line mt-8 text-[0.8rem] text-[--color-text-muted]">
           Already have an account?{' '}
           <Link
-            to="/login"
+            to={CLIENT_ROUTES.LOGIN}
             className="text-[--color-text-primary] font-semibold no-underline pb-px transition-colors"
           >
             Login

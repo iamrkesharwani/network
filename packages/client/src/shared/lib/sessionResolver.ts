@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { AppStore } from '../../store/store';
+import type { AppStore } from '../../app/store/store';
 import { fetchCsrfToken, setAccessToken, axiosInstance } from './axiosInstance';
 import {
   setCredentials,

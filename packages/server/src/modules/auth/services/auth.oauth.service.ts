@@ -2,9 +2,9 @@ import * as authRepository from '../auth.repository.js';
 import {
   generateAccessToken,
   generateRefreshToken,
-} from '../../../utils/token.js';
-import { generateUniqueUsername } from '../../../utils/username.js';
-import { ApiError } from '../../../utils/ApiError.js';
+} from '../../../core/utils/token.js';
+import { generateUniqueUsername } from '../../../core/utils/username.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
 import type { OAuthUserPayload } from '../auth.types.js';
 
 export const handleOAuthUser = async (payload: OAuthUserPayload) => {

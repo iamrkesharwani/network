@@ -14,7 +14,7 @@ import MediaDropzone from '../../upload/components/MediaDropzone';
 import UploadThumbnailStep from '../../upload/components/UploadThumbnailStep';
 import ShortEditForm from './ShortEditForm';
 import SuccessStep from '../../upload/components/SuccessStep';
-import ConfirmModal from '../../../shared/components/ConfirmModal';
+import ConfirmModal from '../../../shared/ui-kit/ConfirmModal';
 import { cn } from '../../../shared/utils/cn';
 
 const stepVariants = {

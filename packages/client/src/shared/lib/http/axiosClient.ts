@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { REQUEST_TIMEOUT_MS } from '@network/shared';
+import { REQUEST_TIMEOUT_MS, DEFAULT_API_URL } from '@network/shared';
 
 export const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || DEFAULT_API_URL,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
   timeout: REQUEST_TIMEOUT_MS,

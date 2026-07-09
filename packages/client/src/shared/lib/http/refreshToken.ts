@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+import { CLIENT_ROUTES } from '@network/shared';
 import { axiosInstance } from './axiosClient';
 import { setAccessToken } from './authToken';
 import { fetchCsrfToken } from './csrf';
@@ -65,7 +66,7 @@ export const handleAuthRefresh = async (
   } catch (refreshError) {
     processQueue(refreshError as AxiosError, null);
     setAccessToken(null);
-    window.location.href = '/login';
+    window.location.href = CLIENT_ROUTES.LOGIN;
     return Promise.reject(refreshError);
   } finally {
     isRefreshing = false;

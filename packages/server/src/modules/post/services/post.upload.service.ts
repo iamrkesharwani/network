@@ -4,9 +4,9 @@ import {
   type PostFinaliseInput,
 } from '@network/shared';
 import * as postRepository from '../post.repository.js';
-import { imageProvider } from '../../../providers/provider.js';
-import { ApiError } from '../../../utils/ApiError.js';
-import { getOwnerId } from '../../../utils/getOwnerId.js';
+import { imageProvider } from '../../../core/providers/provider.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import { getOwnerId } from '../../../core/utils/getOwnerId.js';
 import { toResponse } from './post.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
 

@@ -7,10 +7,10 @@ import {
   type ShortUploadInput,
 } from '@network/shared';
 import * as shortRepository from '../short.repository.js';
-import { storageProvider, imageProvider } from '../../../providers/provider.js';
-import { redisClient } from '../../../config/redis.js';
-import { ApiError } from '../../../utils/ApiError.js';
-import { getOwnerId } from '../../../utils/getOwnerId.js';
+import { storageProvider, imageProvider } from '../../../core/providers/provider.js';
+import { redisClient } from '../../../core/config/redis.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import { getOwnerId } from '../../../core/utils/getOwnerId.js';
 import { uploadSessionKey, toResponse } from './short.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
 import { ingestFromStorage } from '../../upload/services/upload.ingest.service.js';

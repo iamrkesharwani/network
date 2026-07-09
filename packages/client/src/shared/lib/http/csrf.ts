@@ -1,11 +1,12 @@
 import { AxiosError } from 'axios';
+import { CSRF_COOKIE_NAME } from '@network/shared';
 import { axiosInstance } from './axiosClient';
 import type { CustomAxiosRequestConfig } from './types';
 
 export const getCsrfTokenFromCookie = (): string | null => {
   const match = document.cookie
     .split('; ')
-    .find((row) => row.startsWith('_csrf='));
+    .find((row) => row.startsWith(`${CSRF_COOKIE_NAME}=`));
   return match ? decodeURIComponent(match.split('=')[1]) : null;
 };
 

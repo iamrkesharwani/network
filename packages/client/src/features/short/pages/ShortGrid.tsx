@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { cn } from '../../../shared/utils/cn';
 import { useShortGridCols } from '../hooks/useShortGridCols';
 import { useShortVirtualizer } from '../hooks/useShortVirtualizer';
-import { chunkIntoRows } from '../../../shared/utils/shortGrid';
+import { chunkIntoRows } from '../utils/shortGrid';
 import ShortGridRow from '../components/ShortGridRow';
 import ShortEmptyState from '../components/ShortEmptyState';
 import ShortErrorState from '../components/ShortErrorState';
@@ -11,7 +11,7 @@ import type { IShortResponse } from '@network/shared';
 import {
   ShortGridSkeleton,
   ShortRowSkeleton,
-} from '../../../shared/skeleton/short/ShortGridSkeleton';
+} from '../skeleton/ShortGridSkeleton';
 
 export interface ShortGridProps {
   shorts: IShortResponse[];

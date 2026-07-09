@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
 import type { VideoFeedQuery, VideoUpdateInput } from '@network/shared';
-import { asyncHandler } from '../../../utils/asyncHandler.js';
-import { ApiPaginatedResponse } from '../../../utils/ApiPaginatedResponse.js';
-import { ApiError } from '../../../utils/ApiError.js';
-import { ApiResponse } from '../../../utils/ApiResponse.js';
+import { asyncHandler } from '../../../core/utils/asyncHandler.js';
+import { ApiPaginatedResponse } from '../../../core/utils/ApiPaginatedResponse.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import { ApiResponse } from '../../../core/utils/ApiResponse.js';
 import {
   deleteVideo,
   getMyVideos,

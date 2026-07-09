@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Clapperboard, Smartphone, FileText } from 'lucide-react';
+import { CLIENT_ROUTES } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 
 const UPLOAD_OPTIONS = [
@@ -9,7 +10,7 @@ const UPLOAD_OPTIONS = [
     title: 'Video',
     description: 'Long-form, high quality.',
     icon: Clapperboard,
-    path: '/upload/video',
+    path: CLIENT_ROUTES.UPLOAD_VIDEO,
     accent: 'text-primary',
     glow: 'bg-primary/25',
     iconTint: 'text-primary/30',
@@ -19,7 +20,7 @@ const UPLOAD_OPTIONS = [
     title: 'Short',
     description: 'Vertical, under 60s.',
     icon: Smartphone,
-    path: '/upload/short',
+    path: CLIENT_ROUTES.UPLOAD_SHORT,
     accent: 'text-purple-500',
     glow: 'bg-purple-500/25',
     iconTint: 'text-purple-500/30',
@@ -29,7 +30,7 @@ const UPLOAD_OPTIONS = [
     title: 'Post',
     description: 'Text, images, updates.',
     icon: FileText,
-    path: '/upload/post',
+    path: CLIENT_ROUTES.UPLOAD_POST,
     accent: 'text-emerald-500',
     glow: 'bg-emerald-500/25',
     iconTint: 'text-emerald-500/30',

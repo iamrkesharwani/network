@@ -1,7 +1,7 @@
 import { Worker } from 'bullmq';
-import { bullMqConnection } from '../../email/connection.js';
-import { logger } from '../../utils/logger.js';
-import { UPLOAD_REAPER_QUEUE_NAME } from './upload.reaper.queue.js';
+import { UPLOAD_REAPER_QUEUE_NAME } from '@network/shared';
+import { bullMqConnection } from '../email/connection.js';
+import { logger } from '../../core/utils/logger.js';
 import { reapExpiredSessions } from './services/upload.reaper.service.js';
 
 export const startUploadReaperWorker = (): Worker => {

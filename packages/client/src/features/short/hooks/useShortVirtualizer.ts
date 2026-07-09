@@ -2,7 +2,7 @@ import type { IShortResponse } from '@network/shared';
 import {
   estimateShortRowHeight,
   type ShortColCount,
-} from '../../../shared/utils/shortGrid';
+} from '../utils/shortGrid';
 import { useVirtualGrid } from '../../../shared/hooks/useVirtualGrid';
 
 export type SentinelRow = 'skeleton' | 'end';

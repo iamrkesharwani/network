@@ -1,10 +1,11 @@
 import { Queue } from 'bullmq';
-import { bullMqConnection } from '../../email/connection.js';
-import { logger } from '../../utils/logger.js';
-
-export const UPLOAD_REAPER_QUEUE_NAME = 'upload-session-reaper';
-const UPLOAD_REAPER_JOB_ID = 'upload-session-reaper';
-const UPLOAD_REAPER_INTERVAL_MS = 15 * 60 * 1000;
+import {
+  UPLOAD_REAPER_QUEUE_NAME,
+  UPLOAD_REAPER_JOB_ID,
+  UPLOAD_REAPER_INTERVAL_MS,
+} from '@network/shared';
+import { bullMqConnection } from '../email/connection.js';
+import { logger } from '../../core/utils/logger.js';
 
 const uploadReaperQueue = new Queue(UPLOAD_REAPER_QUEUE_NAME, {
   connection: bullMqConnection,

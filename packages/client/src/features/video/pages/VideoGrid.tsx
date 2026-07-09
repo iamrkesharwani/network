@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cn } from '../../../shared/utils/cn';
 import { useGridCols } from '../hooks/useGridCols';
 import { useVideoVirtualizer } from '../hooks/useVideoVirtualizer';
-import { chunkIntoRows, type ColCount } from '../../../shared/utils/videoGrid';
+import { chunkIntoRows, type ColCount } from '../utils/videoGrid';
 import VideoGridRow from '../components/VideoGridRow';
 import VideoEmptyState from '../components/VideoEmptyState';
 import VideoErrorState from '../components/VideoErrorState';
@@ -11,7 +11,7 @@ import type { IVideoResponse } from '@network/shared';
 import {
   VideoGridSkeleton,
   VideoRowSkeleton,
-} from '../../../shared/skeleton/video/VideoGridSkeleton';
+} from '../skeleton/VideoGridSkeleton';
 
 export interface VideoGridProps {
   videos: IVideoResponse[];

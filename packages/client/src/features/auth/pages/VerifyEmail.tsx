@@ -9,6 +9,7 @@ import {
   maskEmail,
   RESEND_COOLDOWN,
   SITE_NAME,
+  CLIENT_ROUTES,
   type ApiErrorResponse,
 } from '@network/shared';
 import OtpInput from '../components/OtpInput';
@@ -52,7 +53,7 @@ const VerifyEmail = () => {
     try {
       await verifyEmail({ email, otp }).unwrap();
       addToast('Email verified successfully!', 'success');
-      navigate('/feed', { replace: true });
+      navigate(CLIENT_ROUTES.FEED, { replace: true });
     } catch (err: unknown) {
       const msg =
         (err as { data?: ApiErrorResponse })?.data?.error?.message ??

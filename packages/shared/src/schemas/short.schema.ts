@@ -5,6 +5,8 @@ import {
   MAX_SHORT_SIZE_BYTES,
   MAX_SHORT_DURATION_SECONDS,
   SHORT_VISIBILITY,
+  SHORT_TITLE_MAX_LENGTH,
+  SHORT_DESCRIPTION_MAX_LENGTH,
 } from '../constants/short.constants.js';
 import {
   DEFAULT_PAGE_LIMIT,
@@ -82,12 +84,16 @@ export const shortUploadSchema = z.object({
     .trim()
     .min(1, { message: 'Title is required.' })
     .min(5, { message: 'Title must be at least 5 characters long.' })
-    .max(100, { message: 'Title cannot exceed 100 characters.' }),
+    .max(SHORT_TITLE_MAX_LENGTH, {
+      message: `Title cannot exceed ${SHORT_TITLE_MAX_LENGTH} characters.`,
+    }),
 
   description: z
     .string()
     .trim()
-    .max(500, { message: 'Description cannot exceed 500 characters.' })
+    .max(SHORT_DESCRIPTION_MAX_LENGTH, {
+      message: `Description cannot exceed ${SHORT_DESCRIPTION_MAX_LENGTH} characters.`,
+    })
     .optional(),
 
   thumbnailUrl: z

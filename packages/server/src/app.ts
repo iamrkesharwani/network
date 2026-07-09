@@ -5,15 +5,15 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import routes from './route.js';
 import { API_V1_PREFIX } from '@network/shared';
-import { env } from './env/env.js';
-import { apiLimiter } from './middleware/rateLimit.middleware.js';
+import { env } from './core/env/env.js';
+import { apiLimiter } from './core/middleware/rateLimit.middleware.js';
 import {
   generateCsrfToken,
   validateCsrfToken,
-} from './middleware/csrf.middleware.js';
-import { sanitizeMiddleware } from './middleware/sanitize.middleware.js';
-import { rawWebhookBody } from './config/webhookRawBody.js';
-import { setupSSR } from './config/viteSSR.js';
+} from './core/middleware/csrf.middleware.js';
+import { sanitizeMiddleware } from './core/middleware/sanitize.middleware.js';
+import { rawWebhookBody } from './core/config/webhookRawBody.js';
+import { setupSSR } from './core/config/viteSSR.js';
 import type { Application } from 'express';
 
 const isProduction = env.NODE_ENV === 'production';

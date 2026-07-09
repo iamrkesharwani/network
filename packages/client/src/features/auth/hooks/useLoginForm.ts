@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   loginSchema,
+  CLIENT_ROUTES,
   type LoginInput,
   type ApiErrorResponse,
 } from '@network/shared';
@@ -15,7 +16,8 @@ export const useLoginForm = () => {
   const { addToast } = useToast();
   const [login, { isLoading }] = useLoginMutation();
   const from =
-    (location.state as { from?: Location })?.from?.pathname ?? '/feed';
+    (location.state as { from?: Location })?.from?.pathname ??
+    CLIENT_ROUTES.FEED;
 
   const {
     register,

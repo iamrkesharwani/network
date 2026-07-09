@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { io, type Socket } from 'socket.io-client';
+import { DEFAULT_API_URL } from '@network/shared';
 
 export const useSocket = (token: string | null) => {
   const socket = useRef<Socket | null>(null);
@@ -13,8 +14,7 @@ export const useSocket = (token: string | null) => {
       return;
     }
 
-    const apiUrl =
-      import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+    const apiUrl = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
     const socketUrl = new URL(apiUrl).origin;
 
     socket.current = io(socketUrl, {

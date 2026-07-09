@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { formatCount } from '@network/shared';
 import type { IPostResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
-import ConfirmModal from '../../../shared/components/ConfirmModal';
+import ConfirmModal from '../../../shared/ui-kit/ConfirmModal';
 import PostCardMeta from '../components/PostCardMeta';
 import PostCardBody from '../components/PostCard';
 

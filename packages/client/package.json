@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build:client": "vite build --outDir dist/client --ssrManifest",
-    "build:server": "vite build --outDir dist/server --ssr src/entry-server.tsx",
+    "build:server": "vite build --outDir dist/server --ssr src/app/entry-server.tsx",
     "build": "tsc -b && npm run build:client && npm run build:server",
     "preview": "vite preview",
     "lint": "eslint .",

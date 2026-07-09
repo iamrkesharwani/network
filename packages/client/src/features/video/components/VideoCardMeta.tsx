@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import VideoCardMenu from './VideoCardMenu';
 import { formatCount, getRelativeDate } from '@network/shared';
 import type { IVideoResponse } from '@network/shared';
-import Avatar from '../../../shared/components/Avatar';
+import Avatar from '../../../shared/ui-kit/Avatar';
 
 interface VideoCardMetaProps {
   video: IVideoResponse;

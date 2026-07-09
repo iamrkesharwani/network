@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { PostModel, type IPostDocument } from './post.model.js';
 import type { PaginatedResponse } from '@network/shared';
-import { paginateQuery } from '../../utils/paginate.js';
+import { paginateQuery } from '../../core/utils/paginate.js';
 import type { UpdatePostData, WebhookUpdateData } from './post.types.js';
 
 export const createTextOrImagePost = (

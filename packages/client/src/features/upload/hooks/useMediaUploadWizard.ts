@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { WizardStep } from '../../../shared/upload/UploadSteps';
+import type { WizardStep } from '../UploadSteps';
 import type {
   ApiResponse,
   ICreatorEvent,

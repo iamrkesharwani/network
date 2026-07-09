@@ -1,11 +1,16 @@
 import * as authRepository from '../auth.repository.js';
-import { ApiError } from '../../../utils/ApiError.js';
-import { hashPassword, verifyPassword } from '../../../utils/hash.js';
-import { redisClient } from '../../../config/redis.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import { hashPassword, verifyPassword } from '../../../core/utils/hash.js';
+import { redisClient } from '../../../core/config/redis.js';
 import { randomInt } from 'node:crypto';
-import { queuePasswordResetEmail } from '../../../email/email.js';
-import { tryStartOtpCooldown } from '../../../utils/otpCooldown.js';
-import { OTP_MAX_ATTEMPTS } from '@network/shared';
+import { queuePasswordResetEmail } from '../../email/email.js';
+import { tryStartOtpCooldown } from '../../../core/utils/otpCooldown.js';
+import {
+  OTP_MAX_ATTEMPTS,
+  OTP_CODE_MIN,
+  OTP_CODE_MAX,
+  OTP_VERIFICATION_TTL_SECONDS,
+} from '@network/shared';
 
 export const changePassword = async (
   userId: string,
@@ -39,14 +44,14 @@ export const requestPasswordReset = async (email: string) => {
     return;
   }
 
-  const otp = randomInt(100000, 1000000).toString();
+  const otp = randomInt(OTP_CODE_MIN, OTP_CODE_MAX).toString();
   const hashedOtp = await hashPassword(otp);
 
   const tokenKey = `pwd_reset_verify:${email}`;
   const attemptsKey = `pwd_reset_attempts:${email}`;
 
-  await redisClient.set(tokenKey, hashedOtp, 'EX', 900);
-  await redisClient.set(attemptsKey, '0', 'EX', 900);
+  await redisClient.set(tokenKey, hashedOtp, 'EX', OTP_VERIFICATION_TTL_SECONDS);
+  await redisClient.set(attemptsKey, '0', 'EX', OTP_VERIFICATION_TTL_SECONDS);
 
   await queuePasswordResetEmail({ to: email, userName: user.name, otp });
 };

@@ -1,9 +1,31 @@
+import { FIFTEEN_MINUTES_SECONDS } from './time.constants.js';
+
 export const OTP_MAX_ATTEMPTS = 5;
 export const OTP_REQUEST_COOLDOWN_SECONDS = 60;
 export const CSRF_EXEMPT_PATHS = ['/auth/refresh', '/auth/logout'];
 export const RESEND_COOLDOWN = 60;
 export const AUTH_PROVIDERS = ['local', 'google', 'github'] as const;
 export type AuthProvider = (typeof AUTH_PROVIDERS)[number];
+
+export const REFRESH_TOKEN_COOKIE_NAME = 'refreshToken';
+export const CSRF_COOKIE_NAME = '_csrf';
+export const GITHUB_OAUTH_STATE_COOKIE_NAME = 'github_oauth_state';
+export const GOOGLE_OAUTH_STATE_COOKIE_NAME = 'google_oauth_state';
+export const GOOGLE_CODE_VERIFIER_COOKIE_NAME = 'google_code_verifier';
+export const ACCESS_TOKEN_EXPIRY = '15m';
+export const OTP_VERIFICATION_TTL_SECONDS = FIFTEEN_MINUTES_SECONDS;
+export const OTP_CODE_MIN = 100000;
+export const OTP_CODE_MAX = 1000000;
+export const AUTH_PUBLIC_PATHS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/refresh',
+  '/auth/verify-email',
+  '/auth/request-password-reset',
+  '/auth/reset-password',
+  '/auth/send-verification',
+  '/auth/forgot-password',
+];
 
 export const AUTH_ICONS = {
   GOOGLE: {

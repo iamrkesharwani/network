@@ -1,15 +1,16 @@
 import { Worker, type Job } from 'bullmq';
-import type { IMediaStatusEvent } from '@network/shared';
-import { bullMqConnection } from '../../email/connection.js';
-import { logger } from '../../utils/logger.js';
-import { emitToUser } from '../../config/socket.js';
+import {
+  MEDIA_INGEST_QUEUE_NAME,
+  MEDIA_STATUS_SOCKET_EVENT,
+  type IMediaStatusEvent,
+} from '@network/shared';
+import { bullMqConnection } from '../email/connection.js';
+import { logger } from '../../core/utils/logger.js';
+import { emitToUser } from '../../core/config/socket.js';
 import { setProviderMediaType } from '../webhook/provider-media-index.repository.js';
 import { getMediaAdapter } from './upload.media.registry.js';
 import { ingestFromStorage } from './services/upload.ingest.service.js';
-import {
-  MEDIA_INGEST_QUEUE_NAME,
-  type MediaIngestJobData,
-} from './upload.ingest.queue.js';
+import type { MediaIngestJobData } from './upload.ingest.queue.js';
 
 const processIngestJob = async (
   job: Job<MediaIngestJobData>
@@ -44,7 +45,7 @@ const processIngestJob = async (
     mediaType,
     status: 'PROCESSING',
   };
-  emitToUser(userId, 'media:status', statusEvent);
+  emitToUser(userId, MEDIA_STATUS_SOCKET_EVENT, statusEvent);
 };
 
 export const startMediaIngestWorker = (): Worker<MediaIngestJobData> => {
@@ -82,7 +83,7 @@ export const startMediaIngestWorker = (): Worker<MediaIngestJobData> => {
         status: 'FAILED',
         errorMessage: 'We could not process this upload. Please try again.',
       };
-      emitToUser(job.data.userId, 'media:status', statusEvent);
+      emitToUser(job.data.userId, MEDIA_STATUS_SOCKET_EVENT, statusEvent);
     } catch (markError) {
       logger.error(
         markError,

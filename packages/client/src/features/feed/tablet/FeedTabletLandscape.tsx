@@ -14,7 +14,7 @@ import {
   DESK_TAB_VIDEOS_PER_BLOCK,
 } from '@network/shared';
 import { buildFeedBlocks } from '../mobile/buildFeedBlocks';
-import type { ColCount } from '../../../shared/utils/videoGrid';
+import type { ColCount } from '../../video/utils/videoGrid';
 
 const FeedTabletLandscape = () => {
   const { activeIndex, goNext, goPrev, updateCurrentShort } = useShort();

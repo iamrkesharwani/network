@@ -4,10 +4,10 @@ import {
   storageProvider,
   videoProvider,
   imageProvider,
-} from '../../../providers/provider.js';
-import { logger } from '../../../utils/logger.js';
-import { ApiError } from '../../../utils/ApiError.js';
-import { getOwnerId } from '../../../utils/getOwnerId.js';
+} from '../../../core/providers/provider.js';
+import { logger } from '../../../core/utils/logger.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import { getOwnerId } from '../../../core/utils/getOwnerId.js';
 import type { Requester } from '../video.types.js';
 import { toResponse, toResponseFromLean } from './video.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';

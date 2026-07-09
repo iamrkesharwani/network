@@ -1,13 +1,14 @@
 import {
   MAX_POST_VIDEO_DURATION_SECONDS,
+  MEDIA_STATUS_SOCKET_EVENT,
   type IMediaStatusEvent,
 } from '@network/shared';
 import * as postRepository from '../post.repository.js';
-import type { NormalizedWebhookPayload } from '../../../providers/types.js';
-import { logger } from '../../../utils/logger.js';
-import { storageProvider, videoProvider } from '../../../providers/provider.js';
-import { emitToUser } from '../../../config/socket.js';
-import { getOwnerId } from '../../../utils/getOwnerId.js';
+import type { NormalizedWebhookPayload } from '../../../core/providers/types.js';
+import { logger } from '../../../core/utils/logger.js';
+import { storageProvider, videoProvider } from '../../../core/providers/provider.js';
+import { emitToUser } from '../../../core/config/socket.js';
+import { getOwnerId } from '../../../core/utils/getOwnerId.js';
 
 export const postProcessWebhook = async (
   payload: NormalizedWebhookPayload
@@ -74,7 +75,7 @@ export const postProcessWebhook = async (
 
     emitToUser(
       getOwnerId(rejected.userId),
-      'media:status',
+      MEDIA_STATUS_SOCKET_EVENT,
       rejectedStatusEvent
     );
 
@@ -124,7 +125,7 @@ export const postProcessWebhook = async (
         errorMessage: post.errorMessage,
       }),
     };
-    emitToUser(getOwnerId(post.userId), 'media:status', mediaStatusEvent);
+    emitToUser(getOwnerId(post.userId), MEDIA_STATUS_SOCKET_EVENT, mediaStatusEvent);
   }
 
   return !!post;

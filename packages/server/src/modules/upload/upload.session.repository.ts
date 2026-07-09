@@ -3,7 +3,7 @@ import {
   MULTIPART_SESSION_TTL_SECONDS,
   MULTIPART_SESSION_REAP_GRACE_SECONDS,
 } from '@network/shared';
-import { redisClient } from '../../config/redis.js';
+import { redisClient } from '../../core/config/redis.js';
 
 export const multipartSessionKey = (sessionId: string): string =>
   `upload:session:${sessionId}`;

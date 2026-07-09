@@ -1,9 +1,10 @@
 import { Queue } from 'bullmq';
-import type { MultipartMediaType } from '@network/shared';
-import { bullMqConnection } from '../../email/connection.js';
-import { logger } from '../../utils/logger.js';
-
-export const MEDIA_INGEST_QUEUE_NAME = 'media-ingest';
+import {
+  MEDIA_INGEST_QUEUE_NAME,
+  type MultipartMediaType,
+} from '@network/shared';
+import { bullMqConnection } from '../email/connection.js';
+import { logger } from '../../core/utils/logger.js';
 
 export interface MediaIngestJobData {
   mediaType: MultipartMediaType;

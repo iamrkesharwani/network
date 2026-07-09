@@ -8,12 +8,6 @@ const sessionIdSchema = z
   .min(1, { message: 'Session ID is required.' })
   .max(128, { message: 'Session ID is too long.' });
 
-const storageKeySchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(512, { message: 'storageKey is too long.' });
-
 const partNumberSchema = z
   .number()
   .int()

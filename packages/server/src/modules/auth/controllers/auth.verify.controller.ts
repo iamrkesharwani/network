@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import { asyncHandler } from '../../../utils/asyncHandler.js';
-import { ApiResponse } from '../../../utils/ApiResponse.js';
+import { asyncHandler } from '../../../core/utils/asyncHandler.js';
+import { ApiResponse } from '../../../core/utils/ApiResponse.js';
 import * as authVerifyService from '../services/auth.verify.service.js';
 
 export const requestEmailVerification = asyncHandler(

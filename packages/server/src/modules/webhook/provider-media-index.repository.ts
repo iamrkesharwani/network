@@ -2,7 +2,7 @@ import {
   PROVIDER_MEDIA_INDEX_TTL_SECONDS,
   type MultipartMediaType,
 } from '@network/shared';
-import { redisClient } from '../../config/redis.js';
+import { redisClient } from '../../core/config/redis.js';
 
 const providerMediaIndexKey = (providerVideoId: string): string =>
   `provider-video:${providerVideoId}`;

@@ -4,7 +4,7 @@ import { cn } from '../../../shared/utils/cn';
 import {
   UploadSteps,
   type WizardStep,
-} from '../../../shared/upload/UploadSteps';
+} from '../UploadSteps';
 
 interface UploadStepperProps {
   current: WizardStep;

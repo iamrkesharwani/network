@@ -1,26 +1,16 @@
 import { AxiosError } from 'axios';
+import { AUTH_PUBLIC_PATHS } from '@network/shared';
 import { axiosInstance } from './axiosClient';
 import { handleAuthRefresh } from './refreshToken';
 import { handleCsrfRetry } from './csrf';
 import type { CustomAxiosRequestConfig } from './types';
-
-const PUBLIC_AUTH_PATHS = [
-  '/auth/login',
-  '/auth/register',
-  '/auth/refresh',
-  '/auth/verify-email',
-  '/auth/request-password-reset',
-  '/auth/reset-password',
-  '/auth/send-verification',
-  '/auth/forgot-password',
-];
 
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
 
-    const isPublicAuthPath = PUBLIC_AUTH_PATHS.some((path) =>
+    const isPublicAuthPath = AUTH_PUBLIC_PATHS.some((path) =>
       originalRequest.url?.includes(path)
     );
 

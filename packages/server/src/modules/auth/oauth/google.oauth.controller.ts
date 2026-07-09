@@ -1,11 +1,16 @@
 import type { Request, Response } from 'express';
-import { env } from '../../../env/env.js';
-import { asyncHandler } from '../../../utils/asyncHandler.js';
+import {
+  REFRESH_TOKEN_COOKIE_NAME,
+  GOOGLE_OAUTH_STATE_COOKIE_NAME,
+  GOOGLE_CODE_VERIFIER_COOKIE_NAME,
+} from '@network/shared';
+import { env } from '../../../core/env/env.js';
+import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { decodeIdToken, generateCodeVerifier, generateState } from 'arctic';
-import { google } from '../../../config/oauth.js';
-import { ApiError } from '../../../utils/ApiError.js';
+import { google } from '../../../core/config/oauth.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
 import { handleOAuthUser } from '../services/auth.oauth.service.js';
-import { setCsrfCookie } from '../../../middleware/csrf.middleware.js';
+import { setCsrfCookie } from '../../../core/middleware/csrf.middleware.js';
 import { cookieOptions, stateCookieOptions } from './oauth.cookies.js';
 
 export const googleRedirect = asyncHandler(
@@ -19,8 +24,8 @@ export const googleRedirect = asyncHandler(
       'email',
     ]);
 
-    res.cookie('google_oauth_state', state, stateCookieOptions);
-    res.cookie('google_code_verifier', codeVerifier, stateCookieOptions);
+    res.cookie(GOOGLE_OAUTH_STATE_COOKIE_NAME, state, stateCookieOptions);
+    res.cookie(GOOGLE_CODE_VERIFIER_COOKIE_NAME, codeVerifier, stateCookieOptions);
     res.redirect(url.toString());
   }
 );
@@ -28,11 +33,11 @@ export const googleRedirect = asyncHandler(
 export const googleCallback = asyncHandler(
   async (req: Request, res: Response) => {
     const { code, state } = req.query as { code?: string; state?: string };
-    const storedState = req.cookies['google_oauth_state'];
-    const storedVerifier = req.cookies['google_code_verifier'];
+    const storedState = req.cookies[GOOGLE_OAUTH_STATE_COOKIE_NAME];
+    const storedVerifier = req.cookies[GOOGLE_CODE_VERIFIER_COOKIE_NAME];
 
-    res.clearCookie('google_oauth_state');
-    res.clearCookie('google_code_verifier');
+    res.clearCookie(GOOGLE_OAUTH_STATE_COOKIE_NAME);
+    res.clearCookie(GOOGLE_CODE_VERIFIER_COOKIE_NAME);
 
     if (
       !code ||
@@ -72,7 +77,7 @@ export const googleCallback = asyncHandler(
 
     const { refreshToken } = result;
 
-    res.cookie('refreshToken', refreshToken, cookieOptions);
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
 
     setCsrfCookie(res);
 

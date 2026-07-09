@@ -1,15 +1,16 @@
-import { env } from '../../../env/env.js';
+import { SEVEN_DAYS_MS, TEN_MINUTES_MS } from '@network/shared';
+import { env } from '../../../core/env/env.js';
 
 export const cookieOptions = {
   httpOnly: true,
   secure: env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  maxAge: SEVEN_DAYS_MS,
 };
 
 export const stateCookieOptions = {
   httpOnly: true,
   secure: env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
-  maxAge: 10 * 60 * 1000,
+  maxAge: TEN_MINUTES_MS,
 };

@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { asyncHandler } from '../../../utils/asyncHandler.js';
-import { ApiResponse } from '../../../utils/ApiResponse.js';
+import { asyncHandler } from '../../../core/utils/asyncHandler.js';
+import { ApiResponse } from '../../../core/utils/ApiResponse.js';
 import * as passwordService from '../services/auth.password.service.js';
-import { ApiError } from '../../../utils/ApiError.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
 
 export const changePassword = asyncHandler(
   async (req: Request, res: Response) => {

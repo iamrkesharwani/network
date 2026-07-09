@@ -1,10 +1,11 @@
 import type { Request, Response } from 'express';
-import { env } from '../../../env/env.js';
-import { asyncHandler } from '../../../utils/asyncHandler.js';
-import { ApiResponse } from '../../../utils/ApiResponse.js';
+import { REFRESH_TOKEN_COOKIE_NAME } from '@network/shared';
+import { env } from '../../../core/env/env.js';
+import { asyncHandler } from '../../../core/utils/asyncHandler.js';
+import { ApiResponse } from '../../../core/utils/ApiResponse.js';
 import * as authCoreService from '../services/auth.core.service.js';
-import { ApiError } from '../../../utils/ApiError.js';
-import { setCsrfCookie } from '../../../middleware/csrf.middleware.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import { setCsrfCookie } from '../../../core/middleware/csrf.middleware.js';
 
 const cookieOptions = {
   httpOnly: true,
@@ -32,7 +33,7 @@ export const loginLocal = asyncHandler(async (req: Request, res: Response) => {
     req.body
   );
 
-  res.cookie('refreshToken', refreshToken, cookieOptions);
+  res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
 
   setCsrfCookie(res);
 
@@ -43,7 +44,7 @@ export const loginLocal = asyncHandler(async (req: Request, res: Response) => {
 
 export const refreshTokens = asyncHandler(
   async (req: Request, res: Response) => {
-    const incomingToken = req.cookies['refreshToken'];
+    const incomingToken = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
 
     if (!incomingToken) {
       throw new ApiError(401, 'UNAUTHORIZED', 'No refresh token provided');
@@ -52,7 +53,7 @@ export const refreshTokens = asyncHandler(
     const { user, accessToken, refreshToken } =
       await authCoreService.refreshAuthTokens(incomingToken);
 
-    res.cookie('refreshToken', refreshToken, cookieOptions);
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
 
     setCsrfCookie(res);
 
@@ -63,7 +64,7 @@ export const refreshTokens = asyncHandler(
 );
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
-  const incomingToken = req.cookies['refreshToken'];
+  const incomingToken = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
 
   if (!incomingToken) {
     throw new ApiError(401, 'UNAUTHORIZED', 'No refresh token provided');
@@ -71,7 +72,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 
   await authCoreService.logoutUser(incomingToken);
 
-  res.clearCookie('refreshToken', {
+  res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
     sameSite: 'strict',

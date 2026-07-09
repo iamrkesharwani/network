@@ -1,11 +1,11 @@
 import type { Request, Response } from 'express';
 import type { MultipartMediaType } from '@network/shared';
-import type { NormalizedWebhookPayload } from '../../providers/types.js';
-import { asyncHandler } from '../../utils/asyncHandler.js';
-import { videoProvider } from '../../providers/provider.js';
-import { ApiError } from '../../utils/ApiError.js';
-import { ApiResponse } from '../../utils/ApiResponse.js';
-import { logger } from '../../utils/logger.js';
+import type { NormalizedWebhookPayload } from '../../core/providers/types.js';
+import { asyncHandler } from '../../core/utils/asyncHandler.js';
+import { videoProvider } from '../../core/providers/provider.js';
+import { ApiError } from '../../core/utils/ApiError.js';
+import { ApiResponse } from '../../core/utils/ApiResponse.js';
+import { logger } from '../../core/utils/logger.js';
 import { shortProcessWebhook } from '../short/services/short.webhook.service.js';
 import { videoProcessWebhook } from '../video/services/video.webhook.service.js';
 import { postProcessWebhook } from '../post/services/post.webhook.service.js';

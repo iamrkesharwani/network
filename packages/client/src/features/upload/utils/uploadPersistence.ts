@@ -1,11 +1,12 @@
 import {
   PERSISTED_UPLOAD_POINTER_TTL_MS,
+  UPLOAD_ACTIVE_SESSION_STORAGE_KEY_PREFIX,
   type IPersistedUploadPointer,
   type MultipartMediaType,
 } from '@network/shared';
 
 const storageKeyFor = (mediaType: MultipartMediaType) =>
-  `upload:active-session:${mediaType}`;
+  `${UPLOAD_ACTIVE_SESSION_STORAGE_KEY_PREFIX}${mediaType}`;
 
 export const saveUploadPointer = (
   pointer: Omit<IPersistedUploadPointer, 'savedAt'>

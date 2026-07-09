@@ -2,17 +2,17 @@ import 'dotenv/config';
 import { createServer } from 'node:http';
 import mongoose from 'mongoose';
 import app from './app.js';
-import { connectDb } from './config/db.js';
+import { connectDb } from './core/config/db.js';
 import {
   initRedis,
   redisClient,
   pubClient,
   subClient,
-} from './config/redis.js';
-import { initSocket } from './config/socket.js';
-import { logger } from './utils/logger.js';
-import { env } from './env/env.js';
-import { startEmailWorker } from './email/email.js';
+} from './core/config/redis.js';
+import { initSocket } from './core/config/socket.js';
+import { logger } from './core/utils/logger.js';
+import { env } from './core/env/env.js';
+import { startEmailWorker } from './modules/email/email.js';
 import { startUploadReaperWorker } from './modules/upload/upload.reaper.worker.js';
 import { scheduleUploadSessionReaper } from './modules/upload/upload.reaper.queue.js';
 import { startMediaIngestWorker } from './modules/upload/upload.ingest.worker.js';

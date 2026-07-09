@@ -2,7 +2,7 @@ import type { PaginatedResponse } from '@network/shared';
 import { VideoModel, type IVideoDocument } from './video.model.js';
 import type { UpdateVideoData, WebhookUpdateData } from './video.types.js';
 import mongoose from 'mongoose';
-import { paginateQuery } from '../../utils/paginate.js';
+import { paginateQuery } from '../../core/utils/paginate.js';
 
 export const createPlaceholder = (
   userId: string,

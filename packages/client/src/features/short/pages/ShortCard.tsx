@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { cn } from '../../../shared/utils/cn';
 import ShortCardThumbnail from '../components/ShortCardThumbnail';
 import ShortCardMeta from '../components/ShortCardMeta';
-import ConfirmModal from '../../../shared/components/ConfirmModal';
+import ConfirmModal from '../../../shared/ui-kit/ConfirmModal';
 import type { IShortResponse } from '@network/shared';
 
 export interface ShortCardProps {

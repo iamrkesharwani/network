@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { cn } from '../../../shared/utils/cn';
 import VideoCardThumbnail from '../components/VideoCardThumbnail';
 import VideoCardMeta from '../components/VideoCardMeta';
-import ConfirmModal from '../../../shared/components/ConfirmModal';
+import ConfirmModal from '../../../shared/ui-kit/ConfirmModal';
 import type { IVideoResponse } from '@network/shared';
 
 export interface VideoCardProps {

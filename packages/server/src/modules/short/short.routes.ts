@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { validate } from '../../middleware/validate.middleware.js';
-import { requireAuth, optionalAuth } from '../../middleware/auth.middleware.js';
-import { uploadLimiter } from '../../middleware/rateLimit.middleware.js';
-import { uploadThumbnail } from '../../middleware/upload.middleware.js';
+import { validate } from '../../core/middleware/validate.middleware.js';
+import { requireAuth, optionalAuth } from '../../core/middleware/auth.middleware.js';
+import { uploadLimiter } from '../../core/middleware/rateLimit.middleware.js';
+import { uploadThumbnail } from '../../core/middleware/upload.middleware.js';
 import {
   initiateShortUploadSchema,
   confirmShortUploadSchema,

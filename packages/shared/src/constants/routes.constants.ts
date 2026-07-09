@@ -1,0 +1,16 @@
+export const CLIENT_ROUTES = {
+  LOGIN: '/login',
+  REGISTER: '/register',
+  VERIFY_EMAIL: '/verify-email',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password',
+  OAUTH_CALLBACK: '/oauth/callback',
+  FEED: '/feed',
+  POSTS: '/posts',
+  UPLOAD: '/upload',
+  UPLOAD_VIDEO: '/upload/video',
+  UPLOAD_SHORT: '/upload/short',
+  UPLOAD_POST: '/upload/post',
+  PROFILE: '/profile',
+  SETTINGS: '/settings',
+} as const;

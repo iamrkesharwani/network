@@ -10,7 +10,7 @@ import FloatingTextarea from '../../upload/components/FloatingTextarea';
 import MediaDropzone from '../../upload/components/MediaDropzone';
 import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
-import Button from '../../../shared/components/Button';
+import Button from '../../../shared/ui-kit/Button';
 import BadgeToast from '../../creator/components/BadgeToast';
 import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
 import { useToast } from '../../../shared/hooks/useToast';

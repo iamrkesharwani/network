@@ -8,8 +8,8 @@ import type {
   InitiateMultipartUploadInput,
 } from '@network/shared';
 import { MULTIPART_PART_SIZE_BYTES } from '@network/shared';
-import { storageProvider } from '../../../providers/provider.js';
-import { ApiError } from '../../../utils/ApiError.js';
+import { storageProvider } from '../../../core/providers/provider.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
 import * as uploadSessionRepository from '../upload.session.repository.js';
 import { getMediaAdapter } from '../upload.media.registry.js';
 import { enqueueMediaIngest } from '../upload.ingest.queue.js';

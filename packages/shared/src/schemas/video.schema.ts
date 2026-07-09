@@ -6,6 +6,8 @@ import {
   MAX_VIDEO_DURATION_SECONDS,
   VIDEO_CATEGORIES,
   VIDEO_VISIBILITY,
+  VIDEO_TITLE_MAX_LENGTH,
+  VIDEO_DESCRIPTION_MAX_LENGTH,
 } from '../constants/video.constants.js';
 import {
   DEFAULT_PAGE_LIMIT,
@@ -83,12 +85,16 @@ export const videoUploadSchema = z.object({
     .trim()
     .min(1, { message: 'Title is required.' })
     .min(5, { message: 'Title must be at least 5 characters long.' })
-    .max(100, { message: 'Title cannot exceed 100 characters.' }),
+    .max(VIDEO_TITLE_MAX_LENGTH, {
+      message: `Title cannot exceed ${VIDEO_TITLE_MAX_LENGTH} characters.`,
+    }),
 
   description: z
     .string()
     .trim()
-    .max(5000, { message: 'Description cannot exceed 5000 characters.' })
+    .max(VIDEO_DESCRIPTION_MAX_LENGTH, {
+      message: `Description cannot exceed ${VIDEO_DESCRIPTION_MAX_LENGTH} characters.`,
+    })
     .optional(),
 
   thumbnailUrl: z

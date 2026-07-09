@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { UploadStage, MultipartMediaType } from '@network/shared';
-import type { WizardStep } from '../../shared/upload/UploadSteps';
+import type { WizardStep } from './UploadSteps';
 
 export interface UploadWizardState {
   step: WizardStep;

@@ -2,7 +2,7 @@ import type { IVideoResponse } from '@network/shared';
 import {
   estimateRowHeight,
   type ColCount,
-} from '../../../shared/utils/videoGrid';
+} from '../utils/videoGrid';
 import { useVirtualGrid } from '../../../shared/hooks/useVirtualGrid';
 
 export type SentinelRow = 'skeleton' | 'end';

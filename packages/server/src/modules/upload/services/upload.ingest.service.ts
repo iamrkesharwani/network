@@ -1,4 +1,4 @@
-import { storageProvider, videoProvider } from '../../../providers/provider.js';
+import { storageProvider, videoProvider } from '../../../core/providers/provider.js';
 
 export interface IngestFromStorageParams {
   storageKey: string;

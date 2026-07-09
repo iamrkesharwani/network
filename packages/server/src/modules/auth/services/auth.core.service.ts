@@ -1,13 +1,13 @@
 import * as authRepository from '../auth.repository.js';
-import { ApiError } from '../../../utils/ApiError.js';
-import { hashPassword, verifyPassword } from '../../../utils/hash.js';
-import { generateUniqueUsername } from '../../../utils/username.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import { hashPassword, verifyPassword } from '../../../core/utils/hash.js';
+import { generateUniqueUsername } from '../../../core/utils/username.js';
 import type { IUser, LoginInput, UserRegistrationInput } from '@network/shared';
 import {
   generateAccessToken,
   generateRefreshToken,
-} from '../../../utils/token.js';
-import { redisClient } from '../../../config/redis.js';
+} from '../../../core/utils/token.js';
+import { redisClient } from '../../../core/config/redis.js';
 import { sendVerificationEmail } from './auth.verify.service.js';
 
 export const registerLocal = async (data: UserRegistrationInput) => {

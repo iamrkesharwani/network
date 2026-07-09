@@ -1,10 +1,12 @@
+import { API_V1_PREFIX } from '@network/shared';
+
 export const useOAuthRedirect = () => {
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL || '/api/v1'}/auth/google`;
+    window.location.href = `${import.meta.env.VITE_API_URL || API_V1_PREFIX}/auth/google`;
   };
 
   const handleGithubLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL || '/api/v1'}/auth/github`;
+    window.location.href = `${import.meta.env.VITE_API_URL || API_V1_PREFIX}/auth/github`;
   };
 
   return { handleGoogleLogin, handleGithubLogin };

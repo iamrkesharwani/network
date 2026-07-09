@@ -1,5 +1,5 @@
-import { storageProvider } from '../../../providers/provider.js';
-import { logger } from '../../../utils/logger.js';
+import { storageProvider } from '../../../core/providers/provider.js';
+import { logger } from '../../../core/utils/logger.js';
 import * as uploadSessionRepository from '../upload.session.repository.js';
 import { getMediaAdapter } from '../upload.media.registry.js';
 

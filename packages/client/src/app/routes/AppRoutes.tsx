@@ -1,0 +1,61 @@
+import { type RouteObject, Navigate } from 'react-router-dom';
+import { CLIENT_ROUTES } from '@network/shared';
+import ProtectedRoute from './ProtectedRoute';
+import PageWrapper from '../layout/PageWrapper';
+import Login from '../../features/auth/pages/Login';
+import Register from '../../features/auth/pages/Register';
+import VerifyEmail from '../../features/auth/pages/VerifyEmail';
+import GuestRoute from './GuestRoute';
+import ForgotPassword from '../../features/auth/pages/ForgotPassword';
+import ResetPassword from '../../features/auth/pages/ResetPassword';
+import OAuthCallback from '../../features/auth/pages/OAuthCallback';
+import FeedPage from '../../features/feed/FeedPage';
+import UploadHub from '../../features/upload/components/UploadHub';
+import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
+import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
+import PostComposer from '../../features/post/form/PostComposer';
+import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
+import { Profile, Settings, NotFound } from './__dev__/PlaceholderPages';
+
+export const routes: RouteObject[] = [
+  { path: CLIENT_ROUTES.OAUTH_CALLBACK, element: <OAuthCallback /> },
+  {
+    element: <GuestRoute />,
+    children: [
+      { path: CLIENT_ROUTES.LOGIN, element: <Login /> },
+      { path: CLIENT_ROUTES.REGISTER, element: <Register /> },
+      { path: CLIENT_ROUTES.VERIFY_EMAIL, element: <VerifyEmail /> },
+      { path: CLIENT_ROUTES.FORGOT_PASSWORD, element: <ForgotPassword /> },
+      { path: CLIENT_ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
+    ],
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        element: <PageWrapper />,
+        children: [
+          {
+            path: '/',
+            element: <Navigate to={CLIENT_ROUTES.FEED} replace />,
+          },
+          { path: CLIENT_ROUTES.FEED, element: <FeedPage /> },
+          { path: CLIENT_ROUTES.UPLOAD, element: <UploadHub /> },
+          {
+            path: CLIENT_ROUTES.UPLOAD_VIDEO,
+            element: <VideoUploadWizard />,
+          },
+          {
+            path: CLIENT_ROUTES.UPLOAD_SHORT,
+            element: <ShortUploadWizard />,
+          },
+          { path: CLIENT_ROUTES.UPLOAD_POST, element: <PostComposer /> },
+          { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
+          { path: CLIENT_ROUTES.PROFILE, element: <Profile /> },
+          { path: CLIENT_ROUTES.SETTINGS, element: <Settings /> },
+        ],
+      },
+    ],
+  },
+  { path: '*', element: <NotFound /> },
+];

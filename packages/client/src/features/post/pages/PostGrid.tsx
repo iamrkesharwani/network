@@ -9,7 +9,7 @@ import PostEndDivider from '../components/PostEndDivider';
 import {
   PostGridSkeleton,
   PostRowSkeleton,
-} from '../../../shared/skeleton/post/PostGridSkeleton';
+} from '../skeleton/PostGridSkeleton';
 
 type PostRow = IPostResponse | 'skeleton' | 'end';
 

@@ -1,11 +1,15 @@
 import type { Request, Response } from 'express';
-import { env } from '../../../env/env.js';
-import { asyncHandler } from '../../../utils/asyncHandler.js';
+import {
+  REFRESH_TOKEN_COOKIE_NAME,
+  GITHUB_OAUTH_STATE_COOKIE_NAME,
+} from '@network/shared';
+import { env } from '../../../core/env/env.js';
+import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { generateState } from 'arctic';
-import { github } from '../../../config/oauth.js';
-import { ApiError } from '../../../utils/ApiError.js';
+import { github } from '../../../core/config/oauth.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
 import { handleOAuthUser } from '../services/auth.oauth.service.js';
-import { setCsrfCookie } from '../../../middleware/csrf.middleware.js';
+import { setCsrfCookie } from '../../../core/middleware/csrf.middleware.js';
 import { cookieOptions, stateCookieOptions } from './oauth.cookies.js';
 
 export const githubRedirect = asyncHandler(
@@ -15,7 +19,7 @@ export const githubRedirect = asyncHandler(
       'read:user',
       'user:email',
     ]);
-    res.cookie('github_oauth_state', state, stateCookieOptions);
+    res.cookie(GITHUB_OAUTH_STATE_COOKIE_NAME, state, stateCookieOptions);
     res.redirect(url.toString());
   }
 );
@@ -23,9 +27,9 @@ export const githubRedirect = asyncHandler(
 export const githubCallback = asyncHandler(
   async (req: Request, res: Response) => {
     const { code, state } = req.query as { code?: string; state?: string };
-    const storedState = req.cookies['github_oauth_state'];
+    const storedState = req.cookies[GITHUB_OAUTH_STATE_COOKIE_NAME];
 
-    res.clearCookie('github_oauth_state');
+    res.clearCookie(GITHUB_OAUTH_STATE_COOKIE_NAME);
 
     if (!code || !state || !storedState || state !== storedState) {
       throw new ApiError(400, 'BAD_REQUEST', 'Invalid OAuth state');
@@ -103,7 +107,7 @@ export const githubCallback = asyncHandler(
 
     const { refreshToken } = result;
 
-    res.cookie('refreshToken', refreshToken, cookieOptions);
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
 
     setCsrfCookie(res);
 

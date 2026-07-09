@@ -2,7 +2,7 @@ import type { PaginatedResponse } from '@network/shared';
 import { ShortModel, type IShortDocument } from './short.model.js';
 import type { UpdateShortData, WebhookUpdateData } from './short.types.js';
 import mongoose from 'mongoose';
-import { paginateQuery } from '../../utils/paginate.js';
+import { paginateQuery } from '../../core/utils/paginate.js';
 
 export const createPlaceholder = (
   userId: string,

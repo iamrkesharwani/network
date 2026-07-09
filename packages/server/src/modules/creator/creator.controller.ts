@@ -4,9 +4,9 @@ import {
   VIDEO_MILESTONE_CATALOG,
   CREATOR_MILESTONE_CATALOG,
 } from '@network/shared';
-import { asyncHandler } from '../../utils/asyncHandler.js';
-import { ApiResponse } from '../../utils/ApiResponse.js';
-import { ApiError } from '../../utils/ApiError.js';
+import { asyncHandler } from '../../core/utils/asyncHandler.js';
+import { ApiResponse } from '../../core/utils/ApiResponse.js';
+import { ApiError } from '../../core/utils/ApiError.js';
 import { getProfile } from './services/creator.profile.service.js';
 
 export const getMyProfile = asyncHandler(

@@ -5,10 +5,10 @@ import type {
   ConfirmVideoUploadInput,
 } from '@network/shared';
 import { ALLOWED_THUMBNAIL_MIME_TYPES } from '@network/shared';
-import { asyncHandler } from '../../../utils/asyncHandler.js';
-import { ApiResponse } from '../../../utils/ApiResponse.js';
-import { ApiError } from '../../../utils/ApiError.js';
-import { verifyFileMagicBytes } from '../../../middleware/upload.middleware.js';
+import { asyncHandler } from '../../../core/utils/asyncHandler.js';
+import { ApiResponse } from '../../../core/utils/ApiResponse.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import { verifyFileMagicBytes } from '../../../core/middleware/upload.middleware.js';
 import {
   confirmUpload,
   finaliseVideo,

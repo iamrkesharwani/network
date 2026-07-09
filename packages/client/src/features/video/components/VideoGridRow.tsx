@@ -1,5 +1,5 @@
 import type { IVideoResponse } from '@network/shared';
-import { COL_CLASS, type ColCount } from '../../../shared/utils/videoGrid';
+import { COL_CLASS, type ColCount } from '../utils/videoGrid';
 import { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import VideoCard from '../pages/VideoCard';

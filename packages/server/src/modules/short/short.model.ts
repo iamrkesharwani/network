@@ -1,5 +1,11 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { SHORT_VISIBILITY, SHORT_STATUS, type IShort } from '@network/shared';
+import {
+  SHORT_VISIBILITY,
+  SHORT_STATUS,
+  SHORT_TITLE_MAX_LENGTH,
+  SHORT_DESCRIPTION_MAX_LENGTH,
+  type IShort,
+} from '@network/shared';
 
 export interface IShortDocument
   extends Omit<IShort, 'id' | 'userId'>, Document {
@@ -17,12 +23,12 @@ const shortSchema = new Schema<IShortDocument>(
       type: String,
       required: true,
       trim: true,
-      maxlength: 100,
+      maxlength: SHORT_TITLE_MAX_LENGTH,
     },
     description: {
       type: String,
       trim: true,
-      maxlength: 500,
+      maxlength: SHORT_DESCRIPTION_MAX_LENGTH,
     },
     thumbnailUrl: {
       type: String,

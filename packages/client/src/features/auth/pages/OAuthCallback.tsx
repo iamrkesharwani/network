@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { CLIENT_ROUTES } from '@network/shared';
 import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
 import { useEffect, useRef } from 'react';
 import {
@@ -6,7 +7,7 @@ import {
   setAccessToken,
 } from '../../../shared/lib/axiosInstance';
 import { setCredentials } from '../authSlice';
-import Spinner from '../../../shared/components/Spinner';
+import Spinner from '../../../shared/ui-kit/Spinner';
 import { useToast } from '../../../shared/hooks/useToast';
 
 const OAuthCallback = () => {
@@ -25,7 +26,7 @@ const OAuthCallback = () => {
 
     if (error) {
       addToast(error, 'error');
-      navigate('/login', { replace: true });
+      navigate(CLIENT_ROUTES.LOGIN, { replace: true });
       return;
     }
 
@@ -37,20 +38,20 @@ const OAuthCallback = () => {
           setAccessToken(accessToken);
           dispatch(setCredentials({ user, accessToken }));
           addToast('Successfully signed in!', 'success');
-          navigate('/feed', { replace: true });
+          navigate(CLIENT_ROUTES.FEED, { replace: true });
         } catch (err) {
           console.error(err);
           addToast(
             'Authentication failed. Please try logging in again.',
             'error'
           );
-          navigate('/login', { replace: true });
+          navigate(CLIENT_ROUTES.LOGIN, { replace: true });
         }
       };
 
       initializeSession();
     } else {
-      navigate('/login', { replace: true });
+      navigate(CLIENT_ROUTES.LOGIN, { replace: true });
     }
   }, [searchParams, navigate, addToast, dispatch]);
 

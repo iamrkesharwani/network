@@ -7,6 +7,7 @@ import Field from '../components/Field';
 import {
   requestResetPasswordSchema,
   SITE_NAME,
+  CLIENT_ROUTES,
   type ApiErrorResponse,
   type RequestResetPasswordInput,
 } from '@network/shared';
@@ -30,7 +31,7 @@ const ForgotPassword = () => {
     try {
       await forgotPassword(data).unwrap();
       addToast('Reset instructions sent to your email.', 'success');
-      navigate('/reset-password', { state: { email: data.email } });
+      navigate(CLIENT_ROUTES.RESET_PASSWORD, { state: { email: data.email } });
     } catch (error: unknown) {
       const msg =
         (error as { data?: ApiErrorResponse })?.data?.error?.message ??
@@ -85,7 +86,7 @@ const ForgotPassword = () => {
         <p className="register-line mt-4 text-[0.8rem] text-[--color-text-muted]">
           Remember your password?{' '}
           <Link
-            to="/login"
+            to={CLIENT_ROUTES.LOGIN}
             className="text-[--color-text-primary] font-semibold no-underline pb-px transition-colors"
           >
             Login

@@ -6,4 +6,5 @@ export const ALLOWED_AVATAR_MIME_TYPES = [
 ];
 export const USER_ROLES = ['user', 'moderator', 'admin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
+export const DEFAULT_USER_ROLE: UserRole = 'user';
 export const USERNAME_MAX_GENERATION_ATTEMPTS = 5;

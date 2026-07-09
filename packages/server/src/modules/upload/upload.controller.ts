@@ -7,9 +7,9 @@ import type {
   CompleteMultipartUploadInput,
   CompletePartInput,
 } from '@network/shared';
-import { asyncHandler } from '../../utils/asyncHandler.js';
-import { ApiResponse } from '../../utils/ApiResponse.js';
-import { ApiError } from '../../utils/ApiError.js';
+import { asyncHandler } from '../../core/utils/asyncHandler.js';
+import { ApiResponse } from '../../core/utils/ApiResponse.js';
+import { ApiError } from '../../core/utils/ApiError.js';
 import * as uploadSessionService from './services/upload.session.service.js';
 
 const requireUserId = (req: Request): string => {
