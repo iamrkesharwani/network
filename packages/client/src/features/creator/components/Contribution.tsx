@@ -1,18 +1,20 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clapperboard, Flame, Lock, Zap } from 'lucide-react';
+import { Calendar, Clapperboard, FileText, Flame, Zap } from 'lucide-react';
 import { DAYS_OF_WEEK } from '@network/shared';
 
 interface ContributionProps {
   uploadActivity: string[];
   videoPublishCount: number;
   shortPublishCount: number;
+  postPublishCount: number;
 }
 
 const Contribution = ({
   uploadActivity,
   videoPublishCount,
   shortPublishCount,
+  postPublishCount,
 }: ContributionProps) => {
   const stats = useMemo(() => {
     const total = uploadActivity.length;
@@ -97,6 +99,12 @@ const Contribution = ({
       value: shortPublishCount,
       icon: Zap,
     },
+    {
+      key: 'post',
+      label: 'Post',
+      value: postPublishCount,
+      icon: FileText,
+    },
   ];
 
   const summaryCards = [
@@ -144,30 +152,6 @@ const Contribution = ({
             </motion.div>
           );
         })}
-
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: contentCards.length * 0.08,
-            type: 'spring',
-            stiffness: 300,
-            damping: 24,
-          }}
-          className="relative flex flex-col items-center sm:items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border border-border border-dashed bg-surface-overlay opacity-60"
-        >
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center bg-surface text-text-muted">
-            <Lock className="w-3.5 h-3.5" />
-          </div>
-          <div className="flex flex-col items-center sm:items-start">
-            <p className="text-[10px] sm:text-[11px] text-center sm:text-left font-medium text-text-muted uppercase tracking-wider">
-              Post stats
-            </p>
-            <p className="text-[10px] text-center sm:text-left text-text-muted">
-              Coming soon
-            </p>
-          </div>
-        </motion.div>
       </div>
 
       {summaryCards.map((card, i) => {
@@ -178,7 +162,7 @@ const Contribution = ({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              delay: (contentCards.length + 1 + i) * 0.08,
+              delay: (contentCards.length + i) * 0.08,
               type: 'spring',
               stiffness: 300,
               damping: 24,
