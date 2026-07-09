@@ -2,9 +2,6 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from '../../shared/lib/axiosBaseQuery';
 import type {
   ApiResponse,
-  ConfirmPostVideoUploadInput,
-  IInitiatePostVideoUploadResult,
-  InitiatePostVideoUploadInput,
   IPostActionResult,
   IPostResponse,
   PaginatedResponse,
@@ -26,28 +23,6 @@ export const postApi = createApi({
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
       invalidatesTags: ['MyPosts', 'Post'],
-    }),
-
-    initiateVideoUpload: builder.mutation<
-      ApiResponse<IInitiatePostVideoUploadResult>,
-      InitiatePostVideoUploadInput
-    >({
-      query: (data) => ({
-        url: '/initiate-video-upload',
-        method: 'POST',
-        data,
-      }),
-    }),
-
-    confirmVideoUpload: builder.mutation<
-      ApiResponse<IPostResponse>,
-      ConfirmPostVideoUploadInput
-    >({
-      query: (data) => ({
-        url: '/confirm-video-upload',
-        method: 'POST',
-        data,
-      }),
     }),
 
     finalisePost: builder.mutation<
@@ -136,8 +111,6 @@ export const postApi = createApi({
 
 export const {
   useCreatePostMutation,
-  useInitiateVideoUploadMutation,
-  useConfirmVideoUploadMutation,
   useFinalisePostMutation,
   useGetFeedQuery,
   useGetMyPostsQuery,

@@ -61,6 +61,9 @@ const PostComposer = () => {
     isSubmitting,
     videoUploadState,
     cancelVideoUpload,
+    resumePointer,
+    discardResume,
+    resumeVideoUpload,
   } = usePostComposer({
     onPublished: (creatorEvent) => {
       addToast('Your post is live', 'success');
@@ -89,13 +92,18 @@ const PostComposer = () => {
 
       setAttachmentError(null);
 
+      if (resumePointer) {
+        resumeVideoUpload(file);
+        return;
+      }
+
       const isImage = ALLOWED_POST_IMAGE_MIME_TYPES.includes(
         file.type as (typeof ALLOWED_POST_IMAGE_MIME_TYPES)[number]
       );
 
       setAttachment({ kind: isImage ? 'image' : 'video', file });
     },
-    [setAttachment]
+    [setAttachment, resumePointer, resumeVideoUpload]
   );
 
   const handleRemoveAttachment = useCallback(() => {
@@ -157,6 +165,8 @@ const PostComposer = () => {
               title="Add an image or video"
               subtitle="or click to browse · JPEG, PNG, WebP, MP4, MOV, WebM, MKV"
               accept={ACCEPTED_ATTACHMENT_MIME}
+              resumePointer={resumePointer}
+              onDiscardResume={discardResume}
             />
           ) : videoUploadStarted ? (
             <MediaDropzone

@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ICreatorEvent, PostVisibility } from '@network/shared';
+import {
+  POST_UPLOAD_STEP,
+  type ICreatorEvent,
+  type PostVisibility,
+} from '@network/shared';
 import { useCreatePostMutation, useFinalisePostMutation } from '../postApi';
 import { useRawPostVideoUpload } from './usePostVideoUpload';
+import { useUploadResumePointer } from '../../upload/hooks/useUploadResumePointer';
 
 export type PostAttachment =
   | { kind: 'none' }
@@ -29,6 +34,14 @@ export const usePostComposer = ({
 
   const finalisedRef = useRef(false);
 
+  const { resumePointer, discardResume, clearPointer } = useUploadResumePointer(
+    {
+      mediaType: 'post',
+      uploadState: videoUpload.state,
+      step: POST_UPLOAD_STEP,
+    }
+  );
+
   const canSubmit = text.trim().length > 0 || attachment.kind !== 'none';
 
   const reset = useCallback(() => {
@@ -39,7 +52,17 @@ export const usePostComposer = ({
     setError(null);
     finalisedRef.current = false;
     videoUpload.reset();
-  }, [videoUpload]);
+    clearPointer();
+  }, [videoUpload, clearPointer]);
+
+  const resumeVideoUpload = useCallback(
+    (file: File) => {
+      finalisedRef.current = false;
+      setAttachment({ kind: 'video', file });
+      void videoUpload.startUpload(file);
+    },
+    [videoUpload]
+  );
 
   const submit = useCallback(async () => {
     setError(null);
@@ -145,5 +168,8 @@ export const usePostComposer = ({
     isSubmitting: createPostState.isLoading || isUploadingVideo,
     videoUploadState: videoUpload.state,
     cancelVideoUpload: videoUpload.cancelUpload,
+    resumePointer,
+    discardResume,
+    resumeVideoUpload,
   };
 };

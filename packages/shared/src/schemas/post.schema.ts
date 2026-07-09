@@ -1,9 +1,6 @@
 import { z } from 'zod';
 import { isValidObjectId } from '../utils/validators.js';
 import {
-  ALLOWED_POST_VIDEO_MIME_TYPES,
-  MAX_POST_VIDEO_SIZE_BYTES,
-  MAX_POST_VIDEO_DURATION_SECONDS,
   POST_TEXT_MAX_LENGTH,
   POST_VISIBILITY,
 } from '../constants/post.constants.js';
@@ -47,55 +44,6 @@ export const createPostSchema = z.object({
 });
 
 export const postUpdateSchema = createPostSchema.partial();
-
-export const initiatePostVideoUploadSchema = z.object({
-  fileName: z
-    .string()
-    .trim()
-    .min(1, { message: 'File name is required.' })
-    .max(255, { message: 'File name is too long.' }),
-
-  fileSizeBytes: z
-    .number()
-    .int()
-    .positive({ message: 'File size must be a positive number.' })
-    .max(MAX_POST_VIDEO_SIZE_BYTES, {
-      message: 'File exceeds the maximum allowed post video size.',
-    }),
-
-  mimeType: z.enum(ALLOWED_POST_VIDEO_MIME_TYPES, {
-    message: 'Unsupported video format.',
-  }),
-
-  durationSeconds: z
-    .number()
-    .int()
-    .positive()
-    .max(MAX_POST_VIDEO_DURATION_SECONDS, {
-      message: 'Post video exceeds the maximum allowed duration.',
-    })
-    .optional(),
-});
-
-export const confirmPostVideoUploadSchema = z.object({
-  postId: z.string().refine(isValidObjectId, {
-    message: 'Invalid post ID.',
-  }),
-
-  storageKey: z
-    .string()
-    .trim()
-    .min(1)
-    .max(512, { message: 'storageKey is too long.' }),
-
-  fileSizeBytes: z
-    .number()
-    .int()
-    .positive({ message: 'File size must be a positive number.' })
-    .max(MAX_POST_VIDEO_SIZE_BYTES, {
-      message: 'File exceeds the maximum allowed post video size.',
-    }),
-});
 
 export const postFinaliseSchema = z.object({
   text: postTextSchema,

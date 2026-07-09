@@ -3,7 +3,6 @@ import type { WizardStep } from '../../../shared/upload/UploadSteps';
 import type {
   ApiResponse,
   ICreatorEvent,
-  IPersistedUploadPointer,
   MediaProcessingStatus,
   MultipartMediaType,
   UploadState,
@@ -17,11 +16,7 @@ import {
 } from '../uploadSlice';
 import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
 import { createThumbnailUploader } from './useMediaEditForm';
-import {
-  saveUploadPointer,
-  loadUploadPointer,
-  clearUploadPointer,
-} from '../utils/uploadPersistence';
+import { useUploadResumePointer } from './useUploadResumePointer';
 
 export interface BaseMediaResponse {
   id: string;
@@ -81,8 +76,6 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [isAbandoning, setIsAbandoning] = useState(false);
   const [isProcessingTerminal, setIsProcessingTerminal] = useState(false);
-  const [resumePointer, setResumePointer] =
-    useState<IPersistedUploadPointer | null>(null);
 
   const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
 
@@ -147,77 +140,34 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     }
   }, [dispatch, mediaType, uploadState.stage, uploadState.videoId]);
 
-  useEffect(() => {
-    if (wizard.sessionId || wizard.mediaId) return;
-
-    const pointer = loadUploadPointer(mediaType);
-    if (!pointer) return;
-
-    const isFullyUploaded =
-      pointer.totalParts > 0 &&
-      pointer.uploadedParts.length >= pointer.totalParts;
-
-    if (pointer.step !== 'drop' || isFullyUploaded) {
-      dispatch(
-        setWizardState({
-          mediaType,
-          patch: {
-            step: (pointer.step === 'drop'
-              ? 'thumbnail'
-              : pointer.step) as WizardStep,
-            mediaId: pointer.mediaId || null,
-            sessionId: pointer.sessionId,
-            fingerprint: pointer.fingerprint,
-            uploadedParts: pointer.uploadedParts.map((part) => part.partNumber),
-            totalParts: pointer.totalParts,
-          },
-        })
-      );
-      return;
-    }
-
-    setResumePointer(pointer);
-  }, []);
-
-  useEffect(() => {
-    if (!uploadState.sessionId || !uploadState.storageKey) return;
-
-    if (resumePointer) setResumePointer(null);
-
-    const existing = loadUploadPointer(mediaType);
-
-    saveUploadPointer({
+  const { resumePointer, discardResume, clearPointer } = useUploadResumePointer(
+    {
       mediaType,
-      sessionId: uploadState.sessionId,
-      mediaId: uploadState.videoId ?? wizard.mediaId ?? existing?.mediaId ?? '',
-      fingerprint: uploadState.fingerprint ?? existing?.fingerprint ?? '',
-      storageKey: uploadState.storageKey,
-      fileName: uploadState.file?.name ?? existing?.fileName ?? '',
-      fileSizeBytes:
-        uploadState.file?.size ??
-        existing?.fileSizeBytes ??
-        uploadState.totalBytes,
-      uploadedParts: uploadState.uploadedParts.map((partNumber) => ({
-        partNumber,
-        etag: '',
-      })),
-      totalParts: uploadState.totalParts,
+      uploadState,
       step,
-    });
-  }, [
-    mediaType,
-    step,
-    wizard.mediaId,
-    resumePointer,
-    uploadState.sessionId,
-    uploadState.storageKey,
-    uploadState.videoId,
-    uploadState.fingerprint,
-    uploadState.file,
-    uploadState.totalBytes,
-    uploadState.uploadedParts,
-    uploadState.totalParts,
-  ]);
+      mediaId: wizard.mediaId,
+      sessionId: wizard.sessionId,
+      onRestorePointer: (pointer) => {
+        dispatch(
+          setWizardState({
+            mediaType,
+            patch: {
+              step: (pointer.step === 'drop'
+                ? 'thumbnail'
+                : pointer.step) as WizardStep,
+              mediaId: pointer.mediaId || null,
+              sessionId: pointer.sessionId,
+              fingerprint: pointer.fingerprint,
+              uploadedParts: pointer.uploadedParts.map(
+                (part) => part.partNumber
+              ),
+              totalParts: pointer.totalParts,
+            },
+          })
+        );
+      },
+    }
+  );
 
   const handleDetailsSuccess = (
     media: TMediaResponse,
@@ -239,13 +189,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     dispatch(resetWizardState({ mediaType }));
     setIsProcessingTerminal(false);
     resetUpload();
-    clearUploadPointer(mediaType);
-    setResumePointer(null);
-  };
-
-  const discardResume = () => {
-    clearUploadPointer(mediaType);
-    setResumePointer(null);
+    clearPointer();
   };
 
   const handleAbandon = async () => {

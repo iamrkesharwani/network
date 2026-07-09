@@ -5,8 +5,6 @@ import { uploadLimiter } from '../../middleware/rateLimit.middleware.js';
 import { uploadPostImage } from '../../middleware/upload.middleware.js';
 import {
   createPostSchema,
-  initiatePostVideoUploadSchema,
-  confirmPostVideoUploadSchema,
   postFinaliseSchema,
   postUpdateSchema,
   postFeedQuerySchema,
@@ -25,22 +23,6 @@ router.post(
   uploadPostImage,
   validate({ body: createPostSchema }),
   postUploadController.createThePost
-);
-
-router.post(
-  '/initiate-video-upload',
-  requireAuth,
-  uploadLimiter,
-  validate({ body: initiatePostVideoUploadSchema }),
-  postUploadController.initiateTheVideoUpload
-);
-
-router.post(
-  '/confirm-video-upload',
-  requireAuth,
-  uploadLimiter,
-  validate({ body: confirmPostVideoUploadSchema }),
-  postUploadController.confirmTheVideoUpload
 );
 
 router.post(

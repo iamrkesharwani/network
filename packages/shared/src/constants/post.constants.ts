@@ -30,5 +30,5 @@ export const MAX_POST_VIDEO_DURATION_SECONDS = 60;
 export const RAW_POST_UPLOAD_KEY_PREFIX = 'raw-post-uploads';
 export const RAW_POST_UPLOAD_PRESIGNED_URL_TTL_SECONDS = 60 * 60;
 export const RAW_POST_UPLOAD_LIFECYCLE_DAYS = 1;
-export const POST_UPLOAD_SESSION_TTL_SECONDS = 60 * 60 * 24;
 export const TEXT_TRUNCATE_LENGTH = 280;
+export const POST_UPLOAD_STEP = 'drop';

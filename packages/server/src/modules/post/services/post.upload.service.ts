@@ -1,19 +1,14 @@
 import {
-  POST_UPLOAD_SESSION_TTL_SECONDS,
   type CreatePostInput,
-  type IInitiatePostVideoUploadResult,
   type IPostActionResult,
-  type InitiatePostVideoUploadInput,
   type PostFinaliseInput,
 } from '@network/shared';
 import * as postRepository from '../post.repository.js';
-import { storageProvider, imageProvider } from '../../../providers/provider.js';
-import { redisClient } from '../../../config/redis.js';
+import { imageProvider } from '../../../providers/provider.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { getOwnerId } from '../../../utils/getOwnerId.js';
-import { uploadSessionKey, toResponse } from './post.mappers.js';
+import { toResponse } from './post.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
-import { ingestFromStorage } from '../../upload/services/upload.ingest.service.js';
 
 export const createPost = async (
   userId: string,
@@ -45,78 +40,6 @@ export const createPost = async (
   });
 
   return { post: toResponse(updated ?? post), creatorEvent };
-};
-
-export const initiateVideoUpload = async (
-  userId: string,
-  data: InitiatePostVideoUploadInput,
-  text?: string
-): Promise<IInitiatePostVideoUploadResult> => {
-  const placeholder = await postRepository.createVideoPlaceholder(userId, text);
-  const postId = placeholder._id.toString();
-
-  const { url: presignedUrl, key: storageKey } =
-    await storageProvider.presignUpload(
-      'post',
-      userId,
-      postId,
-      data.mimeType,
-      data.fileSizeBytes
-    );
-
-  await redisClient.set(
-    uploadSessionKey(storageKey),
-    `${userId}:${postId}`,
-    'EX',
-    POST_UPLOAD_SESSION_TTL_SECONDS
-  );
-
-  return { postId, presignedUrl, storageKey };
-};
-
-export const confirmVideoUpload = async (
-  userId: string,
-  postId: string,
-  storageKey: string,
-  fileSizeBytes: number
-) => {
-  const sessionValue = await redisClient.get(uploadSessionKey(storageKey));
-  if (sessionValue !== `${userId}:${postId}`) {
-    throw new ApiError(
-      403,
-      'FORBIDDEN',
-      'This upload session does not belong to you or has expired.'
-    );
-  }
-
-  if (!storageProvider.isOwnedKey(storageKey, 'post', userId, postId)) {
-    throw new ApiError(403, 'FORBIDDEN', 'Invalid storage key.');
-  }
-
-  const placeholder = await postRepository.findById(postId);
-  if (!placeholder) {
-    throw new ApiError(404, 'NOT_FOUND', 'Post record not found.');
-  }
-
-  const { providerVideoId } = await ingestFromStorage({
-    storageKey,
-    fileName: `post-${postId}`,
-    fileSizeBytes,
-    userId,
-  });
-
-  const post = await postRepository.updateById(postId, {
-    providerVideoId,
-    storageKey,
-    status: 'PROCESSING',
-  });
-
-  if (!post) {
-    throw new ApiError(404, 'NOT_FOUND', 'Post record not found.');
-  }
-
-  await redisClient.del(uploadSessionKey(storageKey));
-  return toResponse(post);
 };
 
 export const finalisePost = async (

@@ -3,8 +3,6 @@ import {
   createPostSchema,
   postUpdateSchema,
   postFinaliseSchema,
-  initiatePostVideoUploadSchema,
-  confirmPostVideoUploadSchema,
   postFeedQuerySchema,
   postIdParamSchema,
 } from '../schemas/post.schema.js';
@@ -18,23 +16,11 @@ import type { ICreatorEvent } from './creator.types.js';
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type PostUpdateInput = z.infer<typeof postUpdateSchema>;
 export type PostFinaliseInput = z.infer<typeof postFinaliseSchema>;
-export type InitiatePostVideoUploadInput = z.infer<
-  typeof initiatePostVideoUploadSchema
->;
-export type ConfirmPostVideoUploadInput = z.infer<
-  typeof confirmPostVideoUploadSchema
->;
 export type PostFeedQuery = z.infer<typeof postFeedQuerySchema>;
 export type PostIdParam = z.infer<typeof postIdParamSchema>;
 export type PostVisibility = (typeof POST_VISIBILITY)[number];
 export type PostStatus = (typeof POST_STATUS)[number];
 export type PostMediaType = (typeof POST_MEDIA_TYPE)[number];
-
-export interface IInitiatePostVideoUploadResult {
-  postId: string;
-  presignedUrl: string;
-  storageKey: string;
-}
 
 export interface IPost {
   id: string;
