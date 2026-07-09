@@ -47,6 +47,8 @@ const VideoUploadWizard = () => {
     handleDetailsSuccess,
     resetWizard,
     handleAbandon,
+    resumePointer,
+    discardResume,
     processingStatus,
     providerThumbnail,
     errorMessage,
@@ -120,6 +122,8 @@ const VideoUploadWizard = () => {
                 title="Drag & drop your video"
                 subtitle="or click to browse · MP4, MOV, WebM, MKV · up to 5GB"
                 accept="video/mp4,video/quicktime,video/webm,video/x-matroska"
+                resumePointer={resumePointer}
+                onDiscardResume={discardResume}
               />
             )}
 

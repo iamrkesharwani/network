@@ -3,6 +3,7 @@ import type { WizardStep } from '../../../shared/upload/UploadSteps';
 import type {
   ApiResponse,
   ICreatorEvent,
+  IPersistedUploadPointer,
   MediaProcessingStatus,
   MultipartMediaType,
   UploadState,
@@ -80,6 +81,8 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [isAbandoning, setIsAbandoning] = useState(false);
   const [isProcessingTerminal, setIsProcessingTerminal] = useState(false);
+  const [resumePointer, setResumePointer] =
+    useState<IPersistedUploadPointer | null>(null);
 
   const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
 
@@ -150,23 +153,36 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     const pointer = loadUploadPointer(mediaType);
     if (!pointer) return;
 
-    dispatch(
-      setWizardState({
-        mediaType,
-        patch: {
-          step: pointer.step as WizardStep,
-          mediaId: pointer.mediaId || null,
-          sessionId: pointer.sessionId,
-          fingerprint: pointer.fingerprint,
-          uploadedParts: pointer.uploadedParts.map((part) => part.partNumber),
-          totalParts: pointer.totalParts,
-        },
-      })
-    );
+    const isFullyUploaded =
+      pointer.totalParts > 0 &&
+      pointer.uploadedParts.length >= pointer.totalParts;
+
+    if (pointer.step !== 'drop' || isFullyUploaded) {
+      dispatch(
+        setWizardState({
+          mediaType,
+          patch: {
+            step: (pointer.step === 'drop'
+              ? 'thumbnail'
+              : pointer.step) as WizardStep,
+            mediaId: pointer.mediaId || null,
+            sessionId: pointer.sessionId,
+            fingerprint: pointer.fingerprint,
+            uploadedParts: pointer.uploadedParts.map((part) => part.partNumber),
+            totalParts: pointer.totalParts,
+          },
+        })
+      );
+      return;
+    }
+
+    setResumePointer(pointer);
   }, []);
 
   useEffect(() => {
     if (!uploadState.sessionId || !uploadState.storageKey) return;
+
+    if (resumePointer) setResumePointer(null);
 
     const existing = loadUploadPointer(mediaType);
 
@@ -192,6 +208,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     mediaType,
     step,
     wizard.mediaId,
+    resumePointer,
     uploadState.sessionId,
     uploadState.storageKey,
     uploadState.videoId,
@@ -223,6 +240,12 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     setIsProcessingTerminal(false);
     resetUpload();
     clearUploadPointer(mediaType);
+    setResumePointer(null);
+  };
+
+  const discardResume = () => {
+    clearUploadPointer(mediaType);
+    setResumePointer(null);
   };
 
   const handleAbandon = async () => {
@@ -281,6 +304,8 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     handleDetailsSuccess,
     resetWizard,
     handleAbandon,
+    resumePointer,
+    discardResume,
     processingStatus,
     providerThumbnail,
     errorMessage,

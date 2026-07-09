@@ -47,6 +47,8 @@ const ShortUploadWizard = () => {
     handleDetailsSuccess,
     resetWizard,
     handleAbandon,
+    resumePointer,
+    discardResume,
     processingStatus,
     providerThumbnail,
     errorMessage,
@@ -120,6 +122,8 @@ const ShortUploadWizard = () => {
                 title="Drag & drop your short"
                 subtitle="or click to browse · MP4, MOV, WebM, MKV · vertical, up to 60s"
                 accept="video/mp4,video/quicktime,video/webm,video/x-matroska"
+                resumePointer={resumePointer}
+                onDiscardResume={discardResume}
               />
             )}
 
