@@ -3,6 +3,11 @@ import {
   EMAIL_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   PASSWORD_MAX_LENGTH,
+  NAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+  USERNAME_MAX_LENGTH,
+  BIO_MAX_LENGTH,
+  NAME_MIN_LENGTH,
 } from '../constants/user.constants.js';
 
 export const userRegistrationSchema = z.object({
@@ -10,8 +15,11 @@ export const userRegistrationSchema = z.object({
     .string()
     .trim()
     .min(1, 'Name is required.')
-    .min(3, 'Name must be at least 3 characters.')
-    .max(50, 'Name cannot exceed 50 characters.')
+    .min(
+      NAME_MIN_LENGTH,
+      `Name must be at least ${NAME_MIN_LENGTH} characters.`
+    )
+    .max(NAME_MAX_LENGTH, `Name cannot exceed ${NAME_MAX_LENGTH} characters.`)
     .regex(
       /^[a-zA-Z\s-]+$/,
       'Name can only contain letters, spaces, and hyphens.'
@@ -21,8 +29,14 @@ export const userRegistrationSchema = z.object({
     .string()
     .trim()
     .toLowerCase()
-    .min(3, 'Username must be at least 3 characters.')
-    .max(20, 'Username cannot exceed 20 characters.')
+    .min(
+      USERNAME_MIN_LENGTH,
+      `Username must be at least ${USERNAME_MIN_LENGTH} characters.`
+    )
+    .max(
+      USERNAME_MAX_LENGTH,
+      `Username cannot exceed ${USERNAME_MAX_LENGTH} characters.`
+    )
     .regex(
       /^[a-z0-9_]+$/,
       'Username can only contain lowercase letters, numbers, and underscores.'
@@ -38,7 +52,7 @@ export const userRegistrationSchema = z.object({
       EMAIL_MAX_LENGTH,
       `Email cannot exceed ${EMAIL_MAX_LENGTH} characters.`
     )
-    .email('Enter a valid email address.'),
+    .check(z.email('Enter a valid email address.')),
 
   password: z
     .string()
@@ -63,7 +77,7 @@ export const userProfileUpdateSchema = z.object({
   bio: z
     .string()
     .trim()
-    .max(500, 'Bio cannot exceed 500 characters.')
+    .max(BIO_MAX_LENGTH, `Bio cannot exceed ${BIO_MAX_LENGTH} characters.`)
     .optional(),
 
   avatarUrl: z

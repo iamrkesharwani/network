@@ -3,14 +3,14 @@ import { env } from '../../../core/env/env.js';
 
 export const cookieOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
+  secure: env.SECURE_COOKIES,
   sameSite: 'lax' as const,
   maxAge: SEVEN_DAYS_MS,
 };
 
 export const stateCookieOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
+  secure: env.SECURE_COOKIES,
   sameSite: 'lax' as const,
   maxAge: TEN_MINUTES_MS,
 };

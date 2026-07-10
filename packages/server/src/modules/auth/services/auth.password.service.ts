@@ -59,7 +59,13 @@ export const requestPasswordReset = async (email: string) => {
     'EX',
     OTP_VERIFICATION_TTL_SECONDS
   );
-  await redisClient.set(attemptsKey, '0', 'EX', OTP_VERIFICATION_TTL_SECONDS);
+  await redisClient.set(
+    attemptsKey,
+    '0',
+    'EX',
+    OTP_VERIFICATION_TTL_SECONDS,
+    'NX'
+  );
 
   await queuePasswordResetEmail({ to: email, userName: user.name, otp });
 };

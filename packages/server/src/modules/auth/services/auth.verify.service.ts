@@ -30,7 +30,13 @@ export const sendVerificationEmail = async (email: string) => {
   const attemptsKey = `otp_attempts:${email}`;
 
   await redisClient.set(tokenKey, hashedOtp, 'EX', OTP_VERIFICATION_TTL_SECONDS);
-  await redisClient.set(attemptsKey, '0', 'EX', OTP_VERIFICATION_TTL_SECONDS);
+  await redisClient.set(
+    attemptsKey,
+    '0',
+    'EX',
+    OTP_VERIFICATION_TTL_SECONDS,
+    'NX'
+  );
 
   await queueOtpEmail({ to: email, userName: user.name, otp });
 };

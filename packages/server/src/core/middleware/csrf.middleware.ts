@@ -7,13 +7,14 @@ import {
   CSRF_EXEMPT_PATHS,
   CSRF_COOKIE_NAME,
   FIFTEEN_MINUTES_MS,
+  WEBHOOK_ROUTE_PREFIX,
 } from '@network/shared';
 
 export const setCsrfCookie = (res: Response) => {
   const token = crypto.randomBytes(32).toString('hex');
   res.cookie(CSRF_COOKIE_NAME, token, {
     httpOnly: false,
-    secure: env.NODE_ENV === 'production',
+    secure: env.SECURE_COOKIES,
     sameSite: 'strict',
     path: '/',
     maxAge: FIFTEEN_MINUTES_MS,
@@ -35,7 +36,10 @@ export const validateCsrfToken = (
     return next();
   }
 
-  if (req.originalUrl.includes('/webhook')) {
+  if (
+    req.path === WEBHOOK_ROUTE_PREFIX ||
+    req.path.startsWith(`${WEBHOOK_ROUTE_PREFIX}/`)
+  ) {
     return next();
   }
 

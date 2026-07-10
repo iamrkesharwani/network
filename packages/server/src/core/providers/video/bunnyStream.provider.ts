@@ -1,6 +1,8 @@
+import { BUNNY_WEBHOOK_REPLAY_TTL_SECONDS } from '@network/shared';
 import type { VideoStatus } from '../../../../../shared/src/index.js';
 import { ApiError } from '../../utils/ApiError.js';
 import { logger } from '../../utils/logger.js';
+import { redisClient } from '../../config/redis.js';
 import type {
   IngestVideoResult,
   IVideoProvider,
@@ -178,10 +180,10 @@ export class BunnyStreamVideoProvider implements IVideoProvider {
     return `https://${this.cdnHostname}/${providerVideoId}/thumbnail.jpg`;
   }
 
-  verifyWebhookSignature({
+  async verifyWebhookSignature({
     rawBody,
     signatureHeader,
-  }: WebhookVerifyParams): boolean {
+  }: WebhookVerifyParams): Promise<boolean> {
     if (!rawBody || !signatureHeader) return false;
 
     const expected = crypto
@@ -191,10 +193,25 @@ export class BunnyStreamVideoProvider implements IVideoProvider {
 
     const expectedBuf = Buffer.from(expected, 'hex');
     const receivedBuf = Buffer.from(signatureHeader, 'hex');
-    return (
+    const signatureValid =
       receivedBuf.length === expectedBuf.length &&
-      crypto.timingSafeEqual(receivedBuf, expectedBuf)
+      crypto.timingSafeEqual(receivedBuf, expectedBuf);
+
+    if (!signatureValid) return false;
+
+    const bodyFingerprint = crypto
+      .createHash('sha256')
+      .update(rawBody)
+      .digest('hex');
+    const firstSeen = await redisClient.set(
+      `bunny_webhook_seen:${bodyFingerprint}`,
+      '1',
+      'EX',
+      BUNNY_WEBHOOK_REPLAY_TTL_SECONDS,
+      'NX'
     );
+
+    return firstSeen !== null;
   }
 
   parseWebhookPayload(body: unknown): NormalizedWebhookPayload | null {

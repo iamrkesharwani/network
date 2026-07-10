@@ -9,7 +9,7 @@ import { setCsrfCookie } from '../../../core/middleware/csrf.middleware.js';
 
 const cookieOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
+  secure: env.SECURE_COOKIES,
   sameSite: 'strict' as const,
   maxAge: env.REFRESH_TOKEN_COOKIE_MS,
 };
@@ -74,7 +74,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 
   res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
     httpOnly: true,
-    secure: env.NODE_ENV === 'production',
+    secure: env.SECURE_COOKIES,
     sameSite: 'strict',
   });
 

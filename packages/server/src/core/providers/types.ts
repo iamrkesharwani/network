@@ -99,7 +99,7 @@ export interface IVideoProvider {
 
   buildThumbnailUrl(providerVideoId: string): string;
 
-  verifyWebhookSignature(params: WebhookVerifyParams): boolean;
+  verifyWebhookSignature(params: WebhookVerifyParams): Promise<boolean>;
 
   parseWebhookPayload(body: unknown): NormalizedWebhookPayload | null;
 }

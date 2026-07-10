@@ -124,10 +124,10 @@ export class CloudflareStreamVideoProvider implements IVideoProvider {
   private static readonly WEBHOOK_TOLERANCE_SECONDS =
     WEBHOOK_SIGNATURE_TOLERANCE_SECONDS;
 
-  verifyWebhookSignature({
+  async verifyWebhookSignature({
     rawBody,
     signatureHeader,
-  }: WebhookVerifyParams): boolean {
+  }: WebhookVerifyParams): Promise<boolean> {
     if (!rawBody || !signatureHeader) return false;
 
     const parts = new Map<string, string[]>();

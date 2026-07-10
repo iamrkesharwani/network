@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import routes from './route.js';
-import { API_V1_PREFIX } from '@network/shared';
+import { API_V1_PREFIX, HSTS_MAX_AGE_SECONDS } from '@network/shared';
 import { env } from './core/env/env.js';
 import { apiLimiter } from './core/middleware/rateLimit.middleware.js';
 import {
@@ -19,13 +19,34 @@ import type { Application } from 'express';
 const isProduction = env.NODE_ENV === 'production';
 const app: Application = express();
 
-app.set('trust proxy', parseInt(env.TRUST_PROXY_HOPS, 10));
+app.set('trust proxy', env.TRUST_PROXY_HOPS);
 
-if (!isProduction) {
-  app.use(helmet({ contentSecurityPolicy: false }));
-} else {
-  app.use(helmet());
-}
+app.use(
+  helmet({
+    contentSecurityPolicy: isProduction
+      ? {
+          directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            mediaSrc: ["'self'", 'https:'],
+            connectSrc: ["'self'", env.CLIENT_URL],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            frameAncestors: ["'self'"],
+          },
+        }
+      : false,
+    hsts: isProduction
+      ? {
+          maxAge: HSTS_MAX_AGE_SECONDS,
+          includeSubDomains: true,
+          preload: true,
+        }
+      : false,
+  })
+);
 
 app.use(
   cors({

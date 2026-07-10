@@ -30,4 +30,8 @@ if (!parsedEnv.success) {
   process.exit(1);
 }
 
-export const env = parsedEnv.data;
+export const env = {
+  ...parsedEnv.data,
+  SECURE_COOKIES:
+    parsedEnv.data.SECURE_COOKIES ?? parsedEnv.data.NODE_ENV === 'production',
+};

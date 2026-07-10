@@ -9,12 +9,17 @@ export const appEnvSchema = z.object({
 
   CLIENT_URL: z.url(),
 
-  TRUST_PROXY_HOPS: z.string().default('1'),
-  
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(1),
+
   DISABLE_RATE_LIMIT: z
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+
+  SECURE_COOKIES: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((value) => (value === undefined ? undefined : value === 'true')),
 
   LOG_LEVEL: z
     .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])

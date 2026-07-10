@@ -3,6 +3,10 @@ import {
   USER_ROLES,
   AUTH_PROVIDERS,
   EMAIL_MAX_LENGTH,
+  NAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+  USERNAME_MAX_LENGTH,
+  BIO_MAX_LENGTH,
   type IUser,
 } from '@network/shared';
 
@@ -18,7 +22,7 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       required: true,
       trim: true,
-      maxlength: 50,
+      maxlength: NAME_MAX_LENGTH,
     },
     username: {
       type: String,
@@ -26,8 +30,8 @@ const userSchema = new Schema<IUserDocument>(
       unique: true,
       trim: true,
       lowercase: true,
-      minlength: 3,
-      maxlength: 30,
+      minlength: USERNAME_MIN_LENGTH,
+      maxlength: USERNAME_MAX_LENGTH,
     },
     email: {
       type: String,
@@ -43,7 +47,7 @@ const userSchema = new Schema<IUserDocument>(
     },
     bio: {
       type: String,
-      maxlength: 160,
+      maxlength: BIO_MAX_LENGTH,
       default: '',
     },
     avatarUrl: {

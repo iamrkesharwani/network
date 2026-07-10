@@ -7,7 +7,17 @@ export const sanitizeMiddleware = (
   next: NextFunction
 ) => {
   if (req.body) mongoSanitize.sanitize(req.body);
-  if (req.query) mongoSanitize.sanitize(req.query);
   if (req.params) mongoSanitize.sanitize(req.params);
+
+  if (req.query) {
+    const sanitizedQuery = mongoSanitize.sanitize({ ...req.query });
+    Object.defineProperty(req, 'query', {
+      value: sanitizedQuery,
+      configurable: true,
+      enumerable: true,
+      writable: true,
+    });
+  }
+
   next();
 };

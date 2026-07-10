@@ -7,6 +7,16 @@ import { generateUniqueUsername } from '../../../core/utils/username.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import type { OAuthUserPayload } from '../auth.types.js';
 
+const sanitizeOAuthAvatarUrl = (avatarUrl: string | undefined): string => {
+  if (!avatarUrl) return '';
+  try {
+    const parsed = new URL(avatarUrl);
+    return parsed.protocol === 'https:' ? avatarUrl : '';
+  } catch {
+    return '';
+  }
+};
+
 export const handleOAuthUser = async (payload: OAuthUserPayload) => {
   let user = await authRepository.findByProviderId(
     payload.provider,
@@ -51,7 +61,7 @@ export const handleOAuthUser = async (payload: OAuthUserPayload) => {
     name: payload.name,
     username,
     email: payload.email,
-    avatarUrl: payload.avatarUrl ?? '',
+    avatarUrl: sanitizeOAuthAvatarUrl(payload.avatarUrl),
     provider: payload.provider,
     providerId: payload.providerId,
   });

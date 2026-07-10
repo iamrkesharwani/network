@@ -27,11 +27,11 @@ export interface UploadState {
 
 import { FIFTEEN_MINUTES_MS } from './time.constants.js';
 
+export const MULTIPART_MEDIA_TYPES = ['video', 'short', 'post'] as const;
+
 export const UPLOAD_REAPER_QUEUE_NAME = 'upload-session-reaper';
 export const UPLOAD_REAPER_JOB_ID = 'upload-session-reaper';
 export const UPLOAD_REAPER_INTERVAL_MS = FIFTEEN_MINUTES_MS;
-
-export const MULTIPART_MEDIA_TYPES = ['video', 'short', 'post'] as const;
 export const MULTIPART_PART_SIZE_BYTES = 8 * 1024 * 1024;
 export const MULTIPART_MIN_PART_SIZE_BYTES = 5 * 1024 * 1024;
 export const MULTIPART_SESSION_TTL_SECONDS = 60 * 60 * 24;

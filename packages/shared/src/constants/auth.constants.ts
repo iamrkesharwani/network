@@ -2,11 +2,12 @@ import { FIFTEEN_MINUTES_SECONDS } from './time.constants.js';
 
 export const OTP_MAX_ATTEMPTS = 5;
 export const OTP_REQUEST_COOLDOWN_SECONDS = 60;
-export const CSRF_EXEMPT_PATHS = ['/auth/refresh', '/auth/logout'];
+export const CSRF_EXEMPT_PATHS = ['/auth/refresh'];
+export const WEBHOOK_ROUTE_PREFIX = '/webhook';
 export const RESEND_COOLDOWN = 60;
+export const LOGIN_LOCKOUT_MAX_ATTEMPTS = 10;
+export const LOGIN_LOCKOUT_DURATION_SECONDS = FIFTEEN_MINUTES_SECONDS;
 export const AUTH_PROVIDERS = ['local', 'google', 'github'] as const;
-export type AuthProvider = (typeof AUTH_PROVIDERS)[number];
-
 export const REFRESH_TOKEN_COOKIE_NAME = 'refreshToken';
 export const CSRF_COOKIE_NAME = '_csrf';
 export const GITHUB_OAUTH_STATE_COOKIE_NAME = 'github_oauth_state';
@@ -43,3 +44,7 @@ export const AUTH_ICONS = {
     VIEWBOX: '0 0 24 24',
   },
 } as const;
+
+export const DUMMY_PASSWORD_HASH =
+  '$argon2id$v=19$m=19456,t=2,p=1$dQJHQO0aS3S1x8CGldfxgQ$YsxGqXSBd8KbVo/RONXSR2+JTIma/z2XpBpq3SuYcwA';
+export type AuthProvider = (typeof AUTH_PROVIDERS)[number];
