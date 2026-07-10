@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { cn } from '../../../shared/utils/cn';
 import ShortCardThumbnail from '../components/ShortCardThumbnail';
-import ShortCardMeta from '../components/ShortCardMeta';
+import ShortCardFooter from '../components/ShortCardFooter';
+import CardShell from '../../../shared/ui-kit/CardShell';
+import CardAuthorHeader from '../../../shared/ui-kit/CardAuthorHeader';
+import CardOptionsMenu from '../../../shared/ui-kit/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui-kit/ConfirmModal';
 import type { IShortResponse } from '@network/shared';
 
@@ -10,6 +12,7 @@ export interface ShortCardProps {
   isOwner?: boolean;
   onEdit?: (short: IShortResponse) => void;
   onDelete?: (short: IShortResponse) => void;
+  onThumbnailClick?: (short: IShortResponse) => void;
   className?: string;
 }
 
@@ -18,6 +21,7 @@ const ShortCard = ({
   isOwner = false,
   onEdit,
   onDelete,
+  onThumbnailClick,
   className,
 }: ShortCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -41,13 +45,42 @@ const ShortCard = ({
   };
 
   return (
-    <article className={cn('group flex flex-col gap-2', className)}>
-      <ShortCardThumbnail short={short} isReady={isReady} />
-      <ShortCardMeta
-        short={short}
-        isOwner={isOwner}
-        onEdit={handleEdit}
-        onDeleteClick={handleDeleteClick}
+    <>
+      <CardShell
+        className={className}
+        header={
+          <CardAuthorHeader
+            username={short.author.username}
+            avatarUrl={short.author.avatarUrl}
+            createdAt={short.createdAt}
+            menu={
+              isOwner && (
+                <CardOptionsMenu
+                  itemLabel="Short"
+                  onEdit={handleEdit}
+                  onDeleteClick={handleDeleteClick}
+                />
+              )
+            }
+          />
+        }
+        media={
+          <ShortCardThumbnail
+            short={short}
+            isReady={isReady}
+            onClick={
+              onThumbnailClick ? () => onThumbnailClick(short) : undefined
+            }
+          />
+        }
+        footer={
+          <ShortCardFooter
+            short={short}
+            onTitleClick={
+              onThumbnailClick ? () => onThumbnailClick(short) : undefined
+            }
+          />
+        }
       />
       <ConfirmModal
         isOpen={confirmOpen}
@@ -59,7 +92,7 @@ const ShortCard = ({
         confirmLabel="Delete"
         cancelLabel="Cancel"
       />
-    </article>
+    </>
   );
 };
 

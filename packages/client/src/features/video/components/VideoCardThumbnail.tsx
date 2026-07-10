@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Play, EyeOff } from 'lucide-react';
-import { formatDuration } from '@network/shared';
+import { Play } from 'lucide-react';
 import type { IVideoResponse } from '@network/shared';
+import MediaDurationBadge from '../../../shared/ui-kit/MediaDurationBadge';
+import MediaVisibilityBadge from '../../../shared/ui-kit/MediaVisibilityBadge';
 
 interface VideoCardThumbnailProps {
   video: IVideoResponse;
@@ -15,7 +16,7 @@ const VideoCardThumbnail = ({ video, isReady }: VideoCardThumbnailProps) => {
   return (
     <Link
       to={`/video/${video.id}`}
-      className="relative block w-full aspect-video rounded-xl overflow-hidden bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className="relative block w-full aspect-video bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       tabIndex={isReady ? 0 : -1}
       aria-disabled={!isReady}
     >
@@ -46,18 +47,8 @@ const VideoCardThumbnail = ({ video, isReady }: VideoCardThumbnailProps) => {
         </div>
       </div>
 
-      {video.duration > 0 && (
-        <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md text-[11px] font-medium font-mono tabular-nums bg-black/70 text-white backdrop-blur-sm leading-tight">
-          {formatDuration(video.duration)}
-        </span>
-      )}
-
-      {video.visibility !== 'public' && (
-        <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-black/70 text-text-secondary backdrop-blur-sm leading-tight">
-          <EyeOff className="w-3 h-3" strokeWidth={2} />
-          {video.visibility === 'private' ? 'Private' : 'Unlisted'}
-        </span>
-      )}
+      <MediaDurationBadge durationSeconds={video.duration} />
+      <MediaVisibilityBadge visibility={video.visibility} />
 
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">

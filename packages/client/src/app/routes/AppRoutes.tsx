@@ -9,7 +9,7 @@ import GuestRoute from './GuestRoute';
 import ForgotPassword from '../../features/auth/pages/ForgotPassword';
 import ResetPassword from '../../features/auth/pages/ResetPassword';
 import OAuthCallback from '../../features/auth/pages/OAuthCallback';
-import FeedPage from '../../features/feed/FeedPage';
+import Feed from '../../features/feed/Feed';
 import UploadHub from '../../features/upload/components/UploadHub';
 import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
@@ -41,7 +41,7 @@ export const routes: RouteObject[] = [
             path: '/',
             element: <Navigate to={CLIENT_ROUTES.FEED} replace />,
           },
-          { path: CLIENT_ROUTES.FEED, element: <FeedPage /> },
+          { path: CLIENT_ROUTES.FEED, element: <Feed /> },
           { path: CLIENT_ROUTES.UPLOAD, element: <UploadHub /> },
           {
             path: CLIENT_ROUTES.UPLOAD_VIDEO,

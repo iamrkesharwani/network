@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { formatCount } from '@network/shared';
 import type { IPostResponse } from '@network/shared';
-import { cn } from '../../../shared/utils/cn';
+import CardShell from '../../../shared/ui-kit/CardShell';
+import CardAuthorHeader from '../../../shared/ui-kit/CardAuthorHeader';
+import CardOptionsMenu from '../../../shared/ui-kit/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui-kit/ConfirmModal';
-import PostCardMeta from '../components/PostCardMeta';
-import PostCardBody from '../components/PostCard';
+import PostMedia from '../components/PostMedia';
+import PostFooter from '../components/PostFooter';
 
 export interface PostCardProps {
   post: IPostResponse;
@@ -41,26 +42,28 @@ const PostCard = ({
   };
 
   return (
-    <article
-      className={cn(
-        'group flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 sm:p-5',
-        className
-      )}
-    >
-      <PostCardMeta
-        post={post}
-        isOwner={isOwner}
-        onEdit={handleEdit}
-        onDeleteClick={handleDeleteClick}
+    <>
+      <CardShell
+        className={className}
+        header={
+          <CardAuthorHeader
+            username={post.author.username}
+            avatarUrl={post.author.avatarUrl}
+            createdAt={post.createdAt}
+            menu={
+              isOwner && (
+                <CardOptionsMenu
+                  itemLabel="Post"
+                  onEdit={handleEdit}
+                  onDeleteClick={handleDeleteClick}
+                />
+              )
+            }
+          />
+        }
+        media={post.mediaType !== 'none' ? <PostMedia post={post} /> : undefined}
+        footer={<PostFooter post={post} />}
       />
-      <PostCardBody post={post} />
-
-      {post.views > 0 && (
-        <p className="text-xs text-text-muted">
-          {formatCount(post.views)} views
-        </p>
-      )}
-
       <ConfirmModal
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
@@ -71,7 +74,7 @@ const PostCard = ({
         confirmLabel="Delete"
         cancelLabel="Cancel"
       />
-    </article>
+    </>
   );
 };
 

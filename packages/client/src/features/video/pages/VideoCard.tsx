@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { cn } from '../../../shared/utils/cn';
 import VideoCardThumbnail from '../components/VideoCardThumbnail';
-import VideoCardMeta from '../components/VideoCardMeta';
+import VideoCardFooter from '../components/VideoCardFooter';
+import CardShell from '../../../shared/ui-kit/CardShell';
+import CardAuthorHeader from '../../../shared/ui-kit/CardAuthorHeader';
+import CardOptionsMenu from '../../../shared/ui-kit/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui-kit/ConfirmModal';
 import type { IVideoResponse } from '@network/shared';
 
@@ -41,13 +43,27 @@ const VideoCard = ({
   };
 
   return (
-    <article className={cn('group flex flex-col gap-3', className)}>
-      <VideoCardThumbnail video={video} isReady={isReady} />
-      <VideoCardMeta
-        video={video}
-        isOwner={isOwner}
-        onEdit={handleEdit}
-        onDeleteClick={handleDeleteClick}
+    <>
+      <CardShell
+        className={className}
+        header={
+          <CardAuthorHeader
+            username={video.author.username}
+            avatarUrl={video.author.avatarUrl}
+            createdAt={video.createdAt}
+            menu={
+              isOwner && (
+                <CardOptionsMenu
+                  itemLabel="Video"
+                  onEdit={handleEdit}
+                  onDeleteClick={handleDeleteClick}
+                />
+              )
+            }
+          />
+        }
+        media={<VideoCardThumbnail video={video} isReady={isReady} />}
+        footer={<VideoCardFooter video={video} />}
       />
       <ConfirmModal
         isOpen={confirmOpen}
@@ -59,7 +75,7 @@ const VideoCard = ({
         confirmLabel="Delete"
         cancelLabel="Cancel"
       />
-    </article>
+    </>
   );
 };
 

@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MoreVertical, Edit2, Trash2 } from 'lucide-react';
-import { cn } from '../../../shared/utils/cn';
+import { cn } from '../utils/cn';
 
-interface PostCardMenuProps {
+interface CardOptionsMenuProps {
+  itemLabel: string;
   onEdit: (e: React.MouseEvent) => void;
   onDeleteClick: (e: React.MouseEvent) => void;
 }
 
-const PostCardMenu = ({ onEdit, onDeleteClick }: PostCardMenuProps) => {
+const CardOptionsMenu = ({
+  itemLabel,
+  onEdit,
+  onDeleteClick,
+}: CardOptionsMenuProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleToggle = (e: React.MouseEvent) => {
@@ -31,7 +36,7 @@ const PostCardMenu = ({ onEdit, onDeleteClick }: PostCardMenuProps) => {
       <button
         type="button"
         onClick={handleToggle}
-        aria-label="Post options"
+        aria-label={`${itemLabel} options`}
         aria-expanded={menuOpen}
         className={cn(
           'p-1.5 -mr-1 rounded-lg text-icon transition-all focus:outline-none',
@@ -75,4 +80,4 @@ const PostCardMenu = ({ onEdit, onDeleteClick }: PostCardMenuProps) => {
   );
 };
 
-export default PostCardMenu;
+export default CardOptionsMenu;

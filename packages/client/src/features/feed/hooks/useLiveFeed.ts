@@ -26,7 +26,7 @@ export interface UseLiveFeedResult<T> {
   retry: () => void;
 }
 
-export const useLiveFeed = <T extends { id: string }>(
+export const useLiveFeed = <T>(
   useFeedQuery: UseFeedQueryHook<T>,
   limit: number
 ) => {

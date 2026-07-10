@@ -1,20 +1,33 @@
-import { formatDuration, type IShortResponse } from '@network/shared';
-import { EyeOff, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import type { IShortResponse } from '@network/shared';
+import MediaDurationBadge from '../../../shared/ui-kit/MediaDurationBadge';
+import MediaVisibilityBadge from '../../../shared/ui-kit/MediaVisibilityBadge';
 
 interface ShortCardThumbnailProps {
   short: IShortResponse;
   isReady: boolean;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
-const ShortCardThumbnail = ({ short, isReady }: ShortCardThumbnailProps) => {
+const ShortCardThumbnail = ({
+  short,
+  isReady,
+  onClick,
+}: ShortCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
 
   return (
     <Link
       to={`/shorts/${short.id}`}
-      className="relative block w-full aspect-9/16 rounded-xl overflow-hidden bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      onClick={(e) => {
+        if (onClick) {
+          e.preventDefault();
+          onClick(e);
+        }
+      }}
+      className="relative block w-full aspect-9/16 bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       tabIndex={isReady ? 0 : -1}
       aria-disabled={!isReady}
     >
@@ -45,18 +58,8 @@ const ShortCardThumbnail = ({ short, isReady }: ShortCardThumbnailProps) => {
         </div>
       </div>
 
-      {short.duration > 0 && (
-        <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md text-[11px] font-medium font-mono tabular-nums bg-black/70 text-white backdrop-blur-sm leading-tight">
-          {formatDuration(short.duration)}
-        </span>
-      )}
-
-      {short.visibility !== 'public' && (
-        <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-black/70 text-text-secondary backdrop-blur-sm leading-tight">
-          <EyeOff className="w-3 h-3" strokeWidth={2} />
-          {short.visibility === 'private' ? 'Private' : 'Unlisted'}
-        </span>
-      )}
+      <MediaDurationBadge durationSeconds={short.duration} isShort />
+      <MediaVisibilityBadge visibility={short.visibility} />
 
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">
