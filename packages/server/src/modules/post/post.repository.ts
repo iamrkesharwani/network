@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { PostModel, type IPostDocument } from './post.model.js';
-import type { PaginatedResponse } from '@network/shared';
+import type { PaginatedResponse, PostVisibility } from '@network/shared';
 import { paginateQuery } from '../../core/utils/paginate.js';
 import type { UpdatePostData, WebhookUpdateData } from './post.types.js';
 
@@ -11,7 +11,9 @@ export const createTextOrImagePost = (
     imageUrl?: string;
     mediaType: 'none' | 'image';
     tags: string[];
-    visibility: 'public' | 'private' | 'unlisted';
+    visibility: PostVisibility;
+    unlistedAt?: Date | null;
+    unlistedExpiryWarnedAt?: Date | null;
   }
 ): Promise<IPostDocument> => {
   return PostModel.create({
@@ -21,6 +23,10 @@ export const createTextOrImagePost = (
     mediaType: data.mediaType,
     tags: data.tags,
     visibility: data.visibility,
+    ...(data.unlistedAt !== undefined && { unlistedAt: data.unlistedAt }),
+    ...(data.unlistedExpiryWarnedAt !== undefined && {
+      unlistedExpiryWarnedAt: data.unlistedExpiryWarnedAt,
+    }),
     status: 'READY',
   });
 };
@@ -37,13 +43,15 @@ export const createVideoPlaceholder = (
 };
 
 export const findById = (id: string): Promise<IPostDocument | null> => {
-  return PostModel.findById(id).populate('userId', 'username avatarUrl').exec();
+  return PostModel.findOne({ _id: id, deletedAt: null })
+    .populate('userId', 'username avatarUrl')
+    .exec();
 };
 
 export const findIdWithStorageKey = (
   id: string
 ): Promise<IPostDocument | null> => {
-  return PostModel.findById(id)
+  return PostModel.findOne({ _id: id, deletedAt: null })
     .select('+storageKey')
     .populate('userId', 'username avatarUrl')
     .exec();
@@ -61,7 +69,7 @@ export const findPublicFeed = async (
 ): Promise<Omit<PaginatedResponse<IPostDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     PostModel,
-    { status: 'READY', visibility: 'public' },
+    { status: 'READY', visibility: 'public', deletedAt: null },
     cursor,
     limit
   );
@@ -81,7 +89,7 @@ export const findByUserId = async (
 ): Promise<Omit<PaginatedResponse<IPostDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     PostModel,
-    { userId: new mongoose.Types.ObjectId(userId) },
+    { userId: new mongoose.Types.ObjectId(userId), deletedAt: null },
     cursor,
     limit
   );
@@ -98,7 +106,7 @@ export const updateById = (
   id: string,
   data: UpdatePostData
 ): Promise<IPostDocument | null> => {
-  return PostModel.findByIdAndUpdate(id, data, {
+  return PostModel.findOneAndUpdate({ _id: id, deletedAt: null }, data, {
     returnDocument: 'after',
     runValidators: true,
   })
@@ -128,6 +136,14 @@ export const incrementViews = (
   )
     .lean()
     .exec();
+};
+
+export const softDeleteById = (id: string): Promise<IPostDocument | null> => {
+  return PostModel.findOneAndUpdate(
+    { _id: id, deletedAt: null },
+    { deletedAt: new Date() },
+    { returnDocument: 'after' }
+  ).exec();
 };
 
 export const deleteById = (id: string): Promise<IPostDocument | null> => {

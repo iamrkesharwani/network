@@ -10,6 +10,7 @@ import { storageProvider, imageProvider } from '../../../core/providers/provider
 import { redisClient } from '../../../core/config/redis.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
+import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields.js';
 import { uploadSessionKey, toResponse } from './video.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
 import { ingestFromStorage } from '../../upload/services/upload.ingest.service.js';
@@ -113,7 +114,7 @@ export const finaliseVideo = async (
     title: data.title,
     category: data.category,
     tags: data.tags,
-    visibility: data.visibility,
+    ...buildVisibilityFields(data.visibility),
     ...(data.description !== undefined && { description: data.description }),
     ...(data.thumbnailUrl !== undefined && { thumbnailUrl: data.thumbnailUrl }),
     ...(!alreadyRecorded && { metricsRecorded: true }),

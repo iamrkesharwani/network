@@ -79,6 +79,18 @@ const postSchema = new Schema<IPostDocument>(
       type: Boolean,
       default: false,
     },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
+    unlistedAt: {
+      type: Date,
+      default: null,
+    },
+    unlistedExpiryWarnedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -93,6 +105,8 @@ const postSchema = new Schema<IPostDocument>(
         delete json['providerVideoId'];
         delete json['storageKey'];
         delete json['metricsRecorded'];
+        delete json['deletedAt'];
+        delete json['unlistedExpiryWarnedAt'];
 
         const raw = json['userId'] as
           | {
@@ -148,5 +162,8 @@ postSchema.pre('validate', function () {
 postSchema.index({ status: 1, visibility: 1, _id: -1 });
 
 postSchema.index({ userId: 1, status: 1, _id: -1 });
+
+postSchema.index({ deletedAt: 1 });
+postSchema.index({ visibility: 1, unlistedAt: 1 });
 
 export const PostModel = mongoose.model<IPostDocument>('Post', postSchema);

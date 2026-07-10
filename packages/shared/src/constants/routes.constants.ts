@@ -14,6 +14,10 @@ export const CLIENT_ROUTES = {
   UPLOAD_SHORT_FINALIZE: '/upload/short/finalize/:mediaId',
   UPLOAD_POST: '/upload/post',
   UPLOAD_POST_FINALIZE: '/upload/post/finalize/:mediaId',
-  PROFILE: '/profile',
+  PROFILE: '/profile/:username',
+  PROFILE_VIDEOS: '/profile/:username/videos',
+  PROFILE_SHORTS: '/profile/:username/shorts',
+  PROFILE_POSTS: '/profile/:username/posts',
+  PROFILE_STATS: '/profile/:username/stats',
   SETTINGS: '/settings',
 } as const;

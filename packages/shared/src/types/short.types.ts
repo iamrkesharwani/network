@@ -47,6 +47,9 @@ export interface IShort {
   views: number;
   likes: number;
   duration: number;
+  deletedAt?: Date | string | null;
+  unlistedAt?: Date | string | null;
+  unlistedExpiryWarnedAt?: Date | string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -59,7 +62,12 @@ export interface IShortAuthor {
 
 export interface IShortResponse extends Omit<
   IShort,
-  'userId' | 'providerVideoId' | 'storageKey' | 'metricsRecorded'
+  | 'userId'
+  | 'providerVideoId'
+  | 'storageKey'
+  | 'metricsRecorded'
+  | 'deletedAt'
+  | 'unlistedExpiryWarnedAt'
 > {
   author: IShortAuthor;
 }

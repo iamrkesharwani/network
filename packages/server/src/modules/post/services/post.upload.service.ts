@@ -7,6 +7,7 @@ import * as postRepository from '../post.repository.js';
 import { imageProvider } from '../../../core/providers/provider.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
+import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields.js';
 import { toResponse } from './post.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
 
@@ -32,6 +33,8 @@ export const createPost = async (
     mediaType,
     tags: data.tags ?? [],
     visibility: data.visibility,
+    unlistedAt: data.visibility === 'unlisted' ? new Date() : null,
+    unlistedExpiryWarnedAt: null,
   });
 
   const creatorEvent = await recordPublish(userId, 'post');
@@ -60,7 +63,7 @@ export const finalisePost = async (
   const updated = await postRepository.updateById(postId, {
     ...(data.text !== undefined && { text: data.text }),
     ...(data.tags !== undefined && { tags: data.tags }),
-    visibility: data.visibility,
+    ...buildVisibilityFields(data.visibility),
     ...(!alreadyRecorded && { metricsRecorded: true }),
   });
 

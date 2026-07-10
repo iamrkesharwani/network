@@ -79,6 +79,18 @@ const shortSchema = new Schema<IShortDocument>(
       type: Boolean,
       default: false,
     },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
+    unlistedAt: {
+      type: Date,
+      default: null,
+    },
+    unlistedExpiryWarnedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -93,6 +105,8 @@ const shortSchema = new Schema<IShortDocument>(
         delete json['providerVideoId'];
         delete json['storageKey'];
         delete json['metricsRecorded'];
+        delete json['deletedAt'];
+        delete json['unlistedExpiryWarnedAt'];
 
         const raw = json['userId'] as
           | {
@@ -136,5 +150,7 @@ const shortSchema = new Schema<IShortDocument>(
 
 shortSchema.index({ status: 1, visibility: 1, _id: -1 });
 shortSchema.index({ userId: 1, status: 1, _id: -1 });
+shortSchema.index({ deletedAt: 1 });
+shortSchema.index({ visibility: 1, unlistedAt: 1 });
 
 export const ShortModel = mongoose.model<IShortDocument>('Short', shortSchema);

@@ -14,12 +14,14 @@ export const createPlaceholder = (
   });
 
 export const findById = (id: string): Promise<IShortDocument | null> =>
-  ShortModel.findById(id).populate('userId', 'username avatarUrl').exec();
+  ShortModel.findOne({ _id: id, deletedAt: null })
+    .populate('userId', 'username avatarUrl')
+    .exec();
 
 export const findByIdWithStorageKey = (
   id: string
 ): Promise<IShortDocument | null> =>
-  ShortModel.findById(id)
+  ShortModel.findOne({ _id: id, deletedAt: null })
     .select('+storageKey')
     .populate('userId', 'username avatarUrl')
     .exec();
@@ -35,7 +37,7 @@ export const findPublicFeed = async (
 ): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     ShortModel,
-    { status: 'READY', visibility: 'public' },
+    { status: 'READY', visibility: 'public', deletedAt: null },
     cursor,
     limit
   );
@@ -55,7 +57,7 @@ export const findByUserId = async (
 ): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     ShortModel,
-    { userId: new mongoose.Types.ObjectId(userId) },
+    { userId: new mongoose.Types.ObjectId(userId), deletedAt: null },
     cursor,
     limit
   );
@@ -72,7 +74,7 @@ export const updateById = (
   id: string,
   data: UpdateShortData
 ): Promise<IShortDocument | null> =>
-  ShortModel.findByIdAndUpdate(id, data, {
+  ShortModel.findOneAndUpdate({ _id: id, deletedAt: null }, data, {
     returnDocument: 'after',
     runValidators: true,
   })
@@ -100,6 +102,13 @@ export const incrementViews = (
   )
     .lean()
     .exec();
+
+export const softDeleteById = (id: string): Promise<IShortDocument | null> =>
+  ShortModel.findOneAndUpdate(
+    { _id: id, deletedAt: null },
+    { deletedAt: new Date() },
+    { returnDocument: 'after' }
+  ).exec();
 
 export const deleteById = (id: string): Promise<IShortDocument | null> =>
   ShortModel.findByIdAndDelete(id).select('+storageKey').exec();

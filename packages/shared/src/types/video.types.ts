@@ -50,6 +50,9 @@ export interface IVideo {
   views: number;
   likes: number;
   duration: number;
+  deletedAt?: Date | string | null;
+  unlistedAt?: Date | string | null;
+  unlistedExpiryWarnedAt?: Date | string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,7 +65,12 @@ export interface IVideoAuthor {
 
 export interface IVideoResponse extends Omit<
   IVideo,
-  'userId' | 'providerVideoId' | 'storageKey' | 'metricsRecorded'
+  | 'userId'
+  | 'providerVideoId'
+  | 'storageKey'
+  | 'metricsRecorded'
+  | 'deletedAt'
+  | 'unlistedExpiryWarnedAt'
 > {
   author: IVideoAuthor;
 }

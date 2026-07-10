@@ -1,16 +1,12 @@
 import type { IPostResponse, PostUpdateInput } from '@network/shared';
 import * as postRepository from '../post.repository.js';
-import {
-  storageProvider,
-  videoProvider,
-  imageProvider,
-} from '../../../core/providers/provider.js';
-import { logger } from '../../../core/utils/logger.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
+import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields.js';
 import type { Requester } from '../post.types.js';
 import { toResponse, toResponseFromLean } from './post.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
+import { logger } from '../../../core/utils/logger.js';
 
 export const getPostById = async (
   postId: string,
@@ -25,7 +21,7 @@ export const getPostById = async (
   if (!canBypassRestrictions && post.status !== 'READY')
     throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
 
-  if (!canBypassRestrictions && post.visibility === 'private')
+  if (!canBypassRestrictions && post.visibility !== 'public')
     throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
 
   if (!isOwner) {
@@ -79,7 +75,7 @@ export const updatePost = async (
   const updated = await postRepository.updateById(postId, {
     ...(data.text !== undefined && { text: data.text }),
     ...(data.tags !== undefined && { tags: data.tags }),
-    ...(data.visibility !== undefined && { visibility: data.visibility }),
+    ...buildVisibilityFields(data.visibility),
   });
 
   if (!updated) throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
@@ -97,22 +93,6 @@ export const deletePost = async (
     throw new ApiError(403, 'FORBIDDEN', 'You cannot delete this post.');
   }
 
-  const deleted = await postRepository.deleteById(postId);
+  const deleted = await postRepository.softDeleteById(postId);
   if (!deleted) throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
-
-  if (deleted.providerVideoId) {
-    await videoProvider.deleteVideo(deleted.providerVideoId);
-  }
-  
-  if (deleted.storageKey) {
-    await storageProvider.deleteObject(deleted.storageKey);
-  }
-  
-  if (deleted.mediaType === 'image' && deleted.imageUrl) {
-    await imageProvider
-      .deleteImage(deleted.imageUrl)
-      .catch((e) =>
-        logger.warn(e, `Failed to delete post image ${deleted.imageUrl}`)
-      );
-  }
 };

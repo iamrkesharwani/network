@@ -86,6 +86,18 @@ const videoSchema = new Schema<IVideoDocument>(
       type: Boolean,
       default: false,
     },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
+    unlistedAt: {
+      type: Date,
+      default: null,
+    },
+    unlistedExpiryWarnedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -100,6 +112,8 @@ const videoSchema = new Schema<IVideoDocument>(
         delete json['providerVideoId'];
         delete json['storageKey'];
         delete json['metricsRecorded'];
+        delete json['deletedAt'];
+        delete json['unlistedExpiryWarnedAt'];
 
         const raw = json['userId'] as
           | {
@@ -152,5 +166,8 @@ videoSchema.index({
   status: 1,
   _id: -1,
 });
+
+videoSchema.index({ deletedAt: 1 });
+videoSchema.index({ visibility: 1, unlistedAt: 1 });
 
 export const VideoModel = mongoose.model<IVideoDocument>('Video', videoSchema);

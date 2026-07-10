@@ -40,6 +40,9 @@ export interface IPost {
   visibility: PostVisibility;
   views: number;
   likes: number;
+  deletedAt?: Date | string | null;
+  unlistedAt?: Date | string | null;
+  unlistedExpiryWarnedAt?: Date | string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,7 +55,12 @@ export interface IPostAuthor {
 
 export interface IPostResponse extends Omit<
   IPost,
-  'userId' | 'providerVideoId' | 'storageKey' | 'metricsRecorded'
+  | 'userId'
+  | 'providerVideoId'
+  | 'storageKey'
+  | 'metricsRecorded'
+  | 'deletedAt'
+  | 'unlistedExpiryWarnedAt'
 > {
   author: IPostAuthor;
 }

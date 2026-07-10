@@ -1,4 +1,6 @@
-export const POST_VISIBILITY = ['public', 'private', 'unlisted'] as const;
+import { CONTENT_VISIBILITY } from './visibility.constants.js';
+
+export const POST_VISIBILITY = CONTENT_VISIBILITY;
 
 export const POST_STATUS = [
   'UPLOADING',

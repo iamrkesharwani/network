@@ -14,12 +14,16 @@ export const createPlaceholder = (
   });
 
 export const findById = (id: string): Promise<IVideoDocument | null> =>
-  VideoModel.findById(id).populate('userId', 'username avatarUrl').exec();
+  VideoModel.findOne({ _id: id, deletedAt: null })
+    .populate('userId', 'username avatarUrl')
+    .exec();
 
 export const findByIdWithStorageKey = (
   id: string
 ): Promise<IVideoDocument | null> =>
-  VideoModel.findById(id).select('+storageKey').exec();
+  VideoModel.findOne({ _id: id, deletedAt: null })
+    .select('+storageKey')
+    .exec();
 
 export const findByProviderVideoId = (
   providerVideoId: string
@@ -32,7 +36,7 @@ export const findPublicFeed = async (
 ): Promise<Omit<PaginatedResponse<IVideoDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     VideoModel,
-    { status: 'READY', visibility: 'public' },
+    { status: 'READY', visibility: 'public', deletedAt: null },
     cursor,
     limit
   );
@@ -52,7 +56,7 @@ export const findByUserId = async (
 ): Promise<Omit<PaginatedResponse<IVideoDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     VideoModel,
-    { userId: new mongoose.Types.ObjectId(userId) },
+    { userId: new mongoose.Types.ObjectId(userId), deletedAt: null },
     cursor,
     limit
   );
@@ -69,7 +73,7 @@ export const updateById = (
   id: string,
   data: UpdateVideoData
 ): Promise<IVideoDocument | null> =>
-  VideoModel.findByIdAndUpdate(id, data, {
+  VideoModel.findOneAndUpdate({ _id: id, deletedAt: null }, data, {
     returnDocument: 'after',
     runValidators: true,
   })
@@ -95,6 +99,13 @@ export const incrementViews = (
   )
     .lean()
     .exec();
+
+export const softDeleteById = (id: string): Promise<IVideoDocument | null> =>
+  VideoModel.findOneAndUpdate(
+    { _id: id, deletedAt: null },
+    { deletedAt: new Date() },
+    { returnDocument: 'after' }
+  ).exec();
 
 export const deleteById = (id: string): Promise<IVideoDocument | null> =>
   VideoModel.findByIdAndDelete(id).select('+storageKey').exec();

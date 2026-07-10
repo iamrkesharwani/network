@@ -1,3 +1,5 @@
+import { CONTENT_VISIBILITY } from './visibility.constants.js';
+
 export const ALLOWED_SHORT_MIME_TYPES = [
   'video/mp4',
   'video/quicktime',
@@ -12,7 +14,7 @@ export const SHORT_STATUS = [
   'FAILED',
 ] as const;
 
-export const SHORT_VISIBILITY = ['public', 'private', 'unlisted'] as const;
+export const SHORT_VISIBILITY = CONTENT_VISIBILITY;
 
 export const SHORT_TITLE_MAX_LENGTH = 100;
 export const SHORT_DESCRIPTION_MAX_LENGTH = 500;

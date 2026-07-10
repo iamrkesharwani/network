@@ -1,13 +1,9 @@
 import type { IShortResponse, ShortUpdateInput } from '@network/shared';
 import * as shortRepository from '../short.repository.js';
-import {
-  storageProvider,
-  videoProvider,
-  imageProvider,
-} from '../../../core/providers/provider.js';
 import { logger } from '../../../core/utils/logger.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
+import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields.js';
 import type { Requester } from '../short.types.js';
 import { toResponse, toResponseFromLean } from './short.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
@@ -26,7 +22,7 @@ export const getShortById = async (
 
   if (!canBypassRestrictions && short.status !== 'READY')
     throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
-  if (!canBypassRestrictions && short.visibility === 'private')
+  if (!canBypassRestrictions && short.visibility !== 'public')
     throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
 
   if (!isOwner) {
@@ -81,7 +77,7 @@ export const updateShort = async (
     ...(data.title !== undefined && { title: data.title }),
     ...(data.description !== undefined && { description: data.description }),
     ...(data.tags !== undefined && { tags: data.tags }),
-    ...(data.visibility !== undefined && { visibility: data.visibility }),
+    ...buildVisibilityFields(data.visibility),
   });
 
   if (!updated) throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
@@ -99,23 +95,6 @@ export const deleteShort = async (
     throw new ApiError(403, 'FORBIDDEN', 'You cannot delete this short.');
   }
 
-  const deleted = await shortRepository.deleteById(shortId);
+  const deleted = await shortRepository.softDeleteById(shortId);
   if (!deleted) throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
-
-  if (deleted.providerVideoId) {
-    await videoProvider.deleteVideo(deleted.providerVideoId);
-  }
-  if (deleted.storageKey) {
-    await storageProvider.deleteObject(deleted.storageKey);
-  }
-  if (deleted.thumbnailUrl) {
-    await imageProvider
-      .deleteImage(deleted.thumbnailUrl)
-      .catch((e) =>
-        logger.warn(
-          e,
-          `Failed to delete short thumbnail ${deleted.thumbnailUrl}`
-        )
-      );
-  }
 };
