@@ -9,12 +9,14 @@ interface ShortCardThumbnailProps {
   short: IShortResponse;
   isReady: boolean;
   onClick?: (e: React.MouseEvent) => void;
+  aspectClassName?: string;
 }
 
 const ShortCardThumbnail = ({
   short,
   isReady,
   onClick,
+  aspectClassName = 'aspect-9/16',
 }: ShortCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
 
@@ -27,7 +29,7 @@ const ShortCardThumbnail = ({
           onClick(e);
         }
       }}
-      className="relative block w-full aspect-9/16 bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className={`relative block w-full ${aspectClassName} bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
       tabIndex={isReady ? 0 : -1}
       aria-disabled={!isReady}
     >

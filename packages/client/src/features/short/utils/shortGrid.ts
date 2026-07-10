@@ -1,4 +1,4 @@
-export type ShortColCount = 2 | 3 | 4 | 6;
+export type ShortColCount = 2 | 3 | 4 | 5 | 6;
 
 export const chunkIntoRows = <T>(arr: T[], size: ShortColCount): T[][] => {
   const rows: T[][] = [];
@@ -23,5 +23,6 @@ export const SHORT_COL_CLASS: Record<ShortColCount, string> = {
   2: 'grid-cols-2',
   3: 'grid-cols-3',
   4: 'grid-cols-4',
+  5: 'grid-cols-5',
   6: 'grid-cols-6',
 };

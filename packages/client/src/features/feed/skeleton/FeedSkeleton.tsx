@@ -1,19 +1,27 @@
+import type { FeedColumnCount } from '../hooks/useFeedColumns';
+import { COL_CLASS } from '../../video/utils/videoGrid';
+import { SHORT_COL_CLASS, type ShortColCount } from '../../short/utils/shortGrid';
 import VideoCardSkeleton from '../../video/skeleton/VideoCardSkeleton';
 import ShortCardSkeleton from '../../short/skeleton/ShortCardSkeleton';
-import PostCardSkeleton from '../../post/skeleton/PostCardSkeleton';
 
-const SKELETON_CARDS = [
-  VideoCardSkeleton,
-  ShortCardSkeleton,
-  PostCardSkeleton,
-] as const;
+interface FeedSkeletonProps {
+  columns?: FeedColumnCount;
+  shortsPerBlock?: ShortColCount;
+}
 
-const FeedSkeleton = () => (
-  <div className="flex-1 min-w-0 flex flex-col gap-5">
-    {Array.from({ length: 5 }).map((_, i) => {
-      const Card = SKELETON_CARDS[i % SKELETON_CARDS.length];
-      return <Card key={i} />;
-    })}
+const FeedSkeleton = ({ columns = 4, shortsPerBlock = 6 }: FeedSkeletonProps) => (
+  <div className="flex flex-col gap-8">
+    <div className={`grid gap-4 ${SHORT_COL_CLASS[shortsPerBlock]}`}>
+      {Array.from({ length: shortsPerBlock }, (_, i) => (
+        <ShortCardSkeleton key={i} />
+      ))}
+    </div>
+
+    <div className={`grid gap-4 ${COL_CLASS[columns]}`}>
+      {Array.from({ length: columns * 2 }, (_, i) => (
+        <VideoCardSkeleton key={i} />
+      ))}
+    </div>
   </div>
 );
 
