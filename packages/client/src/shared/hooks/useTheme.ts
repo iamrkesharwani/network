@@ -1,6 +1,6 @@
+import { setTheme, toggleTheme } from '../../app/store/uiSlice';
 import { useAppDispatch } from './useAppDispatch';
 import { useAppSelector } from './useAppSelector';
-import { toggleTheme, setTheme } from '../../features/ui/uiSlice';
 
 export const useTheme = () => {
   const dispatch = useAppDispatch();

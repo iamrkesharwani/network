@@ -18,7 +18,9 @@ const VideoCardFooter = ({ video }: VideoCardFooterProps) => (
     </Link>
 
     <p className="mt-1 text-xs text-text-muted">
-      {formatCount(video.views)} views
+      {video.likes > 0 && `${formatCount(video.likes)} likes`}
+      {video.likes > 0 && video.views > 0 && ' · '}
+      {video.views > 0 && `${formatCount(video.views)} views`}
     </p>
   </div>
 );

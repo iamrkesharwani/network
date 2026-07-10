@@ -1,5 +1,5 @@
 import AuthLayout from '../components/AuthLayout';
-import Skeleton from '../../../shared/ui-kit/skeleton/Skeleton';
+import Skeleton from '../../../shared/ui/skeleton/Skeleton';
 
 const buttonShell =
   'w-full flex items-center justify-center gap-2.5 px-5 py-[0.825rem] rounded-[10px] border border-white/9 bg-[--color-surface-raised]';

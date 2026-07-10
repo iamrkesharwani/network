@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Menu, Search, Bell, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../shared/hooks/useTheme';
-import Avatar from '../../shared/ui-kit/Avatar';
+import Avatar from '../../shared/ui/primitives/Avatar';
 import { SITE_NAME } from '@network/shared';
 import LogoIcon from '../../public/Logo.svg?react';
 

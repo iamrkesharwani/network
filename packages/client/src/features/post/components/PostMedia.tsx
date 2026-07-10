@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Play } from 'lucide-react';
 import type { IPostResponse } from '@network/shared';
-import MediaVisibilityBadge from '../../../shared/ui-kit/MediaVisibilityBadge';
+import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 
 interface PostMediaProps {
   post: IPostResponse;
@@ -14,13 +14,13 @@ const PostMedia = ({ post }: PostMediaProps) => {
 
   if (post.mediaType === 'image' && post.imageUrl && !thumbError) {
     return (
-      <div className="relative bg-surface-raised">
+      <div className="relative bg-surface-raised aspect-video">
         <img
           src={post.imageUrl}
           alt="Post attachment"
           onError={() => setThumbError(true)}
           draggable={false}
-          className="w-full max-h-128 object-cover"
+          className="w-full h-full object-cover"
         />
         <MediaVisibilityBadge visibility={post.visibility} />
       </div>

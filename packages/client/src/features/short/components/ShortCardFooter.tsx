@@ -25,7 +25,9 @@ const ShortCardFooter = ({ short, onTitleClick }: ShortCardFooterProps) => (
     </Link>
 
     <p className="mt-1 text-xs text-text-muted">
-      {formatCount(short.views)} views
+      {short.likes > 0 && `${formatCount(short.likes)} likes`}
+      {short.likes > 0 && short.views > 0 && ' · '}
+      {short.views > 0 && `${formatCount(short.views)} views`}
     </p>
   </div>
 );

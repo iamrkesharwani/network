@@ -5,10 +5,13 @@ import {
   UNIFIED_FEED_PAGE_SIZE,
   CHAT_RAIL_WIDTH_PX,
   SHORTS_PREFETCH_THRESHOLD,
+  FEED_UNIT_PREFETCH_THRESHOLD,
+  SHORT_THEATER_WIDTH_PX,
   type IFeedItem,
   type IShortResponse,
 } from '@network/shared';
 import usePageTitle from '../../shared/hooks/usePageTitle';
+import { useMainWidth } from '../../shared/hooks/useMainWidth';
 import { COL_CLASS } from '../video/utils/videoGrid';
 import VideoCard from '../video/pages/VideoCard';
 import ShortCard from '../short/pages/ShortCard';
@@ -22,14 +25,22 @@ import VideoErrorState from '../video/components/VideoErrorState';
 import { useLiveVideoFeed } from './hooks/useLiveVideoFeed';
 import { useLiveShortsFeed } from './hooks/useLiveShortsFeed';
 import { useLiveUnifiedFeed } from './hooks/useLiveUnifiedFeed';
-import { useFeedLayoutMetrics } from './hooks/useFeedLayoutMetrics';
+import { useFeedColumns, type FeedWidthMode } from './hooks/useFeedColumns';
+import { assignToColumns } from './utils/assignToColumns';
+import { estimateFeedItemHeight } from './utils/estimateFeedItemHeight';
+import { computeColumnWidthPx } from './utils/computeColumnWidth';
 
-const LEAD_ROW_PREFETCH_THRESHOLD = 4;
+const WIDTH_MODE_CLASS: Record<FeedWidthMode, string> = {
+  full: '',
+  edge: '-mx-4 sm:-mx-6 lg:-mx-8',
+};
 
 const Feed = () => {
   usePageTitle('Feed');
-  const { leadVideoRowCols, shortsTeaserCount, showChatRail } =
-    useFeedLayoutMetrics();
+  const { columns, widthMode, showChatRail } = useFeedColumns();
+  const mainWidthPx = useMainWidth();
+  const columnWidthPx = computeColumnWidthPx(mainWidthPx, columns, showChatRail);
+  const cardClassName = widthMode === 'edge' ? 'rounded-none' : undefined;
   const [theaterOpen, setTheaterOpen] = useState(false);
   const { activeIndex, goToIndex, goNext, goPrev, updateCurrentShort } =
     useShort();
@@ -64,9 +75,9 @@ const Feed = () => {
   );
 
   useEffect(() => {
-    const leadVideosNeeded = chunkCount * leadVideoRowCols;
+    const leadVideosNeeded = chunkCount * columns;
     if (
-      leadVideos.length < leadVideosNeeded + LEAD_ROW_PREFETCH_THRESHOLD &&
+      leadVideos.length < leadVideosNeeded + FEED_UNIT_PREFETCH_THRESHOLD &&
       hasMoreLeadVideos &&
       !leadVideosFetching
     ) {
@@ -74,7 +85,7 @@ const Feed = () => {
     }
   }, [
     chunkCount,
-    leadVideoRowCols,
+    columns,
     leadVideos.length,
     hasMoreLeadVideos,
     leadVideosFetching,
@@ -82,9 +93,9 @@ const Feed = () => {
   ]);
 
   useEffect(() => {
-    const shortsNeeded = chunkCount * shortsTeaserCount;
+    const shortsNeeded = chunkCount * columns;
     if (
-      shorts.length < shortsNeeded + LEAD_ROW_PREFETCH_THRESHOLD &&
+      shorts.length < shortsNeeded + FEED_UNIT_PREFETCH_THRESHOLD &&
       hasMoreShorts &&
       !shortsFetching
     ) {
@@ -92,7 +103,7 @@ const Feed = () => {
     }
   }, [
     chunkCount,
-    shortsTeaserCount,
+    columns,
     shorts.length,
     hasMoreShorts,
     shortsFetching,
@@ -144,10 +155,14 @@ const Feed = () => {
     },
   });
 
+  const contentClassName = `flex-1 min-w-0 flex flex-col gap-8 ${WIDTH_MODE_CLASS[widthMode]}`;
+
   if (streamInitialLoading && streamItems.length === 0) {
     return (
       <div className="flex items-start gap-6 w-full">
-        <FeedSkeleton />
+        <div className={contentClassName}>
+          <FeedSkeleton />
+        </div>
       </div>
     );
   }
@@ -173,58 +188,79 @@ const Feed = () => {
   return (
     <>
       <div className="flex items-start gap-6 w-full">
-        <div className="flex-1 min-w-0 flex flex-col gap-8">
+        <div className={contentClassName}>
           {chunks.map((chunk, chunkIdx) => {
             const unitLeadVideos = leadVideos.slice(
-              chunkIdx * leadVideoRowCols,
-              (chunkIdx + 1) * leadVideoRowCols
+              chunkIdx * columns,
+              (chunkIdx + 1) * columns
             );
             const unitShorts = shorts.slice(
-              chunkIdx * shortsTeaserCount,
-              (chunkIdx + 1) * shortsTeaserCount
+              chunkIdx * columns,
+              (chunkIdx + 1) * columns
+            );
+            const streamColumns = assignToColumns(
+              chunk,
+              (item) => estimateFeedItemHeight(item, columnWidthPx),
+              columns
             );
 
             return (
               <div key={`unit-${chunkIdx}`} className="flex flex-col gap-8">
                 {unitLeadVideos.length > 0 && (
-                  <div
-                    className={`grid gap-4 ${COL_CLASS[leadVideoRowCols]}`}
-                  >
+                  <div className={`grid gap-4 ${COL_CLASS[columns]}`}>
                     {unitLeadVideos.map((video) => (
-                      <VideoCard key={video.id} video={video} />
-                    ))}
-                  </div>
-                )}
-
-                {unitShorts.length > 0 && (
-                  <div
-                    className={`grid gap-4 ${COL_CLASS[shortsTeaserCount]}`}
-                  >
-                    {unitShorts.map((short) => (
-                      <ShortCard
-                        key={short.id}
-                        short={short}
-                        onThumbnailClick={handleThumbnailClick}
+                      <VideoCard
+                        key={video.id}
+                        video={video}
+                        className={cardClassName}
                       />
                     ))}
                   </div>
                 )}
 
-                <div className="flex flex-col gap-5 max-w-2xl mx-auto w-full">
-                  {chunk.map((entry) =>
-                    entry.type === 'video' ? (
-                      <VideoCard key={entry.item.id} video={entry.item} />
-                    ) : (
-                      <PostCard key={entry.item.id} post={entry.item} />
-                    )
-                  )}
+                {unitShorts.length > 0 && (
+                  <div className={`grid gap-4 ${COL_CLASS[columns]}`}>
+                    {unitShorts.map((short) => (
+                      <ShortCard
+                        key={short.id}
+                        short={short}
+                        onThumbnailClick={handleThumbnailClick}
+                        className={cardClassName}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-start gap-4">
+                  {streamColumns.map((column, columnIdx) => (
+                    <div
+                      key={`stream-col-${chunkIdx}-${columnIdx}`}
+                      className="flex-1 min-w-0 flex flex-col gap-4"
+                    >
+                      {column.map((entry) =>
+                        entry.type === 'video' ? (
+                          <VideoCard
+                            key={entry.item.id}
+                            video={entry.item}
+                            className={cardClassName}
+                          />
+                        ) : (
+                          <PostCard
+                            key={entry.item.id}
+                            post={entry.item}
+                            className={cardClassName}
+                          />
+                        )
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             );
           })}
 
           {streamFetching && (
-            <div className="flex flex-col gap-5 max-w-2xl mx-auto w-full">
+            <div className={`grid gap-4 ${COL_CLASS[columns]}`}>
               <PostCardSkeleton />
             </div>
           )}
@@ -249,7 +285,8 @@ const Feed = () => {
           onClick={() => setTheaterOpen(false)}
         >
           <div
-            className="relative w-full max-w-sm h-full max-h-[90vh]"
+            className="relative w-full h-full max-h-[90vh]"
+            style={{ maxWidth: SHORT_THEATER_WIDTH_PX }}
             onClick={(e) => e.stopPropagation()}
           >
             <ShortPlayer

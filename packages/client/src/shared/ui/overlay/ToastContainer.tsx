@@ -1,8 +1,8 @@
 import { useState, useCallback, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Toast, { type ToastType } from './Toast';
-import { useIsMounted } from '../hooks/useIsMounted';
-import { ToastContext } from '../hooks/useToast';
+import { useIsMounted } from '../../hooks/useIsMounted';
+import { ToastContext } from '../../hooks/useToast';
 
 interface ToastMessage {
   id: string;

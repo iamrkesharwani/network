@@ -1,6 +1,6 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from '../../features/auth/authSlice';
-import uiReducer from '../../features/ui/uiSlice';
+import uiReducer from './uiSlice';
 import videoReducer from '../../features/video/videoSlice';
 import shortReducer from '../../features/short/shortSlice';
 import uploadReducer from '../../features/upload/uploadSlice';

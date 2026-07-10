@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import type { IVideoResponse } from '@network/shared';
-import MediaDurationBadge from '../../../shared/ui-kit/MediaDurationBadge';
-import MediaVisibilityBadge from '../../../shared/ui-kit/MediaVisibilityBadge';
+import MediaDurationBadge from '../../../shared/ui/card/MediaDurationBadge';
+import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 
 interface VideoCardThumbnailProps {
   video: IVideoResponse;

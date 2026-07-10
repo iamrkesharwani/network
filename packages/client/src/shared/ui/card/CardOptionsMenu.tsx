@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MoreVertical, Edit2, Trash2 } from 'lucide-react';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 interface CardOptionsMenuProps {
   itemLabel: string;

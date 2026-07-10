@@ -1,5 +1,5 @@
 import { EyeOff } from 'lucide-react';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 interface MediaVisibilityBadgeProps {
   visibility: 'public' | 'private' | 'unlisted';

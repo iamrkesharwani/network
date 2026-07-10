@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import ToastProvider from '../shared/ui-kit/ToastContainer';
+import ToastProvider from '../shared/ui/overlay/ToastContainer';
 import { useAppSelector } from '../shared/hooks/useAppSelector';
 
 const App = ({ children }: { children: ReactNode }) => {

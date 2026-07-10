@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EyeOff } from 'lucide-react';
-import { TEXT_TRUNCATE_LENGTH, formatCount } from '@network/shared';
+import { POST_TEXT_LINE_CLAMP, formatCount } from '@network/shared';
 import type { IPostResponse } from '@network/shared';
 
 interface PostFooterProps {
@@ -9,13 +9,16 @@ interface PostFooterProps {
 
 const PostFooter = ({ post }: PostFooterProps) => {
   const [expanded, setExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
 
   const text = post.text ?? '';
-  const isLong = text.length > TEXT_TRUNCATE_LENGTH;
-  const displayText =
-    expanded || !isLong
-      ? text
-      : `${text.slice(0, TEXT_TRUNCATE_LENGTH).trimEnd()}…`;
+
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+    setIsClamped(el.scrollHeight > el.clientHeight);
+  }, [text]);
 
   const toggleExpanded = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -28,18 +31,24 @@ const PostFooter = ({ post }: PostFooterProps) => {
   return (
     <div className="flex flex-col gap-3">
       {text && (
-        <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap wrap-break-word">
-          {displayText}
-          {isLong && (
-            <button
-              type="button"
-              onClick={toggleExpanded}
-              className="ml-1.5 font-medium text-primary hover:underline focus:outline-none cursor-pointer"
-            >
-              {expanded ? 'Show less' : 'Show more'}
-            </button>
-          )}
+        <p
+          ref={textRef}
+          className={`text-sm text-text-primary leading-relaxed whitespace-pre-wrap wrap-break-word ${
+            expanded ? '' : `line-clamp-${POST_TEXT_LINE_CLAMP}`
+          }`}
+        >
+          {text}
         </p>
+      )}
+
+      {(isClamped || expanded) && (
+        <button
+          type="button"
+          onClick={toggleExpanded}
+          className="self-start text-sm font-medium text-primary hover:underline focus:outline-none cursor-pointer"
+        >
+          {expanded ? 'Show less' : 'Show more'}
+        </button>
       )}
 
       {!hasMedia && post.visibility !== 'public' && (
@@ -49,9 +58,11 @@ const PostFooter = ({ post }: PostFooterProps) => {
         </span>
       )}
 
-      {post.views > 0 && (
+      {(post.views > 0 || post.likes > 0) && (
         <p className="text-xs text-text-muted">
-          {formatCount(post.views)} views
+          {post.likes > 0 && `${formatCount(post.likes)} likes`}
+          {post.likes > 0 && post.views > 0 && ' · '}
+          {post.views > 0 && `${formatCount(post.views)} views`}
         </p>
       )}
     </div>

@@ -1,4 +1,4 @@
-import Skeleton from '../../../shared/ui-kit/skeleton/Skeleton';
+import Skeleton from '../../../shared/ui/skeleton/Skeleton';
 
 const SettingsRowSkeleton = () => (
   <div className="flex flex-col gap-2 py-4 border-b border-border last:border-0">

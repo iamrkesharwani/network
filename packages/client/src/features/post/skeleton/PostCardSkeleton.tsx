@@ -1,4 +1,4 @@
-import Skeleton from '../../../shared/ui-kit/skeleton/Skeleton';
+import Skeleton from '../../../shared/ui/skeleton/Skeleton';
 
 const PostCardSkeleton = () => (
   <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 sm:p-5">

@@ -1,4 +1,4 @@
-import Skeleton from '../../../shared/ui-kit/skeleton/Skeleton';
+import Skeleton from '../../../shared/ui/skeleton/Skeleton';
 import VideoCardSkeleton from '../../video/skeleton/VideoCardSkeleton';
 
 const ProfileSkeleton = () => (

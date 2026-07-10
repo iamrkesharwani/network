@@ -5,7 +5,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
-import Skeleton from '../../../shared/ui-kit/skeleton/Skeleton';
+import Skeleton from '../../../shared/ui/skeleton/Skeleton';
 import { cn } from '../../../shared/utils/cn';
 
 interface ShortPlayerSkeletonProps {

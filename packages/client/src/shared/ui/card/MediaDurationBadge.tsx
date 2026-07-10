@@ -1,6 +1,6 @@
 import { Play } from 'lucide-react';
 import { formatDuration } from '@network/shared';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 interface MediaDurationBadgeProps {
   durationSeconds: number;

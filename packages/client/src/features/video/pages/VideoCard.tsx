@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import VideoCardThumbnail from '../components/VideoCardThumbnail';
 import VideoCardFooter from '../components/VideoCardFooter';
-import CardShell from '../../../shared/ui-kit/CardShell';
-import CardAuthorHeader from '../../../shared/ui-kit/CardAuthorHeader';
-import CardOptionsMenu from '../../../shared/ui-kit/CardOptionsMenu';
-import ConfirmModal from '../../../shared/ui-kit/ConfirmModal';
+import CardShell from '../../../shared/ui/card/CardShell';
+import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
+import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
+import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import type { IVideoResponse } from '@network/shared';
 
 export interface VideoCardProps {

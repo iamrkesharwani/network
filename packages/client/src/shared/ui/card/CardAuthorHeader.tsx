@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { getRelativeDate } from '@network/shared';
-import Avatar from './Avatar';
+import Avatar from '../primitives/Avatar';
 
 interface CardAuthorHeaderProps {
   username: string;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 

@@ -1,12 +1,12 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
-import AppShellSkeleton from '../../shared/ui-kit/skeleton/AppShellSkeleton';
-import ExploreSkeleton from '../../shared/ui-kit/skeleton/ExploreSkeleton';
+import AppShellSkeleton from '../../shared/ui/skeleton/AppShellSkeleton';
+import ExploreSkeleton from '../../shared/ui/skeleton/ExploreSkeleton';
 import ProfileSkeleton from '../../features/creator/skeleton/ProfileSkeleton';
 import SettingsSkeleton from '../../features/creator/skeleton/SettingsSkeleton';
-import FeedSkeleton from '../../shared/ui-kit/skeleton/FeedSkeleton';
-import DefaultPageSkeleton from '../../shared/ui-kit/skeleton/DefaultPageSkeleton';
+import FeedSkeleton from '../../shared/ui/skeleton/FeedSkeleton';
+import DefaultPageSkeleton from '../../shared/ui/skeleton/DefaultPageSkeleton';
 
 const renderSkeletonForPath = (pathname: string) => {
   if (pathname.startsWith('/explore')) return <ExploreSkeleton />;

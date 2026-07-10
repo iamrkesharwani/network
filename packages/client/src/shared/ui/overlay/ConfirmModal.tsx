@@ -1,6 +1,6 @@
 import { AlertTriangle, Trash2, ShieldAlert } from 'lucide-react';
 import Modal from './Modal';
-import Button from './Button';
+import Button from '../primitives/Button';
 
 type Intent = 'danger' | 'warning' | 'info';
 

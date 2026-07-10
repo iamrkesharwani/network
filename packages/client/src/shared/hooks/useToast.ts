@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { ToastType } from '../ui-kit/Toast';
+import type { ToastType } from '../ui/overlay/Toast';
 
 export interface ToastContextType {
   addToast: (message: string, type?: ToastType, duration?: number) => void;

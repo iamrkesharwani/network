@@ -5,3 +5,17 @@ export const POSTS_FEED_PAGE_SIZE = 10;
 export const UNIFIED_FEED_PAGE_SIZE = 12;
 export const UNIFIED_FEED_VIDEO_WEIGHT = 0.6;
 export const CHAT_RAIL_WIDTH_PX = 320;
+export const FEED_UNIT_PREFETCH_THRESHOLD = 4;
+export const SHORT_THEATER_WIDTH_PX = 384;
+
+export const FEED_CARD_HEADER_HEIGHT_PX = 76;
+export const FEED_CARD_FOOTER_PADDING_PX = 33;
+export const FEED_CARD_TITLE_TWO_LINE_HEIGHT_PX = 40;
+export const FEED_CARD_META_LINE_HEIGHT_PX = 16;
+export const FEED_CARD_GAP_PX = 12;
+export const FEED_CARD_TEXT_LINE_HEIGHT_PX = 23;
+export const FEED_CARD_TEXT_AVG_CHAR_WIDTH_PX = 7;
+
+export const FEED_CONTENT_HORIZONTAL_PADDING_PX = 32;
+export const FEED_GRID_GAP_PX = 16;
+export const FEED_CHAT_RAIL_GAP_PX = 24;

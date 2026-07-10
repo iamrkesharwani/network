@@ -7,7 +7,7 @@ import {
   setAccessToken,
 } from '../../../shared/lib/axiosInstance';
 import { setCredentials } from '../authSlice';
-import Spinner from '../../../shared/ui-kit/Spinner';
+import Spinner from '../../../shared/ui/primitives/Spinner';
 import { useToast } from '../../../shared/hooks/useToast';
 
 const OAuthCallback = () => {

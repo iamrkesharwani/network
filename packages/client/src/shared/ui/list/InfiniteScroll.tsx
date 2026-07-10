@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
-import Spinner from './Spinner';
+import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import Spinner from '../primitives/Spinner';
 
 export interface InfiniteScrollProps {
   isLoading: boolean;
