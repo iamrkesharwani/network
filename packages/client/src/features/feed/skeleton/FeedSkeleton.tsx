@@ -6,11 +6,24 @@ import ShortCardSkeleton from '../../short/skeleton/ShortCardSkeleton';
 
 interface FeedSkeletonProps {
   columns?: FeedColumnCount;
+  firstVideoBlockSize?: number;
+  videosPerBlock?: number;
   shortsPerBlock?: ShortColCount;
 }
 
-const FeedSkeleton = ({ columns = 4, shortsPerBlock = 6 }: FeedSkeletonProps) => (
+const FeedSkeleton = ({
+  columns = 4,
+  firstVideoBlockSize = 4,
+  videosPerBlock = 8,
+  shortsPerBlock = 5,
+}: FeedSkeletonProps) => (
   <div className="flex flex-col gap-8">
+    <div className={`grid gap-4 ${COL_CLASS[columns]}`}>
+      {Array.from({ length: firstVideoBlockSize }, (_, i) => (
+        <VideoCardSkeleton key={i} />
+      ))}
+    </div>
+
     <div className={`grid gap-4 ${SHORT_COL_CLASS[shortsPerBlock]}`}>
       {Array.from({ length: shortsPerBlock }, (_, i) => (
         <ShortCardSkeleton key={i} />
@@ -18,7 +31,7 @@ const FeedSkeleton = ({ columns = 4, shortsPerBlock = 6 }: FeedSkeletonProps) =>
     </div>
 
     <div className={`grid gap-4 ${COL_CLASS[columns]}`}>
-      {Array.from({ length: columns * 2 }, (_, i) => (
+      {Array.from({ length: videosPerBlock }, (_, i) => (
         <VideoCardSkeleton key={i} />
       ))}
     </div>

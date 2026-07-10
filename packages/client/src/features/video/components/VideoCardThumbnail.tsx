@@ -2,21 +2,30 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import type { IVideoResponse } from '@network/shared';
+import { cn } from '../../../shared/utils/cn';
 import MediaDurationBadge from '../../../shared/ui/card/MediaDurationBadge';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 
 interface VideoCardThumbnailProps {
   video: IVideoResponse;
   isReady: boolean;
+  className?: string;
 }
 
-const VideoCardThumbnail = ({ video, isReady }: VideoCardThumbnailProps) => {
+const VideoCardThumbnail = ({
+  video,
+  isReady,
+  className,
+}: VideoCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
 
   return (
     <Link
       to={`/video/${video.id}`}
-      className="relative block w-full aspect-video bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className={cn(
+        'relative block w-full aspect-video rounded-xl overflow-hidden bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        className
+      )}
       tabIndex={isReady ? 0 : -1}
       aria-disabled={!isReady}
     >

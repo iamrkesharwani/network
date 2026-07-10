@@ -153,7 +153,12 @@ const Feed = () => {
     return (
       <div className="flex items-start gap-6 w-full">
         <div className={contentClassName}>
-          <FeedSkeleton columns={columns} shortsPerBlock={shortsPerBlock} />
+          <FeedSkeleton
+            columns={columns}
+            firstVideoBlockSize={firstVideoBlockSize}
+            videosPerBlock={videosPerBlock}
+            shortsPerBlock={shortsPerBlock}
+          />
         </div>
       </div>
     );

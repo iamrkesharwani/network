@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import VideoCardThumbnail from '../components/VideoCardThumbnail';
 import VideoCardFooter from '../components/VideoCardFooter';
-import CardShell from '../../../shared/ui/card/CardShell';
-import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import type { IVideoResponse } from '@network/shared';
@@ -44,27 +42,25 @@ const VideoCard = ({
 
   return (
     <>
-      <CardShell
-        className={className}
-        header={
-          <CardAuthorHeader
-            username={video.author.username}
-            avatarUrl={video.author.avatarUrl}
-            createdAt={video.createdAt}
-            menu={
-              isOwner && (
-                <CardOptionsMenu
-                  itemLabel="Video"
-                  onEdit={handleEdit}
-                  onDeleteClick={handleDeleteClick}
-                />
-              )
-            }
-          />
-        }
-        media={<VideoCardThumbnail video={video} isReady={isReady} />}
-        footer={<VideoCardFooter video={video} />}
-      />
+      <div className="group flex flex-col gap-2.5">
+        <VideoCardThumbnail
+          video={video}
+          isReady={isReady}
+          className={className}
+        />
+        <VideoCardFooter
+          video={video}
+          menu={
+            isOwner && (
+              <CardOptionsMenu
+                itemLabel="Video"
+                onEdit={handleEdit}
+                onDeleteClick={handleDeleteClick}
+              />
+            )
+          }
+        />
+      </div>
       <ConfirmModal
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
