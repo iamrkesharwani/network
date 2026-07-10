@@ -37,7 +37,6 @@ const OAuthCallback = () => {
           const { accessToken, user } = data.data;
           setAccessToken(accessToken);
           dispatch(setCredentials({ user, accessToken }));
-          addToast('Successfully signed in!', 'success');
           navigate(CLIENT_ROUTES.FEED, { replace: true });
         } catch (err) {
           console.error(err);
