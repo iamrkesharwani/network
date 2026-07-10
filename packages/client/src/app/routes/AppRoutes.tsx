@@ -15,7 +15,9 @@ import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
 import PostComposer from '../../features/post/form/PostComposer';
 import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
-import { Profile, Settings, NotFound } from './__dev__/PlaceholderPages';
+import ProfilePage from '../../features/creator/pages/ProfilePage';
+import SettingsPage from '../../features/creator/pages/SettingsPage';
+import NotFound from './NotFound';
 
 export const routes: RouteObject[] = [
   { path: CLIENT_ROUTES.OAUTH_CALLBACK, element: <OAuthCallback /> },
@@ -51,8 +53,8 @@ export const routes: RouteObject[] = [
           },
           { path: CLIENT_ROUTES.UPLOAD_POST, element: <PostComposer /> },
           { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
-          { path: CLIENT_ROUTES.PROFILE, element: <Profile /> },
-          { path: CLIENT_ROUTES.SETTINGS, element: <Settings /> },
+          { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
+          { path: CLIENT_ROUTES.SETTINGS, element: <SettingsPage /> },
         ],
       },
     ],

@@ -8,3 +8,4 @@ build/
 .claude
 .DS_Store
 *.tsbuildinfo
+packages/*/src/__dev__/

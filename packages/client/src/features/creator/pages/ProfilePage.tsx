@@ -1,9 +1,11 @@
-import Contribution from '../../../features/creator/components/Contribution';
-import BadgeShowcase from '../../../features/creator/components/BadgeShowcase';
-import { useGetMyProfileQuery } from '../../../features/creator/creatorApi';
 import { Loader2 } from 'lucide-react';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
+import Contribution from '../components/Contribution';
+import BadgeShowcase from '../components/BadgeShowcase';
+import { useGetMyProfileQuery } from '../creatorApi';
 
-export const Profile = () => {
+const ProfilePage = () => {
+  usePageTitle('Profile');
   const { data, isLoading } = useGetMyProfileQuery();
 
   if (isLoading) {
@@ -45,5 +47,4 @@ export const Profile = () => {
   );
 };
 
-export const Settings = () => <div className="p-8 text-xl">Settings</div>;
-export const NotFound = () => <div className="p-8 text-xl">404</div>;
+export default ProfilePage;

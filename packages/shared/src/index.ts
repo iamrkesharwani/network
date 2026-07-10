@@ -1,4 +1,5 @@
 export * from './schemas/auth.schema.js';
+export * from './schemas/feed.schema.js';
 export * from './schemas/post.schema.js';
 export * from './schemas/short.schema.js';
 export * from './schemas/upload.schema.js';
@@ -8,6 +9,7 @@ export * from './schemas/video.schema.js';
 export * from './types/api.types.js';
 export * from './types/auth.types.js';
 export * from './types/creator.types.js';
+export * from './types/feed.types.js';
 export * from './types/post.types.js';
 export * from './types/short.types.js';
 export * from './types/upload.types.js';
