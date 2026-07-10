@@ -1,4 +1,4 @@
-import type { IShortResponse } from '@network/shared';
+import { CLIENT_ROUTES, type IShortResponse } from '@network/shared';
 import {
   useDeleteShortMutation,
   useGetShortByIdQuery,
@@ -32,6 +32,7 @@ const ShortUploadWizard = () => {
     step,
     setStep,
     mediaId: shortId,
+    isFinalizeRoute,
     thumbnailUrl,
     setThumbnailUrl,
     finalMedia: finalShort,
@@ -59,11 +60,14 @@ const ShortUploadWizard = () => {
   } = useMediaUploadWizard<IShortResponse>({
     mediaType: 'short',
     mediaLabel: 'short',
+    basePath: CLIENT_ROUTES.UPLOAD_SHORT,
     upload,
     useGetByIdQuery: useGetShortByIdQuery,
     deleteMedia: deleteShort,
     uploadThumbnail,
   });
+
+  const displayStep = isFinalizeRoute ? step : 'drop';
 
   return (
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
@@ -97,24 +101,24 @@ const ShortUploadWizard = () => {
         </div>
       )}
 
-      <UploadStepper current={step} />
+      <UploadStepper current={displayStep} />
 
       <div
         className={cn(
           'rounded-2xl border border-border bg-surface p-6 sm:p-8',
-          step !== 'details' && 'min-h-72'
+          displayStep !== 'details' && 'min-h-72'
         )}
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={step}
+            key={displayStep}
             variants={stepVariants}
             initial="initial"
             animate="animate"
             exit="exit"
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
-            {step === 'drop' && (
+            {!isFinalizeRoute && (
               <MediaDropzone
                 state={uploadState}
                 onFileSelect={startUpload}
@@ -127,16 +131,16 @@ const ShortUploadWizard = () => {
               />
             )}
 
-            {step === 'thumbnail' && shortId && (
+            {isFinalizeRoute && step === 'thumbnail' && shortId && (
               <UploadThumbnailStep
                 value={thumbnailUrl}
                 onChange={setThumbnailUrl}
                 onContinue={() => setStep('details')}
-                uploadThumbnail={handleThumbnailUpload}
+                uploadThumbnail={handleThumbnailUpload!}
               />
             )}
 
-            {step === 'details' && shortId && (
+            {isFinalizeRoute && step === 'details' && shortId && (
               <ShortEditForm
                 mode="finalise"
                 shortId={shortId}
@@ -145,7 +149,7 @@ const ShortUploadWizard = () => {
               />
             )}
 
-            {step === 'launch' && finalShort && (
+            {isFinalizeRoute && step === 'launch' && finalShort && (
               <SuccessStep
                 title={finalShort.title}
                 visibility={finalShort.visibility}
@@ -159,7 +163,7 @@ const ShortUploadWizard = () => {
         </AnimatePresence>
       </div>
 
-      {step === 'thumbnail' && !thumbnailUrl && providerThumbnail && (
+      {displayStep === 'thumbnail' && !thumbnailUrl && providerThumbnail && (
         <p className="mt-3 text-center text-[0.7rem] text-text-muted">
           A default thumbnail will be used once processing finishes.
         </p>

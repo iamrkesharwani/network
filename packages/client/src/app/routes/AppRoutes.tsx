@@ -53,10 +53,22 @@ export const routes: RouteObject[] = [
                 element: <VideoUploadWizard />,
               },
               {
+                path: CLIENT_ROUTES.UPLOAD_VIDEO_FINALIZE,
+                element: <VideoUploadWizard />,
+              },
+              {
                 path: CLIENT_ROUTES.UPLOAD_SHORT,
                 element: <ShortUploadWizard />,
               },
+              {
+                path: CLIENT_ROUTES.UPLOAD_SHORT_FINALIZE,
+                element: <ShortUploadWizard />,
+              },
               { path: CLIENT_ROUTES.UPLOAD_POST, element: <PostComposer /> },
+              {
+                path: CLIENT_ROUTES.UPLOAD_POST_FINALIZE,
+                element: <PostComposer />,
+              },
               { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.SETTINGS, element: <SettingsPage /> },
             ],

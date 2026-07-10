@@ -9,8 +9,11 @@ export const CLIENT_ROUTES = {
   POSTS: '/posts',
   UPLOAD: '/upload',
   UPLOAD_VIDEO: '/upload/video',
+  UPLOAD_VIDEO_FINALIZE: '/upload/video/finalize/:mediaId',
   UPLOAD_SHORT: '/upload/short',
+  UPLOAD_SHORT_FINALIZE: '/upload/short/finalize/:mediaId',
   UPLOAD_POST: '/upload/post',
+  UPLOAD_POST_FINALIZE: '/upload/post/finalize/:mediaId',
   PROFILE: '/profile',
   SETTINGS: '/settings',
 } as const;

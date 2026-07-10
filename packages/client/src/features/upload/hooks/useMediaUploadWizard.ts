@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import type { WizardStep } from '../UploadSteps';
 import type {
   ApiResponse,
@@ -20,7 +21,7 @@ import { useUploadResumePointer } from './useUploadResumePointer';
 
 export interface BaseMediaResponse {
   id: string;
-  title: string;
+  title?: string;
   visibility: string;
   status: MediaProcessingStatus;
   errorMessage?: string;
@@ -39,15 +40,17 @@ export interface MediaUploadWizardConfig<
 > {
   mediaType: MultipartMediaType;
   mediaLabel: string;
+  basePath: string;
   upload: UploadHookResult;
   useGetByIdQuery: (
     id: string,
     options: { skip: boolean; pollingInterval: number }
-  ) => { data?: ApiResponse<TMediaResponse> };
+  ) => { data?: ApiResponse<TMediaResponse>; isError: boolean };
   deleteMedia: (id: string) => { unwrap: () => Promise<unknown> };
-  uploadThumbnail: (formData: FormData) => {
+  uploadThumbnail?: (formData: FormData) => {
     unwrap: () => Promise<{ data: { thumbnailUrl: string } }>;
   };
+  hasThumbnailStep?: boolean;
 }
 
 export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
@@ -56,10 +59,12 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
   const {
     mediaType,
     mediaLabel,
+    basePath,
     upload,
     useGetByIdQuery,
     deleteMedia,
     uploadThumbnail,
+    hasThumbnailStep = true,
   } = config;
   const {
     state: uploadState,
@@ -69,6 +74,10 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
   } = upload;
 
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { mediaId: routeMediaId } = useParams<{ mediaId?: string }>();
+  const isFinalizeRoute = !!routeMediaId;
+
   const wizard = useAppSelector(selectWizardState(mediaType));
   const { step, mediaId, thumbnailUrl, finalMedia: finalMediaRaw } = wizard;
   const finalMedia = finalMediaRaw as TMediaResponse | null;
@@ -79,7 +88,9 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
 
   const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
 
-  const handleThumbnailUpload = createThumbnailUploader(uploadThumbnail);
+  const handleThumbnailUpload = uploadThumbnail
+    ? createThumbnailUploader(uploadThumbnail)
+    : undefined;
 
   const setStep = (nextStep: WizardStep) => {
     dispatch(setWizardState({ mediaType, patch: { step: nextStep } }));
@@ -89,11 +100,16 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     dispatch(setWizardState({ mediaType, patch: { thumbnailUrl: url } }));
   };
 
-  const shouldPoll = !!mediaId && step !== 'drop';
-  const { data: mediaData } = useGetByIdQuery(mediaId ?? '', {
-    skip: !shouldPoll,
-    pollingInterval: shouldPoll && !isProcessingTerminal ? 5000 : 0,
-  });
+  const effectiveMediaId = mediaId ?? routeMediaId ?? null;
+  const shouldFetchMedia =
+    !!effectiveMediaId && (isFinalizeRoute || step !== 'drop');
+  const { data: mediaData, isError: mediaFetchError } = useGetByIdQuery(
+    effectiveMediaId ?? '',
+    {
+      skip: !shouldFetchMedia,
+      pollingInterval: shouldFetchMedia && !isProcessingTerminal ? 5000 : 0,
+    }
+  );
   const processingStatus = mediaData?.data.status;
   const providerThumbnail = mediaData?.data.thumbnailUrl;
   const errorMessage = mediaData?.data.errorMessage ?? finalMedia?.errorMessage;
@@ -134,11 +150,55 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
       dispatch(
         setWizardState({
           mediaType,
-          patch: { mediaId: uploadState.videoId, step: 'thumbnail' },
+          patch: {
+            mediaId: uploadState.videoId,
+            step: hasThumbnailStep ? 'thumbnail' : 'details',
+          },
         })
       );
+      navigate(`${basePath}/finalize/${uploadState.videoId}`);
     }
-  }, [dispatch, mediaType, uploadState.stage, uploadState.videoId]);
+  }, [
+    dispatch,
+    mediaType,
+    uploadState.stage,
+    uploadState.videoId,
+    hasThumbnailStep,
+    navigate,
+    basePath,
+  ]);
+
+  // Recovers a finalize page that was reached directly (hard refresh, bookmark)
+  // after the localStorage resume pointer has already been cleared, i.e. the
+  // media was already published in a previous visit.
+  useEffect(() => {
+    if (!isFinalizeRoute || !routeMediaId || mediaId === routeMediaId) return;
+
+    if (mediaData) {
+      dispatch(
+        setWizardState({
+          mediaType,
+          patch: {
+            mediaId: routeMediaId,
+            step: 'launch',
+            finalMedia: mediaData.data as unknown as Record<string, unknown>,
+          },
+        })
+      );
+    } else if (mediaFetchError) {
+      navigate(basePath, { replace: true });
+    }
+  }, [
+    isFinalizeRoute,
+    routeMediaId,
+    mediaId,
+    mediaData,
+    mediaFetchError,
+    dispatch,
+    mediaType,
+    navigate,
+    basePath,
+  ]);
 
   const { resumePointer, discardResume, clearPointer } = useUploadResumePointer(
     {
@@ -153,7 +213,9 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
             mediaType,
             patch: {
               step: (pointer.step === 'drop'
-                ? 'thumbnail'
+                ? hasThumbnailStep
+                  ? 'thumbnail'
+                  : 'details'
                 : pointer.step) as WizardStep,
               mediaId: pointer.mediaId || null,
               sessionId: pointer.sessionId,
@@ -165,6 +227,11 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
             },
           })
         );
+        if (pointer.mediaId) {
+          navigate(`${basePath}/finalize/${pointer.mediaId}`, {
+            replace: true,
+          });
+        }
       },
     }
   );
@@ -191,6 +258,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     setIsProcessingTerminal(false);
     resetUpload();
     clearPointer();
+    navigate(basePath, { replace: true });
   };
 
   const handleAbandon = async () => {
@@ -234,6 +302,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     step,
     setStep,
     mediaId,
+    isFinalizeRoute,
     thumbnailUrl,
     setThumbnailUrl,
     finalMedia,
@@ -241,6 +310,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     setShowLeaveConfirm,
     isAbandoning,
     celebration,
+    celebrate,
     dismissCelebration: dismiss,
     uploadState,
     startUpload,

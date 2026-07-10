@@ -1,17 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
-  POST_UPLOAD_STEP,
+  CLIENT_ROUTES,
   type ICreatorEvent,
+  type IPostResponse,
   type PostVisibility,
 } from '@network/shared';
-import { useCreatePostMutation, useFinalisePostMutation } from '../postApi';
+import {
+  useCreatePostMutation,
+  useDeletePostMutation,
+  useGetPostByIdQuery,
+} from '../postApi';
 import { useRawPostVideoUpload } from './usePostVideoUpload';
-import { useUploadResumePointer } from '../../upload/hooks/useUploadResumePointer';
+import { useMediaUploadWizard } from '../../upload/hooks/useMediaUploadWizard';
 
-export type PostAttachment =
-  | { kind: 'none' }
-  | { kind: 'image'; file: File }
-  | { kind: 'video'; file: File };
+export type PostAttachment = { kind: 'none' } | { kind: 'image'; file: File };
 
 interface UsePostComposerOptions {
   onPublished?: (creatorEvent: ICreatorEvent | null) => void;
@@ -21,7 +23,7 @@ export const usePostComposer = ({
   onPublished,
 }: UsePostComposerOptions = {}) => {
   const [createPost, createPostState] = useCreatePostMutation();
-  const [finalisePost] = useFinalisePostMutation();
+  const [deletePost] = useDeletePostMutation();
   const videoUpload = useRawPostVideoUpload();
 
   const [text, setText] = useState('');
@@ -32,49 +34,38 @@ export const usePostComposer = ({
   });
   const [error, setError] = useState<string | null>(null);
 
-  const finalisedRef = useRef(false);
-
-  const { resumePointer, discardResume, clearPointer } = useUploadResumePointer(
-    {
-      mediaType: 'post',
-      uploadState: videoUpload.state,
-      step: POST_UPLOAD_STEP,
-    }
-  );
+  const wizard = useMediaUploadWizard<IPostResponse>({
+    mediaType: 'post',
+    mediaLabel: 'post',
+    basePath: CLIENT_ROUTES.UPLOAD_POST,
+    upload: videoUpload,
+    useGetByIdQuery: useGetPostByIdQuery,
+    deleteMedia: deletePost,
+    hasThumbnailStep: false,
+  });
 
   const canSubmit = text.trim().length > 0 || attachment.kind !== 'none';
 
-  const reset = useCallback(() => {
+  const resetCompose = useCallback(() => {
     setText('');
     setTags([]);
     setVisibility('public');
     setAttachment({ kind: 'none' });
     setError(null);
-    finalisedRef.current = false;
-    videoUpload.reset();
-    clearPointer();
-  }, [videoUpload, clearPointer]);
+  }, []);
 
-  const resumeVideoUpload = useCallback(
+  const startVideoAttachment = useCallback(
     (file: File) => {
-      finalisedRef.current = false;
-      setAttachment({ kind: 'video', file });
-      void videoUpload.startUpload(file);
+      wizard.startUpload(file);
     },
-    [videoUpload]
+    [wizard]
   );
 
   const submit = useCallback(async () => {
     setError(null);
 
     if (!canSubmit) {
-      setError('Write something or attach an image/video first.');
-      return;
-    }
-
-    if (attachment.kind === 'video') {
-      finalisedRef.current = false;
-      await videoUpload.startUpload(attachment.file);
+      setError('Write something or attach an image first.');
       return;
     }
 
@@ -89,7 +80,7 @@ export const usePostComposer = ({
     try {
       const result = await createPost(formData).unwrap();
       onPublished?.(result.data.creatorEvent);
-      reset();
+      resetCompose();
     } catch {
       setError("Couldn't create the post. Please try again.");
     }
@@ -98,59 +89,11 @@ export const usePostComposer = ({
     canSubmit,
     createPost,
     onPublished,
-    reset,
-    tags,
-    text,
-    visibility,
-    videoUpload,
-  ]);
-
-  useEffect(() => {
-    if (
-      attachment.kind !== 'video' ||
-      videoUpload.state.stage !== 'done' ||
-      !videoUpload.state.videoId ||
-      finalisedRef.current
-    ) {
-      return;
-    }
-
-    finalisedRef.current = true;
-
-    finalisePost({
-      postId: videoUpload.state.videoId,
-      ...(text.trim() && { text: text.trim() }),
-      tags,
-      visibility,
-    })
-      .unwrap()
-      .then((result) => {
-        onPublished?.(result.data.creatorEvent);
-        reset();
-      })
-      .catch(() => {
-        setError(
-          'Video uploaded, but finalising the post failed. Please retry.'
-        );
-      });
-  }, [
-    attachment.kind,
-    videoUpload.state.stage,
-    videoUpload.state.videoId,
-    finalisePost,
-    onPublished,
-    reset,
+    resetCompose,
     tags,
     text,
     visibility,
   ]);
-
-  const isUploadingVideo =
-    attachment.kind === 'video' &&
-    videoUpload.state.stage !== 'idle' &&
-    videoUpload.state.stage !== 'done' &&
-    videoUpload.state.stage !== 'error' &&
-    videoUpload.state.stage !== 'cancelled';
 
   return {
     text,
@@ -163,13 +106,9 @@ export const usePostComposer = ({
     setAttachment,
     canSubmit,
     submit,
-    reset,
     error,
-    isSubmitting: createPostState.isLoading || isUploadingVideo,
-    videoUploadState: videoUpload.state,
-    cancelVideoUpload: videoUpload.cancelUpload,
-    resumePointer,
-    discardResume,
-    resumeVideoUpload,
+    isSubmitting: createPostState.isLoading,
+    startVideoAttachment,
+    wizard,
   };
 };

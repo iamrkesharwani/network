@@ -8,14 +8,15 @@ import {
 
 interface UploadStepperProps {
   current: WizardStep;
+  steps?: { key: WizardStep; label: string }[];
 }
 
-const UploadStepper = ({ current }: UploadStepperProps) => {
-  const currentIndex = UploadSteps.findIndex((s) => s.key === current);
+const UploadStepper = ({ current, steps = UploadSteps }: UploadStepperProps) => {
+  const currentIndex = steps.findIndex((s) => s.key === current);
 
   return (
     <div className="flex items-center w-full max-w-md mx-auto mb-10">
-      {UploadSteps.map((step, i) => {
+      {steps.map((step, i) => {
         const isComplete = i < currentIndex;
         const isCurrent = i === currentIndex;
 
@@ -48,7 +49,7 @@ const UploadStepper = ({ current }: UploadStepperProps) => {
               </span>
             </div>
 
-            {i < UploadSteps.length - 1 && (
+            {i < steps.length - 1 && (
               <div className="flex-1 h-0.5 mx-2 rounded-full bg-border overflow-hidden -mt-5">
                 <motion.div
                   className="h-full bg-primary"
