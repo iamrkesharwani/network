@@ -4,7 +4,7 @@ import {
   MEDIA_STATUS_SOCKET_EVENT,
   type IMediaStatusEvent,
 } from '@network/shared';
-import { bullMqConnection } from '../email/connection.js';
+import { bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import { emitToUser } from '../../core/config/socket.js';
 import { setProviderMediaType } from '../webhook/provider-media-index.repository.js';

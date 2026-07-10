@@ -10,6 +10,8 @@ import {
   shortUpdateSchema,
   shortFeedQuerySchema,
   shortIdParamSchema,
+  shortUserFeedQuerySchema,
+  usernameParamSchema,
 } from '@network/shared';
 
 import * as shortCrudController from './controllers/crud.controller.js';
@@ -60,6 +62,13 @@ router.get(
   requireAuth,
   validate({ query: shortFeedQuerySchema }),
   shortCrudController.getMine
+);
+
+router.get(
+  '/user/:username',
+  optionalAuth,
+  validate({ params: usernameParamSchema, query: shortUserFeedQuerySchema }),
+  shortCrudController.getByUsername
 );
 
 router.get(

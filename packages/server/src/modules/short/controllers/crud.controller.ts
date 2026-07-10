@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { ShortFeedQuery, ShortUpdateInput } from '@network/shared';
+import type { ShortFeedQuery, ShortUpdateInput, ShortUserFeedQuery } from '@network/shared';
 import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { ApiPaginatedResponse } from '../../../core/utils/ApiPaginatedResponse.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
@@ -9,14 +9,21 @@ import {
   getMyShorts,
   getPublicFeed,
   getShortById,
+  getUserShorts,
   updateShort,
 } from '../services/short.crud.service.js';
 
 const getFeedQuery = (req: Request): ShortFeedQuery =>
   req.query as unknown as ShortFeedQuery;
 
+const getUserFeedQuery = (req: Request): ShortUserFeedQuery =>
+  req.query as unknown as ShortUserFeedQuery;
+
 const getShortIdParam = (req: Request): string =>
   req.params['shortId'] as string;
+
+const getUsernameParam = (req: Request): string =>
+  req.params['username'] as string;
 
 export const getFeed = asyncHandler(async (req: Request, res: Response) => {
   const { cursor, limit } = getFeedQuery(req);
@@ -51,6 +58,29 @@ export const getMine = asyncHandler(async (req: Request, res: Response) => {
       )
     );
 });
+
+export const getByUsername = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { cursor, limit, visibility } = getUserFeedQuery(req);
+    const result = await getUserShorts(
+      getUsernameParam(req),
+      req.user?.id,
+      cursor ?? null,
+      limit,
+      visibility
+    );
+
+    res
+      .status(200)
+      .json(
+        new ApiPaginatedResponse(
+          result.data,
+          result.meta,
+          "User's shorts fetched successfully"
+        )
+      );
+  }
+);
 
 export const getById = asyncHandler(async (req: Request, res: Response) => {
   const short = await getShortById(getShortIdParam(req), req.user);

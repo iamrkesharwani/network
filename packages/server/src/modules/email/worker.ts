@@ -2,7 +2,7 @@ import { Worker, type Job } from 'bullmq';
 import { SITE_NAME, EMAIL_QUEUE_NAME } from '@network/shared';
 import { logger } from '../../core/utils/logger.js';
 import { env } from '../../core/env/env.js';
-import { bullMqConnection } from './connection.js';
+import { bullMqConnection } from '../../core/config/bullmq.js';
 import { transporter } from './transporter.js';
 import { getHtmlTemplate } from './templates.js';
 import type { EmailJobData } from './types.js';

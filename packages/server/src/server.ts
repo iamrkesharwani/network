@@ -16,6 +16,12 @@ import { startEmailWorker } from './modules/email/email.js';
 import { startUploadReaperWorker } from './modules/upload/upload.reaper.worker.js';
 import { scheduleUploadSessionReaper } from './modules/upload/upload.reaper.queue.js';
 import { startMediaIngestWorker } from './modules/upload/upload.ingest.worker.js';
+import { registerContentReaperAdapter } from './core/reaper/contentReaper.registry.js';
+import { startContentReaperWorker } from './core/reaper/contentReaper.worker.js';
+import { scheduleContentReaper } from './core/reaper/contentReaper.queue.js';
+import { videoReaperAdapter } from './modules/video/services/video.reaper.service.js';
+import { shortReaperAdapter } from './modules/short/services/short.reaper.service.js';
+import { postReaperAdapter } from './modules/post/services/post.reaper.service.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -29,6 +35,12 @@ const startServer = async () => {
     startMediaIngestWorker();
     startUploadReaperWorker();
     await scheduleUploadSessionReaper();
+
+    registerContentReaperAdapter(videoReaperAdapter);
+    registerContentReaperAdapter(shortReaperAdapter);
+    registerContentReaperAdapter(postReaperAdapter);
+    startContentReaperWorker();
+    await scheduleContentReaper();
 
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Server listening on port ${port}`);

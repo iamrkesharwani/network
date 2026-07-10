@@ -1,4 +1,8 @@
-import type { IShortResponse, ShortUpdateInput } from '@network/shared';
+import type {
+  IShortResponse,
+  ShortUpdateInput,
+  ContentVisibility,
+} from '@network/shared';
 import * as shortRepository from '../short.repository.js';
 import { logger } from '../../../core/utils/logger.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
@@ -7,6 +11,7 @@ import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields
 import type { Requester } from '../short.types.js';
 import { toResponse, toResponseFromLean } from './short.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
+import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
 
 export const getShortById = async (
   shortId: string,
@@ -58,6 +63,28 @@ export const getMyShorts = async (
   limit: number
 ) => {
   const result = await shortRepository.findByUserId(userId, cursor, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
+
+export const getUserShorts = async (
+  username: string,
+  requesterId: string | undefined,
+  cursor: string | null,
+  limit: number,
+  visibilityQuery?: ContentVisibility
+) => {
+  const { userId, isOwner } = await resolveProfileOwner(username, requesterId);
+
+  const extraFilter = isOwner
+    ? { ...(visibilityQuery !== undefined && { visibility: visibilityQuery }) }
+    : { visibility: 'public', status: 'READY' };
+
+  const result = await shortRepository.findByUserId(
+    userId,
+    cursor,
+    limit,
+    extraFilter
+  );
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 

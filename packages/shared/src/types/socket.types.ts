@@ -12,3 +12,10 @@ export interface IMediaStatusEvent {
   duration?: number;
   errorMessage?: string;
 }
+
+export interface IUnlistedExpiryWarningEvent {
+  mediaType: 'video' | 'short' | 'post';
+  id: string;
+  title?: string;
+  daysLeft: number;
+}

@@ -4,7 +4,7 @@ import {
   UPLOAD_REAPER_JOB_ID,
   UPLOAD_REAPER_INTERVAL_MS,
 } from '@network/shared';
-import { bullMqConnection } from '../email/connection.js';
+import { bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 
 const uploadReaperQueue = new Queue(UPLOAD_REAPER_QUEUE_NAME, {

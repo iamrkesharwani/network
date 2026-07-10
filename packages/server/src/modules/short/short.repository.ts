@@ -53,11 +53,16 @@ export const findPublicFeed = async (
 export const findByUserId = async (
   userId: string,
   cursor: string | null,
-  limit: number
+  limit: number,
+  extraFilter: Record<string, unknown> = {}
 ): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     ShortModel,
-    { userId: new mongoose.Types.ObjectId(userId), deletedAt: null },
+    {
+      userId: new mongoose.Types.ObjectId(userId),
+      deletedAt: null,
+      ...extraFilter,
+    },
     cursor,
     limit
   );

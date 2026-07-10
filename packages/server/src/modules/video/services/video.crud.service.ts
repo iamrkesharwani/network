@@ -1,4 +1,8 @@
-import type { IVideoResponse, VideoUpdateInput } from '@network/shared';
+import type {
+  IVideoResponse,
+  VideoUpdateInput,
+  ContentVisibility,
+} from '@network/shared';
 import * as videoRepository from '../video.repository.js';
 import { logger } from '../../../core/utils/logger.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
@@ -7,6 +11,7 @@ import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields
 import type { Requester } from '../video.types.js';
 import { toResponse, toResponseFromLean } from './video.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
+import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
 
 export const getVideoById = async (
   videoId: string,
@@ -58,6 +63,28 @@ export const getMyVideos = async (
   limit: number
 ) => {
   const result = await videoRepository.findByUserId(userId, cursor, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
+
+export const getUserVideos = async (
+  username: string,
+  requesterId: string | undefined,
+  cursor: string | null,
+  limit: number,
+  visibilityQuery?: ContentVisibility
+) => {
+  const { userId, isOwner } = await resolveProfileOwner(username, requesterId);
+
+  const extraFilter = isOwner
+    ? { ...(visibilityQuery !== undefined && { visibility: visibilityQuery }) }
+    : { visibility: 'public', status: 'READY' };
+
+  const result = await videoRepository.findByUserId(
+    userId,
+    cursor,
+    limit,
+    extraFilter
+  );
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 

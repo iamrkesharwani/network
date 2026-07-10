@@ -6,6 +6,7 @@ import {
   confirmShortUploadSchema,
   shortFeedQuerySchema,
   shortIdParamSchema,
+  shortUserFeedQuerySchema,
 } from '../schemas/short.schema.js';
 import {
   SHORT_VISIBILITY,
@@ -21,6 +22,7 @@ export type InitiateShortUploadInput = z.infer<
 export type ConfirmShortUploadInput = z.infer<typeof confirmShortUploadSchema>;
 export type ShortFeedQuery = z.infer<typeof shortFeedQuerySchema>;
 export type ShortIdParam = z.infer<typeof shortIdParamSchema>;
+export type ShortUserFeedQuery = z.infer<typeof shortUserFeedQuerySchema>;
 export type ShortVisibility = (typeof SHORT_VISIBILITY)[number];
 export type ShortStatus = (typeof SHORT_STATUS)[number];
 

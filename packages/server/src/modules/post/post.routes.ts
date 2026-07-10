@@ -9,6 +9,8 @@ import {
   postUpdateSchema,
   postFeedQuerySchema,
   postIdParamSchema,
+  postUserFeedQuerySchema,
+  usernameParamSchema,
 } from '@network/shared';
 
 import * as postCrudController from './controllers/crud.controller.js';
@@ -44,6 +46,13 @@ router.get(
   requireAuth,
   validate({ query: postFeedQuerySchema }),
   postCrudController.getMine
+);
+
+router.get(
+  '/user/:username',
+  optionalAuth,
+  validate({ params: usernameParamSchema, query: postUserFeedQuerySchema }),
+  postCrudController.getByUsername
 );
 
 router.get(

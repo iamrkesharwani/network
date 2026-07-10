@@ -1,4 +1,8 @@
-import type { IPostResponse, PostUpdateInput } from '@network/shared';
+import type {
+  IPostResponse,
+  PostUpdateInput,
+  ContentVisibility,
+} from '@network/shared';
 import * as postRepository from '../post.repository.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
@@ -7,6 +11,7 @@ import type { Requester } from '../post.types.js';
 import { toResponse, toResponseFromLean } from './post.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
 import { logger } from '../../../core/utils/logger.js';
+import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
 
 export const getPostById = async (
   postId: string,
@@ -57,6 +62,28 @@ export const getMyPosts = async (
   limit: number
 ) => {
   const result = await postRepository.findByUserId(userId, cursor, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
+
+export const getUserPosts = async (
+  username: string,
+  requesterId: string | undefined,
+  cursor: string | null,
+  limit: number,
+  visibilityQuery?: ContentVisibility
+) => {
+  const { userId, isOwner } = await resolveProfileOwner(username, requesterId);
+
+  const extraFilter = isOwner
+    ? { ...(visibilityQuery !== undefined && { visibility: visibilityQuery }) }
+    : { visibility: 'public', status: 'READY' };
+
+  const result = await postRepository.findByUserId(
+    userId,
+    cursor,
+    limit,
+    extraFilter
+  );
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 

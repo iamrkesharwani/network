@@ -10,6 +10,8 @@ import {
   videoUpdateSchema,
   videoFeedQuerySchema,
   videoIdParamSchema,
+  videoUserFeedQuerySchema,
+  usernameParamSchema,
 } from '@network/shared';
 
 import * as videoCrudController from './controllers/crud.controller.js';
@@ -60,6 +62,13 @@ router.get(
   requireAuth,
   validate({ query: videoFeedQuerySchema }),
   videoCrudController.getMine
+);
+
+router.get(
+  '/user/:username',
+  optionalAuth,
+  validate({ params: usernameParamSchema, query: videoUserFeedQuerySchema }),
+  videoCrudController.getByUsername
 );
 
 router.get(

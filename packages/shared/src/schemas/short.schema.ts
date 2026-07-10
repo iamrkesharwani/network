@@ -8,6 +8,7 @@ import {
   SHORT_TITLE_MAX_LENGTH,
   SHORT_DESCRIPTION_MAX_LENGTH,
 } from '../constants/short.constants.js';
+import { CONTENT_VISIBILITY } from '../constants/visibility.constants.js';
 import {
   DEFAULT_PAGE_LIMIT,
   MAX_PAGE_LIMIT,
@@ -129,4 +130,8 @@ export const shortIdParamSchema = z.object({
   shortId: z.string().refine(isValidObjectId, {
     message: 'Invalid short ID.',
   }),
+});
+
+export const shortUserFeedQuerySchema = shortFeedQuerySchema.extend({
+  visibility: z.enum(CONTENT_VISIBILITY).optional(),
 });

@@ -5,6 +5,7 @@ import {
   postFinaliseSchema,
   postFeedQuerySchema,
   postIdParamSchema,
+  postUserFeedQuerySchema,
 } from '../schemas/post.schema.js';
 import {
   POST_VISIBILITY,
@@ -18,6 +19,7 @@ export type PostUpdateInput = z.infer<typeof postUpdateSchema>;
 export type PostFinaliseInput = z.infer<typeof postFinaliseSchema>;
 export type PostFeedQuery = z.infer<typeof postFeedQuerySchema>;
 export type PostIdParam = z.infer<typeof postIdParamSchema>;
+export type PostUserFeedQuery = z.infer<typeof postUserFeedQuerySchema>;
 export type PostVisibility = (typeof POST_VISIBILITY)[number];
 export type PostStatus = (typeof POST_STATUS)[number];
 export type PostMediaType = (typeof POST_MEDIA_TYPE)[number];

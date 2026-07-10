@@ -71,6 +71,15 @@ export const userRegistrationSchema = z.object({
     .regex(/[^A-Za-z0-9]/, 'Include at least one special character.'),
 });
 
+export const usernameParamSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(USERNAME_MIN_LENGTH, `Username must be at least ${USERNAME_MIN_LENGTH} characters.`)
+    .max(USERNAME_MAX_LENGTH, `Username cannot exceed ${USERNAME_MAX_LENGTH} characters.`),
+});
+
 export const userProfileUpdateSchema = z.object({
   name: userRegistrationSchema.shape.name.optional(),
 

@@ -3,7 +3,7 @@ import {
   MEDIA_INGEST_QUEUE_NAME,
   type MultipartMediaType,
 } from '@network/shared';
-import { bullMqConnection } from '../email/connection.js';
+import { bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 
 export interface MediaIngestJobData {

@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { UPLOAD_REAPER_QUEUE_NAME } from '@network/shared';
-import { bullMqConnection } from '../email/connection.js';
+import { bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import { reapExpiredSessions } from './services/upload.reaper.service.js';
 

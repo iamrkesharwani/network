@@ -4,6 +4,7 @@ import {
   POST_TEXT_MAX_LENGTH,
   POST_VISIBILITY,
 } from '../constants/post.constants.js';
+import { CONTENT_VISIBILITY } from '../constants/visibility.constants.js';
 import {
   DEFAULT_PAGE_LIMIT,
   MAX_PAGE_LIMIT,
@@ -72,4 +73,8 @@ export const postIdParamSchema = z.object({
   postId: z.string().refine(isValidObjectId, {
     message: 'Invalid post ID.',
   }),
+});
+
+export const postUserFeedQuerySchema = postFeedQuerySchema.extend({
+  visibility: z.enum(CONTENT_VISIBILITY).optional(),
 });

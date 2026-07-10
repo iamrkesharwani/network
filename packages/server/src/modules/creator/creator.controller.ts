@@ -8,6 +8,7 @@ import { asyncHandler } from '../../core/utils/asyncHandler.js';
 import { ApiResponse } from '../../core/utils/ApiResponse.js';
 import { ApiError } from '../../core/utils/ApiError.js';
 import { getProfile } from './services/creator.profile.service.js';
+import { getPublicProfile } from '../user/services/user.profile.service.js';
 
 export const getMyProfile = asyncHandler(
   async (req: Request, res: Response) => {
@@ -21,6 +22,17 @@ export const getMyProfile = asyncHandler(
     res
       .status(200)
       .json(new ApiResponse(profile, 'Creator profile fetched successfully'));
+  }
+);
+
+export const getPublicProfileByUsername = asyncHandler(
+  async (req: Request, res: Response) => {
+    const username = req.params['username'] as string;
+    const profile = await getPublicProfile(username);
+
+    res
+      .status(200)
+      .json(new ApiResponse(profile, 'Public profile fetched successfully'));
   }
 );
 

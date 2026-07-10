@@ -9,6 +9,7 @@ import {
   VIDEO_TITLE_MAX_LENGTH,
   VIDEO_DESCRIPTION_MAX_LENGTH,
 } from '../constants/video.constants.js';
+import { CONTENT_VISIBILITY } from '../constants/visibility.constants.js';
 import {
   DEFAULT_PAGE_LIMIT,
   MAX_PAGE_LIMIT,
@@ -134,4 +135,8 @@ export const videoIdParamSchema = z.object({
   videoId: z.string().refine(isValidObjectId, {
     message: 'Invalid video ID.',
   }),
+});
+
+export const videoUserFeedQuerySchema = videoFeedQuerySchema.extend({
+  visibility: z.enum(CONTENT_VISIBILITY).optional(),
 });

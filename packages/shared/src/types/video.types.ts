@@ -6,6 +6,7 @@ import {
   confirmVideoUploadSchema,
   videoFeedQuerySchema,
   videoIdParamSchema,
+  videoUserFeedQuerySchema,
 } from '../schemas/video.schema.js';
 import {
   VIDEO_CATEGORIES,
@@ -22,6 +23,7 @@ export type InitiateVideoUploadInput = z.infer<
 export type ConfirmVideoUploadInput = z.infer<typeof confirmVideoUploadSchema>;
 export type VideoFeedQuery = z.infer<typeof videoFeedQuerySchema>;
 export type VideoIdParam = z.infer<typeof videoIdParamSchema>;
+export type VideoUserFeedQuery = z.infer<typeof videoUserFeedQuerySchema>;
 export type VideoCategory = (typeof VIDEO_CATEGORIES)[number];
 export type VideoVisibility = (typeof VIDEO_VISIBILITY)[number];
 export type VideoStatus = (typeof VIDEO_STATUS)[number];
