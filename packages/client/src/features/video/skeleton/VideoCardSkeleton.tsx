@@ -2,7 +2,7 @@ import Skeleton from '../../../shared/ui/skeleton/Skeleton';
 
 const VideoCardSkeleton = () => (
   <div className="flex flex-col gap-2.5">
-    <Skeleton className="w-full aspect-video rounded-xl" />
+    <Skeleton className="w-full aspect-video rounded-xl max-md:portrait:rounded-none" />
     <div className="flex gap-2.5 px-0.5">
       <Skeleton className="w-8 h-8 rounded-full shrink-0 mt-0.5" />
       <div className="flex-1 flex flex-col gap-2 pt-0.5">

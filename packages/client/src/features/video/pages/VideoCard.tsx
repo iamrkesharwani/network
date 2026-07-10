@@ -10,7 +10,6 @@ export interface VideoCardProps {
   isOwner?: boolean;
   onEdit?: (video: IVideoResponse) => void;
   onDelete?: (video: IVideoResponse) => void;
-  className?: string;
 }
 
 const VideoCard = ({
@@ -18,7 +17,6 @@ const VideoCard = ({
   isOwner = false,
   onEdit,
   onDelete,
-  className,
 }: VideoCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const isReady = video.status === 'READY';
@@ -43,11 +41,7 @@ const VideoCard = ({
   return (
     <>
       <div className="group flex flex-col gap-2.5">
-        <VideoCardThumbnail
-          video={video}
-          isReady={isReady}
-          className={className}
-        />
+        <VideoCardThumbnail video={video} isReady={isReady} />
         <VideoCardFooter
           video={video}
           menu={

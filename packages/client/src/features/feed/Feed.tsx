@@ -48,7 +48,9 @@ const buildFeedBlocks = (
 
   while (videoIndex < videos.length || shortIndex < shorts.length) {
     if (videoIndex < videos.length) {
-      const blockSize = isFirstVideoBlock ? firstVideoBlockSize : videosPerBlock;
+      const blockSize = isFirstVideoBlock
+        ? firstVideoBlockSize
+        : videosPerBlock;
       blocks.push({
         type: 'video',
         items: videos.slice(videoIndex, videoIndex + blockSize),
@@ -79,7 +81,6 @@ const Feed = () => {
     videosPerBlock,
     shortsPerBlock,
   } = useFeedColumns(isChatOpen);
-  const cardClassName = widthMode === 'edge' ? 'rounded-none' : undefined;
 
   const [theaterOpen, setTheaterOpen] = useState(false);
   const { activeIndex, goToIndex, goNext, goPrev, updateCurrentShort } =
@@ -197,11 +198,7 @@ const Feed = () => {
                 className={`grid gap-4 ${COL_CLASS[columns]}`}
               >
                 {block.items.map((video) => (
-                  <VideoCard
-                    key={video.id}
-                    video={video}
-                    className={cardClassName}
-                  />
+                  <VideoCard key={video.id} video={video} />
                 ))}
               </div>
             ) : (
@@ -214,7 +211,6 @@ const Feed = () => {
                     key={short.id}
                     short={short}
                     onClick={handleThumbnailClick}
-                    className={cardClassName}
                   />
                 ))}
               </div>
@@ -229,9 +225,7 @@ const Feed = () => {
             </div>
           )}
 
-          {hasMore && (
-            <div ref={feedSentinelRef} className="h-4" aria-hidden />
-          )}
+          {hasMore && <div ref={feedSentinelRef} className="h-4" aria-hidden />}
         </div>
 
         {showChatRail && (

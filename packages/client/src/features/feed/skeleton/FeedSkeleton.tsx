@@ -12,9 +12,9 @@ interface FeedSkeletonProps {
 }
 
 const FeedSkeleton = ({
-  columns = 4,
-  firstVideoBlockSize = 4,
-  videosPerBlock = 8,
+  columns = 3,
+  firstVideoBlockSize = 3,
+  videosPerBlock = 6,
   shortsPerBlock = 5,
 }: FeedSkeletonProps) => (
   <div className="flex flex-col gap-8">

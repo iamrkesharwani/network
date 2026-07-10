@@ -83,7 +83,7 @@ export const computeFeedColumns = (
   }
 
   return {
-    columns: isChatOpen ? 3 : 4,
+    columns: isChatOpen ? 2 : 3,
     widthMode: 'full',
     showChatRail: isChatOpen,
     firstVideoBlockSize: FEED_VIDEOS_PER_BLOCK_FIRST_DESKTOP,
