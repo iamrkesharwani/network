@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { POST_TEXT_ONLY_MIN_HEIGHT_PX } from '@network/shared';
 import type { IPostResponse } from '@network/shared';
 import CardShell from '../../../shared/ui/card/CardShell';
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
@@ -46,9 +45,6 @@ const PostCard = ({
     <>
       <CardShell
         className={className}
-        minHeight={
-          post.mediaType === 'none' ? POST_TEXT_ONLY_MIN_HEIGHT_PX : undefined
-        }
         header={
           <CardAuthorHeader
             username={post.author.username}
@@ -65,7 +61,9 @@ const PostCard = ({
             }
           />
         }
-        media={post.mediaType !== 'none' ? <PostMedia post={post} /> : undefined}
+        media={
+          post.mediaType !== 'none' ? <PostMedia post={post} /> : undefined
+        }
         footer={<PostFooter post={post} />}
       />
       <ConfirmModal

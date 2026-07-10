@@ -7,7 +7,6 @@ interface CardShellProps {
   mediaBadges?: ReactNode;
   footer?: ReactNode;
   className?: string;
-  minHeight?: number;
 }
 
 const CardShell = ({
@@ -16,14 +15,12 @@ const CardShell = ({
   mediaBadges,
   footer,
   className,
-  minHeight,
 }: CardShellProps) => (
   <article
     className={cn(
       'group rounded-2xl border border-border bg-surface overflow-hidden',
       className
     )}
-    style={minHeight ? { minHeight } : undefined}
   >
     <div className="p-4 sm:p-5 flex flex-col gap-3">{header}</div>
 

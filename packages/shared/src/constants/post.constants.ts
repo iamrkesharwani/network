@@ -31,4 +31,3 @@ export const RAW_POST_UPLOAD_LIFECYCLE_DAYS = 1;
 export const POST_UPLOAD_STEP = 'drop';
 export const POST_TEXT_MAX_LENGTH = 500;
 export const POST_TEXT_LINE_CLAMP = 6;
-export const POST_TEXT_ONLY_MIN_HEIGHT_PX = 220;
