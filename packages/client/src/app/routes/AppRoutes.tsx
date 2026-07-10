@@ -16,7 +16,7 @@ import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
 import PostComposer from '../../features/post/form/PostComposer';
 import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
-import ProfilePage from '../../features/creator/pages/ProfilePage';
+import ProfilePage from '../../features/profile/pages/ProfilePage';
 import SettingsPage from '../../features/creator/pages/SettingsPage';
 import NotFound from './NotFound';
 
@@ -44,6 +44,11 @@ export const routes: RouteObject[] = [
           },
           { path: CLIENT_ROUTES.FEED, element: <Feed /> },
           { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
+          { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
+          { path: CLIENT_ROUTES.PROFILE_VIDEOS, element: <ProfilePage /> },
+          { path: CLIENT_ROUTES.PROFILE_SHORTS, element: <ProfilePage /> },
+          { path: CLIENT_ROUTES.PROFILE_POSTS, element: <ProfilePage /> },
+          { path: CLIENT_ROUTES.PROFILE_STATS, element: <ProfilePage /> },
           {
             element: <RequireAuth />,
             children: [
@@ -69,7 +74,6 @@ export const routes: RouteObject[] = [
                 path: CLIENT_ROUTES.UPLOAD_POST_FINALIZE,
                 element: <PostComposer />,
               },
-              { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.SETTINGS, element: <SettingsPage /> },
             ],
           },

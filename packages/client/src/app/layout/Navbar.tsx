@@ -5,6 +5,7 @@ import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import Avatar from '../../shared/ui/primitives/Avatar';
 import { SITE_NAME, CLIENT_ROUTES } from '@network/shared';
 import LogoIcon from '../../public/Logo.svg?react';
+import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
 
 export interface NavbarProps {
   onMobileMenuClick: () => void;
@@ -65,7 +66,7 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
             </button>
 
             <Link
-              to={CLIENT_ROUTES.PROFILE}
+              to={user?.username ? buildProfilePath(user.username) : CLIENT_ROUTES.LOGIN}
               className="ml-1 rounded-full ring-2 ring-transparent hover:ring-primary transition-all focus:outline-none"
             >
               <Avatar

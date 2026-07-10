@@ -19,6 +19,7 @@ import { clearCredentials } from '../../features/auth/authSlice';
 import { setAccessToken } from '../../shared/lib/axiosInstance';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import { useAppDispatch } from '../../shared/hooks/useAppDispatch';
+import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
 
 export interface SidebarProps {
   isMobileOpen: boolean;
@@ -39,6 +40,7 @@ const Sidebar = ({
   const isAuthenticated = useAppSelector(
     (state) => state.auth.isAuthenticated
   );
+  const authUser = useAppSelector((state) => state.auth.user);
 
   const handleLogout = async () => {
     try {
@@ -59,9 +61,13 @@ const Sidebar = ({
     { name: 'Feed', path: CLIENT_ROUTES.FEED, icon: Home },
     { name: 'Posts', path: CLIENT_ROUTES.POSTS, icon: FileText },
     { name: 'Upload', path: CLIENT_ROUTES.UPLOAD, icon: UploadCloud },
-    ...(isAuthenticated
+    ...(isAuthenticated && authUser?.username
       ? [
-          { name: 'Profile', path: CLIENT_ROUTES.PROFILE, icon: User },
+          {
+            name: 'Profile',
+            path: buildProfilePath(authUser.username),
+            icon: User,
+          },
           { name: 'Settings', path: CLIENT_ROUTES.SETTINGS, icon: Settings },
         ]
       : []),
