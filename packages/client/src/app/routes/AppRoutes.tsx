@@ -1,6 +1,7 @@
 import { type RouteObject, Navigate } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
-import ProtectedRoute from './ProtectedRoute';
+import AppInitGate from './AppInitGate';
+import RequireAuth from './RequireAuth';
 import PageWrapper from '../layout/PageWrapper';
 import Login from '../../features/auth/pages/Login';
 import Register from '../../features/auth/pages/Register';
@@ -32,7 +33,7 @@ export const routes: RouteObject[] = [
     ],
   },
   {
-    element: <ProtectedRoute />,
+    element: <AppInitGate />,
     children: [
       {
         element: <PageWrapper />,
@@ -42,19 +43,24 @@ export const routes: RouteObject[] = [
             element: <Navigate to={CLIENT_ROUTES.FEED} replace />,
           },
           { path: CLIENT_ROUTES.FEED, element: <Feed /> },
-          { path: CLIENT_ROUTES.UPLOAD, element: <UploadHub /> },
-          {
-            path: CLIENT_ROUTES.UPLOAD_VIDEO,
-            element: <VideoUploadWizard />,
-          },
-          {
-            path: CLIENT_ROUTES.UPLOAD_SHORT,
-            element: <ShortUploadWizard />,
-          },
-          { path: CLIENT_ROUTES.UPLOAD_POST, element: <PostComposer /> },
           { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
-          { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
-          { path: CLIENT_ROUTES.SETTINGS, element: <SettingsPage /> },
+          {
+            element: <RequireAuth />,
+            children: [
+              { path: CLIENT_ROUTES.UPLOAD, element: <UploadHub /> },
+              {
+                path: CLIENT_ROUTES.UPLOAD_VIDEO,
+                element: <VideoUploadWizard />,
+              },
+              {
+                path: CLIENT_ROUTES.UPLOAD_SHORT,
+                element: <ShortUploadWizard />,
+              },
+              { path: CLIENT_ROUTES.UPLOAD_POST, element: <PostComposer /> },
+              { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
+              { path: CLIENT_ROUTES.SETTINGS, element: <SettingsPage /> },
+            ],
+          },
         ],
       },
     ],

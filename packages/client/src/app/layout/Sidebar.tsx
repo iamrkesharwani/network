@@ -4,6 +4,8 @@ import {
   User,
   Settings,
   LogOut,
+  LogIn,
+  UserPlus,
   X,
   ChevronRight,
   ChevronLeft,
@@ -13,7 +15,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import { useLogoutMutation } from '../../features/auth/authApi';
+import { clearCredentials } from '../../features/auth/authSlice';
 import { setAccessToken } from '../../shared/lib/axiosInstance';
+import { useAppSelector } from '../../shared/hooks/useAppSelector';
+import { useAppDispatch } from '../../shared/hooks/useAppDispatch';
 
 export interface SidebarProps {
   isMobileOpen: boolean;
@@ -29,7 +34,11 @@ const Sidebar = ({
   onToggleCollapse,
 }: SidebarProps) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [logout, { isLoading }] = useLogoutMutation();
+  const isAuthenticated = useAppSelector(
+    (state) => state.auth.isAuthenticated
+  );
 
   const handleLogout = async () => {
     try {
@@ -41,6 +50,7 @@ const Sidebar = ({
       );
     } finally {
       setAccessToken(null);
+      dispatch(clearCredentials());
       navigate(CLIENT_ROUTES.LOGIN, { replace: true });
     }
   };
@@ -49,8 +59,12 @@ const Sidebar = ({
     { name: 'Feed', path: CLIENT_ROUTES.FEED, icon: Home },
     { name: 'Posts', path: CLIENT_ROUTES.POSTS, icon: FileText },
     { name: 'Upload', path: CLIENT_ROUTES.UPLOAD, icon: UploadCloud },
-    { name: 'Profile', path: CLIENT_ROUTES.PROFILE, icon: User },
-    { name: 'Settings', path: CLIENT_ROUTES.SETTINGS, icon: Settings },
+    ...(isAuthenticated
+      ? [
+          { name: 'Profile', path: CLIENT_ROUTES.PROFILE, icon: User },
+          { name: 'Settings', path: CLIENT_ROUTES.SETTINGS, icon: Settings },
+        ]
+      : []),
   ];
 
   const showLabels = isMobileOpen || !isCollapsed;
@@ -141,34 +155,80 @@ const Sidebar = ({
         </nav>
 
         <div className="px-2 py-4 border-t border-border shrink-0 space-y-1">
-          <button
-            onClick={handleLogout}
-            disabled={isLoading}
-            title={
-              !showLabels
-                ? isLoading
-                  ? 'Logging out...'
-                  : 'Log Out'
-                : undefined
-            }
-            className={[
-              'group flex items-center rounded-lg text-sm font-medium text-text-secondary hover:text-error hover:bg-error-subtle transition-all focus:outline-none w-full',
-              !showLabels
-                ? 'justify-center px-0 py-2.5 w-10 mx-auto'
-                : 'gap-3 px-3 py-2.5',
-            ].join(' ')}
-          >
-            <LogOut
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              disabled={isLoading}
+              title={
+                !showLabels
+                  ? isLoading
+                    ? 'Logging out...'
+                    : 'Log Out'
+                  : undefined
+              }
               className={[
-                'shrink-0 text-icon group-hover:text-error transition-colors',
-                !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
+                'group flex items-center rounded-lg text-sm font-medium text-text-secondary hover:text-error hover:bg-error-subtle transition-all focus:outline-none w-full',
+                !showLabels
+                  ? 'justify-center px-0 py-2.5 w-10 mx-auto'
+                  : 'gap-3 px-3 py-2.5',
               ].join(' ')}
-              strokeWidth={1.75}
-            />
-            {showLabels && (
-              <span>{isLoading ? 'Logging out...' : 'Log Out'}</span>
-            )}
-          </button>
+            >
+              <LogOut
+                className={[
+                  'shrink-0 text-icon group-hover:text-error transition-colors',
+                  !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
+                ].join(' ')}
+                strokeWidth={1.75}
+              />
+              {showLabels && (
+                <span>{isLoading ? 'Logging out...' : 'Log Out'}</span>
+              )}
+            </button>
+          ) : (
+            <>
+              <NavLink
+                to={CLIENT_ROUTES.LOGIN}
+                onClick={onMobileClose}
+                title={!showLabels ? 'Log in' : undefined}
+                className={[
+                  'group flex items-center rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-all focus:outline-none w-full',
+                  !showLabels
+                    ? 'justify-center px-0 py-2.5 w-10 mx-auto'
+                    : 'gap-3 px-3 py-2.5',
+                ].join(' ')}
+              >
+                <LogIn
+                  className={[
+                    'shrink-0 text-icon group-hover:text-icon-hover transition-colors',
+                    !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
+                  ].join(' ')}
+                  strokeWidth={1.75}
+                />
+                {showLabels && <span>Log in</span>}
+              </NavLink>
+
+              <NavLink
+                to={CLIENT_ROUTES.REGISTER}
+                onClick={onMobileClose}
+                title={!showLabels ? 'Sign up' : undefined}
+                className={[
+                  'group flex items-center rounded-lg text-sm font-medium text-primary hover:bg-primary-muted transition-all focus:outline-none w-full',
+                  !showLabels
+                    ? 'justify-center px-0 py-2.5 w-10 mx-auto'
+                    : 'gap-3 px-3 py-2.5',
+                ].join(' ')}
+              >
+                <UserPlus
+                  className={[
+                    'shrink-0',
+                    !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
+                  ].join(' ')}
+                  strokeWidth={1.75}
+                />
+                {showLabels && <span>Sign up</span>}
+              </NavLink>
+            </>
+          )}
         </div>
       </aside>
     </>

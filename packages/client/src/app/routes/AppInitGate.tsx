@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import AppShellSkeleton from '../../shared/ui/skeleton/AppShellSkeleton';
@@ -17,11 +17,9 @@ const renderSkeletonForPath = (pathname: string) => {
   return <DefaultPageSkeleton />;
 };
 
-const ProtectedRoute = () => {
+const AppInitGate = () => {
   const location = useLocation();
-  const { isAuthenticated, isInitialized } = useAppSelector(
-    (state) => state.auth
-  );
+  const { isInitialized } = useAppSelector((state) => state.auth);
 
   if (!isInitialized) {
     return (
@@ -31,13 +29,7 @@ const ProtectedRoute = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <Navigate to={CLIENT_ROUTES.LOGIN} state={{ from: location }} replace />
-    );
-  }
-
   return <Outlet />;
 };
 
-export default ProtectedRoute;
+export default AppInitGate;
