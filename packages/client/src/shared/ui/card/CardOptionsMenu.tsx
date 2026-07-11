@@ -1,17 +1,23 @@
 import { useState } from 'react';
-import { MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, EyeOff, Eye } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface CardOptionsMenuProps {
   itemLabel: string;
   onEdit: (e: React.MouseEvent) => void;
   onDeleteClick: (e: React.MouseEvent) => void;
+  visibilityAction?: {
+    label: string;
+    toPublic: boolean;
+    onClick: (e: React.MouseEvent) => void;
+  };
 }
 
 const CardOptionsMenu = ({
   itemLabel,
   onEdit,
   onDeleteClick,
+  visibilityAction,
 }: CardOptionsMenuProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -24,6 +30,11 @@ const CardOptionsMenu = ({
   const handleEdit = (e: React.MouseEvent) => {
     setMenuOpen(false);
     onEdit(e);
+  };
+
+  const handleVisibility = (e: React.MouseEvent) => {
+    setMenuOpen(false);
+    visibilityAction?.onClick(e);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -65,6 +76,20 @@ const CardOptionsMenu = ({
               <Edit2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
               Edit
             </button>
+            {visibilityAction && (
+              <button
+                type="button"
+                onClick={handleVisibility}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
+              >
+                {visibilityAction.toPublic ? (
+                  <Eye className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                ) : (
+                  <EyeOff className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                )}
+                {visibilityAction.label}
+              </button>
+            )}
             <button
               type="button"
               onClick={handleDelete}

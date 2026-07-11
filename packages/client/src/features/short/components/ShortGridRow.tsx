@@ -26,8 +26,8 @@ interface ShortGridRowProps {
   cols: ShortColCount;
   isOwner: boolean;
   seenIds: React.RefObject<Set<string>>;
-  onEdit?: (short: IShortResponse) => void;
-  onDelete?: (short: IShortResponse) => void;
+  onDelete?: (short: IShortResponse) => Promise<void> | void;
+  onToggleVisibility?: (short: IShortResponse) => Promise<void> | void;
 }
 
 const ShortGridRow = ({
@@ -36,8 +36,8 @@ const ShortGridRow = ({
   cols,
   isOwner,
   seenIds,
-  onEdit,
   onDelete,
+  onToggleVisibility,
 }: ShortGridRowProps) => {
   const getAnimIndex = useCallback(
     (id: string, posIdx: number) => {
@@ -64,8 +64,8 @@ const ShortGridRow = ({
             <ShortCard
               short={short}
               isOwner={isOwner}
-              onEdit={onEdit}
               onDelete={onDelete}
+              onToggleVisibility={onToggleVisibility}
             />
           </motion.div>
         );

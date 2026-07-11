@@ -11,12 +11,13 @@ import type {
   ShortFeedQuery,
   ShortUpdateInput,
   ShortUploadInput,
+  ShortUserFeedQuery,
 } from '@network/shared';
 
 export const shortApi = createApi({
   reducerPath: 'shortApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/short' }),
-  tagTypes: ['Short', 'MyShorts'],
+  tagTypes: ['Short', 'MyShorts', 'UserShorts'],
   endpoints: (builder) => ({
     initiateUpload: builder.mutation<
       ApiResponse<IInitiateShortUploadResult>,
@@ -102,6 +103,36 @@ export const shortApi = createApi({
       providesTags: ['MyShorts'],
     }),
 
+    getUserShorts: builder.query<
+      PaginatedResponse<IShortResponse>,
+      { username: string } & ShortUserFeedQuery
+    >({
+      query: ({ username, ...params }) => ({
+        url: `/user/${username}`,
+        method: 'GET',
+        params,
+      }),
+      serializeQueryArgs: ({ endpointName, queryArgs }) =>
+        `${endpointName}-${queryArgs.username}-${queryArgs.visibility ?? 'all'}`,
+      merge: (currentCache, newData, { arg }) => {
+        if (arg.cursor === undefined) {
+          currentCache.data = newData.data;
+          currentCache.meta = newData.meta;
+          return;
+        }
+        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        for (const item of newData.data) {
+          if (!existingIds.has(item.id)) {
+            currentCache.data.push(item);
+          }
+        }
+        currentCache.meta = newData.meta;
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        currentArg?.cursor !== previousArg?.cursor,
+      providesTags: ['UserShorts'],
+    }),
+
     getShortById: builder.query<ApiResponse<IShortResponse>, string>({
       query: (shortId) => ({
         url: `/${shortId}`,
@@ -124,6 +155,7 @@ export const shortApi = createApi({
       invalidatesTags: (_result, _error, { shortId }) => [
         { type: 'Short', id: shortId },
         'MyShorts',
+        'UserShorts',
       ],
     }),
 
@@ -135,6 +167,7 @@ export const shortApi = createApi({
       invalidatesTags: (_result, _error, shortId) => [
         { type: 'Short', id: shortId },
         'MyShorts',
+        'UserShorts',
         'Short',
       ],
     }),
@@ -148,6 +181,7 @@ export const {
   useFinaliseShortMutation,
   useGetFeedQuery,
   useGetMyShortsQuery,
+  useGetUserShortsQuery,
   useGetShortByIdQuery,
   useUpdateShortMutation,
   useDeleteShortMutation,

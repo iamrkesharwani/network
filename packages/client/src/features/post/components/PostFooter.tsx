@@ -5,9 +5,10 @@ import type { IPostResponse } from '@network/shared';
 
 interface PostFooterProps {
   post: IPostResponse;
+  daysLeft?: number | null;
 }
 
-const PostFooter = ({ post }: PostFooterProps) => {
+const PostFooter = ({ post, daysLeft }: PostFooterProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isClamped, setIsClamped] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
@@ -54,7 +55,10 @@ const PostFooter = ({ post }: PostFooterProps) => {
       {!hasMedia && post.visibility !== 'public' && (
         <span className="inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-md text-[11px] font-medium bg-surface-raised text-text-muted border border-border">
           <EyeOff className="w-3 h-3" strokeWidth={2} />
-          {post.visibility === 'private' ? 'Private' : 'Unlisted'}
+          Unlisted
+          {daysLeft !== undefined &&
+            daysLeft !== null &&
+            ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
         </span>
       )}
 

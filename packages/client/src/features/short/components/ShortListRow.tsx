@@ -1,33 +1,29 @@
 import { useState } from 'react';
-import ShortCardThumbnail from '../components/ShortCardThumbnail';
-import ShortCardFooter from '../components/ShortCardFooter';
-import CardShell from '../../../shared/ui/card/CardShell';
-import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
+import { Link } from 'react-router-dom';
+import { Play } from 'lucide-react';
+import { formatCount, formatDuration } from '@network/shared';
+import type { IShortResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import ShortEditForm from '../form/ShortEditForm';
 import { formatDaysLeft } from '../../../shared/utils/formatDaysLeft';
-import type { IShortResponse } from '@network/shared';
 
-export interface ShortCardProps {
+export interface ShortListRowProps {
   short: IShortResponse;
   isOwner?: boolean;
   onDelete?: (short: IShortResponse) => Promise<void> | void;
   onToggleVisibility?: (short: IShortResponse) => Promise<void> | void;
-  onThumbnailClick?: (short: IShortResponse) => void;
-  className?: string;
 }
 
-const ShortCard = ({
+const ShortListRow = ({
   short,
   isOwner = false,
   onDelete,
   onToggleVisibility,
-  onThumbnailClick,
-  className,
-}: ShortCardProps) => {
+}: ShortListRowProps) => {
+  const [thumbError, setThumbError] = useState(false);
   const [editConfirmOpen, setEditConfirmOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [visibilityConfirmOpen, setVisibilityConfirmOpen] = useState(false);
@@ -35,7 +31,6 @@ const ShortCard = ({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const isReady = short.status === 'READY';
   const isUnlisted = short.visibility === 'unlisted';
   const daysLeft = isOwner && isUnlisted ? formatDaysLeft(short.unlistedAt) : null;
 
@@ -74,48 +69,54 @@ const ShortCard = ({
 
   return (
     <>
-      <CardShell
-        className={className}
-        header={
-          <CardAuthorHeader
-            username={short.author.username}
-            avatarUrl={short.author.avatarUrl}
-            createdAt={short.createdAt}
-            menu={
-              isOwner && (
-                <CardOptionsMenu
-                  itemLabel="Short"
-                  onEdit={() => setEditConfirmOpen(true)}
-                  onDeleteClick={() => setDeleteConfirmOpen(true)}
-                  visibilityAction={{
-                    label: isUnlisted ? 'Make public' : 'Make unlisted',
-                    toPublic: isUnlisted,
-                    onClick: () => setVisibilityConfirmOpen(true),
-                  }}
-                />
-              )
-            }
+      <div className="group flex items-center gap-3 py-2.5">
+        <Link
+          to={`/shorts/${short.id}`}
+          className="relative shrink-0 w-16 aspect-9/16 rounded-lg overflow-hidden bg-surface-raised"
+        >
+          {short.thumbnailUrl && !thumbError ? (
+            <img
+              src={short.thumbnailUrl}
+              alt={short.title}
+              onError={() => setThumbError(true)}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Play className="w-4 h-4 text-text-muted opacity-40" strokeWidth={1.5} />
+            </div>
+          )}
+          <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded text-[10px] font-medium bg-black/70 text-text-secondary">
+            {formatDuration(short.duration)}
+          </span>
+        </Link>
+
+        <div className="flex-1 min-w-0">
+          <Link to={`/shorts/${short.id}`} className="block">
+            <h3 className="text-sm font-semibold text-text-primary leading-snug line-clamp-2">
+              {short.title}
+            </h3>
+          </Link>
+          <p className="mt-1 text-xs text-text-muted">
+            {formatCount(short.views)} views · {formatCount(short.likes)} likes
+            {isUnlisted && ' · Unlisted'}
+            {daysLeft !== null && ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
+          </p>
+        </div>
+
+        {isOwner && (
+          <CardOptionsMenu
+            itemLabel="Short"
+            onEdit={() => setEditConfirmOpen(true)}
+            onDeleteClick={() => setDeleteConfirmOpen(true)}
+            visibilityAction={{
+              label: isUnlisted ? 'Make public' : 'Make unlisted',
+              toPublic: isUnlisted,
+              onClick: () => setVisibilityConfirmOpen(true),
+            }}
           />
-        }
-        media={
-          <ShortCardThumbnail
-            short={short}
-            isReady={isReady}
-            daysLeft={daysLeft}
-            onClick={
-              onThumbnailClick ? () => onThumbnailClick(short) : undefined
-            }
-          />
-        }
-        footer={
-          <ShortCardFooter
-            short={short}
-            onTitleClick={
-              onThumbnailClick ? () => onThumbnailClick(short) : undefined
-            }
-          />
-        }
-      />
+        )}
+      </div>
 
       <ConfirmModal
         isOpen={editConfirmOpen}
@@ -174,4 +175,4 @@ const ShortCard = ({
   );
 };
 
-export default ShortCard;
+export default ShortListRow;

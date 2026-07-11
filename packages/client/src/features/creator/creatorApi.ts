@@ -4,6 +4,7 @@ import type {
   ApiResponse,
   ICreatorProfile,
   ICreatorCatalog,
+  IPublicProfile,
 } from '@network/shared';
 
 export const creatorApi = createApi({
@@ -19,7 +20,21 @@ export const creatorApi = createApi({
     getCatalog: builder.query<ApiResponse<ICreatorCatalog>, void>({
       query: () => ({ url: '/catalog', method: 'GET' }),
     }),
+
+    getPublicProfileByUsername: builder.query<
+      ApiResponse<IPublicProfile>,
+      string
+    >({
+      query: (username) => ({ url: `/${username}`, method: 'GET' }),
+      providesTags: (_result, _error, username) => [
+        { type: 'Creator', id: username },
+      ],
+    }),
   }),
 });
 
-export const { useGetMyProfileQuery, useGetCatalogQuery } = creatorApi;
+export const {
+  useGetMyProfileQuery,
+  useGetCatalogQuery,
+  useGetPublicProfileByUsernameQuery,
+} = creatorApi;

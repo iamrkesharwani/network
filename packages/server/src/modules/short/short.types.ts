@@ -1,7 +1,14 @@
 import type { IShort, ShortStatus } from '@network/shared';
 import type { Request } from 'express';
 
-export type UpdateShortData = Partial<IShort>;
+export type UpdateShortData = Omit<
+  Partial<IShort>,
+  'deletedAt' | 'unlistedAt' | 'unlistedExpiryWarnedAt'
+> & {
+  deletedAt?: Date | null;
+  unlistedAt?: Date | null;
+  unlistedExpiryWarnedAt?: Date | null;
+};
 
 export interface WebhookUpdateData {
   status: ShortStatus;

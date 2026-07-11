@@ -1,31 +1,29 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FileText, Play } from 'lucide-react';
+import { formatCount } from '@network/shared';
 import type { IPostResponse } from '@network/shared';
-import CardShell from '../../../shared/ui/card/CardShell';
-import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
-import PostMedia from '../components/PostMedia';
-import PostFooter from '../components/PostFooter';
 import PostEditForm from '../form/PostEditForm';
 import { formatDaysLeft } from '../../../shared/utils/formatDaysLeft';
 
-export interface PostCardProps {
+export interface PostListRowProps {
   post: IPostResponse;
   isOwner?: boolean;
   onDelete?: (post: IPostResponse) => Promise<void> | void;
   onToggleVisibility?: (post: IPostResponse) => Promise<void> | void;
-  className?: string;
 }
 
-const PostCard = ({
+const PostListRow = ({
   post,
   isOwner = false,
   onDelete,
   onToggleVisibility,
-  className,
-}: PostCardProps) => {
+}: PostListRowProps) => {
+  const [thumbError, setThumbError] = useState(false);
   const [editConfirmOpen, setEditConfirmOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [visibilityConfirmOpen, setVisibilityConfirmOpen] = useState(false);
@@ -35,6 +33,8 @@ const PostCard = ({
 
   const isUnlisted = post.visibility === 'unlisted';
   const daysLeft = isOwner && isUnlisted ? formatDaysLeft(post.unlistedAt) : null;
+  const previewImage =
+    post.mediaType === 'image' ? post.imageUrl : post.thumbnailUrl;
 
   const handleEditConfirm = () => {
     setEditConfirmOpen(false);
@@ -71,36 +71,51 @@ const PostCard = ({
 
   return (
     <>
-      <CardShell
-        className={className}
-        header={
-          <CardAuthorHeader
-            username={post.author.username}
-            avatarUrl={post.author.avatarUrl}
-            createdAt={post.createdAt}
-            menu={
-              isOwner && (
-                <CardOptionsMenu
-                  itemLabel="Post"
-                  onEdit={() => setEditConfirmOpen(true)}
-                  onDeleteClick={() => setDeleteConfirmOpen(true)}
-                  visibilityAction={{
-                    label: isUnlisted ? 'Make public' : 'Make unlisted',
-                    toPublic: isUnlisted,
-                    onClick: () => setVisibilityConfirmOpen(true),
-                  }}
-                />
-              )
-            }
+      <div className="group flex items-center gap-3 py-2.5">
+        <Link
+          to={`/post/${post.id}`}
+          className="relative shrink-0 w-20 aspect-video rounded-lg overflow-hidden bg-surface-raised flex items-center justify-center"
+        >
+          {previewImage && !thumbError ? (
+            <img
+              src={previewImage}
+              alt="Post attachment"
+              onError={() => setThumbError(true)}
+              className="w-full h-full object-cover"
+            />
+          ) : post.mediaType === 'video' ? (
+            <Play className="w-4 h-4 text-text-muted opacity-40" strokeWidth={1.5} />
+          ) : (
+            <FileText className="w-4 h-4 text-text-muted opacity-40" strokeWidth={1.5} />
+          )}
+        </Link>
+
+        <div className="flex-1 min-w-0">
+          <Link to={`/post/${post.id}`} className="block">
+            <p className="text-sm font-semibold text-text-primary leading-snug line-clamp-2">
+              {post.text || 'Post'}
+            </p>
+          </Link>
+          <p className="mt-1 text-xs text-text-muted">
+            {formatCount(post.views)} views · {formatCount(post.likes)} likes
+            {isUnlisted && ' · Unlisted'}
+            {daysLeft !== null && ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
+          </p>
+        </div>
+
+        {isOwner && (
+          <CardOptionsMenu
+            itemLabel="Post"
+            onEdit={() => setEditConfirmOpen(true)}
+            onDeleteClick={() => setDeleteConfirmOpen(true)}
+            visibilityAction={{
+              label: isUnlisted ? 'Make public' : 'Make unlisted',
+              toPublic: isUnlisted,
+              onClick: () => setVisibilityConfirmOpen(true),
+            }}
           />
-        }
-        media={
-          post.mediaType !== 'none' ? (
-            <PostMedia post={post} daysLeft={daysLeft} />
-          ) : undefined
-        }
-        footer={<PostFooter post={post} daysLeft={daysLeft} />}
-      />
+        )}
+      </div>
 
       <ConfirmModal
         isOpen={editConfirmOpen}
@@ -155,4 +170,4 @@ const PostCard = ({
   );
 };
 
-export default PostCard;
+export default PostListRow;

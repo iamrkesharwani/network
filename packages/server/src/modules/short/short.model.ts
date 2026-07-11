@@ -8,8 +8,15 @@ import {
 } from '@network/shared';
 
 export interface IShortDocument
-  extends Omit<IShort, 'id' | 'userId'>, Document {
+  extends Omit<
+      IShort,
+      'id' | 'userId' | 'deletedAt' | 'unlistedAt' | 'unlistedExpiryWarnedAt'
+    >,
+    Document {
   userId: mongoose.Types.ObjectId;
+  deletedAt: Date | null;
+  unlistedAt: Date | null;
+  unlistedExpiryWarnedAt: Date | null;
 }
 
 const shortSchema = new Schema<IShortDocument>(

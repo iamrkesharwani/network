@@ -1,7 +1,14 @@
 import type { IVideo, VideoStatus } from '@network/shared';
 import type { Request } from 'express';
 
-export type UpdateVideoData = Partial<IVideo>;
+export type UpdateVideoData = Omit<
+  Partial<IVideo>,
+  'deletedAt' | 'unlistedAt' | 'unlistedExpiryWarnedAt'
+> & {
+  deletedAt?: Date | null;
+  unlistedAt?: Date | null;
+  unlistedExpiryWarnedAt?: Date | null;
+};
 
 export interface WebhookUpdateData {
   status: VideoStatus;

@@ -11,12 +11,13 @@ import type {
   VideoUploadInput,
   VideoUpdateInput,
   VideoFeedQuery,
+  VideoUserFeedQuery,
 } from '@network/shared';
 
 export const videoApi = createApi({
   reducerPath: 'videoApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/video' }),
-  tagTypes: ['Video', 'MyVideos'],
+  tagTypes: ['Video', 'MyVideos', 'UserVideos'],
   endpoints: (builder) => ({
     initiateUpload: builder.mutation<
       ApiResponse<IInitiateVideoUploadResult>,
@@ -102,6 +103,36 @@ export const videoApi = createApi({
       providesTags: ['MyVideos'],
     }),
 
+    getUserVideos: builder.query<
+      PaginatedResponse<IVideoResponse>,
+      { username: string } & VideoUserFeedQuery
+    >({
+      query: ({ username, ...params }) => ({
+        url: `/user/${username}`,
+        method: 'GET',
+        params,
+      }),
+      serializeQueryArgs: ({ endpointName, queryArgs }) =>
+        `${endpointName}-${queryArgs.username}-${queryArgs.visibility ?? 'all'}`,
+      merge: (currentCache, newData, { arg }) => {
+        if (arg.cursor === undefined) {
+          currentCache.data = newData.data;
+          currentCache.meta = newData.meta;
+          return;
+        }
+        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        for (const item of newData.data) {
+          if (!existingIds.has(item.id)) {
+            currentCache.data.push(item);
+          }
+        }
+        currentCache.meta = newData.meta;
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        currentArg?.cursor !== previousArg?.cursor,
+      providesTags: ['UserVideos'],
+    }),
+
     getVideoById: builder.query<ApiResponse<IVideoResponse>, string>({
       query: (videoId) => ({
         url: `/${videoId}`,
@@ -124,6 +155,7 @@ export const videoApi = createApi({
       invalidatesTags: (_result, _error, { videoId }) => [
         { type: 'Video', id: videoId },
         'MyVideos',
+        'UserVideos',
       ],
     }),
 
@@ -135,6 +167,7 @@ export const videoApi = createApi({
       invalidatesTags: (_result, _error, videoId) => [
         { type: 'Video', id: videoId },
         'MyVideos',
+        'UserVideos',
         'Video',
       ],
     }),
@@ -148,6 +181,7 @@ export const {
   useFinaliseVideoMutation,
   useGetFeedQuery,
   useGetMyVideosQuery,
+  useGetUserVideosQuery,
   useGetVideoByIdQuery,
   useUpdateVideoMutation,
   useDeleteVideoMutation,

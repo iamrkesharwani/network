@@ -4,12 +4,14 @@ import { Link } from 'react-router-dom';
 import type { IShortResponse } from '@network/shared';
 import MediaDurationBadge from '../../../shared/ui/card/MediaDurationBadge';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
+import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBadge';
 
 interface ShortCardThumbnailProps {
   short: IShortResponse;
   isReady: boolean;
   onClick?: (e: React.MouseEvent) => void;
   aspectClassName?: string;
+  daysLeft?: number | null;
 }
 
 const ShortCardThumbnail = ({
@@ -17,6 +19,7 @@ const ShortCardThumbnail = ({
   isReady,
   onClick,
   aspectClassName = 'aspect-9/16',
+  daysLeft,
 }: ShortCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
 
@@ -62,6 +65,9 @@ const ShortCardThumbnail = ({
 
       <MediaDurationBadge durationSeconds={short.duration} isShort />
       <MediaVisibilityBadge visibility={short.visibility} />
+      {daysLeft !== undefined && daysLeft !== null && (
+        <UnlistedCountdownBadge daysLeft={daysLeft} />
+      )}
 
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">

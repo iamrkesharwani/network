@@ -7,8 +7,16 @@ import {
   type IPost,
 } from '@network/shared';
 
-export interface IPostDocument extends Omit<IPost, 'id' | 'userId'>, Document {
+export interface IPostDocument
+  extends Omit<
+      IPost,
+      'id' | 'userId' | 'deletedAt' | 'unlistedAt' | 'unlistedExpiryWarnedAt'
+    >,
+    Document {
   userId: mongoose.Types.ObjectId;
+  deletedAt: Date | null;
+  unlistedAt: Date | null;
+  unlistedExpiryWarnedAt: Date | null;
 }
 
 const postSchema = new Schema<IPostDocument>(

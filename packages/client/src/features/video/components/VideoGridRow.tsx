@@ -23,8 +23,8 @@ interface VideoGridRowProps {
   cols: ColCount;
   isOwner: boolean;
   seenIds: React.RefObject<Set<string>>;
-  onEdit?: (video: IVideoResponse) => void;
-  onDelete?: (video: IVideoResponse) => void;
+  onDelete?: (video: IVideoResponse) => Promise<void> | void;
+  onToggleVisibility?: (video: IVideoResponse) => Promise<void> | void;
 }
 
 const VideoGridRow = ({
@@ -33,8 +33,8 @@ const VideoGridRow = ({
   cols,
   isOwner,
   seenIds,
-  onEdit,
   onDelete,
+  onToggleVisibility,
 }: VideoGridRowProps) => {
   const getAnimIndex = useCallback(
     (id: string, posIdx: number) => {
@@ -61,8 +61,8 @@ const VideoGridRow = ({
             <VideoCard
               video={video}
               isOwner={isOwner}
-              onEdit={onEdit}
               onDelete={onDelete}
+              onToggleVisibility={onToggleVisibility}
             />
           </motion.div>
         );

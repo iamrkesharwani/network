@@ -9,8 +9,15 @@ import {
 } from '@network/shared';
 
 export interface IVideoDocument
-  extends Omit<IVideo, 'id' | 'userId'>, Document {
+  extends Omit<
+      IVideo,
+      'id' | 'userId' | 'deletedAt' | 'unlistedAt' | 'unlistedExpiryWarnedAt'
+    >,
+    Document {
   userId: mongoose.Types.ObjectId;
+  deletedAt: Date | null;
+  unlistedAt: Date | null;
+  unlistedExpiryWarnedAt: Date | null;
 }
 
 const videoSchema = new Schema<IVideoDocument>(

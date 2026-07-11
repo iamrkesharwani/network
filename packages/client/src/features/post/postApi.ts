@@ -8,12 +8,13 @@ import type {
   PostFeedQuery,
   PostFinaliseInput,
   PostUpdateInput,
+  PostUserFeedQuery,
 } from '@network/shared';
 
 export const postApi = createApi({
   reducerPath: 'postApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/post' }),
-  tagTypes: ['Post', 'MyPosts'],
+  tagTypes: ['Post', 'MyPosts', 'UserPosts'],
   endpoints: (builder) => ({
     createPost: builder.mutation<ApiResponse<IPostActionResult>, FormData>({
       query: (data) => ({
@@ -72,6 +73,36 @@ export const postApi = createApi({
       providesTags: ['MyPosts'],
     }),
 
+    getUserPosts: builder.query<
+      PaginatedResponse<IPostResponse>,
+      { username: string } & PostUserFeedQuery
+    >({
+      query: ({ username, ...params }) => ({
+        url: `/user/${username}`,
+        method: 'GET',
+        params,
+      }),
+      serializeQueryArgs: ({ endpointName, queryArgs }) =>
+        `${endpointName}-${queryArgs.username}-${queryArgs.visibility ?? 'all'}`,
+      merge: (currentCache, newData, { arg }) => {
+        if (arg.cursor === undefined) {
+          currentCache.data = newData.data;
+          currentCache.meta = newData.meta;
+          return;
+        }
+        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        for (const item of newData.data) {
+          if (!existingIds.has(item.id)) {
+            currentCache.data.push(item);
+          }
+        }
+        currentCache.meta = newData.meta;
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        currentArg?.cursor !== previousArg?.cursor,
+      providesTags: ['UserPosts'],
+    }),
+
     getPostById: builder.query<ApiResponse<IPostResponse>, string>({
       query: (postId) => ({
         url: `/${postId}`,
@@ -92,6 +123,7 @@ export const postApi = createApi({
       invalidatesTags: (_result, _error, { postId }) => [
         { type: 'Post', id: postId },
         'MyPosts',
+        'UserPosts',
       ],
     }),
 
@@ -103,6 +135,7 @@ export const postApi = createApi({
       invalidatesTags: (_result, _error, postId) => [
         { type: 'Post', id: postId },
         'MyPosts',
+        'UserPosts',
         'Post',
       ],
     }),
@@ -114,6 +147,7 @@ export const {
   useFinalisePostMutation,
   useGetFeedQuery,
   useGetMyPostsQuery,
+  useGetUserPostsQuery,
   useGetPostByIdQuery,
   useUpdatePostMutation,
   useDeletePostMutation,

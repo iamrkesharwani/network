@@ -4,13 +4,19 @@ import { Play } from 'lucide-react';
 import type { IVideoResponse } from '@network/shared';
 import MediaDurationBadge from '../../../shared/ui/card/MediaDurationBadge';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
+import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBadge';
 
 interface VideoCardThumbnailProps {
   video: IVideoResponse;
   isReady: boolean;
+  daysLeft?: number | null;
 }
 
-const VideoCardThumbnail = ({ video, isReady }: VideoCardThumbnailProps) => {
+const VideoCardThumbnail = ({
+  video,
+  isReady,
+  daysLeft,
+}: VideoCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
 
   return (
@@ -49,6 +55,9 @@ const VideoCardThumbnail = ({ video, isReady }: VideoCardThumbnailProps) => {
 
       <MediaDurationBadge durationSeconds={video.duration} />
       <MediaVisibilityBadge visibility={video.visibility} />
+      {daysLeft !== undefined && daysLeft !== null && (
+        <UnlistedCountdownBadge daysLeft={daysLeft} />
+      )}
 
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">

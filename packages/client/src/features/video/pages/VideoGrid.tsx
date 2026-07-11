@@ -19,8 +19,8 @@ export interface VideoGridProps {
   isFetchingNextPage?: boolean;
   hasNextPage?: boolean;
   onLoadMore?: () => void;
-  onEdit?: (video: IVideoResponse) => void;
-  onDelete?: (video: IVideoResponse) => void;
+  onDelete?: (video: IVideoResponse) => Promise<void> | void;
+  onToggleVisibility?: (video: IVideoResponse) => Promise<void> | void;
   onRetry?: () => void;
   isOwner?: boolean;
   isError?: boolean;
@@ -39,8 +39,8 @@ const VideoGrid = ({
   isFetchingNextPage = false,
   hasNextPage = false,
   onLoadMore,
-  onEdit,
   onDelete,
+  onToggleVisibility,
   onRetry,
   isOwner = false,
   isError = false,
@@ -156,8 +156,8 @@ const VideoGrid = ({
                 cols={cols}
                 isOwner={resolvedIsOwner}
                 seenIds={seenIds}
-                onEdit={onEdit}
                 onDelete={onDelete}
+                onToggleVisibility={onToggleVisibility}
               />
             )}
           </div>

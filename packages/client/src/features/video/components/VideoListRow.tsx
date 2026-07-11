@@ -1,27 +1,29 @@
 import { useState } from 'react';
-import VideoCardThumbnail from '../components/VideoCardThumbnail';
-import VideoCardFooter from '../components/VideoCardFooter';
+import { Link } from 'react-router-dom';
+import { Play } from 'lucide-react';
+import { formatCount, formatDuration } from '@network/shared';
+import type { IVideoResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import VideoEditForm from '../form/VideoEditForm';
 import { formatDaysLeft } from '../../../shared/utils/formatDaysLeft';
-import type { IVideoResponse } from '@network/shared';
 
-export interface VideoCardProps {
+export interface VideoListRowProps {
   video: IVideoResponse;
   isOwner?: boolean;
   onDelete?: (video: IVideoResponse) => Promise<void> | void;
   onToggleVisibility?: (video: IVideoResponse) => Promise<void> | void;
 }
 
-const VideoCard = ({
+const VideoListRow = ({
   video,
   isOwner = false,
   onDelete,
   onToggleVisibility,
-}: VideoCardProps) => {
+}: VideoListRowProps) => {
+  const [thumbError, setThumbError] = useState(false);
   const [editConfirmOpen, setEditConfirmOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [visibilityConfirmOpen, setVisibilityConfirmOpen] = useState(false);
@@ -29,25 +31,12 @@ const VideoCard = ({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const isReady = video.status === 'READY';
   const isUnlisted = video.visibility === 'unlisted';
   const daysLeft = isOwner && isUnlisted ? formatDaysLeft(video.unlistedAt) : null;
-
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setEditConfirmOpen(true);
-  };
 
   const handleEditConfirm = () => {
     setEditConfirmOpen(false);
     setEditModalOpen(true);
-  };
-
-  const handleVisibilityClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setVisibilityConfirmOpen(true);
   };
 
   const handleVisibilityConfirm = async () => {
@@ -62,12 +51,6 @@ const VideoCard = ({
     } finally {
       setIsTogglingVisibility(false);
     }
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDeleteConfirmOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
@@ -86,25 +69,53 @@ const VideoCard = ({
 
   return (
     <>
-      <div className="group flex flex-col gap-2.5">
-        <VideoCardThumbnail video={video} isReady={isReady} daysLeft={daysLeft} />
-        <VideoCardFooter
-          video={video}
-          menu={
-            isOwner && (
-              <CardOptionsMenu
-                itemLabel="Video"
-                onEdit={handleEditClick}
-                onDeleteClick={handleDeleteClick}
-                visibilityAction={{
-                  label: isUnlisted ? 'Make public' : 'Make unlisted',
-                  toPublic: isUnlisted,
-                  onClick: handleVisibilityClick,
-                }}
-              />
-            )
-          }
-        />
+      <div className="group flex items-center gap-3 py-2.5">
+        <Link
+          to={`/video/${video.id}`}
+          className="relative shrink-0 w-32 aspect-video rounded-lg overflow-hidden bg-surface-raised"
+        >
+          {video.thumbnailUrl && !thumbError ? (
+            <img
+              src={video.thumbnailUrl}
+              alt={video.title}
+              onError={() => setThumbError(true)}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Play className="w-5 h-5 text-text-muted opacity-40" strokeWidth={1.5} />
+            </div>
+          )}
+          <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded text-[10px] font-medium bg-black/70 text-text-secondary">
+            {formatDuration(video.duration)}
+          </span>
+        </Link>
+
+        <div className="flex-1 min-w-0">
+          <Link to={`/video/${video.id}`} className="block">
+            <h3 className="text-sm font-semibold text-text-primary leading-snug line-clamp-2">
+              {video.title}
+            </h3>
+          </Link>
+          <p className="mt-1 text-xs text-text-muted">
+            {formatCount(video.views)} views · {formatCount(video.likes)} likes
+            {isUnlisted && ' · Unlisted'}
+            {daysLeft !== null && ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
+          </p>
+        </div>
+
+        {isOwner && (
+          <CardOptionsMenu
+            itemLabel="Video"
+            onEdit={() => setEditConfirmOpen(true)}
+            onDeleteClick={() => setDeleteConfirmOpen(true)}
+            visibilityAction={{
+              label: isUnlisted ? 'Make public' : 'Make unlisted',
+              toPublic: isUnlisted,
+              onClick: () => setVisibilityConfirmOpen(true),
+            }}
+          />
+        )}
       </div>
 
       <ConfirmModal
@@ -165,4 +176,4 @@ const VideoCard = ({
   );
 };
 
-export default VideoCard;
+export default VideoListRow;

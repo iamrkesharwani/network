@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Globe, Link2, Lock } from 'lucide-react';
+import { Globe, Link2 } from 'lucide-react';
 import { type VideoVisibility } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 
@@ -18,14 +18,8 @@ const OPTIONS: {
   {
     value: 'unlisted',
     label: 'Unlisted',
-    description: 'Only people with the link can watch.',
+    description: 'Only you can see this. Automatically deleted after 7 days unless you make it public.',
     icon: Link2,
-  },
-  {
-    value: 'private',
-    label: 'Private',
-    description: 'Only you can watch this video.',
-    icon: Lock,
   },
 ];
 

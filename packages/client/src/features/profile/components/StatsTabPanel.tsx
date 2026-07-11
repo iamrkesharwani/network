@@ -1,17 +1,15 @@
 import { Loader2 } from 'lucide-react';
-import usePageTitle from '../../../shared/hooks/usePageTitle';
-import Contribution from '../components/Contribution';
-import BadgeShowcase from '../components/BadgeShowcase';
-import { useGetMyProfileQuery } from '../creatorApi';
+import { useGetMyProfileQuery } from '../../creator/creatorApi';
+import Contribution from '../../creator/components/Contribution';
+import BadgeShowcase from '../../creator/components/BadgeShowcase';
 
-const ProfilePage = () => {
-  usePageTitle('Profile');
+const StatsTabPanel = () => {
   const { data, isLoading } = useGetMyProfileQuery();
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex h-48 items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -22,11 +20,7 @@ const ProfilePage = () => {
   const postPublishCount = data?.data.postPublishCount ?? 0;
 
   return (
-    <div className="p-8 max-w-3xl mx-auto space-y-8">
-      <h1 className="text-xl font-bold font-display text-text-primary">
-        Profile
-      </h1>
-
+    <div className="space-y-8">
       <div>
         <p className="text-xs font-medium text-text-secondary mb-3">
           Publishing activity
@@ -47,4 +41,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default StatsTabPanel;

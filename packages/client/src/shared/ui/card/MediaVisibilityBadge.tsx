@@ -2,7 +2,7 @@ import { EyeOff } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface MediaVisibilityBadgeProps {
-  visibility: 'public' | 'private' | 'unlisted';
+  visibility: 'public' | 'unlisted';
   className?: string;
 }
 
@@ -20,7 +20,7 @@ const MediaVisibilityBadge = ({
       )}
     >
       <EyeOff className="w-3 h-3" strokeWidth={2} />
-      {visibility === 'private' ? 'Private' : 'Unlisted'}
+      Unlisted
     </span>
   );
 };

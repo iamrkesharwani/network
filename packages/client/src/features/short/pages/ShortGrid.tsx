@@ -19,8 +19,8 @@ export interface ShortGridProps {
   isFetchingNextPage?: boolean;
   hasNextPage?: boolean;
   onLoadMore?: () => void;
-  onEdit?: (short: IShortResponse) => void;
-  onDelete?: (short: IShortResponse) => void;
+  onDelete?: (short: IShortResponse) => Promise<void> | void;
+  onToggleVisibility?: (short: IShortResponse) => Promise<void> | void;
   onRetry?: () => void;
   isOwner?: boolean;
   isError?: boolean;
@@ -37,8 +37,8 @@ const ShortGrid = ({
   isFetchingNextPage = false,
   hasNextPage = false,
   onLoadMore,
-  onEdit,
   onDelete,
+  onToggleVisibility,
   onRetry,
   isOwner = false,
   isError = false,
@@ -126,8 +126,8 @@ const ShortGrid = ({
                 cols={cols}
                 isOwner={isOwner}
                 seenIds={seenIds}
-                onEdit={onEdit}
                 onDelete={onDelete}
+                onToggleVisibility={onToggleVisibility}
               />
             )}
           </div>

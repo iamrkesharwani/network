@@ -10,7 +10,7 @@ import DefaultPageSkeleton from '../../shared/ui/skeleton/DefaultPageSkeleton';
 
 const renderSkeletonForPath = (pathname: string) => {
   if (pathname.startsWith('/explore')) return <ExploreSkeleton />;
-  if (pathname.startsWith(CLIENT_ROUTES.PROFILE)) return <ProfileSkeleton />;
+  if (pathname.startsWith('/profile/')) return <ProfileSkeleton />;
   if (pathname.startsWith(CLIENT_ROUTES.SETTINGS)) return <SettingsSkeleton />;
   if (pathname.startsWith(CLIENT_ROUTES.FEED) || pathname === '/')
     return <FeedSkeleton />;

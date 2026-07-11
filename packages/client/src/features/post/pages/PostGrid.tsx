@@ -19,8 +19,8 @@ export interface PostGridProps {
   isFetchingNextPage?: boolean;
   hasNextPage?: boolean;
   onLoadMore?: () => void;
-  onEdit?: (post: IPostResponse) => void;
-  onDelete?: (post: IPostResponse) => void;
+  onDelete?: (post: IPostResponse) => Promise<void> | void;
+  onToggleVisibility?: (post: IPostResponse) => Promise<void> | void;
   onRetry?: () => void;
   isOwner?: boolean;
   isError?: boolean;
@@ -44,8 +44,8 @@ const PostGrid = ({
   isFetchingNextPage = false,
   hasNextPage = false,
   onLoadMore,
-  onEdit,
   onDelete,
+  onToggleVisibility,
   onRetry,
   isOwner = false,
   isError = false,
@@ -127,8 +127,8 @@ const PostGrid = ({
               <PostCard
                 post={row}
                 isOwner={isOwner}
-                onEdit={onEdit}
                 onDelete={onDelete}
+                onToggleVisibility={onToggleVisibility}
               />
             )}
           </div>

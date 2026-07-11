@@ -49,9 +49,9 @@ export interface IShort {
   views: number;
   likes: number;
   duration: number;
-  deletedAt?: Date | string | null;
-  unlistedAt?: Date | string | null;
-  unlistedExpiryWarnedAt?: Date | string | null;
+  deletedAt?: string | null;
+  unlistedAt?: string | null;
+  unlistedExpiryWarnedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
