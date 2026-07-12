@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText } from 'lucide-react';
-import { formatCount } from '@network/shared';
+import { formatCount, formatDaysLeft } from '@network/shared';
 import type { IPostResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import PostEditForm from '../form/PostEditForm';
-import { formatDaysLeft } from '../../../shared/utils/formatDaysLeft';
 
 export interface PostListRowProps {
   post: IPostResponse;
@@ -32,7 +31,8 @@ const PostListRow = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isUnlisted = post.visibility === 'unlisted';
-  const daysLeft = isOwner && isUnlisted ? formatDaysLeft(post.unlistedAt) : null;
+  const daysLeft =
+    isOwner && isUnlisted ? formatDaysLeft(post.unlistedAt) : null;
   const previewImage =
     post.mediaType === 'image' ? post.imageUrls?.[0] : undefined;
 
@@ -84,7 +84,10 @@ const PostListRow = ({
               className="w-full h-full object-cover"
             />
           ) : (
-            <FileText className="w-4 h-4 text-text-muted opacity-40" strokeWidth={1.5} />
+            <FileText
+              className="w-4 h-4 text-text-muted opacity-40"
+              strokeWidth={1.5}
+            />
           )}
         </Link>
 
@@ -97,7 +100,8 @@ const PostListRow = ({
           <p className="mt-1 text-xs text-text-muted">
             {formatCount(post.views)} views · {formatCount(post.likes)} likes
             {isUnlisted && ' · Unlisted'}
-            {daysLeft !== null && ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
+            {daysLeft !== null &&
+              ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
           </p>
         </div>
 
@@ -130,7 +134,9 @@ const PostListRow = ({
         onClose={() => setVisibilityConfirmOpen(false)}
         onConfirm={handleVisibilityConfirm}
         intent="info"
-        title={isUnlisted ? 'Make this post public?' : 'Make this post unlisted?'}
+        title={
+          isUnlisted ? 'Make this post public?' : 'Make this post unlisted?'
+        }
         description={
           isUnlisted
             ? 'Make this public now to keep it — otherwise it is automatically deleted in a few days.'

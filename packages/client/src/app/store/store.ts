@@ -7,6 +7,7 @@ import { postApi } from '../../features/post/postApi';
 import { creatorApi } from '../../features/creator/creatorApi';
 import { uploadApi } from '../../features/upload/uploadApi';
 import { feedApi } from '../../features/feed/feedApi';
+import { userApi } from '../../features/user/userApi';
 
 export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
   configureStore({
@@ -20,7 +21,8 @@ export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
         postApi.middleware,
         creatorApi.middleware,
         uploadApi.middleware,
-        feedApi.middleware
+        feedApi.middleware,
+        userApi.middleware
       ),
     devTools: import.meta.env.MODE !== 'production',
   });

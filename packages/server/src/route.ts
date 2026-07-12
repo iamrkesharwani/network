@@ -7,6 +7,7 @@ import creatorRoutes from './modules/creator/creator.routes.js';
 import webhookRoutes from './modules/webhook/webhook.routes.js';
 import uploadRoutes from './modules/upload/upload.routes.js';
 import feedRoutes from './modules/feed/feed.routes.js';
+import userRoutes from './modules/user/user.routes.js';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/creator', creatorRoutes);
 router.use('/webhook', webhookRoutes);
 router.use('/uploads', uploadRoutes);
 router.use('/feed', feedRoutes);
+router.use('/user', userRoutes);
 
 export default router;

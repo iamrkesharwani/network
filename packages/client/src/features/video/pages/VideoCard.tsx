@@ -6,8 +6,7 @@ import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import VideoEditForm from '../form/VideoEditForm';
-import { formatDaysLeft } from '../../../shared/utils/formatDaysLeft';
-import type { IVideoResponse } from '@network/shared';
+import { formatDaysLeft, type IVideoResponse } from '@network/shared';
 
 export interface VideoCardProps {
   video: IVideoResponse;
@@ -31,7 +30,8 @@ const VideoCard = ({
 
   const isReady = video.status === 'READY';
   const isUnlisted = video.visibility === 'unlisted';
-  const daysLeft = isOwner && isUnlisted ? formatDaysLeft(video.unlistedAt) : null;
+  const daysLeft =
+    isOwner && isUnlisted ? formatDaysLeft(video.unlistedAt) : null;
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -87,7 +87,11 @@ const VideoCard = ({
   return (
     <>
       <div className="group flex flex-col gap-2.5">
-        <VideoCardThumbnail video={video} isReady={isReady} daysLeft={daysLeft} />
+        <VideoCardThumbnail
+          video={video}
+          isReady={isReady}
+          daysLeft={daysLeft}
+        />
         <VideoCardFooter
           video={video}
           menu={
@@ -122,7 +126,9 @@ const VideoCard = ({
         onClose={() => setVisibilityConfirmOpen(false)}
         onConfirm={handleVisibilityConfirm}
         intent="info"
-        title={isUnlisted ? 'Make this video public?' : 'Make this video unlisted?'}
+        title={
+          isUnlisted ? 'Make this video public?' : 'Make this video unlisted?'
+        }
         description={
           isUnlisted
             ? 'Make this public now to keep it — otherwise it is automatically deleted in a few days.'

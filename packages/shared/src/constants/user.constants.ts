@@ -17,3 +17,5 @@ export const USERNAME_MIN_LENGTH = 3;
 export const USERNAME_MAX_LENGTH = 20;
 export const BIO_MAX_LENGTH = 160;
 export const PROFILE_BIO_PREVIEW_MAX_LENGTH = 100;
+export const PROFILE_CONTENT_TYPES = ['video', 'short', 'post'] as const;
+export type ProfileContentType = (typeof PROFILE_CONTENT_TYPES)[number];

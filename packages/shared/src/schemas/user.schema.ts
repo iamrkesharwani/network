@@ -9,6 +9,7 @@ import {
   BIO_MAX_LENGTH,
   NAME_MIN_LENGTH,
 } from '../constants/user.constants.js';
+import { THEMES, VIEW_MODES } from '../constants/general.constants.js';
 
 export const userRegistrationSchema = z.object({
   name: z
@@ -93,4 +94,16 @@ export const userProfileUpdateSchema = z.object({
     .url('Avatar must be a valid URL.')
     .startsWith('https://', 'Avatar URL must use HTTPS.')
     .optional(),
+});
+
+const profileViewModeSchema = z.object({
+  video: z.enum(VIEW_MODES).optional(),
+  short: z.enum(VIEW_MODES).optional(),
+  post: z.enum(VIEW_MODES).optional(),
+});
+
+export const updatePreferencesSchema = z.object({
+  theme: z.enum(THEMES).optional(),
+  sidebarCollapsed: z.boolean().optional(),
+  profileViewMode: profileViewModeSchema.optional(),
 });

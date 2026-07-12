@@ -4,16 +4,23 @@ import { SIDEBAR_COLLAPSED_STORAGE_KEY } from '@network/shared';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { useMediaStatusSocket } from '../../shared/hooks/useMediaStatusSocket';
+import { useAppSelector } from '../../shared/hooks/useAppSelector';
+import { useDeviceSyncedPreference } from '../../features/user/hooks/useDeviceSyncedPreference';
 
 const PageWrapper = () => {
   useMediaStatusSocket();
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    const stored = localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
-    return stored === null ? true : stored === 'true';
-  });
+  const dbSidebarCollapsed = useAppSelector(
+    (state) => state.auth.user?.preferences?.sidebarCollapsed
+  );
+  const [isSidebarCollapsed, setIsSidebarCollapsed] =
+    useDeviceSyncedPreference<boolean>({
+      storageKey: SIDEBAR_COLLAPSED_STORAGE_KEY,
+      defaultValue: true,
+      dbValue: dbSidebarCollapsed,
+      toPatch: (value) => ({ sidebarCollapsed: value }),
+    });
 
   return (
     <div className="h-screen bg-surface-alt flex flex-col overflow-hidden">
@@ -24,13 +31,7 @@ const PageWrapper = () => {
           isMobileOpen={isMobileSidebarOpen}
           onMobileClose={() => setIsMobileSidebarOpen(false)}
           isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() =>
-            setIsSidebarCollapsed((prev) => {
-              const next = !prev;
-              localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, String(next));
-              return next;
-            })
-          }
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
 
         <main className="flex-1 min-w-0 overflow-y-auto">

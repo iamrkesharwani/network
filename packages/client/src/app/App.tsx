@@ -1,13 +1,12 @@
 import { useEffect, type ReactNode } from 'react';
 import ToastProvider from '../shared/ui/overlay/ToastContainer';
-import { useAppSelector } from '../shared/hooks/useAppSelector';
+import { useTheme } from '../shared/hooks/useTheme';
 
 const App = ({ children }: { children: ReactNode }) => {
-  const theme = useAppSelector((state) => state.ui.theme);
+  const { theme } = useTheme();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
   }, [theme]);
 
   return <ToastProvider>{children}</ToastProvider>;

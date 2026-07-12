@@ -8,5 +8,8 @@ export const HSTS_MAX_AGE_SECONDS = ONE_YEAR_SECONDS;
 export const VIEW_MODES = ['grid', 'list'] as const;
 export type ViewMode = (typeof VIEW_MODES)[number];
 
+export const THEMES = ['light', 'dark'] as const;
+export type Theme = (typeof THEMES)[number];
+
 export const PROCESS_ROLES = ['web', 'worker'] as const;
 export type ProcessRole = (typeof PROCESS_ROLES)[number];

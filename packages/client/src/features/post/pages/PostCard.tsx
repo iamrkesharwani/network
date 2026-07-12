@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { IPostResponse } from '@network/shared';
+import { formatDaysLeft, type IPostResponse } from '@network/shared';
 import CardShell from '../../../shared/ui/card/CardShell';
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
@@ -9,7 +9,6 @@ import Modal from '../../../shared/ui/overlay/Modal';
 import PostMedia from '../components/PostMedia';
 import PostFooter from '../components/PostFooter';
 import PostEditForm from '../form/PostEditForm';
-import { formatDaysLeft } from '../../../shared/utils/formatDaysLeft';
 
 export interface PostCardProps {
   post: IPostResponse;
@@ -34,7 +33,8 @@ const PostCard = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isUnlisted = post.visibility === 'unlisted';
-  const daysLeft = isOwner && isUnlisted ? formatDaysLeft(post.unlistedAt) : null;
+  const daysLeft =
+    isOwner && isUnlisted ? formatDaysLeft(post.unlistedAt) : null;
 
   const handleEditConfirm = () => {
     setEditConfirmOpen(false);
@@ -117,7 +117,9 @@ const PostCard = ({
         onClose={() => setVisibilityConfirmOpen(false)}
         onConfirm={handleVisibilityConfirm}
         intent="info"
-        title={isUnlisted ? 'Make this post public?' : 'Make this post unlisted?'}
+        title={
+          isUnlisted ? 'Make this post public?' : 'Make this post unlisted?'
+        }
         description={
           isUnlisted
             ? 'Make this public now to keep it — otherwise it is automatically deleted in a few days.'

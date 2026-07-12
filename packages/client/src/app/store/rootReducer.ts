@@ -1,6 +1,5 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from '../../features/auth/authSlice';
-import uiReducer from './uiSlice';
 import videoReducer from '../../features/video/videoSlice';
 import shortReducer from '../../features/short/shortSlice';
 import uploadReducer from '../../features/upload/uploadSlice';
@@ -11,10 +10,10 @@ import { postApi } from '../../features/post/postApi';
 import { creatorApi } from '../../features/creator/creatorApi';
 import { uploadApi } from '../../features/upload/uploadApi';
 import { feedApi } from '../../features/feed/feedApi';
+import { userApi } from '../../features/user/userApi';
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  ui: uiReducer,
   video: videoReducer,
   short: shortReducer,
   upload: uploadReducer,
@@ -25,6 +24,7 @@ const rootReducer = combineReducers({
   [creatorApi.reducerPath]: creatorApi.reducer,
   [uploadApi.reducerPath]: uploadApi.reducer,
   [feedApi.reducerPath]: feedApi.reducer,
+  [userApi.reducerPath]: userApi.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

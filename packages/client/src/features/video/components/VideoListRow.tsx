@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import { formatCount, formatDuration } from '@network/shared';
+import { formatCount, formatDuration, formatDaysLeft } from '@network/shared';
 import type { IVideoResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import VideoEditForm from '../form/VideoEditForm';
-import { formatDaysLeft } from '../../../shared/utils/formatDaysLeft';
 
 export interface VideoListRowProps {
   video: IVideoResponse;
@@ -32,7 +31,8 @@ const VideoListRow = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isUnlisted = video.visibility === 'unlisted';
-  const daysLeft = isOwner && isUnlisted ? formatDaysLeft(video.unlistedAt) : null;
+  const daysLeft =
+    isOwner && isUnlisted ? formatDaysLeft(video.unlistedAt) : null;
 
   const handleEditConfirm = () => {
     setEditConfirmOpen(false);
@@ -83,7 +83,10 @@ const VideoListRow = ({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Play className="w-5 h-5 text-text-muted opacity-40" strokeWidth={1.5} />
+              <Play
+                className="w-5 h-5 text-text-muted opacity-40"
+                strokeWidth={1.5}
+              />
             </div>
           )}
           <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded text-[10px] font-medium bg-black/70 text-text-secondary">
@@ -100,7 +103,8 @@ const VideoListRow = ({
           <p className="mt-1 text-xs text-text-muted">
             {formatCount(video.views)} views · {formatCount(video.likes)} likes
             {isUnlisted && ' · Unlisted'}
-            {daysLeft !== null && ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
+            {daysLeft !== null &&
+              ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
           </p>
         </div>
 
@@ -133,7 +137,9 @@ const VideoListRow = ({
         onClose={() => setVisibilityConfirmOpen(false)}
         onConfirm={handleVisibilityConfirm}
         intent="info"
-        title={isUnlisted ? 'Make this video public?' : 'Make this video unlisted?'}
+        title={
+          isUnlisted ? 'Make this video public?' : 'Make this video unlisted?'
+        }
         description={
           isUnlisted
             ? 'Make this public now to keep it — otherwise it is automatically deleted in a few days.'

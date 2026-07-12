@@ -7,6 +7,8 @@ import {
   USERNAME_MIN_LENGTH,
   USERNAME_MAX_LENGTH,
   BIO_MAX_LENGTH,
+  THEMES,
+  VIEW_MODES,
   type IUser,
 } from '@network/shared';
 
@@ -14,6 +16,24 @@ export interface IUserDocument extends IUser, Document {
   password?: string;
   googleId?: string;
 }
+
+const profileViewModeSchema = new Schema(
+  {
+    video: { type: String, enum: VIEW_MODES },
+    short: { type: String, enum: VIEW_MODES },
+    post: { type: String, enum: VIEW_MODES },
+  },
+  { _id: false }
+);
+
+const preferencesSchema = new Schema(
+  {
+    theme: { type: String, enum: THEMES },
+    sidebarCollapsed: { type: Boolean },
+    profileViewMode: { type: profileViewModeSchema, default: undefined },
+  },
+  { _id: false }
+);
 
 const userSchema = new Schema<IUserDocument>(
   {
@@ -74,6 +94,7 @@ const userSchema = new Schema<IUserDocument>(
       sparse: true,
       unique: true,
     },
+    preferences: { type: preferencesSchema, default: undefined },
   },
   {
     timestamps: true,

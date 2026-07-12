@@ -8,8 +8,7 @@ import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import ShortEditForm from '../form/ShortEditForm';
-import { formatDaysLeft } from '../../../shared/utils/formatDaysLeft';
-import type { IShortResponse } from '@network/shared';
+import { formatDaysLeft, type IShortResponse } from '@network/shared';
 
 export interface ShortCardProps {
   short: IShortResponse;
@@ -37,7 +36,8 @@ const ShortCard = ({
 
   const isReady = short.status === 'READY';
   const isUnlisted = short.visibility === 'unlisted';
-  const daysLeft = isOwner && isUnlisted ? formatDaysLeft(short.unlistedAt) : null;
+  const daysLeft =
+    isOwner && isUnlisted ? formatDaysLeft(short.unlistedAt) : null;
 
   const handleEditConfirm = () => {
     setEditConfirmOpen(false);
@@ -132,7 +132,9 @@ const ShortCard = ({
         onClose={() => setVisibilityConfirmOpen(false)}
         onConfirm={handleVisibilityConfirm}
         intent="info"
-        title={isUnlisted ? 'Make this short public?' : 'Make this short unlisted?'}
+        title={
+          isUnlisted ? 'Make this short public?' : 'Make this short unlisted?'
+        }
         description={
           isUnlisted
             ? 'Make this public now to keep it — otherwise it is automatically deleted in a few days.'

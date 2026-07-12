@@ -1,35 +1,26 @@
-import { useState } from 'react';
-import { PROFILE_VIEW_MODE_STORAGE_KEY, type ViewMode } from '@network/shared';
+import {
+  PROFILE_VIEW_MODE_STORAGE_KEY,
+  type ProfileContentType,
+  type ViewMode,
+} from '@network/shared';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
-
-type ContentType = 'video' | 'short' | 'post';
-type ViewModeMap = Partial<Record<ContentType, ViewMode>>;
-
-const readStoredMap = (): ViewModeMap => {
-  if (typeof window === 'undefined') return {};
-
-  try {
-    const raw = localStorage.getItem(PROFILE_VIEW_MODE_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as ViewModeMap) : {};
-  } catch {
-    return {};
-  }
-};
+import { useAppSelector } from '../../../shared/hooks/useAppSelector';
+import { useDeviceSyncedPreference } from '../../user/hooks/useDeviceSyncedPreference';
 
 export const useProfileViewMode = (
-  contentType: ContentType
+  contentType: ProfileContentType
 ): [ViewMode, (mode: ViewMode) => void] => {
   const isMobile = useIsMobileLayout();
-  const [viewMode, setViewMode] = useState<ViewMode>(
-    () => readStoredMap()[contentType] ?? 'grid'
+  const dbValue = useAppSelector(
+    (state) => state.auth.user?.preferences?.profileViewMode?.[contentType]
   );
 
-  const updateViewMode = (mode: ViewMode) => {
-    setViewMode(mode);
-    const map = readStoredMap();
-    map[contentType] = mode;
-    localStorage.setItem(PROFILE_VIEW_MODE_STORAGE_KEY, JSON.stringify(map));
-  };
+  const [viewMode, setViewMode] = useDeviceSyncedPreference<ViewMode>({
+    storageKey: `${PROFILE_VIEW_MODE_STORAGE_KEY}:${contentType}`,
+    defaultValue: 'grid',
+    dbValue,
+    toPatch: (mode) => ({ profileViewMode: { [contentType]: mode } }),
+  });
 
-  return [isMobile ? viewMode : 'grid', updateViewMode];
+  return [isMobile ? viewMode : 'grid', setViewMode];
 };

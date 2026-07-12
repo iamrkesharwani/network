@@ -51,7 +51,7 @@ const CardOptionsMenu = ({
         aria-expanded={menuOpen}
         className={cn(
           'p-1.5 -mr-1 rounded-lg text-icon transition-all focus:outline-none',
-          'opacity-0 group-hover:opacity-100 focus:opacity-100',
+          'opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100',
           menuOpen
             ? 'opacity-100 bg-surface-overlay text-icon-hover'
             : 'hover:bg-surface-raised hover:text-icon-hover'
