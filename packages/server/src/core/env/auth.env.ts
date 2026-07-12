@@ -13,10 +13,4 @@ export const authEnvSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string(),
 
   GOOGLE_REDIRECT_URI: z.url(),
-
-  GITHUB_CLIENT_ID: z.string(),
-
-  GITHUB_CLIENT_SECRET: z.string(),
-
-  GITHUB_REDIRECT_URI: z.url(),
 });

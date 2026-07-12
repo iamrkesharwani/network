@@ -2,9 +2,8 @@ import { User, type IUserDocument } from '../user/user.model.js';
 import type { CreateLocalUserData, UpdateOAuthData } from './auth.types.js';
 import type { OAuthProvider } from '@network/shared';
 
-const providerIdFieldMap: Record<OAuthProvider, 'googleId' | 'githubId'> = {
+const providerIdFieldMap: Record<OAuthProvider, 'googleId'> = {
   google: 'googleId',
-  github: 'githubId',
 } as const;
 
 export const findById = (id: string): Promise<IUserDocument | null> =>

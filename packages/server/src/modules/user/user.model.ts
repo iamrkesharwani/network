@@ -13,7 +13,6 @@ import {
 export interface IUserDocument extends IUser, Document {
   password?: string;
   googleId?: string;
-  githubId?: string;
 }
 
 const userSchema = new Schema<IUserDocument>(
@@ -75,11 +74,6 @@ const userSchema = new Schema<IUserDocument>(
       sparse: true,
       unique: true,
     },
-    githubId: {
-      type: String,
-      sparse: true,
-      unique: true,
-    },
   },
   {
     timestamps: true,
@@ -92,7 +86,6 @@ const userSchema = new Schema<IUserDocument>(
         delete json['__v'];
         delete json['password'];
         delete json['googleId'];
-        delete json['githubId'];
         return json;
       },
     },

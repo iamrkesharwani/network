@@ -3,7 +3,7 @@ import React from 'react';
 import Field from '../components/Field';
 import { SITE_NAME } from '@network/shared';
 import AuthLayout from '../components/AuthLayout';
-import { EmailIcon, GitHubIcon, GoogleIcon } from '../components/AuthIcons';
+import { EmailIcon, GoogleIcon } from '../components/AuthIcons';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import SiteLogo from '../../../public/Logo.svg?react';
 import { useOAuthRedirect } from '../hooks/useOAuthRedirect';
@@ -13,7 +13,7 @@ import { useLoginForm } from '../hooks/useLoginForm';
 const Login = () => {
   usePageTitle('Login');
 
-  const { handleGoogleLogin, handleGithubLogin } = useOAuthRedirect();
+  const { handleGoogleLogin } = useOAuthRedirect();
   const { register, setFocus, errors, isLoading, onSubmit } = useLoginForm();
   const {
     entryCollapsed,
@@ -77,14 +77,6 @@ const Login = () => {
             className={oauthBtn}
           >
             <GoogleIcon /> Continue with Google
-          </button>
-
-          <button
-            type="button"
-            onClick={handleGithubLogin}
-            className={oauthBtn}
-          >
-            <GitHubIcon /> Continue with GitHub
           </button>
 
           <div className="flex items-center gap-3.5 w-full my-5">

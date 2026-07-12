@@ -8,17 +8,6 @@ export const GoogleIcon = () => (
   </svg>
 );
 
-export const GitHubIcon = () => (
-  <svg
-    className={cls}
-    viewBox={AUTH_ICONS.GITHUB.VIEWBOX}
-    fill="currentColor"
-    aria-hidden="true"
-  >
-    <path d={AUTH_ICONS.GITHUB.PATH} />
-  </svg>
-);
-
 export const EmailIcon = () => (
   <svg
     className={cls}
