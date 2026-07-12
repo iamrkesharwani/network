@@ -1,17 +1,6 @@
 import { useCallback, useState } from 'react';
-import {
-  CLIENT_ROUTES,
-  type ICreatorEvent,
-  type IPostResponse,
-  type PostVisibility,
-} from '@network/shared';
-import {
-  useCreatePostMutation,
-  useDeletePostMutation,
-  useGetPostByIdQuery,
-} from '../postApi';
-import { useRawPostVideoUpload } from './usePostVideoUpload';
-import { useMediaUploadWizard } from '../../upload/hooks/useMediaUploadWizard';
+import { type ICreatorEvent, type PostVisibility } from '@network/shared';
+import { useCreatePostMutation } from '../postApi';
 
 export type PostAttachment = { kind: 'none' } | { kind: 'image'; file: File };
 
@@ -23,8 +12,6 @@ export const usePostComposer = ({
   onPublished,
 }: UsePostComposerOptions = {}) => {
   const [createPost, createPostState] = useCreatePostMutation();
-  const [deletePost] = useDeletePostMutation();
-  const videoUpload = useRawPostVideoUpload();
 
   const [text, setText] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -33,16 +20,6 @@ export const usePostComposer = ({
     kind: 'none',
   });
   const [error, setError] = useState<string | null>(null);
-
-  const wizard = useMediaUploadWizard<IPostResponse>({
-    mediaType: 'post',
-    mediaLabel: 'post',
-    basePath: CLIENT_ROUTES.UPLOAD_POST,
-    upload: videoUpload,
-    useGetByIdQuery: useGetPostByIdQuery,
-    deleteMedia: deletePost,
-    hasThumbnailStep: false,
-  });
 
   const canSubmit = text.trim().length > 0 || attachment.kind !== 'none';
 
@@ -53,13 +30,6 @@ export const usePostComposer = ({
     setAttachment({ kind: 'none' });
     setError(null);
   }, []);
-
-  const startVideoAttachment = useCallback(
-    (file: File) => {
-      wizard.startUpload(file);
-    },
-    [wizard]
-  );
 
   const submit = useCallback(async () => {
     setError(null);
@@ -108,7 +78,5 @@ export const usePostComposer = ({
     submit,
     error,
     isSubmitting: createPostState.isLoading,
-    startVideoAttachment,
-    wizard,
   };
 };

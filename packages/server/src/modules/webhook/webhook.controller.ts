@@ -8,7 +8,6 @@ import { ApiResponse } from '../../core/utils/ApiResponse.js';
 import { logger } from '../../core/utils/logger.js';
 import { shortProcessWebhook } from '../short/services/short.webhook.service.js';
 import { videoProcessWebhook } from '../video/services/video.webhook.service.js';
-import { postProcessWebhook } from '../post/services/post.webhook.service.js';
 import {
   getProviderMediaType,
   setProviderMediaType,
@@ -20,7 +19,6 @@ const webhookHandlers: Record<
 > = {
   video: videoProcessWebhook,
   short: shortProcessWebhook,
-  post: postProcessWebhook,
 };
 
 export const handleMediaWebhook = asyncHandler(

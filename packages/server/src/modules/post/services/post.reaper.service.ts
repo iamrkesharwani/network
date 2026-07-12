@@ -9,11 +9,7 @@ import {
 } from '@network/shared';
 import type { ContentReaperAdapter } from '../../../core/reaper/contentReaper.types.js';
 import { PostModel } from '../post.model.js';
-import {
-  storageProvider,
-  videoProvider,
-  imageProvider,
-} from '../../../core/providers/provider.js';
+import { imageProvider } from '../../../core/providers/provider.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import { queueGenericEmail } from '../../email/email.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
@@ -23,37 +19,14 @@ import { logger } from '../../../core/utils/logger.js';
 const reapExpiredSoftDeletes = async (): Promise<number> => {
   const expired = await PostModel.find({
     deletedAt: { $ne: null, $lte: daysAgo(CONTENT_RETENTION_DAYS) },
-  })
-    .select('+storageKey')
-    .exec();
+  }).exec();
 
   for (const doc of expired) {
-    if (doc.providerVideoId) {
-      await videoProvider
-        .deleteVideo(doc.providerVideoId)
-        .catch((e) =>
-          logger.warn(e, `Reaper: failed to delete provider video ${doc.providerVideoId}`)
-        );
-    }
-    if (doc.storageKey) {
-      await storageProvider
-        .deleteObject(doc.storageKey)
-        .catch((e) =>
-          logger.warn(e, `Reaper: failed to delete storage object ${doc.storageKey}`)
-        );
-    }
     if (doc.mediaType === 'image' && doc.imageUrl) {
       await imageProvider
         .deleteImage(doc.imageUrl)
         .catch((e) =>
           logger.warn(e, `Reaper: failed to delete post image ${doc.imageUrl}`)
-        );
-    }
-    if (doc.thumbnailUrl) {
-      await imageProvider
-        .deleteImage(doc.thumbnailUrl)
-        .catch((e) =>
-          logger.warn(e, `Reaper: failed to delete post thumbnail ${doc.thumbnailUrl}`)
         );
     }
     await PostModel.deleteOne({ _id: doc._id }).exec();

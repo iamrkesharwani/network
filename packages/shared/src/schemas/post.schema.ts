@@ -46,16 +46,6 @@ export const createPostSchema = z.object({
 
 export const postUpdateSchema = createPostSchema.partial();
 
-export const postFinaliseSchema = z.object({
-  text: postTextSchema,
-  tags: postTagsSchema,
-  visibility: z
-    .enum(POST_VISIBILITY, {
-      message: 'Invalid visibility state selected.',
-    })
-    .default('public'),
-});
-
 export const postFeedQuerySchema = z.object({
   cursor: z
     .string()

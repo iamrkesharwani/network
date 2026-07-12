@@ -4,15 +4,11 @@ import {
   MAX_VIDEO_SIZE_BYTES,
   ALLOWED_SHORT_MIME_TYPES,
   MAX_SHORT_SIZE_BYTES,
-  ALLOWED_POST_VIDEO_MIME_TYPES,
-  MAX_POST_VIDEO_SIZE_BYTES,
 } from '@network/shared';
 import * as videoRepository from '../video/video.repository.js';
 import * as shortRepository from '../short/short.repository.js';
-import * as postRepository from '../post/post.repository.js';
 import { videoProcessWebhook } from '../video/services/video.webhook.service.js';
 import { shortProcessWebhook } from '../short/services/short.webhook.service.js';
-import { postProcessWebhook } from '../post/services/post.webhook.service.js';
 import type { NormalizedWebhookPayload } from '../../core/providers/types.js';
 
 export interface MultipartPlaceholder {
@@ -133,49 +129,9 @@ const shortAdapter: MultipartMediaAdapter = {
   processReadyPayload: shortProcessWebhook,
 };
 
-const postAdapter: MultipartMediaAdapter = {
-  allowedMimeTypes: ALLOWED_POST_VIDEO_MIME_TYPES,
-  maxSizeBytes: MAX_POST_VIDEO_SIZE_BYTES,
-
-  createPlaceholder: async (userId, fileName) => {
-    const placeholder = await postRepository.createVideoPlaceholder(userId);
-    return { id: placeholder._id.toString(), ingestFileName: fileName };
-  },
-
-  findPlaceholder: async (id) => {
-    const doc = await postRepository.findById(id);
-    if (!doc) return null;
-    return { id, ingestFileName: `post-${id}` };
-  },
-
-  markProcessing: async (id, data) => {
-    const updated = await postRepository.updateById(id, {
-      providerVideoId: data.providerVideoId,
-      storageKey: data.storageKey,
-      status: 'PROCESSING',
-    });
-    return !!updated;
-  },
-
-  markFailed: async (id, errorMessage) => {
-    const updated = await postRepository.updateById(id, {
-      status: 'FAILED',
-      errorMessage,
-    });
-    return !!updated;
-  },
-
-  deletePlaceholder: async (id) => {
-    await postRepository.deleteById(id);
-  },
-
-  processReadyPayload: postProcessWebhook,
-};
-
 const registry: Record<MultipartMediaType, MultipartMediaAdapter> = {
   video: videoAdapter,
   short: shortAdapter,
-  post: postAdapter,
 };
 
 export const getMediaAdapter = (

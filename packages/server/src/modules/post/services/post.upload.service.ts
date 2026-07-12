@@ -1,13 +1,6 @@
-import {
-  type CreatePostInput,
-  type IPostActionResult,
-  type PostFinaliseInput,
-} from '@network/shared';
+import { type CreatePostInput, type IPostActionResult } from '@network/shared';
 import * as postRepository from '../post.repository.js';
 import { imageProvider } from '../../../core/providers/provider.js';
-import { ApiError } from '../../../core/utils/ApiError.js';
-import { getOwnerId } from '../../../core/utils/getOwnerId.js';
-import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields.js';
 import { toResponse } from './post.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
 
@@ -38,42 +31,6 @@ export const createPost = async (
   });
 
   const creatorEvent = await recordPublish(userId, 'post');
-  const updated = await postRepository.updateById(post._id.toString(), {
-    metricsRecorded: true,
-  });
 
-  return { post: toResponse(updated ?? post), creatorEvent };
-};
-
-export const finalisePost = async (
-  postId: string,
-  userId: string,
-  data: PostFinaliseInput
-): Promise<IPostActionResult> => {
-  const post = await postRepository.findById(postId);
-  if (!post) {
-    throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
-  }
-  if (getOwnerId(post.userId) !== userId) {
-    throw new ApiError(403, 'FORBIDDEN', 'You do not own this post.');
-  }
-
-  const alreadyRecorded = post.metricsRecorded === true;
-
-  const updated = await postRepository.updateById(postId, {
-    ...(data.text !== undefined && { text: data.text }),
-    ...(data.tags !== undefined && { tags: data.tags }),
-    ...buildVisibilityFields(data.visibility),
-    ...(!alreadyRecorded && { metricsRecorded: true }),
-  });
-
-  if (!updated) {
-    throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
-  }
-
-  const creatorEvent = alreadyRecorded
-    ? null
-    : await recordPublish(userId, 'post');
-
-  return { post: toResponse(updated), creatorEvent };
+  return { post: toResponse(post), creatorEvent };
 };

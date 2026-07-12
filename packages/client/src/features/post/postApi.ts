@@ -6,7 +6,6 @@ import type {
   IPostResponse,
   PaginatedResponse,
   PostFeedQuery,
-  PostFinaliseInput,
   PostUpdateInput,
   PostUserFeedQuery,
 } from '@network/shared';
@@ -24,18 +23,6 @@ export const postApi = createApi({
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
       invalidatesTags: ['MyPosts', 'Post'],
-    }),
-
-    finalisePost: builder.mutation<
-      ApiResponse<IPostActionResult>,
-      { postId: string } & PostFinaliseInput
-    >({
-      query: ({ postId, ...data }) => ({
-        url: `/${postId}/finalise`,
-        method: 'POST',
-        data,
-      }),
-      invalidatesTags: ['MyPosts'],
     }),
 
     getFeed: builder.query<PaginatedResponse<IPostResponse>, PostFeedQuery>({
@@ -144,7 +131,6 @@ export const postApi = createApi({
 
 export const {
   useCreatePostMutation,
-  useFinalisePostMutation,
   useGetFeedQuery,
   useGetMyPostsQuery,
   useGetUserPostsQuery,

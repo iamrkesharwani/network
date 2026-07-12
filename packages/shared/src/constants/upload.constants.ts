@@ -27,7 +27,7 @@ export interface UploadState {
 
 import { FIFTEEN_MINUTES_MS } from './time.constants.js';
 
-export const MULTIPART_MEDIA_TYPES = ['video', 'short', 'post'] as const;
+export const MULTIPART_MEDIA_TYPES = ['video', 'short'] as const;
 
 export const UPLOAD_REAPER_QUEUE_NAME = 'upload-session-reaper';
 export const UPLOAD_REAPER_JOB_ID = 'upload-session-reaper';

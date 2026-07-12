@@ -5,7 +5,6 @@ import { uploadLimiter } from '../../core/middleware/rateLimit.middleware.js';
 import { uploadPostImage } from '../../core/middleware/upload.middleware.js';
 import {
   createPostSchema,
-  postFinaliseSchema,
   postUpdateSchema,
   postFeedQuerySchema,
   postIdParamSchema,
@@ -25,14 +24,6 @@ router.post(
   uploadPostImage,
   validate({ body: createPostSchema }),
   postUploadController.createThePost
-);
-
-router.post(
-  '/:postId/finalise',
-  requireAuth,
-  uploadLimiter,
-  validate({ params: postIdParamSchema, body: postFinaliseSchema }),
-  postUploadController.finaliseThePost
 );
 
 router.get(

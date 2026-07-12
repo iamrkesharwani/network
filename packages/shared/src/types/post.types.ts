@@ -2,7 +2,6 @@ import { z } from 'zod';
 import {
   createPostSchema,
   postUpdateSchema,
-  postFinaliseSchema,
   postFeedQuerySchema,
   postIdParamSchema,
   postUserFeedQuerySchema,
@@ -16,7 +15,6 @@ import type { ICreatorEvent } from './creator.types.js';
 
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type PostUpdateInput = z.infer<typeof postUpdateSchema>;
-export type PostFinaliseInput = z.infer<typeof postFinaliseSchema>;
 export type PostFeedQuery = z.infer<typeof postFeedQuerySchema>;
 export type PostIdParam = z.infer<typeof postIdParamSchema>;
 export type PostUserFeedQuery = z.infer<typeof postUserFeedQuerySchema>;
@@ -30,14 +28,7 @@ export interface IPost {
   text?: string;
   mediaType: PostMediaType;
   imageUrl?: string;
-  providerVideoId?: string;
-  playbackUrl?: string;
-  thumbnailUrl?: string;
-  duration?: number;
   status: PostStatus;
-  errorMessage?: string;
-  storageKey?: string;
-  metricsRecorded?: boolean;
   tags: string[];
   visibility: PostVisibility;
   views: number;
@@ -55,15 +46,8 @@ export interface IPostAuthor {
   avatarUrl?: string;
 }
 
-export interface IPostResponse extends Omit<
-  IPost,
-  | 'userId'
-  | 'providerVideoId'
-  | 'storageKey'
-  | 'metricsRecorded'
-  | 'deletedAt'
-  | 'unlistedExpiryWarnedAt'
-> {
+export interface IPostResponse
+  extends Omit<IPost, 'userId' | 'deletedAt' | 'unlistedExpiryWarnedAt'> {
   author: IPostAuthor;
 }
 

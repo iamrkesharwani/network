@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Play } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { formatCount } from '@network/shared';
 import type { IPostResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
@@ -33,8 +33,7 @@ const PostListRow = ({
 
   const isUnlisted = post.visibility === 'unlisted';
   const daysLeft = isOwner && isUnlisted ? formatDaysLeft(post.unlistedAt) : null;
-  const previewImage =
-    post.mediaType === 'image' ? post.imageUrl : post.thumbnailUrl;
+  const previewImage = post.mediaType === 'image' ? post.imageUrl : undefined;
 
   const handleEditConfirm = () => {
     setEditConfirmOpen(false);
@@ -83,8 +82,6 @@ const PostListRow = ({
               onError={() => setThumbError(true)}
               className="w-full h-full object-cover"
             />
-          ) : post.mediaType === 'video' ? (
-            <Play className="w-4 h-4 text-text-muted opacity-40" strokeWidth={1.5} />
           ) : (
             <FileText className="w-4 h-4 text-text-muted opacity-40" strokeWidth={1.5} />
           )}

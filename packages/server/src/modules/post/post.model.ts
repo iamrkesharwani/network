@@ -39,20 +39,6 @@ const postSchema = new Schema<IPostDocument>(
     imageUrl: {
       type: String,
     },
-    thumbnailUrl: {
-      type: String,
-    },
-    providerVideoId: {
-      type: String,
-      sparse: true,
-      unique: true,
-    },
-    playbackUrl: {
-      type: String,
-    },
-    duration: {
-      type: Number,
-    },
     tags: {
       type: [String],
       default: [],
@@ -73,19 +59,7 @@ const postSchema = new Schema<IPostDocument>(
     status: {
       type: String,
       enum: POST_STATUS,
-      default: 'UPLOADING',
-    },
-    errorMessage: {
-      type: String,
-    },
-    storageKey: {
-      type: String,
-      sparse: true,
-      select: false,
-    },
-    metricsRecorded: {
-      type: Boolean,
-      default: false,
+      default: 'READY',
     },
     deletedAt: {
       type: Date,
@@ -110,9 +84,6 @@ const postSchema = new Schema<IPostDocument>(
         json['id'] = json['_id'].toString();
         delete json['_id'];
         delete json['__v'];
-        delete json['providerVideoId'];
-        delete json['storageKey'];
-        delete json['metricsRecorded'];
         delete json['deletedAt'];
         delete json['unlistedExpiryWarnedAt'];
 
@@ -161,9 +132,7 @@ postSchema.pre('validate', function () {
   const hasMedia = this.mediaType !== 'none';
 
   if (!hasText && !hasMedia) {
-    throw new Error(
-      'A post must contain text, an image, or a video attachment.'
-    );
+    throw new Error('A post must contain text or an image.');
   }
 });
 

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { PostModel, type IPostDocument } from './post.model.js';
 import type { PaginatedResponse, PostVisibility } from '@network/shared';
 import { paginateQuery } from '../../core/utils/paginate.js';
-import type { UpdatePostData, WebhookUpdateData } from './post.types.js';
+import type { UpdatePostData } from './post.types.js';
 
 export const createTextOrImagePost = (
   userId: string,
@@ -31,36 +31,10 @@ export const createTextOrImagePost = (
   });
 };
 
-export const createVideoPlaceholder = (
-  userId: string,
-  text?: string
-): Promise<IPostDocument> => {
-  return PostModel.create({
-    userId: new mongoose.Types.ObjectId(userId),
-    ...(text !== undefined && { text }),
-    mediaType: 'video',
-  });
-};
-
 export const findById = (id: string): Promise<IPostDocument | null> => {
   return PostModel.findOne({ _id: id, deletedAt: null })
     .populate('userId', 'username avatarUrl')
     .exec();
-};
-
-export const findIdWithStorageKey = (
-  id: string
-): Promise<IPostDocument | null> => {
-  return PostModel.findOne({ _id: id, deletedAt: null })
-    .select('+storageKey')
-    .populate('userId', 'username avatarUrl')
-    .exec();
-};
-
-export const findByProviderVideoId = (
-  providerVideoId: string
-): Promise<IPostDocument | null> => {
-  return PostModel.findOne({ providerVideoId }).exec();
 };
 
 export const findPublicFeed = async (
@@ -116,18 +90,6 @@ export const updateById = (
     runValidators: true,
   })
     .populate('userId', 'username avatarUrl')
-    .exec();
-};
-
-export const updateByProviderVideoId = (
-  providerVideoId: string,
-  data: WebhookUpdateData
-): Promise<IPostDocument | null> => {
-  return PostModel.findOneAndUpdate({ providerVideoId }, data, {
-    returnDocument: 'after',
-    runValidators: true,
-  })
-    .select('+storageKey')
     .exec();
 };
 
