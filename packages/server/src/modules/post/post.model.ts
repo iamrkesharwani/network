@@ -4,6 +4,7 @@ import {
   POST_STATUS,
   POST_MEDIA_TYPE,
   POST_TEXT_MAX_LENGTH,
+  MAX_POST_IMAGES,
   type IPost,
 } from '@network/shared';
 
@@ -36,8 +37,13 @@ const postSchema = new Schema<IPostDocument>(
       enum: POST_MEDIA_TYPE,
       default: 'none',
     },
-    imageUrl: {
-      type: String,
+    imageUrls: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (value: string[]) => value.length <= MAX_POST_IMAGES,
+        message: `A post can have at most ${MAX_POST_IMAGES} images.`,
+      },
     },
     tags: {
       type: [String],

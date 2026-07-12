@@ -8,7 +8,7 @@ export const createTextOrImagePost = (
   userId: string,
   data: {
     text?: string;
-    imageUrl?: string;
+    imageUrls?: string[];
     mediaType: 'none' | 'image';
     tags: string[];
     visibility: PostVisibility;
@@ -19,7 +19,7 @@ export const createTextOrImagePost = (
   return PostModel.create({
     userId: new mongoose.Types.ObjectId(userId),
     ...(data.text !== undefined && { text: data.text }),
-    ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+    ...(data.imageUrls !== undefined && { imageUrls: data.imageUrls }),
     mediaType: data.mediaType,
     tags: data.tags,
     visibility: data.visibility,

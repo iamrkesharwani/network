@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { validate } from '../../core/middleware/validate.middleware.js';
 import { requireAuth, optionalAuth } from '../../core/middleware/auth.middleware.js';
 import { uploadLimiter } from '../../core/middleware/rateLimit.middleware.js';
-import { uploadPostImage } from '../../core/middleware/upload.middleware.js';
+import { uploadPostImages } from '../../core/middleware/upload.middleware.js';
 import {
   createPostSchema,
   postUpdateSchema,
@@ -21,7 +21,7 @@ router.post(
   '/',
   requireAuth,
   uploadLimiter,
-  uploadPostImage,
+  uploadPostImages,
   validate({ body: createPostSchema }),
   postUploadController.createThePost
 );

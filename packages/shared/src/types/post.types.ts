@@ -27,7 +27,7 @@ export interface IPost {
   userId: string;
   text?: string;
   mediaType: PostMediaType;
-  imageUrl?: string;
+  imageUrls?: string[];
   status: PostStatus;
   tags: string[];
   visibility: PostVisibility;

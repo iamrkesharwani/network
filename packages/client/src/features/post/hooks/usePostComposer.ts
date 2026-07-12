@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react';
-import { type ICreatorEvent, type PostVisibility } from '@network/shared';
+import {
+  MAX_POST_IMAGES,
+  type ICreatorEvent,
+  type PostVisibility,
+} from '@network/shared';
 import { useCreatePostMutation } from '../postApi';
-
-export type PostAttachment = { kind: 'none' } | { kind: 'image'; file: File };
 
 interface UsePostComposerOptions {
   onPublished?: (creatorEvent: ICreatorEvent | null) => void;
@@ -16,19 +18,27 @@ export const usePostComposer = ({
   const [text, setText] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [visibility, setVisibility] = useState<PostVisibility>('public');
-  const [attachment, setAttachment] = useState<PostAttachment>({
-    kind: 'none',
-  });
+  const [images, setImages] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = text.trim().length > 0 || attachment.kind !== 'none';
+  const canSubmit = text.trim().length > 0 || images.length > 0;
 
   const resetCompose = useCallback(() => {
     setText('');
     setTags([]);
     setVisibility('public');
-    setAttachment({ kind: 'none' });
+    setImages([]);
     setError(null);
+  }, []);
+
+  const addImages = useCallback((files: File[]) => {
+    setImages((current) =>
+      [...current, ...files].slice(0, MAX_POST_IMAGES)
+    );
+  }, []);
+
+  const removeImage = useCallback((index: number) => {
+    setImages((current) => current.filter((_, i) => i !== index));
   }, []);
 
   const submit = useCallback(async () => {
@@ -43,9 +53,7 @@ export const usePostComposer = ({
     if (text.trim()) formData.append('text', text.trim());
     tags.forEach((tag) => formData.append('tags', tag));
     formData.append('visibility', visibility);
-    if (attachment.kind === 'image') {
-      formData.append('image', attachment.file);
-    }
+    images.forEach((file) => formData.append('images', file));
 
     try {
       const result = await createPost(formData).unwrap();
@@ -55,9 +63,9 @@ export const usePostComposer = ({
       setError("Couldn't create the post. Please try again.");
     }
   }, [
-    attachment,
     canSubmit,
     createPost,
+    images,
     onPublished,
     resetCompose,
     tags,
@@ -72,8 +80,9 @@ export const usePostComposer = ({
     setTags,
     visibility,
     setVisibility,
-    attachment,
-    setAttachment,
+    images,
+    addImages,
+    removeImage,
     canSubmit,
     submit,
     error,

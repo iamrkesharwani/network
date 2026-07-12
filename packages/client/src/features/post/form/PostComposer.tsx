@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ImageIcon, X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Plus, X } from 'lucide-react';
 import {
   POST_TEXT_MAX_LENGTH,
   ALLOWED_POST_IMAGE_MIME_TYPES,
   MAX_POST_IMAGE_SIZE_BYTES,
+  MAX_POST_IMAGES,
 } from '@network/shared';
 import FloatingTextarea from '../../upload/components/FloatingTextarea';
-import MediaDropzone from '../../upload/components/MediaDropzone';
 import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
 import Button from '../../../shared/ui/primitives/Button';
@@ -17,7 +17,7 @@ import { usePostComposer } from '../hooks/usePostComposer';
 
 const ACCEPTED_ATTACHMENT_MIME = ALLOWED_POST_IMAGE_MIME_TYPES.join(',');
 
-const validateAttachment = (file: File): string | null => {
+const validateImageFile = (file: File): string | null => {
   const isImage = ALLOWED_POST_IMAGE_MIME_TYPES.includes(
     file.type as (typeof ALLOWED_POST_IMAGE_MIME_TYPES)[number]
   );
@@ -38,6 +38,7 @@ const PostComposer = () => {
   const { addToast } = useToast();
   const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     text,
@@ -46,8 +47,9 @@ const PostComposer = () => {
     setTags,
     visibility,
     setVisibility,
-    attachment,
-    setAttachment,
+    images,
+    addImages,
+    removeImage,
     canSubmit,
     submit,
     error,
@@ -59,40 +61,48 @@ const PostComposer = () => {
     },
   });
 
-  const previewUrl = useMemo(() => {
-    if (attachment.kind !== 'image') return null;
-    return URL.createObjectURL(attachment.file);
-  }, [attachment]);
+  const previewUrls = useMemo(
+    () => images.map((file) => URL.createObjectURL(file)),
+    [images]
+  );
 
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [previewUrl]);
+  }, [previewUrls]);
 
-  const handleFileSelect = useCallback(
-    (file: File) => {
-      const validationError = validateAttachment(file);
-      if (validationError) {
-        setAttachmentError(validationError);
+  const handleFilesSelected = useCallback(
+    (files: FileList | null) => {
+      if (!files || files.length === 0) return;
+
+      const remainingSlots = MAX_POST_IMAGES - images.length;
+      if (remainingSlots <= 0) {
+        setAttachmentError(`You can attach up to ${MAX_POST_IMAGES} images.`);
         return;
       }
 
-      setAttachmentError(null);
-      setAttachment({ kind: 'image', file });
-    },
-    [setAttachment]
-  );
+      const candidates = Array.from(files).slice(0, remainingSlots);
+      for (const file of candidates) {
+        const validationError = validateImageFile(file);
+        if (validationError) {
+          setAttachmentError(validationError);
+          return;
+        }
+      }
 
-  const handleRemoveAttachment = useCallback(() => {
-    setAttachmentError(null);
-    setAttachment({ kind: 'none' });
-  }, [setAttachment]);
+      setAttachmentError(null);
+      addImages(candidates);
+    },
+    [addImages, images.length]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await submit();
   };
+
+  const canAddMore = images.length < MAX_POST_IMAGES;
 
   return (
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
@@ -118,63 +128,75 @@ const PostComposer = () => {
 
         <div className="mb-6">
           <p className="text-sm font-medium text-text-secondary mb-2.5">
-            Attachment{' '}
-            <span className="text-text-muted font-normal">(optional)</span>
+            Images{' '}
+            <span className="text-text-muted font-normal">
+              (optional, up to {MAX_POST_IMAGES})
+            </span>
           </p>
 
-          {attachment.kind === 'none' ? (
-            <MediaDropzone
-              state={{
-                stage: 'idle',
-                file: null,
-                videoId: null,
-                progressPercent: 0,
-                uploadedBytes: 0,
-                totalBytes: 0,
-                speedBytesPerSec: 0,
-                etaSeconds: null,
-                error: attachmentError,
-                sessionId: null,
-                fingerprint: null,
-                uploadedParts: [],
-                totalParts: 0,
-                storageKey: null,
-              }}
-              onFileSelect={handleFileSelect}
-              onCancel={() => setAttachmentError(null)}
-              title="Add an image"
-              subtitle="or click to browse · JPEG, PNG, WebP"
-              accept={ACCEPTED_ATTACHMENT_MIME}
-            />
-          ) : (
-            <div className="relative rounded-2xl border border-border bg-surface-raised overflow-hidden">
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Attachment preview"
-                  className="w-full max-h-80 object-cover"
-                />
-              ) : (
-                <div className="flex items-center gap-3 p-4">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary-muted shrink-0">
-                    <ImageIcon className="w-5 h-5 text-primary" />
-                  </div>
-                  <p className="text-sm text-text-primary truncate">
-                    {attachment.kind === 'image' && attachment.file.name}
-                  </p>
-                </div>
-              )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_ATTACHMENT_MIME}
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              handleFilesSelected(e.target.files);
+              e.target.value = '';
+            }}
+          />
 
-              <button
-                type="button"
-                onClick={handleRemoveAttachment}
-                disabled={isSubmitting}
-                aria-label="Remove attachment"
-                className="absolute top-2 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+          {images.length === 0 ? (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full rounded-2xl border-2 border-dashed border-border bg-surface-raised py-10 flex flex-col items-center justify-center gap-2 text-text-muted hover:border-primary/40 hover:text-text-secondary transition-colors cursor-pointer"
+            >
+              <Plus className="w-6 h-6" strokeWidth={1.5} />
+              <span className="text-sm">Add images</span>
+              <span className="text-xs">JPEG, PNG, WebP</span>
+            </button>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {previewUrls.map((url, index) => (
+                <div
+                  key={url}
+                  className="relative aspect-square rounded-xl overflow-hidden border border-border bg-surface-raised"
+                >
+                  <img
+                    src={url}
+                    alt={`Attachment ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    disabled={isSubmitting}
+                    aria-label="Remove image"
+                    className="absolute top-1.5 right-1.5 flex items-center justify-center w-6 h-6 rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+
+              {canAddMore && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="aspect-square rounded-xl border-2 border-dashed border-border bg-surface-raised flex items-center justify-center text-text-muted hover:border-primary/40 hover:text-text-secondary transition-colors cursor-pointer"
+                  aria-label="Add more images"
+                >
+                  <Plus className="w-5 h-5" strokeWidth={1.5} />
+                </button>
+              )}
             </div>
+          )}
+
+          {attachmentError && (
+            <p role="alert" className="mt-2 text-sm text-error">
+              {attachmentError}
+            </p>
           )}
         </div>
 

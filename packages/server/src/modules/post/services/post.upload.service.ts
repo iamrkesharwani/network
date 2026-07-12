@@ -7,22 +7,18 @@ import { recordPublish } from '../../creator/services/creator.publish.service.js
 export const createPost = async (
   userId: string,
   data: CreatePostInput,
-  imageFile?: { buffer: Buffer; mimeType: string }
+  imageFiles: { buffer: Buffer; mimeType: string }[]
 ): Promise<IPostActionResult> => {
-  let imageUrl: string | undefined;
-  let mediaType: 'none' | 'image' = 'none';
-
-  if (imageFile) {
-    imageUrl = await imageProvider.uploadImage(
-      imageFile.buffer,
-      imageFile.mimeType
-    );
-    mediaType = 'image';
-  }
+  const imageUrls = await Promise.all(
+    imageFiles.map((file) =>
+      imageProvider.uploadImage(file.buffer, file.mimeType)
+    )
+  );
+  const mediaType: 'none' | 'image' = imageUrls.length > 0 ? 'image' : 'none';
 
   const post = await postRepository.createTextOrImagePost(userId, {
     ...(data.text !== undefined && { text: data.text }),
-    ...(imageUrl !== undefined && { imageUrl }),
+    ...(imageUrls.length > 0 && { imageUrls }),
     mediaType,
     tags: data.tags ?? [],
     visibility: data.visibility,

@@ -22,12 +22,14 @@ const reapExpiredSoftDeletes = async (): Promise<number> => {
   }).exec();
 
   for (const doc of expired) {
-    if (doc.mediaType === 'image' && doc.imageUrl) {
-      await imageProvider
-        .deleteImage(doc.imageUrl)
-        .catch((e) =>
-          logger.warn(e, `Reaper: failed to delete post image ${doc.imageUrl}`)
-        );
+    if (doc.mediaType === 'image') {
+      for (const imageUrl of doc.imageUrls ?? []) {
+        await imageProvider
+          .deleteImage(imageUrl)
+          .catch((e) =>
+            logger.warn(e, `Reaper: failed to delete post image ${imageUrl}`)
+          );
+      }
     }
     await PostModel.deleteOne({ _id: doc._id }).exec();
   }

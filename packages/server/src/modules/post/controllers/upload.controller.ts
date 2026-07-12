@@ -15,8 +15,9 @@ export const createThePost = asyncHandler(
     const data = req.body as CreatePostInput;
     const hasText =
       typeof data.text === 'string' && data.text.trim().length > 0;
+    const files = (req.files as Express.Multer.File[] | undefined) ?? [];
 
-    if (!hasText && !req.file) {
+    if (!hasText && files.length === 0) {
       throw new ApiError(
         400,
         'VALIDATION_ERROR',
@@ -24,16 +25,14 @@ export const createThePost = asyncHandler(
       );
     }
 
-    if (req.file) {
-      await verifyFileMagicBytes(req.file, ALLOWED_POST_IMAGE_MIME_TYPES);
+    for (const file of files) {
+      await verifyFileMagicBytes(file, ALLOWED_POST_IMAGE_MIME_TYPES);
     }
 
     const result = await createPost(
       req.user.id,
       data,
-      req.file
-        ? { buffer: req.file.buffer, mimeType: req.file.mimetype }
-        : undefined
+      files.map((file) => ({ buffer: file.buffer, mimeType: file.mimetype }))
     );
 
     res.status(201).json(new ApiResponse(result, 'Post created successfully'));

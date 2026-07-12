@@ -33,7 +33,8 @@ const PostListRow = ({
 
   const isUnlisted = post.visibility === 'unlisted';
   const daysLeft = isOwner && isUnlisted ? formatDaysLeft(post.unlistedAt) : null;
-  const previewImage = post.mediaType === 'image' ? post.imageUrl : undefined;
+  const previewImage =
+    post.mediaType === 'image' ? post.imageUrls?.[0] : undefined;
 
   const handleEditConfirm = () => {
     setEditConfirmOpen(false);

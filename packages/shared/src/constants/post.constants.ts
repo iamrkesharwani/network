@@ -13,5 +13,6 @@ export const ALLOWED_POST_IMAGE_MIME_TYPES = [
 ] as const;
 
 export const MAX_POST_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+export const MAX_POST_IMAGES = 10;
 export const POST_TEXT_MAX_LENGTH = 500;
 export const POST_TEXT_LINE_CLAMP = 6;
