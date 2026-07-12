@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PROFILE_VIEW_MODE_STORAGE_KEY, type ViewMode } from '@network/shared';
+import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 
 type ContentType = 'video' | 'short' | 'post';
 type ViewModeMap = Partial<Record<ContentType, ViewMode>>;
@@ -18,6 +19,7 @@ const readStoredMap = (): ViewModeMap => {
 export const useProfileViewMode = (
   contentType: ContentType
 ): [ViewMode, (mode: ViewMode) => void] => {
+  const isMobile = useIsMobileLayout();
   const [viewMode, setViewMode] = useState<ViewMode>(
     () => readStoredMap()[contentType] ?? 'grid'
   );
@@ -29,5 +31,5 @@ export const useProfileViewMode = (
     localStorage.setItem(PROFILE_VIEW_MODE_STORAGE_KEY, JSON.stringify(map));
   };
 
-  return [viewMode, updateViewMode];
+  return [isMobile ? viewMode : 'grid', updateViewMode];
 };
