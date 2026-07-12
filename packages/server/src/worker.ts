@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import mongoose from 'mongoose';
 import { HEALTH_CHECK_ROUTE, METRICS_ROUTE } from '@network/shared';
 import { connectDb } from './core/config/db.js';
+import './modules/user/user.model.js';
 import {
   initRedis,
   redisClient,
