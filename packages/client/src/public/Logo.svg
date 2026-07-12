@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect x="0" y="0" width="64" height="64" rx="12" fill="var(--logo-bg)"/>
-  <g transform="translate(26.7,26.7) scale(0.587) rotate(-8)">
-    <path d="M 0,-40 Q 26,-20 22,10 Q 18,34 -2,36 Q -22,34 -20,10 Q -18,-14 0,-40 Z" fill="var(--logo-leaf-big)"/>
+  <g transform="translate(28.3,31.1) scale(0.587) rotate(-8)">
+    <path d="M -1.18,-38 Q 24.82,-18 20.82,12 Q 16.82,36 -3.18,38 Q -23.18,36 -21.18,12 Q -19.18,-12 -1.18,-38 Z" fill="var(--logo-leaf-big)"/>
   </g>
-  <g transform="translate(38,38.4) scale(0.391) rotate(12)">
-    <path d="M 0,-40 Q 26,-20 22,10 Q 18,34 -2,36 Q -22,34 -20,10 Q -18,-14 0,-40 Z" fill="var(--logo-leaf-small)"/>
+  <g transform="translate(39.6,42.8) scale(0.391) rotate(12)">
+    <path d="M -1.18,-38 Q 24.82,-18 20.82,12 Q 16.82,36 -3.18,38 Q -23.18,36 -21.18,12 Q -19.18,-12 -1.18,-38 Z" fill="var(--logo-leaf-small)"/>
   </g>
 </svg>
