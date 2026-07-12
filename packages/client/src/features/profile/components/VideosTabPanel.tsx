@@ -7,7 +7,7 @@ import {
 } from '../../video/videoApi';
 import VideoGrid from '../../video/pages/VideoGrid';
 import VideoList from '../../video/pages/VideoList';
-import ViewModeToggle from '../../../shared/ui/ViewModeToggle';
+import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
 import VisibilityFilter, {
   type VisibilityFilterValue,
 } from './VisibilityFilter';

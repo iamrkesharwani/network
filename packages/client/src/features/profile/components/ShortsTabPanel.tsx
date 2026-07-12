@@ -7,7 +7,7 @@ import {
 } from '../../short/shortApi';
 import ShortGrid from '../../short/pages/ShortGrid';
 import ShortList from '../../short/pages/ShortList';
-import ViewModeToggle from '../../../shared/ui/ViewModeToggle';
+import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
 import VisibilityFilter, {
   type VisibilityFilterValue,
 } from './VisibilityFilter';

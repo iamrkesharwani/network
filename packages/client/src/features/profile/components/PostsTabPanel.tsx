@@ -7,7 +7,7 @@ import {
 } from '../../post/postApi';
 import PostGrid from '../../post/pages/PostGrid';
 import PostList from '../../post/pages/PostList';
-import ViewModeToggle from '../../../shared/ui/ViewModeToggle';
+import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
 import VisibilityFilter, {
   type VisibilityFilterValue,
 } from './VisibilityFilter';

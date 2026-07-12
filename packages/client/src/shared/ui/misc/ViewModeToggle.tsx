@@ -1,7 +1,7 @@
 import { LayoutGrid, List } from 'lucide-react';
 import type { ViewMode } from '@network/shared';
-import { cn } from '../utils/cn';
-import { useIsMobileLayout } from '../hooks/useIsMobileLayout';
+import { cn } from '../../utils/cn';
+import { useIsMobileLayout } from '../../hooks/useIsMobileLayout';
 
 export interface ViewModeToggleProps {
   value: ViewMode;
