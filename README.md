@@ -1,6 +1,6 @@
 # Network
 
-*A social media platform built in India, for the world.*
+> _A social media platform built in India, for the world._
 
 India has one of the largest and fastest-growing internet populations on earth, and yet most of
 the platforms people use every day were never designed for how India actually communicates:
@@ -13,11 +13,11 @@ through voice rather than text. Network starts from that reality instead of retr
 
 One account, one feed, one creator identity, across three content formats:
 
-| Format | What it's for |
-|---|---|
-| **Video** | Long-form uploads with a full watch experience |
-| **Shorts** | Vertical, swipeable short-form video |
-| **Posts** | Text and image sharing |
+| Format     | What it's for                                  |
+| ---------- | ---------------------------------------------- |
+| **Video**  | Long-form uploads with a full watch experience |
+| **Shorts** | Vertical, swipeable short-form video           |
+| **Posts**  | Text and image sharing                         |
 
 No splitting yourself across a "YouTuber" app and a "poster" app. One profile, one dashboard,
 everything in one place.
@@ -26,14 +26,14 @@ everything in one place.
 
 ## What makes it different
 
-| Most global platforms | Network |
-|---|---|
+| Most global platforms                          | Network                                                                            |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------- |
 | English-first, other languages bolted on later | Ten to fifteen Indian languages built in from day one, English fully supported too |
-| Card and wallet payments only | UPI-native tipping, plus card payments for a global audience |
-| Trending driven purely by engagement | Trending shaped by festivals, sports, and other pre-decided hot topics |
-| Discovery built only around who you follow | Discovery also built around your language and city |
-| Sharing means copying a plain link | Share cards built for how content actually spreads here, mainly WhatsApp |
-| Assumes fast, unlimited data | Data Saver mode and offline viewing built in |
+| Card and wallet payments only                  | UPI-native tipping, plus card payments for a global audience                       |
+| Trending driven purely by engagement           | Trending shaped by festivals, sports, and other pre-decided hot topics             |
+| Discovery built only around who you follow     | Discovery also built around your language and city                                 |
+| Sharing means copying a plain link             | Share cards built for how content actually spreads here, mainly WhatsApp           |
+| Assumes fast, unlimited data                   | Data Saver mode and offline viewing built in                                       |
 
 And it's proudly Indian about it. The app carries a visible "Made in India" mark. This is built to
 be seen as homegrown, not a copy of something built elsewhere.
@@ -62,7 +62,7 @@ audience breakdowns. Scheduled publishing. UPI and card-based tipping.
 Compliant with India's IT Rules and Digital Personal Data Protection Act from the ground up.
 Automated content-safety scanning on every upload. A transparent takedown process.
 
-**Live** *(planned)*
+**Live** _(planned)_
 Live streaming with real-time chat, viewer counts, and automatic VOD saving.
 
 ---
@@ -111,5 +111,5 @@ protection law from day one, not bolted on after the fact.
 
 ---
 
-This is early. Pre-launch, no public users yet. But the architecture and the roadmap are already
-built for where this is going, not just where it is today.
+> This is early. Pre-launch, no public users yet. But the architecture and the roadmap are already
+> built for where this is going, not just where it is today.
