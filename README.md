@@ -1,117 +1,115 @@
 # Network
 
-A social media platform built in India, for the world.
-
-## The idea
+*A social media platform built in India, for the world.*
 
 India has one of the largest and fastest-growing internet populations on earth, and yet most of
-the platforms people use every day were never designed for how India actually communicates: across
-a dozen languages, on limited data plans, through WhatsApp forwards, and increasingly through voice
-rather than text. Network starts from that reality instead of retrofitting it later.
+the platforms people use every day were never designed for how India actually communicates:
+across a dozen languages, on limited data plans, through WhatsApp forwards, and increasingly
+through voice rather than text. Network starts from that reality instead of retrofitting it later.
 
-It's a single platform for long-form video, short-form video, and text-and-image posts: one
-account, one feed, one creator identity across all three, built with the same ambition as the
-platforms it competes with, and a set of design choices that make it genuinely usable for the next
-billion people coming online, not just the ones already comfortable with an English-only app.
+---
 
 ## What it is
 
-At its core, Network is a content and social platform with three content formats living side by
-side:
+One account, one feed, one creator identity, across three content formats:
 
-- **Video** for long-form uploads with a full watch experience
-- **Shorts** for vertical, swipeable short-form video
-- **Posts** for text and image sharing
+| Format | What it's for |
+|---|---|
+| **Video** | Long-form uploads with a full watch experience |
+| **Shorts** | Vertical, swipeable short-form video |
+| **Posts** | Text and image sharing |
 
-Every creator gets one profile, one set of followers, and one dashboard covering all three formats,
-rather than forcing people to think of themselves as a "YouTuber" on one app and a "poster" on
-another.
+No splitting yourself across a "YouTuber" app and a "poster" app. One profile, one dashboard,
+everything in one place.
+
+---
 
 ## What makes it different
 
-**Language-first, not language-added.** Ten to fifteen Indian languages are supported natively in
-the interface, with a transliteration input system that lets someone type in Roman script and get
-native-script suggestions as they go, with no separate keyboard app required. Search works across
-scripts too, so a query typed in English can surface content posted in Hindi, and vice versa.
+| Most global platforms | Network |
+|---|---|
+| English-first, other languages bolted on later | Ten to fifteen Indian languages built in from day one, English fully supported too |
+| Card and wallet payments only | UPI-native tipping, plus card payments for a global audience |
+| Trending driven purely by engagement | Trending shaped by festivals, sports, and other pre-decided hot topics |
+| Discovery built only around who you follow | Discovery also built around your language and city |
+| Sharing means copying a plain link | Share cards built for how content actually spreads here, mainly WhatsApp |
+| Assumes fast, unlimited data | Data Saver mode and offline viewing built in |
 
-**Built for real network conditions.** A dedicated Data Saver mode keeps video quality modest by
-default and makes content available for offline viewing, because a meaningful share of the intended
-audience is on limited or metered data plans, not unlimited fibre.
+And it's proudly Indian about it. The app carries a visible "Made in India" mark. This is built to
+be seen as homegrown, not a copy of something built elsewhere.
 
-**Distribution that matches how content actually spreads here.** Rather than assuming people share
-links, Network generates branded, shareable video and image cards built specifically for forwarding
-on WhatsApp, the actual distribution channel for a huge amount of content in India today.
-
-**Payments that fit the market and the world.** Creator tipping works through UPI for instant,
-native Indian payments, with card-based payments alongside it for a global audience. Nobody is
-forced through a payment rail that doesn't make sense for where they live.
-
-**Culturally aware, not just algorithmically ranked.** Trending and discovery surfaces take Indian
-festivals and major cricket events into account, instead of relying purely on generic engagement
-scoring.
-
-**Community by language and city, not just by follow graph.** People can find and join communities
-built around shared language and shared geography, a different and often more relevant discovery
-model than a pure follow-based feed.
-
-**Proudly Indian.** The app carries a visible "Made in India" mark. This is a platform built to be
-seen as homegrown, not a copy of something built elsewhere.
+---
 
 ## Feature highlights
 
 **Content & discovery**
-
-- Unified home feed across video, shorts, and posts
-- Trending, following, and curated/editorial shelves
-- Full-text and cross-script search with autocomplete
-- Personalized recommendations based on watch history
+Unified home feed across video, shorts, and posts. Trending, following, and curated shelves.
+Full-text and cross-script search. Recommendations based on watch history.
 
 **Social**
-
-- Follow/channel pages per creator
-- Likes, threaded comments, and native sharing
-- Playlists and bookmarks
-- Real-time notifications
+Follow/channel pages, likes, threaded comments, native sharing, playlists, bookmarks, real-time
+notifications.
 
 **Messaging**
-
-- End-to-end encrypted direct messages: private keys never leave the user's device, so not even
-  the platform can read message content
+End-to-end encrypted direct messages. Private keys never leave your device, so not even the
+platform can read your conversations.
 
 **Creator tools**
-
-- A unified creator dashboard with badges, milestones, and stats across all content types
-- Video analytics, including watch time and audience region/device breakdowns
-- Scheduled publishing and chapter markers
-- UPI and card-based tipping, with a creator fund path for the future
+A unified dashboard with badges, milestones, and stats. Video analytics, including watch time and
+audience breakdowns. Scheduled publishing. UPI and card-based tipping.
 
 **Trust & safety**
+Compliant with India's IT Rules and Digital Personal Data Protection Act from the ground up.
+Automated content-safety scanning on every upload. A transparent takedown process.
 
-- Full compliance with India's IT Rules and Digital Personal Data Protection Act
-- Automated content-safety scanning on every upload
-- A transparent takedown and grievance process
+**Live** *(planned)*
+Live streaming with real-time chat, viewer counts, and automatic VOD saving.
 
-**Live** (planned)
-
-- Live streaming with real-time chat and viewer counts, VOD saved automatically when a broadcast
-  ends
+---
 
 ## Built to last, not built to burn cash
 
-The video pipeline (upload, transcoding, storage, and delivery) is entirely self-hosted rather than
-routed through an expensive per-minute third-party video vendor, so the cost of running the
-platform doesn't scale unpredictably with usage the way many video-heavy startups do.
-Infrastructure choices throughout the project favor fixed, predictable cost over convenience that
-comes with a surprise bill attached.
+The video pipeline, upload, transcoding, storage, and delivery, is entirely self-hosted rather than
+routed through an expensive per-minute third-party vendor. The cost of running this doesn't scale
+unpredictably with usage the way a lot of video-heavy startups do. Every infrastructure choice so
+far favors fixed, predictable cost over convenience that comes with a surprise bill attached.
 
-## Where things stand today
+---
 
-The foundation is complete: authentication, video and shorts upload with a real self-hosted
-transcoding pipeline, posts, creator profiles, and the core feed are all built and working.
-Playback, search, watch history, and the full social layer (follows, comments, likes, playlists,
-notifications, and encrypted messaging) are next, followed by the India-first language and
-payments work described above, and then a deliberately careful, cost-controlled path to a public
-launch.
+## Roadmap at a glance
 
-This is early: pre-launch, with no public users yet. The architecture and the roadmap are already
+**Live today**
+Sign-in and account setup, video and shorts upload with real transcoding, posts, creator profiles
+and dashboards, and a unified home feed.
+
+**Building next**
+The full watch experience, search, follows, likes, comments, playlists, notifications, and
+end-to-end encrypted messaging.
+
+**Coming later**
+Indian-language interface and voice input, UPI and card payments, WhatsApp-native sharing, live
+streaming, and personalized recommendations.
+
+---
+
+## Common questions
+
+**Can I use this today?**
+Not yet. It's in active development and hasn't launched publicly.
+
+**Why build another social app instead of using what's already out there?**
+Because most existing apps weren't built around India's languages, data realities, or payment
+habits. This one is, without giving up usability for anyone else, anywhere.
+
+**Is this only for people in India?**
+No. India-first, not India-only. The language, payment, and sharing choices are built around
+Indian habits, but the app itself works for anyone.
+
+**How is my privacy handled?**
+Direct messages are end-to-end encrypted, and the platform is being built to follow India's data
+protection law from day one, not bolted on after the fact.
+
+---
+
+This is early. Pre-launch, no public users yet. But the architecture and the roadmap are already
 built for where this is going, not just where it is today.
