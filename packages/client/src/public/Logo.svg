@@ -1,5 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 68">
-  <rect x="0"  y="0"  width="116" height="16" rx="8" fill="var(--logo-bar-1)"/>
-  <rect x="0"  y="26" width="74"  height="16" rx="8" fill="var(--logo-bar-2)"/>
-  <rect x="0"  y="52" width="42"  height="16" rx="8" fill="var(--logo-bar-3)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="0" y="0" width="64" height="64" rx="12" fill="var(--logo-bg)"/>
+  <g transform="translate(26.7,26.7) scale(0.587) rotate(-8)">
+    <path d="M 0,-40 Q 26,-20 22,10 Q 18,34 -2,36 Q -22,34 -20,10 Q -18,-14 0,-40 Z" fill="var(--logo-leaf-big)"/>
+  </g>
+  <g transform="translate(38,38.4) scale(0.391) rotate(12)">
+    <path d="M 0,-40 Q 26,-20 22,10 Q 18,34 -2,36 Q -22,34 -20,10 Q -18,-14 0,-40 Z" fill="var(--logo-leaf-small)"/>
+  </g>
 </svg>

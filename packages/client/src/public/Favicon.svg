@@ -1,18 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <style>
-    .bg { fill: #18180F; }
-    .b1 { fill: #6B6B5E; }
-    .b2 { fill: #4A4A3E; }
-    .b3 { fill: #E8940A; }
-    @media (prefers-color-scheme: light) {
-      .bg { fill: #EEECEA; }
-      .b1 { fill: #8A8A7A; }
-      .b2 { fill: #B0AFA2; }
-      .b3 { fill: #E8940A; }
-    }
-  </style>
-  <rect x="0" y="0" width="32" height="32" rx="6" class="bg"/>
-  <rect x="4" y="7"  width="24" height="5" rx="2.5" class="b1"/>
-  <rect x="4" y="14" width="16" height="5" rx="2.5" class="b2"/>
-  <rect x="4" y="21" width="9"  height="5" rx="2.5" class="b3"/>
+  <rect x="0" y="0" width="32" height="32" rx="6" fill="#F2691C"/>
+  <g transform="translate(13.35,13.35) scale(0.2935) rotate(-8)">
+    <path d="M 0,-40 Q 26,-20 22,10 Q 18,34 -2,36 Q -22,34 -20,10 Q -18,-14 0,-40 Z" fill="#F5EDE4"/>
+  </g>
+  <g transform="translate(19,19.2) scale(0.1955) rotate(12)">
+    <path d="M 0,-40 Q 26,-20 22,10 Q 18,34 -2,36 Q -22,34 -20,10 Q -18,-14 0,-40 Z" fill="#171310"/>
+  </g>
 </svg>
