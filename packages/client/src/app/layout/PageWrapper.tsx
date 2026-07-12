@@ -10,6 +10,7 @@ const PageWrapper = () => {
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
     const stored = localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
     return stored === null ? true : stored === 'true';
   });

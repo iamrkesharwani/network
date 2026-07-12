@@ -38,4 +38,4 @@ COPY --from=builder /app/packages/server/package.json packages/server/package.js
 COPY --from=builder /app/packages/server/dist packages/server/dist
 
 EXPOSE 5000
-CMD ["node", "packages/server/dist/server.js"]
+CMD ["node", "packages/server/dist/web.js"]

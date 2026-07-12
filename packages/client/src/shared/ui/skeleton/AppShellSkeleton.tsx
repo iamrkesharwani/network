@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { SIDEBAR_COLLAPSED_STORAGE_KEY } from '@network/shared';
 import Skeleton from './Skeleton';
 
 interface AppShellSkeletonProps {
@@ -6,7 +7,10 @@ interface AppShellSkeletonProps {
 }
 
 const AppShellSkeleton = ({ children }: AppShellSkeletonProps) => {
-  const isCollapsed = localStorage.getItem('sidebar:collapsed') !== 'false';
+  const isCollapsed =
+    typeof window === 'undefined'
+      ? true
+      : localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) !== 'false';
   const sidebarWidth = isCollapsed ? 'w-14' : 'w-56';
   return (
     <div

@@ -5,6 +5,8 @@ type ContentType = 'video' | 'short' | 'post';
 type ViewModeMap = Partial<Record<ContentType, ViewMode>>;
 
 const readStoredMap = (): ViewModeMap => {
+  if (typeof window === 'undefined') return {};
+
   try {
     const raw = localStorage.getItem(PROFILE_VIEW_MODE_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as ViewModeMap) : {};

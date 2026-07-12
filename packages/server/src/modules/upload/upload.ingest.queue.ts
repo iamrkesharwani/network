@@ -15,7 +15,7 @@ export interface MediaIngestJobData {
   fileSizeBytes: number;
 }
 
-const mediaIngestQueue = new Queue<MediaIngestJobData>(
+export const mediaIngestQueue = new Queue<MediaIngestJobData>(
   MEDIA_INGEST_QUEUE_NAME,
   {
     connection: bullMqConnection,

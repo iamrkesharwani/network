@@ -108,6 +108,21 @@ export class R2StorageProvider implements IStorageProvider {
     );
   }
 
+  async uploadObject(
+    key: string,
+    body: Buffer,
+    contentType: string
+  ): Promise<void> {
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+      })
+    );
+  }
+
   async deleteObject(key: string): Promise<void> {
     try {
       await this.client.send(

@@ -7,6 +7,11 @@ import {
 import { bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import { emitToUser } from '../../core/config/socket.js';
+import { storageProvider } from '../../core/providers/provider.js';
+import {
+  mediaIngestJobDurationSeconds,
+  mediaIngestJobFailuresTotal,
+} from '../../core/metrics/queueMetrics.js';
 import { setProviderMediaType } from '../webhook/provider-media-index.repository.js';
 import { getMediaAdapter } from './upload.media.registry.js';
 import { ingestFromStorage } from './services/upload.ingest.service.js';
@@ -15,10 +20,11 @@ import type { MediaIngestJobData } from './upload.ingest.queue.js';
 const processIngestJob = async (
   job: Job<MediaIngestJobData>
 ): Promise<void> => {
+  const jobStartMs = Date.now();
   const { mediaType, mediaId, userId, storageKey, fileName, fileSizeBytes } =
     job.data;
 
-  const { providerVideoId } = await ingestFromStorage({
+  const { providerVideoId, readyPayload } = await ingestFromStorage({
     storageKey,
     fileName,
     fileSizeBytes,
@@ -37,6 +43,7 @@ const processIngestJob = async (
     logger.warn(
       `Media ingest: placeholder ${mediaId} (${mediaType}) vanished before it could be marked processing`
     );
+    mediaIngestJobDurationSeconds.observe((Date.now() - jobStartMs) / 1000);
     return;
   }
 
@@ -46,6 +53,19 @@ const processIngestJob = async (
     status: 'PROCESSING',
   };
   emitToUser(userId, MEDIA_STATUS_SOCKET_EVENT, statusEvent);
+
+  if (readyPayload) {
+    await adapter.processReadyPayload(readyPayload);
+
+    await storageProvider.deleteObject(storageKey).catch((e) =>
+      logger.warn(
+        e,
+        `Failed to delete raw upload object ${storageKey} after successful transcode`
+      )
+    );
+  }
+
+  mediaIngestJobDurationSeconds.observe((Date.now() - jobStartMs) / 1000);
 };
 
 export const startMediaIngestWorker = (): Worker<MediaIngestJobData> => {
@@ -70,11 +90,20 @@ export const startMediaIngestWorker = (): Worker<MediaIngestJobData> => {
 
     if (!isFinal) return;
 
+    mediaIngestJobFailuresTotal.inc();
+
     try {
       const adapter = getMediaAdapter(job.data.mediaType);
       await adapter.markFailed(
         job.data.mediaId,
         'We could not process this upload. Please try uploading again.'
+      );
+
+      await storageProvider.deleteObject(job.data.storageKey).catch((e) =>
+        logger.warn(
+          e,
+          `Failed to delete raw upload object ${job.data.storageKey} after exhausted ingest retries`
+        )
       );
 
       const statusEvent: IMediaStatusEvent = {

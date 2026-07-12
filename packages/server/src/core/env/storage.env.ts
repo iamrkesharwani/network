@@ -18,6 +18,8 @@ export const storageEnvSchema = z.object({
 
   CF_R2_BUCKET_NAME: z.string().optional(),
 
+  CF_R2_PROCESSED_BUCKET_NAME: z.string().optional(),
+
   S3_REGION: z.string().optional(),
 
   S3_ACCESS_KEY_ID: z.string().optional(),
@@ -31,10 +33,4 @@ export const storageEnvSchema = z.object({
   S3_FORCE_PATH_STYLE: z.string().optional(),
 
   IMAGE_CDN_BASE_URL: z.string().optional(),
-
-  AZURE_STORAGE_ACCOUNT_NAME: z.string().optional(),
-
-  AZURE_STORAGE_ACCOUNT_KEY: z.string().optional(),
-
-  AZURE_STORAGE_CONTAINER_NAME: z.string().optional(),
 });

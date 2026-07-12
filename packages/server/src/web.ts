@@ -15,7 +15,6 @@ import { env } from './core/env/env.js';
 import { startEmailWorker } from './modules/email/email.js';
 import { startUploadReaperWorker } from './modules/upload/upload.reaper.worker.js';
 import { scheduleUploadSessionReaper } from './modules/upload/upload.reaper.queue.js';
-import { startMediaIngestWorker } from './modules/upload/upload.ingest.worker.js';
 import { registerContentReaperAdapter } from './core/reaper/contentReaper.registry.js';
 import { startContentReaperWorker } from './core/reaper/contentReaper.worker.js';
 import { scheduleContentReaper } from './core/reaper/contentReaper.queue.js';
@@ -26,13 +25,12 @@ import { postReaperAdapter } from './modules/post/services/post.reaper.service.j
 const port = env.PORT;
 const httpServer = createServer(app);
 
-const startServer = async () => {
+const startWeb = async () => {
   try {
     await connectDb();
     await initRedis();
     initSocket(httpServer);
     startEmailWorker();
-    startMediaIngestWorker();
     startUploadReaperWorker();
     await scheduleUploadSessionReaper();
 
@@ -43,7 +41,7 @@ const startServer = async () => {
     await scheduleContentReaper();
 
     httpServer.listen(port, '0.0.0.0', () => {
-      logger.info(`Server listening on port ${port}`);
+      logger.info(`Web server listening on port ${port}`);
       logger.info(
         `Providers:
         storage: ${env.STORAGE_PROVIDER}
@@ -52,7 +50,7 @@ const startServer = async () => {
       );
     });
   } catch (error) {
-    logger.error(error, 'Failed to initialize application startup');
+    logger.error(error, 'Failed to initialize web process startup');
     process.exit(1);
   }
 };
@@ -95,4 +93,4 @@ const gracefulShutdown = async (signal: string) => {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-startServer();
+startWeb();

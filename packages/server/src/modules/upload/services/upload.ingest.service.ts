@@ -1,4 +1,5 @@
 import { storageProvider, videoProvider } from '../../../core/providers/provider.js';
+import type { IngestVideoResult } from '../../../core/providers/types.js';
 
 export interface IngestFromStorageParams {
   storageKey: string;
@@ -7,13 +8,9 @@ export interface IngestFromStorageParams {
   userId: string;
 }
 
-export interface IngestFromStorageResult {
-  providerVideoId: string;
-}
-
 export const ingestFromStorage = async (
   params: IngestFromStorageParams
-): Promise<IngestFromStorageResult> => {
+): Promise<IngestVideoResult> => {
   const storageUrl = await storageProvider.buildAccessUrl(params.storageKey);
 
   return videoProvider.ingestFromUrl({

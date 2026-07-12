@@ -10,6 +10,10 @@ import {
 import * as videoRepository from '../video/video.repository.js';
 import * as shortRepository from '../short/short.repository.js';
 import * as postRepository from '../post/post.repository.js';
+import { videoProcessWebhook } from '../video/services/video.webhook.service.js';
+import { shortProcessWebhook } from '../short/services/short.webhook.service.js';
+import { postProcessWebhook } from '../post/services/post.webhook.service.js';
+import type { NormalizedWebhookPayload } from '../../core/providers/types.js';
 
 export interface MultipartPlaceholder {
   id: string;
@@ -35,6 +39,8 @@ export interface MultipartMediaAdapter {
   markFailed(id: string, errorMessage: string): Promise<boolean>;
 
   deletePlaceholder(id: string): Promise<void>;
+
+  processReadyPayload(payload: NormalizedWebhookPayload): Promise<boolean>;
 }
 
 const videoAdapter: MultipartMediaAdapter = {
@@ -78,6 +84,8 @@ const videoAdapter: MultipartMediaAdapter = {
   deletePlaceholder: async (id) => {
     await videoRepository.deleteById(id);
   },
+
+  processReadyPayload: videoProcessWebhook,
 };
 
 const shortAdapter: MultipartMediaAdapter = {
@@ -121,6 +129,8 @@ const shortAdapter: MultipartMediaAdapter = {
   deletePlaceholder: async (id) => {
     await shortRepository.deleteById(id);
   },
+
+  processReadyPayload: shortProcessWebhook,
 };
 
 const postAdapter: MultipartMediaAdapter = {
@@ -158,6 +168,8 @@ const postAdapter: MultipartMediaAdapter = {
   deletePlaceholder: async (id) => {
     await postRepository.deleteById(id);
   },
+
+  processReadyPayload: postProcessWebhook,
 };
 
 const registry: Record<MultipartMediaType, MultipartMediaAdapter> = {

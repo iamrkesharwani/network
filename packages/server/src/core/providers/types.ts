@@ -33,6 +33,8 @@ export interface IStorageProvider {
 
   buildAccessUrl(key: string): Promise<string>;
 
+  uploadObject(key: string, body: Buffer, contentType: string): Promise<void>;
+
   deleteObject(key: string): Promise<void>;
 
   isOwnedKey(
@@ -69,6 +71,7 @@ export interface IStorageProvider {
 
 export interface IngestVideoResult {
   providerVideoId: string;
+  readyPayload?: NormalizedWebhookPayload;
 }
 
 export interface WebhookVerifyParams {
