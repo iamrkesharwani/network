@@ -1,7 +1,10 @@
 import { z } from 'zod';
+import { PROCESS_ROLES } from '@network/shared';
 
 export const appEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']),
+
+  PROCESS_ROLE: z.enum(PROCESS_ROLES).default('web'),
 
   PORT: z.coerce.number().default(5000),
 

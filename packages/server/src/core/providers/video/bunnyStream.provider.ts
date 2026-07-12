@@ -1,5 +1,7 @@
-import { BUNNY_WEBHOOK_REPLAY_TTL_SECONDS } from '@network/shared';
-import type { VideoStatus } from '../../../../../shared/src/index.js';
+import {
+  BUNNY_WEBHOOK_REPLAY_TTL_SECONDS,
+  type VideoStatus,
+} from '@network/shared';
 import { ApiError } from '../../utils/ApiError.js';
 import { logger } from '../../utils/logger.js';
 import { redisClient } from '../../config/redis.js';

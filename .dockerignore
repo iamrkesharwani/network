@@ -1,0 +1,17 @@
+.git
+node_modules
+**/node_modules
+dist
+**/dist
+build
+**/build
+*.log
+.claude
+.DS_Store
+*.tsbuildinfo
+packages/*/src/__dev__/
+.env
+.env.*
+!.env.example
+Dockerfile
+.dockerignore
