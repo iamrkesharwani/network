@@ -6,6 +6,7 @@ dist/
 build/
 *.log
 .claude
+.agents
 .DS_Store
 *.tsbuildinfo
 packages/*/src/__dev__/

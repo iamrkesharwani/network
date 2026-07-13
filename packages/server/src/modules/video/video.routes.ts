@@ -65,6 +65,13 @@ router.get(
 );
 
 router.get(
+  '/user/:username/visibility-counts',
+  requireAuth,
+  validate({ params: usernameParamSchema }),
+  videoCrudController.getVisibilityCounts
+);
+
+router.get(
   '/user/:username',
   optionalAuth,
   validate({ params: usernameParamSchema, query: videoUserFeedQuerySchema }),

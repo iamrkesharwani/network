@@ -43,3 +43,9 @@ export interface ICreatorCatalog {
   videoMilestones: typeof import('../constants/creator.constants.js').VIDEO_MILESTONE_CATALOG;
   creatorMilestones: typeof import('../constants/creator.constants.js').CREATOR_MILESTONE_CATALOG;
 }
+
+export interface IVisibilityCounts {
+  all: number;
+  public: number;
+  unlisted: number;
+}

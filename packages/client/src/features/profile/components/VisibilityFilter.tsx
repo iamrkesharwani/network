@@ -1,4 +1,4 @@
-import type { ContentVisibility } from '@network/shared';
+import type { ContentVisibility, IVisibilityCounts } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 
 export type VisibilityFilterValue = ContentVisibility | 'all';
@@ -6,6 +6,7 @@ export type VisibilityFilterValue = ContentVisibility | 'all';
 export interface VisibilityFilterProps {
   value: VisibilityFilterValue;
   onChange: (value: VisibilityFilterValue) => void;
+  counts?: IVisibilityCounts;
 }
 
 const OPTIONS: { value: VisibilityFilterValue; label: string }[] = [
@@ -14,7 +15,7 @@ const OPTIONS: { value: VisibilityFilterValue; label: string }[] = [
   { value: 'unlisted', label: 'Unlisted' },
 ];
 
-const VisibilityFilter = ({ value, onChange }: VisibilityFilterProps) => (
+const VisibilityFilter = ({ value, onChange, counts }: VisibilityFilterProps) => (
   <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-surface-raised border border-border">
     {OPTIONS.map((option) => (
       <button
@@ -29,7 +30,7 @@ const VisibilityFilter = ({ value, onChange }: VisibilityFilterProps) => (
             : 'text-text-secondary hover:text-text-primary'
         )}
       >
-        {option.label}
+        {option.label}{counts ? ` (${counts[option.value]})` : ''}
       </button>
     ))}
   </div>

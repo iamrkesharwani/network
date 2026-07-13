@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   IVideoResponse,
   IVideoActionResult,
+  IVisibilityCounts,
   IInitiateVideoUploadResult,
   InitiateVideoUploadInput,
   ConfirmVideoUploadInput,
@@ -17,7 +18,7 @@ import type {
 export const videoApi = createApi({
   reducerPath: 'videoApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/video' }),
-  tagTypes: ['Video', 'MyVideos', 'UserVideos'],
+  tagTypes: ['Video', 'MyVideos', 'UserVideos', 'UserVideoVisibilityCounts'],
   endpoints: (builder) => ({
     initiateUpload: builder.mutation<
       ApiResponse<IInitiateVideoUploadResult>,
@@ -62,7 +63,7 @@ export const videoApi = createApi({
         method: 'POST',
         data,
       }),
-      invalidatesTags: ['MyVideos'],
+      invalidatesTags: ['MyVideos', 'UserVideoVisibilityCounts'],
     }),
 
     getFeed: builder.query<PaginatedResponse<IVideoResponse>, VideoFeedQuery>({
@@ -131,6 +132,16 @@ export const videoApi = createApi({
       providesTags: ['UserVideos'],
     }),
 
+    getUserVisibilityCounts: builder.query<ApiResponse<IVisibilityCounts>, string>({
+      query: (username) => ({
+        url: `/user/${username}/visibility-counts`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error, username) => [
+        { type: 'UserVideoVisibilityCounts', id: username },
+      ],
+    }),
+
     getVideoById: builder.query<ApiResponse<IVideoResponse>, string>({
       query: (videoId) => ({
         url: `/${videoId}`,
@@ -154,6 +165,7 @@ export const videoApi = createApi({
         { type: 'Video', id: videoId },
         'MyVideos',
         'UserVideos',
+        'UserVideoVisibilityCounts',
       ],
       async onQueryStarted({ videoId }, { dispatch, getState, queryFulfilled }) {
         const { data: result } = await queryFulfilled.catch(() => ({
@@ -214,6 +226,7 @@ export const videoApi = createApi({
         { type: 'Video', id: videoId },
         'MyVideos',
         'UserVideos',
+        'UserVideoVisibilityCounts',
         'Video',
       ],
     }),
@@ -228,6 +241,7 @@ export const {
   useGetFeedQuery,
   useGetMyVideosQuery,
   useGetUserVideosQuery,
+  useGetUserVisibilityCountsQuery,
   useGetVideoByIdQuery,
   useUpdateVideoMutation,
   useDeleteVideoMutation,

@@ -4,6 +4,7 @@ import {
   useGetUserShortsQuery,
   useDeleteShortMutation,
   useUpdateShortMutation,
+  useGetUserVisibilityCountsQuery,
 } from '../../short/shortApi';
 import ShortGrid from '../../short/pages/ShortGrid';
 import ShortList from '../../short/pages/ShortList';
@@ -39,6 +40,9 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
       ...(isOwner &&
         visibilityFilter !== 'all' && { visibility: visibilityFilter }),
     });
+  const { data: visibilityCounts } = useGetUserVisibilityCountsQuery(username, {
+    skip: !isOwner,
+  });
 
   const [deleteShort] = useDeleteShortMutation();
   const [updateShort] = useUpdateShortMutation();
@@ -79,6 +83,7 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
           <VisibilityFilter
             value={visibilityFilter}
             onChange={setVisibilityFilter}
+            counts={visibilityCounts?.data}
           />
         ) : (
           <span />

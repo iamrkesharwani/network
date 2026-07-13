@@ -7,6 +7,7 @@ import type {
   InitiateShortUploadInput,
   IShortActionResult,
   IShortResponse,
+  IVisibilityCounts,
   PaginatedResponse,
   ShortFeedQuery,
   ShortUpdateInput,
@@ -17,7 +18,7 @@ import type {
 export const shortApi = createApi({
   reducerPath: 'shortApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/short' }),
-  tagTypes: ['Short', 'MyShorts', 'UserShorts'],
+  tagTypes: ['Short', 'MyShorts', 'UserShorts', 'UserShortVisibilityCounts'],
   endpoints: (builder) => ({
     initiateUpload: builder.mutation<
       ApiResponse<IInitiateShortUploadResult>,
@@ -62,7 +63,7 @@ export const shortApi = createApi({
         method: 'POST',
         data,
       }),
-      invalidatesTags: ['MyShorts'],
+      invalidatesTags: ['MyShorts', 'UserShortVisibilityCounts'],
     }),
 
     getFeed: builder.query<PaginatedResponse<IShortResponse>, ShortFeedQuery>({
@@ -131,6 +132,16 @@ export const shortApi = createApi({
       providesTags: ['UserShorts'],
     }),
 
+    getUserVisibilityCounts: builder.query<ApiResponse<IVisibilityCounts>, string>({
+      query: (username) => ({
+        url: `/user/${username}/visibility-counts`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error, username) => [
+        { type: 'UserShortVisibilityCounts', id: username },
+      ],
+    }),
+
     getShortById: builder.query<ApiResponse<IShortResponse>, string>({
       query: (shortId) => ({
         url: `/${shortId}`,
@@ -154,6 +165,7 @@ export const shortApi = createApi({
         { type: 'Short', id: shortId },
         'MyShorts',
         'UserShorts',
+        'UserShortVisibilityCounts',
       ],
       async onQueryStarted({ shortId }, { dispatch, getState, queryFulfilled }) {
         const { data: result } = await queryFulfilled.catch(() => ({
@@ -214,6 +226,7 @@ export const shortApi = createApi({
         { type: 'Short', id: shortId },
         'MyShorts',
         'UserShorts',
+        'UserShortVisibilityCounts',
         'Short',
       ],
     }),
@@ -228,6 +241,7 @@ export const {
   useGetFeedQuery,
   useGetMyShortsQuery,
   useGetUserShortsQuery,
+  useGetUserVisibilityCountsQuery,
   useGetShortByIdQuery,
   useUpdateShortMutation,
   useDeleteShortMutation,

@@ -10,6 +10,7 @@ import {
   getPublicFeed,
   getPostById,
   getUserPosts,
+  getUserVisibilityCounts,
   updatePost,
 } from '../services/post.crud.service.js';
 
@@ -78,6 +79,17 @@ export const getByUsername = asyncHandler(
           "User's posts fetched successfully"
         )
       );
+  }
+);
+
+export const getVisibilityCounts = asyncHandler(
+  async (req: Request, res: Response) => {
+    const counts = await getUserVisibilityCounts(
+      getUsernameParam(req),
+      req.user?.id
+    );
+
+    res.status(200).json(new ApiResponse(counts, 'Visibility counts fetched successfully'));
   }
 );
 

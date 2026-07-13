@@ -4,6 +4,7 @@ import type {
   ApiResponse,
   IPostActionResult,
   IPostResponse,
+  IVisibilityCounts,
   PaginatedResponse,
   PostFeedQuery,
   PostUpdateInput,
@@ -13,7 +14,7 @@ import type {
 export const postApi = createApi({
   reducerPath: 'postApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/post' }),
-  tagTypes: ['Post', 'MyPosts', 'UserPosts'],
+  tagTypes: ['Post', 'MyPosts', 'UserPosts', 'UserPostVisibilityCounts'],
   endpoints: (builder) => ({
     createPost: builder.mutation<ApiResponse<IPostActionResult>, FormData>({
       query: (data) => ({
@@ -22,7 +23,7 @@ export const postApi = createApi({
         data,
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
-      invalidatesTags: ['MyPosts', 'Post'],
+      invalidatesTags: ['MyPosts', 'Post', 'UserPostVisibilityCounts'],
     }),
 
     getFeed: builder.query<PaginatedResponse<IPostResponse>, PostFeedQuery>({
@@ -88,6 +89,16 @@ export const postApi = createApi({
       providesTags: ['UserPosts'],
     }),
 
+    getUserVisibilityCounts: builder.query<ApiResponse<IVisibilityCounts>, string>({
+      query: (username) => ({
+        url: `/user/${username}/visibility-counts`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error, username) => [
+        { type: 'UserPostVisibilityCounts', id: username },
+      ],
+    }),
+
     getPostById: builder.query<ApiResponse<IPostResponse>, string>({
       query: (postId) => ({
         url: `/${postId}`,
@@ -109,6 +120,7 @@ export const postApi = createApi({
         { type: 'Post', id: postId },
         'MyPosts',
         'UserPosts',
+        'UserPostVisibilityCounts',
       ],
       async onQueryStarted({ postId }, { dispatch, getState, queryFulfilled }) {
         const { data: result } = await queryFulfilled.catch(() => ({
@@ -169,6 +181,7 @@ export const postApi = createApi({
         { type: 'Post', id: postId },
         'MyPosts',
         'UserPosts',
+        'UserPostVisibilityCounts',
         'Post',
       ],
     }),
@@ -180,6 +193,7 @@ export const {
   useGetFeedQuery,
   useGetMyPostsQuery,
   useGetUserPostsQuery,
+  useGetUserVisibilityCountsQuery,
   useGetPostByIdQuery,
   useUpdatePostMutation,
   useDeletePostMutation,

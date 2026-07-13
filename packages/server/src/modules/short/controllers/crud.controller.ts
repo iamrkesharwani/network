@@ -10,6 +10,7 @@ import {
   getPublicFeed,
   getShortById,
   getUserShorts,
+  getUserVisibilityCounts,
   updateShort,
 } from '../services/short.crud.service.js';
 
@@ -79,6 +80,17 @@ export const getByUsername = asyncHandler(
           "User's shorts fetched successfully"
         )
       );
+  }
+);
+
+export const getVisibilityCounts = asyncHandler(
+  async (req: Request, res: Response) => {
+    const counts = await getUserVisibilityCounts(
+      getUsernameParam(req),
+      req.user?.id
+    );
+
+    res.status(200).json(new ApiResponse(counts, 'Visibility counts fetched successfully'));
   }
 );
 

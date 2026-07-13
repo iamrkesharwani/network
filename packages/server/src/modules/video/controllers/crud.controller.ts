@@ -9,6 +9,7 @@ import {
   getMyVideos,
   getPublicFeed,
   getUserVideos,
+  getUserVisibilityCounts,
   getVideoById,
   updateVideo,
 } from '../services/video.crud.service.js';
@@ -80,6 +81,17 @@ export const getByUsername = asyncHandler(
           "User's videos fetched successfully"
         )
       );
+  }
+);
+
+export const getVisibilityCounts = asyncHandler(
+  async (req: Request, res: Response) => {
+    const counts = await getUserVisibilityCounts(
+      getUsernameParam(req),
+      req.user?.id
+    );
+
+    res.status(200).json(new ApiResponse(counts, 'Visibility counts fetched successfully'));
   }
 );
 

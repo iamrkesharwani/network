@@ -13,6 +13,17 @@ import { recordViewIncrement } from '../../creator/services/creator.views.servic
 import { logger } from '../../../core/utils/logger.js';
 import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
 
+export const getUserVisibilityCounts = async (
+  username: string,
+  requesterId: string | undefined
+) => {
+  const { userId, isOwner } = await resolveProfileOwner(username, requesterId);
+  if (!isOwner) {
+    throw new ApiError(403, 'FORBIDDEN', 'You cannot view these counts.');
+  }
+  return postRepository.countByVisibility(userId);
+};
+
 export const getPostById = async (
   postId: string,
   requester?: Requester

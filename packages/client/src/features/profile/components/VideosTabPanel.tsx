@@ -4,6 +4,7 @@ import {
   useGetUserVideosQuery,
   useDeleteVideoMutation,
   useUpdateVideoMutation,
+  useGetUserVisibilityCountsQuery,
 } from '../../video/videoApi';
 import VideoGrid from '../../video/pages/VideoGrid';
 import VideoList from '../../video/pages/VideoList';
@@ -39,6 +40,9 @@ const VideosTabPanel = ({ username, isOwner }: VideosTabPanelProps) => {
       ...(isOwner &&
         visibilityFilter !== 'all' && { visibility: visibilityFilter }),
     });
+  const { data: visibilityCounts } = useGetUserVisibilityCountsQuery(username, {
+    skip: !isOwner,
+  });
 
   const [deleteVideo] = useDeleteVideoMutation();
   const [updateVideo] = useUpdateVideoMutation();
@@ -79,6 +83,7 @@ const VideosTabPanel = ({ username, isOwner }: VideosTabPanelProps) => {
           <VisibilityFilter
             value={visibilityFilter}
             onChange={setVisibilityFilter}
+            counts={visibilityCounts?.data}
           />
         ) : (
           <span />

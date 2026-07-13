@@ -75,6 +75,28 @@ export const findByUserId = async (
   return result;
 };
 
+export const countByVisibility = async (
+  userId: string
+): Promise<{ all: number; public: number; unlisted: number }> => {
+  const counts = await ShortModel.aggregate<{ _id: string; count: number }>([
+    {
+      $match: {
+        userId: new mongoose.Types.ObjectId(userId),
+        deletedAt: null,
+      },
+    },
+    { $group: { _id: '$visibility', count: { $sum: 1 } } },
+  ]);
+
+  const publicCount = counts.find((count) => count._id === 'public')?.count ?? 0;
+  const unlistedCount = counts.find((count) => count._id === 'unlisted')?.count ?? 0;
+  return {
+    all: publicCount + unlistedCount,
+    public: publicCount,
+    unlisted: unlistedCount,
+  };
+};
+
 export const updateById = (
   id: string,
   data: UpdateShortData

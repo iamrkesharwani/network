@@ -4,6 +4,7 @@ import {
   useGetUserPostsQuery,
   useDeletePostMutation,
   useUpdatePostMutation,
+  useGetUserVisibilityCountsQuery,
 } from '../../post/postApi';
 import PostGrid from '../../post/pages/PostGrid';
 import PostList from '../../post/pages/PostList';
@@ -38,6 +39,9 @@ const PostsTabPanel = ({ username, isOwner }: PostsTabPanelProps) => {
       ...(isOwner &&
         visibilityFilter !== 'all' && { visibility: visibilityFilter }),
     });
+  const { data: visibilityCounts } = useGetUserVisibilityCountsQuery(username, {
+    skip: !isOwner,
+  });
 
   const [deletePost] = useDeletePostMutation();
   const [updatePost] = useUpdatePostMutation();
@@ -67,6 +71,7 @@ const PostsTabPanel = ({ username, isOwner }: PostsTabPanelProps) => {
           <VisibilityFilter
             value={visibilityFilter}
             onChange={setVisibilityFilter}
+            counts={visibilityCounts?.data}
           />
         ) : (
           <span />
