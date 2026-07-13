@@ -109,7 +109,8 @@ const VideoPlayer = ({
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    return () =>
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   const shouldAutoplayNextRef = useRef(false);
@@ -151,6 +152,11 @@ const VideoPlayer = ({
   const isBuffering = sourceState === 'buffering' || engine.isBuffering;
   const overlayError = sourceError ?? engine.error;
 
+  const handleRetry = () => {
+    retry();
+    engine.play();
+  };
+
   return (
     <>
       {isTheaterMode &&
@@ -167,7 +173,7 @@ const VideoPlayer = ({
         className={cn(
           'group/player relative aspect-video w-full overflow-hidden rounded-lg bg-black',
           isTheaterMode &&
-            'fixed top-1/2 left-1/2 z-50 w-screen max-w-400 -translate-x-1/2 -translate-y-1/2 px-4',
+            'fixed top-1/2 left-1/2 z-50 w-[min(100vw,calc(100vh*16/9))] max-w-400 -translate-x-1/2 -translate-y-1/2 px-4',
           className
         )}
       >
@@ -194,7 +200,7 @@ const VideoPlayer = ({
             isBuffering={isBuffering}
             error={overlayError}
             onTogglePlay={engine.togglePlay}
-            onRetry={retry}
+            onRetry={handleRetry}
           />
 
           <div

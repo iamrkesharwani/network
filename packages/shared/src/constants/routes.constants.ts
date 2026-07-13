@@ -6,6 +6,7 @@ export const CLIENT_ROUTES = {
   RESET_PASSWORD: '/reset-password',
   OAUTH_CALLBACK: '/oauth/callback',
   FEED: '/feed',
+  VIDEO_WATCH: '/video/:videoId',
   SHORT_WATCH: '/shorts/:shortId',
   POSTS: '/posts',
   UPLOAD: '/upload',

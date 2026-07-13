@@ -101,7 +101,7 @@ const ControlGroup = ({
           volume={volume}
           isMuted={isMuted}
           onVolumeChange={setVolume}
-          className="hidden w-20 @sm:block"
+          className="ml-1 hidden w-20 @sm:flex"
         />
       </div>
 
@@ -148,7 +148,11 @@ const ControlGroup = ({
             aria-pressed={isFullscreen}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
           >
-            {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+            {isFullscreen ? (
+              <Minimize className="h-5 w-5" />
+            ) : (
+              <Maximize className="h-5 w-5" />
+            )}
           </button>
         )}
       </div>

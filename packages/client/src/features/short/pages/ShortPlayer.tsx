@@ -5,6 +5,8 @@ import {
   Heart,
   MessageCircle,
   Share2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { formatCount } from '@network/shared';
 import type { IShortResponse } from '@network/shared';
@@ -70,6 +72,11 @@ const ShortPlayer = ({
     onNavigateNext: onNext,
   });
 
+  const handleRetry = () => {
+    retry();
+    engine.play();
+  };
+
   const isBuffering = sourceState === 'buffering' || engine.isBuffering;
   const overlayError = sourceError ?? engine.error;
 
@@ -101,6 +108,7 @@ const ShortPlayer = ({
         className="w-full h-full object-cover"
         playsInline
         loop
+        muted
       />
 
       <DoubleTapSeekZones
@@ -115,12 +123,12 @@ const ShortPlayer = ({
         isBuffering={isBuffering}
         error={overlayError}
         onTogglePlay={engine.togglePlay}
-        onRetry={retry}
+        onRetry={handleRetry}
       />
 
       <div className="absolute inset-0 bg-linear-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
 
-      <div className="absolute top-4 left-4 right-4 flex items-center gap-2 pointer-events-none">
+      <div className="absolute top-4 left-4 right-16 flex items-center gap-2 pointer-events-none">
         <div className="w-8 h-8 rounded-full bg-surface-overlay ring-2 ring-white/20 overflow-hidden shrink-0">
           {short.author.avatarUrl && (
             <img
@@ -134,6 +142,19 @@ const ShortPlayer = ({
           @{short.author.username}
         </span>
       </div>
+
+      <button
+        type="button"
+        onClick={engine.toggleMute}
+        aria-label={engine.isMuted ? 'Unmute' : 'Mute'}
+        className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 text-white hover:bg-black/70 transition-colors focus:outline-none"
+      >
+        {engine.isMuted ? (
+          <VolumeX className="w-4.5 h-4.5" strokeWidth={1.75} />
+        ) : (
+          <Volume2 className="w-4.5 h-4.5" strokeWidth={1.75} />
+        )}
+      </button>
 
       <div className="absolute right-3 bottom-4 flex flex-col items-center gap-5">
         <button

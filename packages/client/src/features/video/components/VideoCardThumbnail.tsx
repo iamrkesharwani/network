@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import type { IVideoResponse } from '@network/shared';
+import { CLIENT_ROUTES, type IVideoResponse } from '@network/shared';
 import MediaDurationBadge from '../../../shared/ui/card/MediaDurationBadge';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBadge';
@@ -23,7 +23,7 @@ const VideoCardThumbnail = ({
 
   return (
     <Link
-      to={`/video/${video.id}`}
+      to={CLIENT_ROUTES.VIDEO_WATCH.replace(':videoId', video.id)}
       className="relative block w-full aspect-video rounded-xl max-md:portrait:rounded-none overflow-hidden bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       tabIndex={isReady ? 0 : -1}
       aria-disabled={!isReady}

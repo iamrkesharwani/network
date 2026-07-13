@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
 
 export interface MediaEngineError {
   code: number;
@@ -134,6 +140,7 @@ export function useMediaEngine(
     const handlePlaying = () => {
       setIsBuffering(false);
       setIsPlaying(true);
+      setError(null);
     };
     const handleEnded = () => setIsPlaying(false);
     const handleLoadedMetadata = () => setDuration(video.duration || 0);
@@ -141,6 +148,7 @@ export function useMediaEngine(
       setVolumeState(video.volume);
       setIsMuted(video.muted);
     };
+    handleVolumeChange();
 
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('progress', handleProgress);

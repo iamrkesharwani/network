@@ -11,6 +11,7 @@ import ForgotPassword from '../../features/auth/pages/ForgotPassword';
 import ResetPassword from '../../features/auth/pages/ResetPassword';
 import OAuthCallback from '../../features/auth/pages/OAuthCallback';
 import Feed from '../../features/feed/Feed';
+import VideoWatch from '../../features/video/pages/VideoWatch';
 import ShortWatch from '../../features/short/pages/ShortWatch';
 import UploadHub from '../../features/upload/components/UploadHub';
 import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
@@ -45,6 +46,7 @@ export const routes: RouteObject[] = [
             element: <Navigate to={CLIENT_ROUTES.FEED} replace />,
           },
           { path: CLIENT_ROUTES.FEED, element: <Feed /> },
+          { path: CLIENT_ROUTES.VIDEO_WATCH, element: <VideoWatch /> },
           { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
           { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
           { path: CLIENT_ROUTES.PROFILE_VIDEOS, element: <ProfilePage /> },
