@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   MEDIA_STATUS_SOCKET_EVENT,
   type IMediaStatusEvent,
@@ -15,6 +16,7 @@ export const useMediaStatusSocket = (): void => {
   const { accessToken } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const { addToast } = useToast();
+  const navigate = useNavigate();
   const socketRef = useSocket(accessToken);
 
   useEffect(() => {
@@ -51,7 +53,10 @@ export const useMediaStatusSocket = (): void => {
       const label = event.title ? `"${event.title}"` : 'Your post';
 
       if (event.status === 'READY') {
-        addToast(`${label} is now live`, 'success');
+        addToast(`${label} is now live`, 'success', 3000, {
+          label: 'View',
+          onClick: () => navigate(`/${event.mediaType}/${event.id}`),
+        });
       } else if (event.status === 'FAILED') {
         addToast(`Processing failed for ${label}`, 'error');
       }
@@ -62,5 +67,5 @@ export const useMediaStatusSocket = (): void => {
     return () => {
       socket.off(MEDIA_STATUS_SOCKET_EVENT, handleMediaStatus);
     };
-  }, [accessToken, dispatch, addToast, socketRef]);
+  }, [accessToken, dispatch, addToast, navigate, socketRef]);
 };

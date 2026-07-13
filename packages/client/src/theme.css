@@ -165,6 +165,7 @@ a.forgot:hover {
 }
 
 .submit-btn {
+  isolation: isolate;
   transition:
     border-color 0.35s,
     color 0.35s,

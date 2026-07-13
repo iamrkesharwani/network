@@ -1,21 +1,41 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  POST_TEXT_MAX_LENGTH,
   ALLOWED_POST_IMAGE_MIME_TYPES,
   MAX_POST_IMAGE_SIZE_BYTES,
   MAX_POST_IMAGES,
 } from '@network/shared';
-import FloatingTextarea from '../../upload/components/FloatingTextarea';
-import TagInput from '../../upload/components/TagInput';
-import VisibilitySelector from '../../upload/components/VisibilitySelector';
-import Button from '../../../shared/ui/primitives/Button';
 import BadgeToast from '../../creator/components/BadgeToast';
 import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
 import { useToast } from '../../../shared/hooks/useToast';
+import { useAppSelector } from '../../../shared/hooks/useAppSelector';
+import { buildProfileTabPath } from '../../profile/utils/buildProfilePath';
+import { SPRINGS } from '../../../shared/motion/springs';
+import UploadStepper from '../../upload/components/UploadStepper';
+import PublishReviewModal, {
+  type ReviewField,
+} from '../../upload/components/PublishReviewModal';
 import { usePostComposer } from '../hooks/usePostComposer';
+import PostStepOne from './PostStepOne';
+import PostStepTwo from './PostStepTwo';
+
+const TEXT_PREVIEW_LENGTH = 80;
 
 const ACCEPTED_ATTACHMENT_MIME = ALLOWED_POST_IMAGE_MIME_TYPES.join(',');
+
+type PostComposerStep = 'compose' | 'details';
+
+const POST_STEPS: { key: PostComposerStep; label: string }[] = [
+  { key: 'compose', label: 'Compose' },
+  { key: 'details', label: 'Details' },
+];
+
+const stepVariants = {
+  initial: { opacity: 0, x: 24 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -24 },
+};
 
 const validateImageFile = (file: File): string | null => {
   const isImage = ALLOWED_POST_IMAGE_MIME_TYPES.includes(
@@ -35,9 +55,13 @@ const validateImageFile = (file: File): string | null => {
 };
 
 const PostComposer = () => {
+  const navigate = useNavigate();
+  const username = useAppSelector((state) => state.auth.user?.username);
   const { addToast } = useToast();
   const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
+  const [step, setStep] = useState<PostComposerStep>('compose');
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -56,8 +80,11 @@ const PostComposer = () => {
     isSubmitting,
   } = usePostComposer({
     onPublished: (creatorEvent) => {
+      setShowReviewModal(false);
+      setStep('compose');
       addToast('Your post is live', 'success');
       celebrate(creatorEvent);
+      if (username) navigate(buildProfileTabPath(username, 'posts'));
     },
   });
 
@@ -97,12 +124,35 @@ const PostComposer = () => {
     [addImages, images.length]
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await submit();
+  const handleContinue = () => {
+    if (!canSubmit) {
+      setAttachmentError('Write something or attach an image first.');
+      return;
+    }
+    setAttachmentError(null);
+    setStep('details');
   };
 
-  const canAddMore = images.length < MAX_POST_IMAGES;
+  const textPreview =
+    text.length > TEXT_PREVIEW_LENGTH
+      ? `${text.slice(0, TEXT_PREVIEW_LENGTH)}…`
+      : text;
+
+  const reviewFields: ReviewField[] = [
+    ...(textPreview ? [{ label: 'Text', value: textPreview }] : []),
+    ...(images.length > 0
+      ? [
+          {
+            label: 'Images',
+            value: `${images.length} attached`,
+          },
+        ]
+      : []),
+    ...(tags.length > 0
+      ? [{ label: 'Tags', value: tags.map((tag) => `#${tag}`).join(' ') }]
+      : []),
+    { label: 'Visibility', value: <span className="capitalize">{visibility}</span> },
+  ];
 
   return (
     <div className="relative mx-auto max-w-2xl pb-20 pt-8 sm:pt-12 px-4">
@@ -112,113 +162,61 @@ const PostComposer = () => {
         Create a post
       </h1>
 
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-2xl border border-border bg-surface p-6 sm:p-8"
+      <UploadStepper current={step} steps={POST_STEPS} />
+
+      <motion.div
+        layout
+        transition={SPRINGS.smooth}
+        className="rounded-2xl border border-border bg-surface p-6 sm:p-8 min-h-72"
       >
-        <FloatingTextarea
-          label="What's on your mind?"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          maxLength={POST_TEXT_MAX_LENGTH}
-          counter={{ current: text.length, max: POST_TEXT_MAX_LENGTH }}
-          rows={4}
-          disabled={isSubmitting}
-        />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step}
+            variants={stepVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {step === 'compose' && (
+              <PostStepOne
+                text={text}
+                setText={setText}
+                images={images}
+                previewUrls={previewUrls}
+                attachmentError={attachmentError}
+                fileInputRef={fileInputRef}
+                acceptedMime={ACCEPTED_ATTACHMENT_MIME}
+                onFilesSelected={handleFilesSelected}
+                onRemoveImage={removeImage}
+                onContinue={handleContinue}
+                disabled={isSubmitting}
+              />
+            )}
 
-        <div className="mb-6">
-          <p className="text-sm font-medium text-text-secondary mb-2.5">
-            Images{' '}
-            <span className="text-text-muted font-normal">
-              (optional, up to {MAX_POST_IMAGES})
-            </span>
-          </p>
+            {step === 'details' && (
+              <PostStepTwo
+                tags={tags}
+                setTags={setTags}
+                visibility={visibility}
+                setVisibility={setVisibility}
+                onBack={() => setStep('compose')}
+                onReview={() => setShowReviewModal(true)}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={ACCEPTED_ATTACHMENT_MIME}
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              handleFilesSelected(e.target.files);
-              e.target.value = '';
-            }}
-          />
-
-          {images.length === 0 ? (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full rounded-2xl border-2 border-dashed border-border bg-surface-raised py-10 flex flex-col items-center justify-center gap-2 text-text-muted hover:border-primary/40 hover:text-text-secondary transition-colors cursor-pointer"
-            >
-              <Plus className="w-6 h-6" strokeWidth={1.5} />
-              <span className="text-sm">Add images</span>
-              <span className="text-xs">JPEG, PNG, WebP</span>
-            </button>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {previewUrls.map((url, index) => (
-                <div
-                  key={url}
-                  className="relative aspect-square rounded-xl overflow-hidden border border-border bg-surface-raised"
-                >
-                  <img
-                    src={url}
-                    alt={`Attachment ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    disabled={isSubmitting}
-                    aria-label="Remove image"
-                    className="absolute top-1.5 right-1.5 flex items-center justify-center w-6 h-6 rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-50 cursor-pointer"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-
-              {canAddMore && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-border bg-surface-raised flex items-center justify-center text-text-muted hover:border-primary/40 hover:text-text-secondary transition-colors cursor-pointer"
-                  aria-label="Add more images"
-                >
-                  <Plus className="w-5 h-5" strokeWidth={1.5} />
-                </button>
-              )}
-            </div>
-          )}
-
-          {attachmentError && (
-            <p role="alert" className="mt-2 text-sm text-error">
-              {attachmentError}
-            </p>
-          )}
-        </div>
-
-        <TagInput value={tags} onChange={setTags} />
-
-        <VisibilitySelector value={visibility} onChange={setVisibility} />
-
-        {error && (
-          <p role="alert" className="mb-4 text-sm text-error">
-            {error}
-          </p>
-        )}
-
-        <Button
-          type="submit"
-          className="w-full"
-          isLoading={isSubmitting}
-          disabled={!canSubmit || isSubmitting}
-        >
-          Post
-        </Button>
-      </form>
+      <PublishReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onConfirm={submit}
+        fields={reviewFields}
+        isPublishing={isSubmitting}
+        error={error}
+        confirmLabel="Confirm & post"
+      />
     </div>
   );
 };

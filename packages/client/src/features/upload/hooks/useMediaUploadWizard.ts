@@ -152,7 +152,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
           mediaType,
           patch: {
             mediaId: uploadState.videoId,
-            step: hasThumbnailStep ? 'thumbnail' : 'details',
+            step: hasThumbnailStep ? 'thumbnail' : 'details-1',
           },
         })
       );
@@ -169,8 +169,10 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
   ]);
 
   // Recovers a finalize page that was reached directly (hard refresh, bookmark)
-  // after the localStorage resume pointer has already been cleared, i.e. the
-  // media was already published in a previous visit.
+  // after the localStorage resume pointer has already been cleared. Fetchable
+  // media doesn't prove finalization happened (a raw-upload placeholder is
+  // fetchable long before finalize is ever called), so the safe default is
+  // details-1, not the confirmation step.
   useEffect(() => {
     if (!isFinalizeRoute || !routeMediaId || mediaId === routeMediaId) return;
 
@@ -180,8 +182,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
           mediaType,
           patch: {
             mediaId: routeMediaId,
-            step: 'launch',
-            finalMedia: mediaData.data as unknown as Record<string, unknown>,
+            step: 'details-1',
           },
         })
       );
@@ -200,8 +201,8 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     basePath,
   ]);
 
-  const { resumePointer, discardResume, clearPointer } = useUploadResumePointer(
-    {
+  const { resumePointer, discardResume, clearPointer, continueResume } =
+    useUploadResumePointer({
       mediaType,
       uploadState,
       step,
@@ -215,7 +216,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
               step: (pointer.step === 'drop'
                 ? hasThumbnailStep
                   ? 'thumbnail'
-                  : 'details'
+                  : 'details-1'
                 : pointer.step) as WizardStep,
               mediaId: pointer.mediaId || null,
               sessionId: pointer.sessionId,
@@ -233,8 +234,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
           });
         }
       },
-    }
-  );
+    });
 
   const handleDetailsSuccess = (
     media: TMediaResponse,
@@ -245,7 +245,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
         mediaType,
         patch: {
           finalMedia: media as unknown as Record<string, unknown>,
-          step: 'launch',
+          step: 'confirmation',
         },
       })
     );
@@ -281,14 +281,16 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
       uploadState.stage
     );
 
+  const isDetailsStep =
+    step === 'details-1' || step === 'details-2' || step === 'details-3';
+
   const isProcessing =
-    (step === 'thumbnail' || step === 'details') &&
+    (step === 'thumbnail' || isDetailsStep) &&
     !!processingStatus &&
     processingStatus !== 'READY';
 
   const isProcessingDone =
-    (step === 'thumbnail' || step === 'details') &&
-    processingStatus === 'READY';
+    (step === 'thumbnail' || isDetailsStep) && processingStatus === 'READY';
 
   const statusLabel = isUploadingStage
     ? `Uploading your ${mediaLabel} in the background…`
@@ -321,6 +323,7 @@ export const useMediaUploadWizard = <TMediaResponse extends BaseMediaResponse>(
     handleAbandon,
     resumePointer,
     discardResume,
+    continueResume,
     processingStatus,
     providerThumbnail,
     errorMessage,

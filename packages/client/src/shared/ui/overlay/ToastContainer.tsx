@@ -2,13 +2,14 @@ import { useState, useCallback, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Toast, { type ToastType } from './Toast';
 import { useIsMounted } from '../../hooks/useIsMounted';
-import { ToastContext } from '../../hooks/useToast';
+import { ToastContext, type ToastAction } from '../../hooks/useToast';
 
 interface ToastMessage {
   id: string;
   message: string;
   type: ToastType;
   duration?: number;
+  action?: ToastAction;
 }
 
 const ToastProvider = ({ children }: { children: ReactNode }) => {
@@ -20,9 +21,14 @@ const ToastProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const addToast = useCallback(
-    (message: string, type: ToastType = 'info', duration = 3000) => {
+    (
+      message: string,
+      type: ToastType = 'info',
+      duration = 3000,
+      action?: ToastAction
+    ) => {
       const id = crypto.randomUUID();
-      setToasts((prev) => [...prev, { id, message, type, duration }]);
+      setToasts((prev) => [...prev, { id, message, type, duration, action }]);
     },
     []
   );
@@ -44,6 +50,7 @@ const ToastProvider = ({ children }: { children: ReactNode }) => {
                 message={toast.message}
                 type={toast.type}
                 duration={toast.duration}
+                action={toast.action}
                 onClose={removeToast}
               />
             ))}

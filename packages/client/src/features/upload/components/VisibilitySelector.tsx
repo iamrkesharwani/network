@@ -34,7 +34,7 @@ const VisibilitySelector = ({ value, onChange }: VisibilitySelectorProps) => {
       <p className="text-sm font-medium text-text-secondary mb-2.5">
         Visibility
       </p>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {OPTIONS.map((option) => {
           const selected = value === option.value;
           const Icon = option.icon;

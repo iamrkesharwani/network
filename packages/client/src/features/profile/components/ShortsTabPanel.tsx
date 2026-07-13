@@ -11,6 +11,7 @@ import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
 import VisibilityFilter, {
   type VisibilityFilterValue,
 } from './VisibilityFilter';
+import ProcessingShelf from './ProcessingShelf';
 import { useProfileViewMode } from '../hooks/useProfileViewMode';
 
 export interface ShortsTabPanelProps {
@@ -44,6 +45,9 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
 
   const shorts = data?.data ?? [];
   const hasNextPage = data?.meta.hasNextPage ?? false;
+  const processingShorts = isOwner
+    ? shorts.filter((short) => short.status !== 'READY')
+    : [];
 
   const handleLoadMore = () => {
     if (data?.meta.nextCursor) setCursor(data.meta.nextCursor);
@@ -51,6 +55,10 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
 
   const handleDelete = async (short: IShortResponse) => {
     await deleteShort(short.id).unwrap();
+  };
+
+  const handleDeleteById = async (shortId: string) => {
+    await deleteShort(shortId).unwrap();
   };
 
   const handleToggleVisibility = async (short: IShortResponse) => {
@@ -62,6 +70,10 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
 
   return (
     <div>
+      {isOwner && (
+        <ProcessingShelf items={processingShorts} onDelete={handleDeleteById} />
+      )}
+
       <div className="flex items-center justify-between mb-4">
         {isOwner ? (
           <VisibilityFilter

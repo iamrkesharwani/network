@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Info,
+  X,
+  ChevronRight,
+} from 'lucide-react';
 import { cn } from '../../utils/cn';
+import type { ToastAction } from '../../hooks/useToast';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -10,6 +18,7 @@ export interface ToastProps {
   message: string;
   onClose: (id: string) => void;
   duration?: number;
+  action?: ToastAction;
 }
 
 const variants: Record<
@@ -22,7 +31,14 @@ const variants: Record<
   info: { icon: Info, iconClass: 'text-(--color-primary)' },
 };
 
-const Toast = ({ id, type, message, onClose, duration = 3000 }: ToastProps) => {
+const Toast = ({
+  id,
+  type,
+  message,
+  onClose,
+  duration = 3000,
+  action,
+}: ToastProps) => {
   const [isLeaving, setIsLeaving] = useState(false);
 
   const close = useCallback(() => {
@@ -50,9 +66,24 @@ const Toast = ({ id, type, message, onClose, duration = 3000 }: ToastProps) => {
       )}
     >
       <Icon className={cn('h-4.5 w-4.5 shrink-0 mt-px', iconClass)} />
-      <p className="flex-1 text-[0.825rem] leading-snug font-medium text-text-primary">
-        {message}
-      </p>
+      <div className="flex-1">
+        <p className="text-[0.825rem] leading-snug font-medium text-text-primary">
+          {message}
+        </p>
+        {action && (
+          <button
+            type="button"
+            onClick={() => {
+              action.onClick();
+              close();
+            }}
+            className="mt-1 flex items-center gap-0.5 text-[0.75rem] font-semibold text-primary hover:underline cursor-pointer"
+          >
+            {action.label}
+            <ChevronRight className="h-3 w-3" />
+          </button>
+        )}
+      </div>
       <button
         onClick={close}
         aria-label="Close notification"

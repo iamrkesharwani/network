@@ -4,7 +4,7 @@ import type { PaginatedResponse, PostVisibility } from '@network/shared';
 import { paginateQuery } from '../../core/utils/paginate.js';
 import type { UpdatePostData } from './post.types.js';
 
-export const createTextOrImagePost = (
+export const createTextOrImagePost = async (
   userId: string,
   data: {
     text?: string;
@@ -16,7 +16,7 @@ export const createTextOrImagePost = (
     unlistedExpiryWarnedAt?: Date | null;
   }
 ): Promise<IPostDocument> => {
-  return PostModel.create({
+  const post = await PostModel.create({
     userId: new mongoose.Types.ObjectId(userId),
     ...(data.text !== undefined && { text: data.text }),
     ...(data.imageUrls !== undefined && { imageUrls: data.imageUrls }),
@@ -29,6 +29,7 @@ export const createTextOrImagePost = (
     }),
     status: 'READY',
   });
+  return post.populate('userId', 'username avatarUrl');
 };
 
 export const findById = (id: string): Promise<IPostDocument | null> => {

@@ -36,19 +36,6 @@ export const useUploadResumePointer = ({
     const pointer = loadUploadPointer(mediaType);
     if (!pointer) return;
 
-    const isFullyUploaded =
-      pointer.totalParts > 0 &&
-      pointer.uploadedParts.length >= pointer.totalParts;
-
-    if (onRestorePointer) {
-      if (pointer.step !== 'drop' || isFullyUploaded) {
-        onRestorePointer(pointer);
-        return;
-      }
-      setResumePointer(pointer);
-      return;
-    }
-
     setResumePointer(pointer);
   }, []);
 
@@ -102,5 +89,9 @@ export const useUploadResumePointer = ({
     setResumePointer(null);
   };
 
-  return { resumePointer, discardResume, clearPointer };
+  const continueResume = () => {
+    if (resumePointer) onRestorePointer?.(resumePointer);
+  };
+
+  return { resumePointer, discardResume, clearPointer, continueResume };
 };

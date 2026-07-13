@@ -10,21 +10,27 @@ import {
   MAX_PAGE_LIMIT,
 } from '../constants/api.constants.js';
 
-const postTagsSchema = z
-  .array(
-    z
-      .string()
-      .trim()
-      .toLowerCase()
-      .min(2, { message: 'Tag must be at least 2 characters.' })
-      .max(20, { message: 'Tag cannot exceed 20 characters.' })
-      .regex(/^[a-z0-9]+$/, {
-        message: 'Tags can only contain letters and numbers.',
-      })
-  )
-  .max(5, { message: 'Posts can have a maximum of 5 tags.' })
-  .optional()
-  .default([]);
+const postTagsSchema = z.preprocess(
+  (val) => {
+    if (val === undefined || val === null || val === '') return undefined;
+    return Array.isArray(val) ? val : [val];
+  },
+  z
+    .array(
+      z
+        .string()
+        .trim()
+        .toLowerCase()
+        .min(2, { message: 'Tag must be at least 2 characters.' })
+        .max(20, { message: 'Tag cannot exceed 20 characters.' })
+        .regex(/^[a-z0-9]+$/, {
+          message: 'Tags can only contain letters and numbers.',
+        })
+    )
+    .max(5, { message: 'Posts can have a maximum of 5 tags.' })
+    .optional()
+    .default([])
+);
 
 const postTextSchema = z
   .string()
