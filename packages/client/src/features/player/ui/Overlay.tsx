@@ -14,10 +14,20 @@ interface OverlayProps {
   className?: string;
 }
 
-const Overlay = ({ isPaused, isBuffering, error, onTogglePlay, onRetry, className }: OverlayProps) => {
+const Overlay = ({
+  isPaused,
+  isBuffering,
+  error,
+  onTogglePlay,
+  onRetry,
+  className,
+}: OverlayProps) => {
   return (
     <div
-      className={cn('pointer-events-none absolute inset-0 flex items-center justify-center', className)}
+      className={cn(
+        'pointer-events-none absolute inset-0 flex items-center justify-center',
+        className
+      )}
     >
       {error ? (
         <div className="pointer-events-auto flex flex-col items-center gap-3 rounded-lg bg-black/70 px-6 py-5 text-center text-white">
@@ -26,7 +36,7 @@ const Overlay = ({ isPaused, isBuffering, error, onTogglePlay, onRetry, classNam
           <button
             type="button"
             onClick={onRetry}
-            className="flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium hover:bg-white/20"
+            className="flex min-h-11 items-center gap-1.5 rounded-full bg-white/10 px-4 text-sm font-medium hover:bg-white/20"
           >
             <RefreshCw className="h-4 w-4" />
             Retry

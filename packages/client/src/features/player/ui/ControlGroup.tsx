@@ -50,22 +50,31 @@ const ControlGroup = ({
   }, [isSettingsOpen]);
 
   return (
-    <div className={cn('@container flex w-full items-center justify-between gap-2', className)}>
+    <div
+      className={cn(
+        '@container flex w-full items-center justify-between gap-2',
+        className
+      )}
+    >
       <div className="flex min-w-0 items-center gap-1">
         <button
           type="button"
           onClick={togglePlay}
           aria-label={isPlaying ? 'Pause' : 'Play'}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
         >
-          {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+          {isPlaying ? (
+            <Pause className="h-5 w-5" />
+          ) : (
+            <Play className="h-5 w-5" />
+          )}
         </button>
 
         <button
           type="button"
           onClick={toggleMute}
           aria-label={isMuted ? 'Unmute' : 'Mute'}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
         >
           <VolumeIcon isMuted={isMuted} volume={volume} />
         </button>
@@ -78,14 +87,17 @@ const ControlGroup = ({
         />
       </div>
 
-      <div ref={settingsContainerRef} className="relative flex shrink-0 items-center">
+      <div
+        ref={settingsContainerRef}
+        className="relative flex shrink-0 items-center"
+      >
         <button
           type="button"
           onClick={() => setIsSettingsOpen((open) => !open)}
           aria-label="Settings"
           aria-haspopup="menu"
           aria-expanded={isSettingsOpen}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
         >
           <Settings className="h-5 w-5" />
         </button>
