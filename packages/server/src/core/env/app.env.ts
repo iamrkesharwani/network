@@ -8,6 +8,8 @@ export const appEnvSchema = z.object({
 
   PORT: z.coerce.number().default(5000),
 
+  WORKER_PORT: z.coerce.number().default(5001),
+
   BASE_URL: z.string().default('/'),
 
   CLIENT_URL: z.url(),

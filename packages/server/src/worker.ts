@@ -17,7 +17,7 @@ import { register } from './core/metrics/queueMetrics.js';
 import { startMediaIngestWorker } from './modules/upload/upload.ingest.worker.js';
 import { startQueueBacklogMonitor } from './modules/upload/upload.ingest.monitor.js';
 
-const port = env.PORT;
+const port = env.WORKER_PORT;
 let backlogMonitor: NodeJS.Timeout | undefined;
 
 const httpServer = createServer((req, res) => {

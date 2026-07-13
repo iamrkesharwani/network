@@ -10,11 +10,13 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces --if-present",
     "dev:client": "npm run dev --workspace=@network/client",
-    "dev:server": "npm run dev --workspace=@network/server",
+    "dev:web": "npm run dev:web --workspace=@network/server",
+    "dev:worker": "npm run dev:worker --workspace=@network/server",
     "build:shared": "npm run build --workspace=@network/shared",
-    "build": "npm run build --workspace=@network/shared --workspace=@network/client --workspace=@network/server --if-present",
+    "build:client": "npm run build --workspace=@network/client",
+    "build:server": "npm run build --workspace=@network/server",
+    "build": "npm run build:shared && npm run build:client && npm run build:server",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "i:client": "npm install --workspace=@network/client",
     "i:server": "npm install --workspace=@network/server",
