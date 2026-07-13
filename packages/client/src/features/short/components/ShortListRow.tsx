@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import { formatCount, formatDuration, formatDaysLeft } from '@network/shared';
+import {
+  CLIENT_ROUTES,
+  formatCount,
+  formatDuration,
+  formatDaysLeft,
+} from '@network/shared';
 import type { IShortResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
@@ -71,7 +76,7 @@ const ShortListRow = ({
     <>
       <div className="group flex items-center gap-3 py-2.5">
         <Link
-          to={`/shorts/${short.id}`}
+          to={CLIENT_ROUTES.SHORT_WATCH.replace(':shortId', short.id)}
           className="relative shrink-0 w-16 aspect-9/16 rounded-lg overflow-hidden bg-surface-raised"
         >
           {short.thumbnailUrl && !thumbError ? (
@@ -95,7 +100,10 @@ const ShortListRow = ({
         </Link>
 
         <div className="flex-1 min-w-0">
-          <Link to={`/shorts/${short.id}`} className="block">
+          <Link
+            to={CLIENT_ROUTES.SHORT_WATCH.replace(':shortId', short.id)}
+            className="block"
+          >
             <h3 className="text-sm font-semibold text-text-primary leading-snug line-clamp-2">
               {short.title}
             </h3>

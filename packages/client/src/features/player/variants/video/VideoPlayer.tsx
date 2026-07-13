@@ -2,12 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { IVideoResponse } from '@network/shared';
 import { cn } from '../../../../shared/utils/cn';
+import { useAppDispatch } from '../../../../shared/hooks/useAppDispatch';
 import { useAuth } from '../../../auth/useAuth';
+import { setVolumePreference } from '../../store/playerSlice';
 import { useVideoSource } from '../../core/useVideoSource';
 import { useMediaEngine } from '../../core/useMediaEngine';
 import { useKeyboardShortcuts } from '../../core/useKeyboardShortcuts';
 import { useOrientationLock } from '../../core/useOrientationLock';
 import { useTelemetry } from '../../core/useTelemetry';
+import { usePictureInPictureSync } from '../../core/usePictureInPictureSync';
 import ProgressBar from '../../ui/ProgressBar';
 import ControlGroup from '../../ui/ControlGroup';
 import Overlay from '../../ui/Overlay';
@@ -33,6 +36,7 @@ const VideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const touchLayerRef = useRef<TouchInactivityLayerHandle>(null);
 
+  const dispatch = useAppDispatch();
   const { user } = useAuth();
 
   const {
@@ -41,6 +45,12 @@ const VideoPlayer = ({
     retry,
   } = useVideoSource(videoRef, video.playbackUrl);
   const engine = useMediaEngine(videoRef);
+
+  useEffect(() => {
+    dispatch(setVolumePreference(engine.volume));
+  }, [dispatch, engine.volume]);
+
+  usePictureInPictureSync(videoRef);
 
   useTelemetry({
     videoId: video.id,

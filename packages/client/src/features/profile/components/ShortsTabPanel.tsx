@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { IShortResponse } from '@network/shared';
+import { useNavigate } from 'react-router-dom';
+import { CLIENT_ROUTES, type IShortResponse } from '@network/shared';
 import {
   useGetUserShortsQuery,
   useDeleteShortMutation,
@@ -8,7 +9,9 @@ import {
 } from '../../short/shortApi';
 import ShortGrid from '../../short/pages/ShortGrid';
 import ShortList from '../../short/pages/ShortList';
+import ShortTheaterModal from '../../short/components/ShortTheaterModal';
 import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
+import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import VisibilityFilter, {
   type VisibilityFilterValue,
 } from './VisibilityFilter';
@@ -21,10 +24,13 @@ export interface ShortsTabPanelProps {
 }
 
 const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
+  const navigate = useNavigate();
+  const isMobileLayout = useIsMobileLayout();
   const [viewMode, setViewMode] = useProfileViewMode('short');
   const [visibilityFilter, setVisibilityFilter] =
     useState<VisibilityFilterValue>('all');
   const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [theaterIndex, setTheaterIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setCursor(undefined);
@@ -72,6 +78,27 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
     }).unwrap();
   };
 
+  const handleThumbnailClick = (short: IShortResponse) => {
+    if (isMobileLayout) {
+      navigate(CLIENT_ROUTES.SHORT_WATCH.replace(':shortId', short.id));
+      return;
+    }
+
+    const index = shorts.findIndex((s) => s.id === short.id);
+    if (index === -1) return;
+    setTheaterIndex(index);
+  };
+
+  const handleTheaterNext = () => {
+    setTheaterIndex((index) =>
+      index === null ? index : Math.min(index + 1, shorts.length - 1)
+    );
+  };
+
+  const handleTheaterPrev = () => {
+    setTheaterIndex((index) => (index === null ? index : Math.max(index - 1, 0)));
+  };
+
   return (
     <div>
       {isOwner && (
@@ -100,6 +127,7 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
           onLoadMore={handleLoadMore}
           onDelete={handleDelete}
           onToggleVisibility={handleToggleVisibility}
+          onThumbnailClick={handleThumbnailClick}
           onRetry={refetch}
           isOwner={isOwner}
           isError={isError}
@@ -116,6 +144,17 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
           onRetry={refetch}
           isOwner={isOwner}
           isError={isError}
+        />
+      )}
+
+      {theaterIndex !== null && (
+        <ShortTheaterModal
+          short={shorts[theaterIndex] ?? null}
+          activeIndex={theaterIndex}
+          total={shorts.length}
+          onNext={handleTheaterNext}
+          onPrev={handleTheaterPrev}
+          onClose={() => setTheaterIndex(null)}
         />
       )}
     </div>

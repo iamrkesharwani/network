@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import {
   CHAT_RAIL_WIDTH_PX,
   CLIENT_ROUTES,
   SHORTS_PREFETCH_THRESHOLD,
-  SHORT_THEATER_WIDTH_PX,
   type IShortResponse,
   type IVideoResponse,
 } from '@network/shared';
@@ -16,7 +14,7 @@ import { COL_CLASS } from '../video/utils/videoGrid';
 import { SHORT_COL_CLASS } from '../short/utils/shortGrid';
 import VideoCard from '../video/pages/VideoCard';
 import ShortRailCard from '../short/components/ShortRailCard';
-import ShortPlayer from '../short/pages/ShortPlayer';
+import ShortTheaterModal from '../short/components/ShortTheaterModal';
 import { useShort } from '../short/useShort';
 import FeedSkeleton from './skeleton/FeedSkeleton';
 import VideoCardSkeleton from '../video/skeleton/VideoCardSkeleton';
@@ -248,34 +246,14 @@ const Feed = () => {
       </div>
 
       {theaterOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setTheaterOpen(false)}
-        >
-          <div
-            className="relative w-full h-full max-h-[90vh]"
-            style={{ maxWidth: SHORT_THEATER_WIDTH_PX }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ShortPlayer
-              short={shorts[activeIndex] ?? null}
-              activeIndex={activeIndex}
-              total={shorts.length}
-              onNext={handleShortNext}
-              onPrev={goPrev}
-              className="h-full"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setTheaterOpen(false)}
-            aria-label="Close"
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <X className="w-5 h-5" strokeWidth={2} />
-          </button>
-        </div>
+        <ShortTheaterModal
+          short={shorts[activeIndex] ?? null}
+          activeIndex={activeIndex}
+          total={shorts.length}
+          onNext={handleShortNext}
+          onPrev={goPrev}
+          onClose={() => setTheaterOpen(false)}
+        />
       )}
     </>
   );

@@ -21,6 +21,8 @@ import { scheduleContentReaper } from './core/reaper/contentReaper.queue.js';
 import { videoReaperAdapter } from './modules/video/services/video.reaper.service.js';
 import { shortReaperAdapter } from './modules/short/services/short.reaper.service.js';
 import { postReaperAdapter } from './modules/post/services/post.reaper.service.js';
+import { startTelemetryFlushWorker } from './modules/telemetry/telemetry.flush.worker.js';
+import { scheduleTelemetryFlush } from './modules/telemetry/telemetry.flush.queue.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -39,6 +41,9 @@ const startWeb = async () => {
     registerContentReaperAdapter(postReaperAdapter);
     startContentReaperWorker();
     await scheduleContentReaper();
+
+    startTelemetryFlushWorker();
+    await scheduleTelemetryFlush();
 
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Web server listening on port ${port}`);

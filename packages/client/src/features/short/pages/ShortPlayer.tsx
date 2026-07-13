@@ -12,6 +12,7 @@ import { cn } from '../../../shared/utils/cn';
 import { useVideoSource } from '../../player/core/useVideoSource';
 import { useMediaEngine } from '../../player/core/useMediaEngine';
 import { useKeyboardShortcuts } from '../../player/core/useKeyboardShortcuts';
+import { usePictureInPictureSync } from '../../player/core/usePictureInPictureSync';
 import Overlay from '../../player/ui/Overlay';
 import DoubleTapSeekZones from '../../player/ui/DoubleTapSeekZones';
 
@@ -47,6 +48,8 @@ const ShortPlayer = ({
     retry,
   } = useVideoSource(videoRef, short?.playbackUrl);
   const engine = useMediaEngine(videoRef);
+
+  usePictureInPictureSync(videoRef);
 
   useEffect(() => {
     if (isActive) engine.play();
