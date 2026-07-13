@@ -11,6 +11,8 @@ interface UseKeyboardShortcutsOptions {
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
   toggleFullscreen: () => void;
+  onNavigatePrev?: () => void;
+  onNavigateNext?: () => void;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -32,6 +34,8 @@ export function useKeyboardShortcuts({
   seek,
   setVolume,
   toggleFullscreen,
+  onNavigatePrev,
+  onNavigateNext,
 }: UseKeyboardShortcutsOptions): void {
   useEffect(() => {
     const container = containerRef.current;
@@ -68,11 +72,13 @@ export function useKeyboardShortcuts({
           return;
         case 'ArrowUp':
           event.preventDefault();
-          setVolume(volume + PLAYER_VOLUME_STEP);
+          if (onNavigatePrev) onNavigatePrev();
+          else setVolume(volume + PLAYER_VOLUME_STEP);
           return;
         case 'ArrowDown':
           event.preventDefault();
-          setVolume(volume - PLAYER_VOLUME_STEP);
+          if (onNavigateNext) onNavigateNext();
+          else setVolume(volume - PLAYER_VOLUME_STEP);
           return;
         default:
           break;
@@ -98,5 +104,7 @@ export function useKeyboardShortcuts({
     seek,
     setVolume,
     toggleFullscreen,
+    onNavigatePrev,
+    onNavigateNext,
   ]);
 }

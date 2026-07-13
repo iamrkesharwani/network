@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import {
   ChevronUp,
   ChevronDown,
@@ -8,6 +9,11 @@ import {
 import { formatCount } from '@network/shared';
 import type { IShortResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
+import { useVideoSource } from '../../player/core/useVideoSource';
+import { useMediaEngine } from '../../player/core/useMediaEngine';
+import { useKeyboardShortcuts } from '../../player/core/useKeyboardShortcuts';
+import Overlay from '../../player/ui/Overlay';
+import DoubleTapSeekZones from '../../player/ui/DoubleTapSeekZones';
 
 interface ShortPlayerProps {
   short: IShortResponse | null;
@@ -15,8 +21,12 @@ interface ShortPlayerProps {
   total: number;
   onNext: () => void;
   onPrev: () => void;
+  isActive?: boolean;
+  onLike?: () => void;
   className?: string;
 }
+
+const noop = () => {};
 
 const ShortPlayer = ({
   short,
@@ -24,8 +34,42 @@ const ShortPlayer = ({
   total,
   onNext,
   onPrev,
+  isActive = true,
+  onLike,
   className,
 }: ShortPlayerProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const {
+    state: sourceState,
+    error: sourceError,
+    retry,
+  } = useVideoSource(videoRef, short?.playbackUrl);
+  const engine = useMediaEngine(videoRef);
+
+  useEffect(() => {
+    if (isActive) engine.play();
+    else engine.pause();
+  }, [isActive, engine.play, engine.pause]);
+
+  useKeyboardShortcuts({
+    containerRef,
+    currentTimeRef: engine.currentTimeRef,
+    duration: engine.duration,
+    volume: engine.volume,
+    togglePlay: engine.togglePlay,
+    toggleMute: engine.toggleMute,
+    seek: engine.seek,
+    setVolume: engine.setVolume,
+    toggleFullscreen: noop,
+    onNavigatePrev: onPrev,
+    onNavigateNext: onNext,
+  });
+
+  const isBuffering = sourceState === 'buffering' || engine.isBuffering;
+  const overlayError = sourceError ?? engine.error;
+
   if (!short) {
     return (
       <div
@@ -41,21 +85,35 @@ const ShortPlayer = ({
 
   return (
     <div
+      ref={containerRef}
+      tabIndex={-1}
       className={cn(
         'relative w-full h-full rounded-2xl overflow-hidden bg-black',
         className
       )}
     >
-      {short.thumbnailUrl ? (
-        <img
-          src={short.thumbnailUrl}
-          alt={short.title}
-          draggable={false}
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <div className="w-full h-full bg-linear-to-br from-surface-overlay to-surface-raised" />
-      )}
+      <video
+        ref={videoRef}
+        poster={short.thumbnailUrl}
+        className="w-full h-full object-cover"
+        playsInline
+        loop
+      />
+
+      <DoubleTapSeekZones
+        currentTimeRef={engine.currentTimeRef}
+        seek={engine.seek}
+        onToggleControls={engine.togglePlay}
+        onDoubleTapCenter={onLike}
+      />
+
+      <Overlay
+        isPaused={!engine.isPlaying}
+        isBuffering={isBuffering}
+        error={overlayError}
+        onTogglePlay={engine.togglePlay}
+        onRetry={retry}
+      />
 
       <div className="absolute inset-0 bg-linear-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
 
@@ -77,6 +135,7 @@ const ShortPlayer = ({
       <div className="absolute right-3 bottom-4 flex flex-col items-center gap-5">
         <button
           type="button"
+          onClick={onLike}
           className="flex flex-col items-center gap-1 focus:outline-none group"
         >
           <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">

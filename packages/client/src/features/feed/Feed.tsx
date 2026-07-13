@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import {
   CHAT_RAIL_WIDTH_PX,
+  CLIENT_ROUTES,
   SHORTS_PREFETCH_THRESHOLD,
   SHORT_THEATER_WIDTH_PX,
   type IShortResponse,
   type IVideoResponse,
 } from '@network/shared';
 import usePageTitle from '../../shared/hooks/usePageTitle';
+import { useIsMobileLayout } from '../../shared/hooks/useIsMobileLayout';
 import { COL_CLASS } from '../video/utils/videoGrid';
 import { SHORT_COL_CLASS } from '../short/utils/shortGrid';
 import VideoCard from '../video/pages/VideoCard';
@@ -73,6 +76,8 @@ const buildFeedBlocks = (
 
 const Feed = () => {
   usePageTitle('Feed');
+  const navigate = useNavigate();
+  const isMobileLayout = useIsMobileLayout();
   const {
     columns,
     widthMode,
@@ -128,6 +133,11 @@ const Feed = () => {
   ]);
 
   const handleThumbnailClick = (short: IShortResponse) => {
+    if (isMobileLayout) {
+      navigate(CLIENT_ROUTES.SHORT_WATCH.replace(':shortId', short.id));
+      return;
+    }
+
     const globalIndex = shorts.findIndex((s) => s.id === short.id);
     if (globalIndex === -1) return;
     goToIndex(globalIndex);

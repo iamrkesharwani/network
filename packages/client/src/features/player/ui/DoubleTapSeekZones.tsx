@@ -9,6 +9,7 @@ interface DoubleTapSeekZonesProps {
   currentTimeRef: RefObject<number>;
   seek: (time: number) => void;
   onToggleControls: () => void;
+  onDoubleTapCenter?: () => void;
   className?: string;
 }
 
@@ -43,6 +44,7 @@ const DoubleTapSeekZones = ({
   currentTimeRef,
   seek,
   onToggleControls,
+  onDoubleTapCenter,
   className,
 }: DoubleTapSeekZonesProps) => {
   const handleSeekBackward = useCallback(() => {
@@ -54,7 +56,7 @@ const DoubleTapSeekZones = ({
   }, [currentTimeRef, seek]);
 
   const handleLeftTap = useTapZone(onToggleControls, handleSeekBackward);
-  const handleCenterTap = useTapZone(onToggleControls, onToggleControls);
+  const handleCenterTap = useTapZone(onToggleControls, onDoubleTapCenter ?? onToggleControls);
   const handleRightTap = useTapZone(onToggleControls, handleSeekForward);
 
   return (

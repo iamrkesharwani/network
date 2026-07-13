@@ -2,9 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { IVideoResponse } from '@network/shared';
 import { cn } from '../../../../shared/utils/cn';
+import { useAuth } from '../../../auth/useAuth';
 import { useVideoSource } from '../../core/useVideoSource';
 import { useMediaEngine } from '../../core/useMediaEngine';
 import { useKeyboardShortcuts } from '../../core/useKeyboardShortcuts';
+import { useOrientationLock } from '../../core/useOrientationLock';
+import { useTelemetry } from '../../core/useTelemetry';
 import ProgressBar from '../../ui/ProgressBar';
 import ControlGroup from '../../ui/ControlGroup';
 import Overlay from '../../ui/Overlay';
@@ -16,17 +19,21 @@ import DoubleTapSeekZones from '../../ui/DoubleTapSeekZones';
 interface VideoPlayerProps {
   video: IVideoResponse;
   onTheaterModeChange?: (isTheaterMode: boolean) => void;
+  onEnded?: () => void;
   className?: string;
 }
 
 const VideoPlayer = ({
   video,
   onTheaterModeChange,
+  onEnded,
   className,
 }: VideoPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const touchLayerRef = useRef<TouchInactivityLayerHandle>(null);
+
+  const { user } = useAuth();
 
   const {
     state: sourceState,
@@ -34,6 +41,12 @@ const VideoPlayer = ({
     retry,
   } = useVideoSource(videoRef, video.playbackUrl);
   const engine = useMediaEngine(videoRef);
+
+  useTelemetry({
+    videoId: video.id,
+    userId: user?.id,
+    currentTimeRef: engine.currentTimeRef,
+  });
 
   const [isTheaterMode, setIsTheaterMode] = useState(false);
 
@@ -59,7 +72,59 @@ const VideoPlayer = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isTheaterMode, onTheaterModeChange]);
 
-  const handleToggleFullscreen = useCallback(() => {}, []);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useOrientationLock(containerRef);
+
+  const handleToggleFullscreen = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    if (document.fullscreenElement === container) {
+      document.exitFullscreen();
+      return;
+    }
+
+    container.requestFullscreen().catch(() => {});
+    setIsTheaterMode(false);
+    onTheaterModeChange?.(false);
+  }, [onTheaterModeChange]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === container);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const shouldAutoplayNextRef = useRef(false);
+  const onEndedRef = useRef(onEnded);
+  onEndedRef.current = onEnded;
+
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+
+    const handleEnded = () => {
+      shouldAutoplayNextRef.current = true;
+      onEndedRef.current?.();
+    };
+
+    videoEl.addEventListener('ended', handleEnded);
+    return () => videoEl.removeEventListener('ended', handleEnded);
+  }, []);
+
+  useEffect(() => {
+    if (sourceState === 'ready' && shouldAutoplayNextRef.current) {
+      shouldAutoplayNextRef.current = false;
+      engine.play();
+    }
+  }, [sourceState, engine.play]);
 
   useKeyboardShortcuts({
     containerRef,
@@ -146,6 +211,8 @@ const VideoPlayer = ({
               setPlaybackRate={engine.setPlaybackRate}
               isTheaterMode={isTheaterMode}
               onToggleTheaterMode={handleToggleTheaterMode}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={handleToggleFullscreen}
             />
           </div>
         </TouchInactivityLayer>

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Maximize,
+  Minimize,
   Pause,
   Play,
   RectangleHorizontal,
@@ -23,6 +25,8 @@ interface ControlGroupProps {
   setPlaybackRate: (rate: number) => void;
   isTheaterMode?: boolean;
   onToggleTheaterMode?: () => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
   className?: string;
 }
 
@@ -43,6 +47,8 @@ const ControlGroup = ({
   setPlaybackRate,
   isTheaterMode,
   onToggleTheaterMode,
+  isFullscreen,
+  onToggleFullscreen,
   className,
 }: ControlGroupProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -131,6 +137,18 @@ const ControlGroup = ({
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
           >
             <RectangleHorizontal className="h-5 w-5" />
+          </button>
+        )}
+
+        {onToggleFullscreen && (
+          <button
+            type="button"
+            onClick={onToggleFullscreen}
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            aria-pressed={isFullscreen}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          >
+            {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
           </button>
         )}
       </div>

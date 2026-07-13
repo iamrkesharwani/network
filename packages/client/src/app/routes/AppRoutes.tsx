@@ -11,6 +11,7 @@ import ForgotPassword from '../../features/auth/pages/ForgotPassword';
 import ResetPassword from '../../features/auth/pages/ResetPassword';
 import OAuthCallback from '../../features/auth/pages/OAuthCallback';
 import Feed from '../../features/feed/Feed';
+import ShortWatch from '../../features/short/pages/ShortWatch';
 import UploadHub from '../../features/upload/components/UploadHub';
 import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
@@ -35,6 +36,7 @@ export const routes: RouteObject[] = [
   {
     element: <AppInitGate />,
     children: [
+      { path: CLIENT_ROUTES.SHORT_WATCH, element: <ShortWatch /> },
       {
         element: <PageWrapper />,
         children: [
