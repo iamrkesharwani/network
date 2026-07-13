@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pause, Play, Settings, Volume1, Volume2, VolumeX } from 'lucide-react';
+import {
+  Pause,
+  Play,
+  RectangleHorizontal,
+  Settings,
+  Volume1,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { cn } from '../../../shared/utils/cn';
 import VolumeSlider from './VolumeSlider';
 import SettingsMenu from './SettingsMenu';
@@ -13,6 +21,8 @@ interface ControlGroupProps {
   toggleMute: () => void;
   setVolume: (volume: number) => void;
   setPlaybackRate: (rate: number) => void;
+  isTheaterMode?: boolean;
+  onToggleTheaterMode?: () => void;
   className?: string;
 }
 
@@ -31,6 +41,8 @@ const ControlGroup = ({
   toggleMute,
   setVolume,
   setPlaybackRate,
+  isTheaterMode,
+  onToggleTheaterMode,
   className,
 }: ControlGroupProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -87,26 +99,40 @@ const ControlGroup = ({
         />
       </div>
 
-      <div
-        ref={settingsContainerRef}
-        className="relative flex shrink-0 items-center"
-      >
-        <button
-          type="button"
-          onClick={() => setIsSettingsOpen((open) => !open)}
-          aria-label="Settings"
-          aria-haspopup="menu"
-          aria-expanded={isSettingsOpen}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+      <div className="flex shrink-0 items-center gap-1">
+        <div
+          ref={settingsContainerRef}
+          className="relative flex shrink-0 items-center"
         >
-          <Settings className="h-5 w-5" />
-        </button>
-        <SettingsMenu
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          playbackRate={playbackRate}
-          onPlaybackRateChange={setPlaybackRate}
-        />
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen((open) => !open)}
+            aria-label="Settings"
+            aria-haspopup="menu"
+            aria-expanded={isSettingsOpen}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          >
+            <Settings className="h-5 w-5" />
+          </button>
+          <SettingsMenu
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            playbackRate={playbackRate}
+            onPlaybackRateChange={setPlaybackRate}
+          />
+        </div>
+
+        {onToggleTheaterMode && (
+          <button
+            type="button"
+            onClick={onToggleTheaterMode}
+            aria-label={isTheaterMode ? 'Exit theater mode' : 'Theater mode'}
+            aria-pressed={isTheaterMode}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          >
+            <RectangleHorizontal className="h-5 w-5" />
+          </button>
+        )}
       </div>
     </div>
   );
