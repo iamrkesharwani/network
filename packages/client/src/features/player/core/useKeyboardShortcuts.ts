@@ -1,4 +1,5 @@
 import { useEffect, type RefObject } from 'react';
+import { PLAYER_SEEK_STEP_SECONDS, PLAYER_VOLUME_STEP } from '@network/shared';
 
 interface UseKeyboardShortcutsOptions {
   containerRef: RefObject<HTMLElement | null>;
@@ -59,19 +60,19 @@ export function useKeyboardShortcuts({
           return;
         case 'ArrowLeft':
           event.preventDefault();
-          seek(currentTimeRef.current - 5);
+          seek(currentTimeRef.current - PLAYER_SEEK_STEP_SECONDS);
           return;
         case 'ArrowRight':
           event.preventDefault();
-          seek(currentTimeRef.current + 5);
+          seek(currentTimeRef.current + PLAYER_SEEK_STEP_SECONDS);
           return;
         case 'ArrowUp':
           event.preventDefault();
-          setVolume(volume + 0.1);
+          setVolume(volume + PLAYER_VOLUME_STEP);
           return;
         case 'ArrowDown':
           event.preventDefault();
-          setVolume(volume - 0.1);
+          setVolume(volume - PLAYER_VOLUME_STEP);
           return;
         default:
           break;
