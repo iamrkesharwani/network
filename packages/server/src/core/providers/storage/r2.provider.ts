@@ -30,14 +30,17 @@ interface R2Config {
   accessKeyId: string;
   secretAccessKey: string;
   bucketName: string;
+  publicBaseUrl?: string;
 }
 
 export class R2StorageProvider implements IStorageProvider {
   private readonly client: S3Client;
   private readonly bucketName: string;
+  private readonly publicBaseUrl: string | undefined;
 
   constructor(config: R2Config) {
     this.bucketName = config.bucketName;
+    this.publicBaseUrl = config.publicBaseUrl?.replace(/\/+$/, '');
     this.client = new S3Client({
       region: 'auto',
       endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
@@ -106,6 +109,15 @@ export class R2StorageProvider implements IStorageProvider {
       new GetObjectCommand({ Bucket: this.bucketName, Key: key }),
       { expiresIn: MEDIA_ACCESS_URL_TTL_SECONDS }
     );
+  }
+
+  buildPublicUrl(key: string): string {
+    if (!this.publicBaseUrl) {
+      throw new Error(
+        `R2: buildPublicUrl called on a bucket ("${this.bucketName}") with no publicBaseUrl configured.`
+      );
+    }
+    return `${this.publicBaseUrl}/${key}`;
   }
 
   async uploadObject(

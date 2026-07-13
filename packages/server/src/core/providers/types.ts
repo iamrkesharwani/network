@@ -33,6 +33,8 @@ export interface IStorageProvider {
 
   buildAccessUrl(key: string): Promise<string>;
 
+  buildPublicUrl(key: string): string;
+
   uploadObject(key: string, body: Buffer, contentType: string): Promise<void>;
 
   deleteObject(key: string): Promise<void>;

@@ -14,6 +14,7 @@ import {
   VIDEO_STATUS,
 } from '../constants/video.constants.js';
 import type { ICreatorEvent } from './creator.types.js';
+import type { ICaptionTrack } from './caption.types.js';
 
 export type VideoUploadInput = z.infer<typeof videoUploadSchema>;
 export type VideoUpdateInput = z.infer<typeof videoUpdateSchema>;
@@ -48,6 +49,7 @@ export interface IVideo {
   metricsRecorded?: boolean;
   category: VideoCategory;
   tags: string[];
+  captions: ICaptionTrack[];
   visibility: VideoVisibility;
   views: number;
   likes: number;

@@ -5,19 +5,73 @@ import {
   VIDEO_STATUS,
   VIDEO_TITLE_MAX_LENGTH,
   VIDEO_DESCRIPTION_MAX_LENGTH,
+  CAPTION_LABEL_MAX_LENGTH,
   type IVideo,
 } from '@network/shared';
+
+const captionSchema = new Schema(
+  {
+    language: {
+      type: String,
+      required: true,
+    },
+    label: {
+      type: String,
+      required: true,
+      maxlength: CAPTION_LABEL_MAX_LENGTH,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
+    storageKey: {
+      type: String,
+      required: true,
+      select: false,
+    },
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    toJSON: {
+      transform(_doc, ret) {
+        const json = ret as Record<string, any>;
+        json['id'] = json['_id'].toString();
+        delete json['_id'];
+        delete json['storageKey'];
+        return json;
+      },
+    },
+  }
+);
+
+export interface ICaptionSubdocument {
+  _id: mongoose.Types.ObjectId;
+  language: string;
+  label: string;
+  url: string;
+  storageKey: string;
+  isDefault: boolean;
+}
 
 export interface IVideoDocument
   extends Omit<
       IVideo,
-      'id' | 'userId' | 'deletedAt' | 'unlistedAt' | 'unlistedExpiryWarnedAt'
+      | 'id'
+      | 'userId'
+      | 'deletedAt'
+      | 'unlistedAt'
+      | 'unlistedExpiryWarnedAt'
+      | 'captions'
     >,
     Document {
   userId: mongoose.Types.ObjectId;
   deletedAt: Date | null;
   unlistedAt: Date | null;
   unlistedExpiryWarnedAt: Date | null;
+  captions: mongoose.Types.DocumentArray<ICaptionSubdocument>;
 }
 
 const videoSchema = new Schema<IVideoDocument>(
@@ -57,6 +111,10 @@ const videoSchema = new Schema<IVideoDocument>(
     },
     tags: {
       type: [String],
+      default: [],
+    },
+    captions: {
+      type: [captionSchema],
       default: [],
     },
     visibility: {

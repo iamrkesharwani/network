@@ -10,6 +10,14 @@ export type UpdateVideoData = Omit<
   unlistedExpiryWarnedAt?: Date | null;
 };
 
+export interface NewCaptionData {
+  language: string;
+  label: string;
+  url: string;
+  storageKey: string;
+  isDefault: boolean;
+}
+
 export interface WebhookUpdateData {
   status: VideoStatus;
   duration?: number;

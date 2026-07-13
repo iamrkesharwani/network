@@ -2,7 +2,10 @@ import { Router } from 'express';
 import { validate } from '../../core/middleware/validate.middleware.js';
 import { requireAuth, optionalAuth } from '../../core/middleware/auth.middleware.js';
 import { uploadLimiter } from '../../core/middleware/rateLimit.middleware.js';
-import { uploadThumbnail } from '../../core/middleware/upload.middleware.js';
+import {
+  uploadThumbnail,
+  uploadCaption,
+} from '../../core/middleware/upload.middleware.js';
 import {
   initiateVideoUploadSchema,
   confirmVideoUploadSchema,
@@ -12,10 +15,13 @@ import {
   videoIdParamSchema,
   videoUserFeedQuerySchema,
   usernameParamSchema,
+  captionUploadSchema,
+  captionIdParamSchema,
 } from '@network/shared';
 
 import * as videoCrudController from './controllers/crud.controller.js';
 import * as videoUploadController from './controllers/upload.controller.js';
+import * as videoCaptionController from './controllers/caption.controller.js';
 
 const router = Router();
 
@@ -49,6 +55,29 @@ router.post(
   uploadLimiter,
   validate({ params: videoIdParamSchema, body: videoUploadSchema }),
   videoUploadController.finaliseTheVideo
+);
+
+router.post(
+  '/:videoId/captions',
+  requireAuth,
+  uploadLimiter,
+  uploadCaption,
+  validate({ params: videoIdParamSchema, body: captionUploadSchema }),
+  videoCaptionController.uploadTheCaption
+);
+
+router.delete(
+  '/:videoId/captions/:captionId',
+  requireAuth,
+  validate({ params: captionIdParamSchema }),
+  videoCaptionController.deleteTheCaption
+);
+
+router.patch(
+  '/:videoId/captions/:captionId/default',
+  requireAuth,
+  validate({ params: captionIdParamSchema }),
+  videoCaptionController.setTheDefaultCaption
 );
 
 router.get(

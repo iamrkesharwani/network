@@ -30,19 +30,24 @@ function buildStorageProvider(): IStorageProvider {
   }
 }
 
-function buildVideoProvider(): IVideoProvider {
+function buildProcessedStorageProvider(): IStorageProvider {
+  return new R2StorageProvider({
+    accountId: env.CF_ACCOUNT_ID!,
+    accessKeyId: env.CF_R2_ACCESS_KEY_ID!,
+    secretAccessKey: env.CF_R2_SECRET_ACCESS_KEY!,
+    bucketName: env.CF_R2_PROCESSED_BUCKET_NAME!,
+    publicBaseUrl: env.CF_PUBLIC_URL!,
+  });
+}
+
+function buildVideoProvider(processedStorage: IStorageProvider): IVideoProvider {
   const name = env.VIDEO_PROVIDER;
   logger.info(`Video provider: ${name}`);
 
   switch (name) {
     case 'local-ffmpeg':
       return new LocalFfmpegVideoProvider({
-        processedStorage: new R2StorageProvider({
-          accountId: env.CF_ACCOUNT_ID!,
-          accessKeyId: env.CF_R2_ACCESS_KEY_ID!,
-          secretAccessKey: env.CF_R2_SECRET_ACCESS_KEY!,
-          bucketName: env.CF_R2_PROCESSED_BUCKET_NAME!,
-        }),
+        processedStorage,
         publicBaseUrl: env.CF_PUBLIC_URL!,
       });
 
@@ -86,5 +91,9 @@ function buildImageProvider(): IImageProvider {
 }
 
 export const storageProvider: IStorageProvider = buildStorageProvider();
-export const videoProvider: IVideoProvider = buildVideoProvider();
+export const processedStorageProvider: IStorageProvider =
+  buildProcessedStorageProvider();
+export const videoProvider: IVideoProvider = buildVideoProvider(
+  processedStorageProvider
+);
 export const imageProvider: IImageProvider = buildImageProvider();

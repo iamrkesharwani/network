@@ -1,6 +1,10 @@
 import type { PaginatedResponse } from '@network/shared';
 import { VideoModel, type IVideoDocument } from './video.model.js';
-import type { UpdateVideoData, WebhookUpdateData } from './video.types.js';
+import type {
+  UpdateVideoData,
+  WebhookUpdateData,
+  NewCaptionData,
+} from './video.types.js';
 import mongoose from 'mongoose';
 import { paginateQuery } from '../../core/utils/paginate.js';
 
@@ -136,3 +140,67 @@ export const softDeleteById = (id: string): Promise<IVideoDocument | null> =>
 
 export const deleteById = (id: string): Promise<IVideoDocument | null> =>
   VideoModel.findByIdAndDelete(id).select('+storageKey').exec();
+
+export const findByIdWithCaptionStorageKeys = (
+  id: string
+): Promise<IVideoDocument | null> =>
+  VideoModel.findOne({ _id: id, deletedAt: null })
+    .select('+captions.storageKey')
+    .exec();
+
+export const pushCaption = (
+  videoId: string,
+  caption: NewCaptionData
+): Promise<IVideoDocument | null> =>
+  VideoModel.findOneAndUpdate(
+    { _id: videoId, deletedAt: null },
+    { $push: { captions: caption } },
+    { returnDocument: 'after', runValidators: true }
+  )
+    .populate('userId', 'username avatarUrl')
+    .exec();
+
+export const pullCaption = (
+  videoId: string,
+  captionId: string
+): Promise<IVideoDocument | null> =>
+  VideoModel.findOneAndUpdate(
+    { _id: videoId, deletedAt: null },
+    { $pull: { captions: { _id: captionId } } },
+    { returnDocument: 'after' }
+  )
+    .populate('userId', 'username avatarUrl')
+    .exec();
+
+export const clearCaptionDefaults = async (videoId: string): Promise<void> => {
+  await VideoModel.updateOne(
+    { _id: videoId, deletedAt: null },
+    { $set: { 'captions.$[].isDefault': false } }
+  ).exec();
+};
+
+export const setCaptionDefault = (
+  videoId: string,
+  captionId: string
+): Promise<IVideoDocument | null> => {
+  const captionObjectId = new mongoose.Types.ObjectId(captionId);
+
+  return VideoModel.findOneAndUpdate(
+    { _id: videoId, deletedAt: null },
+    {
+      $set: {
+        'captions.$[target].isDefault': true,
+        'captions.$[others].isDefault': false,
+      },
+    },
+    {
+      arrayFilters: [
+        { 'target._id': captionObjectId },
+        { 'others._id': { $ne: captionObjectId } },
+      ],
+      returnDocument: 'after',
+    }
+  )
+    .populate('userId', 'username avatarUrl')
+    .exec();
+};
