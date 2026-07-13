@@ -38,12 +38,11 @@ export const postApi = createApi({
           currentCache.meta = newData.meta;
           return;
         }
-        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        const byId = new Map(currentCache.data.map((item) => [item.id, item]));
         for (const item of newData.data) {
-          if (!existingIds.has(item.id)) {
-            currentCache.data.push(item);
-          }
+          byId.set(item.id, item);
         }
+        currentCache.data = Array.from(byId.values());
         currentCache.meta = newData.meta;
       },
       forceRefetch: ({ currentArg, previousArg }) =>
@@ -77,12 +76,11 @@ export const postApi = createApi({
           currentCache.meta = newData.meta;
           return;
         }
-        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        const byId = new Map(currentCache.data.map((item) => [item.id, item]));
         for (const item of newData.data) {
-          if (!existingIds.has(item.id)) {
-            currentCache.data.push(item);
-          }
+          byId.set(item.id, item);
         }
+        currentCache.data = Array.from(byId.values());
         currentCache.meta = newData.meta;
       },
       forceRefetch: ({ currentArg, previousArg }) =>
@@ -112,6 +110,54 @@ export const postApi = createApi({
         'MyPosts',
         'UserPosts',
       ],
+      async onQueryStarted({ postId }, { dispatch, getState, queryFulfilled }) {
+        const { data: result } = await queryFulfilled.catch(() => ({
+          data: undefined,
+        }));
+        if (!result) return;
+        const updated = result.data;
+
+        dispatch(
+          postApi.util.updateQueryData('getPostById', postId, (draft) => {
+            Object.assign(draft.data, updated);
+          })
+        );
+
+        const cachedMyPostsArgs = postApi.util.selectCachedArgsForQuery(
+          getState(),
+          'getMyPosts'
+        );
+        for (const args of cachedMyPostsArgs) {
+          dispatch(
+            postApi.util.updateQueryData('getMyPosts', args, (draft) => {
+              const item = draft.data.find((p) => p.id === postId);
+              if (item) Object.assign(item, updated);
+            })
+          );
+        }
+
+        const cachedUserPostsArgs = postApi.util.selectCachedArgsForQuery(
+          getState(),
+          'getUserPosts'
+        );
+        for (const args of cachedUserPostsArgs) {
+          const filterVisibility = args.visibility;
+          if (filterVisibility && filterVisibility !== updated.visibility) {
+            dispatch(
+              postApi.util.updateQueryData('getUserPosts', args, (draft) => {
+                draft.data = draft.data.filter((p) => p.id !== postId);
+              })
+            );
+            continue;
+          }
+          dispatch(
+            postApi.util.updateQueryData('getUserPosts', args, (draft) => {
+              const item = draft.data.find((p) => p.id === postId);
+              if (item) Object.assign(item, updated);
+            })
+          );
+        }
+      },
     }),
 
     deletePost: builder.mutation<ApiResponse<null>, string>({

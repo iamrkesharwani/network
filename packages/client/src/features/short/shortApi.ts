@@ -78,12 +78,11 @@ export const shortApi = createApi({
           currentCache.meta = newData.meta;
           return;
         }
-        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        const byId = new Map(currentCache.data.map((item) => [item.id, item]));
         for (const item of newData.data) {
-          if (!existingIds.has(item.id)) {
-            currentCache.data.push(item);
-          }
+          byId.set(item.id, item);
         }
+        currentCache.data = Array.from(byId.values());
         currentCache.meta = newData.meta;
       },
       forceRefetch: ({ currentArg, previousArg }) =>
@@ -120,12 +119,11 @@ export const shortApi = createApi({
           currentCache.meta = newData.meta;
           return;
         }
-        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        const byId = new Map(currentCache.data.map((item) => [item.id, item]));
         for (const item of newData.data) {
-          if (!existingIds.has(item.id)) {
-            currentCache.data.push(item);
-          }
+          byId.set(item.id, item);
         }
+        currentCache.data = Array.from(byId.values());
         currentCache.meta = newData.meta;
       },
       forceRefetch: ({ currentArg, previousArg }) =>
@@ -157,6 +155,54 @@ export const shortApi = createApi({
         'MyShorts',
         'UserShorts',
       ],
+      async onQueryStarted({ shortId }, { dispatch, getState, queryFulfilled }) {
+        const { data: result } = await queryFulfilled.catch(() => ({
+          data: undefined,
+        }));
+        if (!result) return;
+        const updated = result.data;
+
+        dispatch(
+          shortApi.util.updateQueryData('getShortById', shortId, (draft) => {
+            Object.assign(draft.data, updated);
+          })
+        );
+
+        const cachedMyShortsArgs = shortApi.util.selectCachedArgsForQuery(
+          getState(),
+          'getMyShorts'
+        );
+        for (const args of cachedMyShortsArgs) {
+          dispatch(
+            shortApi.util.updateQueryData('getMyShorts', args, (draft) => {
+              const item = draft.data.find((s) => s.id === shortId);
+              if (item) Object.assign(item, updated);
+            })
+          );
+        }
+
+        const cachedUserShortsArgs = shortApi.util.selectCachedArgsForQuery(
+          getState(),
+          'getUserShorts'
+        );
+        for (const args of cachedUserShortsArgs) {
+          const filterVisibility = args.visibility;
+          if (filterVisibility && filterVisibility !== updated.visibility) {
+            dispatch(
+              shortApi.util.updateQueryData('getUserShorts', args, (draft) => {
+                draft.data = draft.data.filter((s) => s.id !== shortId);
+              })
+            );
+            continue;
+          }
+          dispatch(
+            shortApi.util.updateQueryData('getUserShorts', args, (draft) => {
+              const item = draft.data.find((s) => s.id === shortId);
+              if (item) Object.assign(item, updated);
+            })
+          );
+        }
+      },
     }),
 
     deleteShort: builder.mutation<ApiResponse<null>, string>({

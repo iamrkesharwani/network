@@ -24,14 +24,13 @@ export const feedApi = createApi({
           currentCache.meta = newData.meta;
           return;
         }
-        const existingIds = new Set(
-          currentCache.data.map((entry) => entry.item.id)
+        const byId = new Map(
+          currentCache.data.map((entry) => [entry.item.id, entry])
         );
         for (const entry of newData.data) {
-          if (!existingIds.has(entry.item.id)) {
-            currentCache.data.push(entry);
-          }
+          byId.set(entry.item.id, entry);
         }
+        currentCache.data = Array.from(byId.values());
         currentCache.meta = newData.meta;
       },
       forceRefetch: ({ currentArg, previousArg }) =>

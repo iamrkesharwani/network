@@ -78,12 +78,11 @@ export const videoApi = createApi({
           currentCache.meta = newData.meta;
           return;
         }
-        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        const byId = new Map(currentCache.data.map((item) => [item.id, item]));
         for (const item of newData.data) {
-          if (!existingIds.has(item.id)) {
-            currentCache.data.push(item);
-          }
+          byId.set(item.id, item);
         }
+        currentCache.data = Array.from(byId.values());
         currentCache.meta = newData.meta;
       },
       forceRefetch: ({ currentArg, previousArg }) =>
@@ -120,12 +119,11 @@ export const videoApi = createApi({
           currentCache.meta = newData.meta;
           return;
         }
-        const existingIds = new Set(currentCache.data.map((item) => item.id));
+        const byId = new Map(currentCache.data.map((item) => [item.id, item]));
         for (const item of newData.data) {
-          if (!existingIds.has(item.id)) {
-            currentCache.data.push(item);
-          }
+          byId.set(item.id, item);
         }
+        currentCache.data = Array.from(byId.values());
         currentCache.meta = newData.meta;
       },
       forceRefetch: ({ currentArg, previousArg }) =>
@@ -157,6 +155,54 @@ export const videoApi = createApi({
         'MyVideos',
         'UserVideos',
       ],
+      async onQueryStarted({ videoId }, { dispatch, getState, queryFulfilled }) {
+        const { data: result } = await queryFulfilled.catch(() => ({
+          data: undefined,
+        }));
+        if (!result) return;
+        const updated = result.data;
+
+        dispatch(
+          videoApi.util.updateQueryData('getVideoById', videoId, (draft) => {
+            Object.assign(draft.data, updated);
+          })
+        );
+
+        const cachedMyVideosArgs = videoApi.util.selectCachedArgsForQuery(
+          getState(),
+          'getMyVideos'
+        );
+        for (const args of cachedMyVideosArgs) {
+          dispatch(
+            videoApi.util.updateQueryData('getMyVideos', args, (draft) => {
+              const item = draft.data.find((v) => v.id === videoId);
+              if (item) Object.assign(item, updated);
+            })
+          );
+        }
+
+        const cachedUserVideosArgs = videoApi.util.selectCachedArgsForQuery(
+          getState(),
+          'getUserVideos'
+        );
+        for (const args of cachedUserVideosArgs) {
+          const filterVisibility = args.visibility;
+          if (filterVisibility && filterVisibility !== updated.visibility) {
+            dispatch(
+              videoApi.util.updateQueryData('getUserVideos', args, (draft) => {
+                draft.data = draft.data.filter((v) => v.id !== videoId);
+              })
+            );
+            continue;
+          }
+          dispatch(
+            videoApi.util.updateQueryData('getUserVideos', args, (draft) => {
+              const item = draft.data.find((v) => v.id === videoId);
+              if (item) Object.assign(item, updated);
+            })
+          );
+        }
+      },
     }),
 
     deleteVideo: builder.mutation<ApiResponse<null>, string>({
