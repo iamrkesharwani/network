@@ -11,6 +11,7 @@ interface ShortCardThumbnailProps {
   isReady: boolean;
   onClick?: (e: React.MouseEvent) => void;
   aspectClassName?: string;
+  isUnlisted?: boolean;
   daysLeft?: number | null;
 }
 
@@ -19,7 +20,8 @@ const ShortCardThumbnail = ({
   isReady,
   onClick,
   aspectClassName = 'aspect-9/16',
-  daysLeft,
+  isUnlisted = false,
+  daysLeft = null,
 }: ShortCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
 
@@ -65,9 +67,7 @@ const ShortCardThumbnail = ({
 
       <MediaDurationBadge durationSeconds={short.duration} isShort />
       <MediaVisibilityBadge visibility={short.visibility} />
-      {daysLeft !== undefined && daysLeft !== null && (
-        <UnlistedCountdownBadge daysLeft={daysLeft} />
-      )}
+      {isUnlisted && <UnlistedCountdownBadge daysLeft={daysLeft} />}
 
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">

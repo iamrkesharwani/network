@@ -74,7 +74,7 @@ const UploadConfirmation = ({
         transition={{ delay: 0.2 }}
       >
         <h2 className="text-2xl font-bold font-display text-text-primary">
-          You're all set 🎉
+          You're all set
         </h2>
         <p className="mt-1.5 text-sm text-text-muted max-w-sm">
           We'll notify you the moment your {mediaLabel} is ready.

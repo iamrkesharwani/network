@@ -90,6 +90,7 @@ const VideoCard = ({
         <VideoCardThumbnail
           video={video}
           isReady={isReady}
+          isUnlisted={isOwner && isUnlisted}
           daysLeft={daysLeft}
         />
         <VideoCardFooter

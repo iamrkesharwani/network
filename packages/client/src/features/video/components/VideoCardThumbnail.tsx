@@ -9,13 +9,15 @@ import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBad
 interface VideoCardThumbnailProps {
   video: IVideoResponse;
   isReady: boolean;
+  isUnlisted?: boolean;
   daysLeft?: number | null;
 }
 
 const VideoCardThumbnail = ({
   video,
   isReady,
-  daysLeft,
+  isUnlisted = false,
+  daysLeft = null,
 }: VideoCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
 
@@ -55,9 +57,7 @@ const VideoCardThumbnail = ({
 
       <MediaDurationBadge durationSeconds={video.duration} />
       <MediaVisibilityBadge visibility={video.visibility} />
-      {daysLeft !== undefined && daysLeft !== null && (
-        <UnlistedCountdownBadge daysLeft={daysLeft} />
-      )}
+      {isUnlisted && <UnlistedCountdownBadge daysLeft={daysLeft} />}
 
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">

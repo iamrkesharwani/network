@@ -96,7 +96,11 @@ const PostCard = ({
         }
         media={
           post.mediaType !== 'none' ? (
-            <PostMedia post={post} daysLeft={daysLeft} />
+            <PostMedia
+              post={post}
+              isUnlisted={isOwner && isUnlisted}
+              daysLeft={daysLeft}
+            />
           ) : undefined
         }
         footer={<PostFooter post={post} daysLeft={daysLeft} />}

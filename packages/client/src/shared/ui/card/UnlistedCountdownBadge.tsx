@@ -2,7 +2,7 @@ import { Clock } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface UnlistedCountdownBadgeProps {
-  daysLeft: number;
+  daysLeft: number | null;
   className?: string;
 }
 
@@ -17,7 +17,11 @@ const UnlistedCountdownBadge = ({
     )}
   >
     <Clock className="w-3 h-3" strokeWidth={2} />
-    {daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}
+    {daysLeft === null
+      ? 'Unlisted'
+      : daysLeft === 0
+        ? 'Expires today'
+        : `${daysLeft}d left`}
   </span>
 );
 

@@ -18,34 +18,28 @@ const MultiStepConfirmDelete = ({
   itemName,
   isLoading = false,
 }: MultiStepConfirmDeleteProps) => {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
 
   useEffect(() => {
     if (isOpen) setStep(1);
   }, [isOpen]);
 
   const handleAdvance = () => {
-    if (step === 3) {
+    if (step === 2) {
       onConfirm();
       return;
     }
-    setStep((s) => (s + 1) as 1 | 2 | 3);
+    setStep(2);
   };
 
   const steps = {
     1: {
       title: `Delete this ${itemLabel}?`,
-      description: `"${itemName}" will be removed from your profile.`,
+      description: `"${itemName}" will be removed from your profile. This action cannot be undone.`,
       confirmLabel: 'Continue',
       intent: 'warning' as const,
     },
     2: {
-      title: 'Are you sure?',
-      description: 'This action cannot be undone.',
-      confirmLabel: 'Continue',
-      intent: 'warning' as const,
-    },
-    3: {
       title: 'Confirm deletion',
       description: `This is the final step. Click Delete to permanently remove this ${itemLabel}.`,
       confirmLabel: 'Delete',

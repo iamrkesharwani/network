@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { IPostResponse } from '@network/shared';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
@@ -6,12 +6,24 @@ import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBad
 
 interface PostMediaProps {
   post: IPostResponse;
+  isUnlisted?: boolean;
   daysLeft?: number | null;
 }
 
-const PostMedia = ({ post, daysLeft }: PostMediaProps) => {
+const PostMedia = ({
+  post,
+  isUnlisted = false,
+  daysLeft = null,
+}: PostMediaProps) => {
   const [index, setIndex] = useState(0);
   const images = post.imageUrls ?? [];
+
+  useEffect(() => {
+    images.slice(1).forEach((url) => {
+      const preload = new Image();
+      preload.src = url;
+    });
+  }, [images]);
 
   if (post.mediaType !== 'image' || images.length === 0) return null;
 
@@ -39,9 +51,7 @@ const PostMedia = ({ post, daysLeft }: PostMediaProps) => {
       />
 
       <MediaVisibilityBadge visibility={post.visibility} />
-      {daysLeft !== undefined && daysLeft !== null && (
-        <UnlistedCountdownBadge daysLeft={daysLeft} />
-      )}
+      {isUnlisted && <UnlistedCountdownBadge daysLeft={daysLeft} />}
 
       {showArrows && (
         <>

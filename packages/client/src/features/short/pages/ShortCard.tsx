@@ -101,6 +101,7 @@ const ShortCard = ({
           <ShortCardThumbnail
             short={short}
             isReady={isReady}
+            isUnlisted={isOwner && isUnlisted}
             daysLeft={daysLeft}
             onClick={
               onThumbnailClick ? () => onThumbnailClick(short) : undefined

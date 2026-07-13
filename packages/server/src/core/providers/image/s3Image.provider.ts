@@ -55,7 +55,6 @@ export class S3ImageProvider implements IImageProvider {
         Key: key,
         Body: buffer,
         ContentType: mimeType,
-        ACL: 'public-read',
       })
     );
 

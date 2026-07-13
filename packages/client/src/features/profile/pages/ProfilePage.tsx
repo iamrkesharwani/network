@@ -70,11 +70,13 @@ const ProfilePage = () => {
             activeTab={activeTab ?? 'videos'}
             isOwner={isOwner}
           />
-          <ProfileTabContent
-            tab={activeTab ?? 'videos'}
-            username={username}
-            isOwner={isOwner}
-          />
+          <div className="pt-6">
+            <ProfileTabContent
+              tab={activeTab ?? 'videos'}
+              username={username}
+              isOwner={isOwner}
+            />
+          </div>
         </div>
       )}
     </div>

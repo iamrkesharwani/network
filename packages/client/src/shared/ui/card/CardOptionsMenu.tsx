@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { MoreVertical, Edit2, Trash2, EyeOff, Eye } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -13,6 +14,11 @@ interface CardOptionsMenuProps {
   };
 }
 
+interface MenuPosition {
+  top: number;
+  right: number;
+}
+
 const CardOptionsMenu = ({
   itemLabel,
   onEdit,
@@ -20,12 +26,39 @@ const CardOptionsMenu = ({
   visibilityAction,
 }: CardOptionsMenuProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [position, setPosition] = useState<MenuPosition | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const openMenu = () => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setPosition({
+      top: rect.bottom + 4,
+      right: window.innerWidth - rect.right,
+    });
+    setMenuOpen(true);
+  };
 
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setMenuOpen((v) => !v);
+    if (menuOpen) {
+      setMenuOpen(false);
+    } else {
+      openMenu();
+    }
   };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = () => setMenuOpen(false);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [menuOpen]);
 
   const handleEdit = (e: React.MouseEvent) => {
     setMenuOpen(false);
@@ -45,6 +78,7 @@ const CardOptionsMenu = ({
   return (
     <div className="relative shrink-0 self-start">
       <button
+        ref={buttonRef}
         type="button"
         onClick={handleToggle}
         aria-label={`${itemLabel} options`}
@@ -60,47 +94,57 @@ const CardOptionsMenu = ({
         <MoreVertical className="w-4 h-4" strokeWidth={1.75} />
       </button>
 
-      {menuOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setMenuOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="absolute right-0 top-8 z-20 w-40 py-1 rounded-xl bg-surface-overlay border border-border shadow-xl shadow-black/40">
-            <button
-              type="button"
-              onClick={handleEdit}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
+      {menuOpen &&
+        position &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setMenuOpen(false)}
+              aria-hidden="true"
+            />
+            <div
+              style={{
+                position: 'fixed',
+                top: position.top,
+                right: position.right,
+              }}
+              className="z-50 w-40 py-1 rounded-xl bg-surface-overlay border border-border shadow-xl shadow-black/40"
             >
-              <Edit2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-              Edit
-            </button>
-            {visibilityAction && (
               <button
                 type="button"
-                onClick={handleVisibility}
+                onClick={handleEdit}
                 className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
               >
-                {visibilityAction.toPublic ? (
-                  <Eye className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-                ) : (
-                  <EyeOff className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-                )}
-                {visibilityAction.label}
+                <Edit2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                Edit
               </button>
-            )}
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-error hover:bg-error-subtle transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-              Delete
-            </button>
-          </div>
-        </>
-      )}
+              {visibilityAction && (
+                <button
+                  type="button"
+                  onClick={handleVisibility}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
+                >
+                  {visibilityAction.toPublic ? (
+                    <Eye className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                  ) : (
+                    <EyeOff className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                  )}
+                  {visibilityAction.label}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-error hover:bg-error-subtle transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                Delete
+              </button>
+            </div>
+          </>,
+          document.body
+        )}
     </div>
   );
 };

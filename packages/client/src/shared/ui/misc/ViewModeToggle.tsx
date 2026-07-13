@@ -11,6 +11,8 @@ export interface ViewModeToggleProps {
 const ViewModeToggle = ({ value, onChange }: ViewModeToggleProps) => {
   const isMobile = useIsMobileLayout();
 
+  if (!isMobile) return null;
+
   return (
     <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-surface-raised border border-border">
       <button
