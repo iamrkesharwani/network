@@ -12,40 +12,38 @@ interface SessionResolverProps {
   store: AppStore;
 }
 
+let inFlightResolution: Promise<void> | null = null;
+
+const resolveSessionOnce = (store: AppStore): Promise<void> => {
+  if (inFlightResolution) {
+    return inFlightResolution;
+  }
+
+  inFlightResolution = (async () => {
+    await fetchCsrfToken();
+    try {
+      const { data } = await axiosInstance.post<{
+        data: { accessToken: string; user: IUser };
+      }>('/auth/refresh');
+
+      const { accessToken, user } = data.data;
+
+      setAccessToken(accessToken);
+      store.dispatch(setCredentials({ user, accessToken }));
+    } catch {
+      setAccessToken(null);
+      store.dispatch(clearCredentials());
+    } finally {
+      store.dispatch(setInitialized());
+    }
+  })();
+
+  return inFlightResolution;
+};
+
 const SessionResolver = ({ store }: SessionResolverProps) => {
   useEffect(() => {
-    let isMounted = true;
-
-    const resolveSession = async () => {
-      await fetchCsrfToken();
-      try {
-        const { data } = await axiosInstance.post<{
-          data: { accessToken: string; user: IUser };
-        }>('/auth/refresh');
-
-        if (!isMounted) return;
-
-        const { accessToken, user } = data.data;
-
-        setAccessToken(accessToken);
-        store.dispatch(setCredentials({ user, accessToken }));
-      } catch {
-        if (!isMounted) return;
-
-        setAccessToken(null);
-        store.dispatch(clearCredentials());
-      } finally {
-        if (isMounted) {
-          store.dispatch(setInitialized());
-        }
-      }
-    };
-
-    resolveSession();
-
-    return () => {
-      isMounted = false;
-    };
+    resolveSessionOnce(store);
   }, [store]);
 
   return null;
