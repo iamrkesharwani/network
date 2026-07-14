@@ -15,7 +15,7 @@ import { useCaptions } from '../../core/useCaptions';
 import ProgressBar from '../../ui/ProgressBar';
 import ControlGroup from '../../ui/ControlGroup';
 import TopControls from '../../ui/TopControls';
-import SettingsMenu from '../../ui/SettingsMenu';
+import SettingsMenu from '../../ui/settings/SettingsMenu';
 import Overlay from '../../ui/Overlay';
 import CaptionOverlay from '../../ui/CaptionOverlay';
 import TouchInactivityLayer, {
