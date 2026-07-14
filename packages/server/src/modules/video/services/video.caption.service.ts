@@ -57,16 +57,14 @@ export const addCaption = async (
   }
 
   const storageKey = buildCaptionStorageKey(videoId);
-  await processedStorageProvider.uploadObject(
-    storageKey,
-    file.buffer,
-    'text/vtt'
-  );
   const url = processedStorageProvider.buildPublicUrl(storageKey);
 
-  if (data.isDefault) {
-    await videoRepository.clearCaptionDefaults(videoId);
-  }
+  await Promise.all([
+    processedStorageProvider.uploadObject(storageKey, file.buffer, 'text/vtt'),
+    data.isDefault
+      ? videoRepository.clearCaptionDefaults(videoId)
+      : Promise.resolve(),
+  ]);
 
   const updated = await videoRepository.pushCaption(videoId, {
     language: languageEntry.code,
@@ -97,9 +95,10 @@ export const removeCaption = async (
   );
   if (!caption) throw new ApiError(404, 'NOT_FOUND', 'Caption not found.');
 
-  await processedStorageProvider.deleteObject(caption.storageKey);
-
-  const updated = await videoRepository.pullCaption(videoId, captionId);
+  const [, updated] = await Promise.all([
+    processedStorageProvider.deleteObject(caption.storageKey),
+    videoRepository.pullCaption(videoId, captionId),
+  ]);
   if (!updated) throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
   return toResponse(updated);
 };

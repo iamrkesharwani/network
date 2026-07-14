@@ -11,9 +11,11 @@ import { useKeyboardShortcuts } from '../../core/useKeyboardShortcuts';
 import { useOrientationLock } from '../../core/useOrientationLock';
 import { useTelemetry } from '../../core/useTelemetry';
 import { usePictureInPictureSync } from '../../core/usePictureInPictureSync';
+import { useCaptions } from '../../core/useCaptions';
 import ProgressBar from '../../ui/ProgressBar';
 import ControlGroup from '../../ui/ControlGroup';
 import Overlay from '../../ui/Overlay';
+import CaptionOverlay from '../../ui/CaptionOverlay';
 import TouchInactivityLayer, {
   type TouchInactivityLayerHandle,
 } from '../../ui/TouchInactivityLayer';
@@ -45,6 +47,10 @@ const VideoPlayer = ({
     retry,
   } = useVideoSource(videoRef, video.playbackUrl);
   const engine = useMediaEngine(videoRef);
+  const { activeLanguage, activeCueText, setActiveLanguage } = useCaptions(
+    videoRef,
+    video.captions
+  );
 
   useEffect(() => {
     dispatch(setVolumePreference(engine.volume));
@@ -137,6 +143,16 @@ const VideoPlayer = ({
     }
   }, [sourceState, engine.play]);
 
+  const handleToggleCaptions = useCallback(() => {
+    if (activeLanguage !== 'off') {
+      setActiveLanguage('off');
+      return;
+    }
+    const preferred =
+      video.captions.find((track) => track.isDefault) ?? video.captions[0];
+    if (preferred) setActiveLanguage(preferred.language);
+  }, [activeLanguage, video.captions, setActiveLanguage]);
+
   useKeyboardShortcuts({
     containerRef,
     currentTimeRef: engine.currentTimeRef,
@@ -147,6 +163,7 @@ const VideoPlayer = ({
     seek: engine.seek,
     setVolume: engine.setVolume,
     toggleFullscreen: handleToggleFullscreen,
+    onToggleCaptions: handleToggleCaptions,
   });
 
   const isBuffering = sourceState === 'buffering' || engine.isBuffering;
@@ -182,7 +199,18 @@ const VideoPlayer = ({
           poster={video.thumbnailUrl}
           className="h-full w-full object-contain"
           playsInline
-        />
+        >
+          {video.captions.map((track) => (
+            <track
+              key={track.id}
+              kind="subtitles"
+              src={track.url}
+              srcLang={track.language}
+              label={track.label}
+              default={track.isDefault}
+            />
+          ))}
+        </video>
 
         <TouchInactivityLayer
           ref={touchLayerRef}
@@ -202,6 +230,8 @@ const VideoPlayer = ({
             onTogglePlay={engine.togglePlay}
             onRetry={handleRetry}
           />
+
+          <CaptionOverlay activeCueText={activeCueText} />
 
           <div
             className={cn(
@@ -229,6 +259,9 @@ const VideoPlayer = ({
               onToggleTheaterMode={handleToggleTheaterMode}
               isFullscreen={isFullscreen}
               onToggleFullscreen={handleToggleFullscreen}
+              captionTracks={video.captions}
+              activeCaptionLanguage={activeLanguage}
+              onSelectCaptionLanguage={setActiveLanguage}
             />
           </div>
         </TouchInactivityLayer>

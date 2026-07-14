@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Check } from 'lucide-react';
 import { PLAYER_PLAYBACK_RATES } from '@network/shared';
+import type { ICaptionTrack } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 
 interface SettingsMenuProps {
@@ -8,6 +9,9 @@ interface SettingsMenuProps {
   onClose: () => void;
   playbackRate: number;
   onPlaybackRateChange: (rate: number) => void;
+  captionTracks?: ICaptionTrack[];
+  activeCaptionLanguage?: string | 'off';
+  onSelectCaptionLanguage?: (language: string | 'off') => void;
   className?: string;
 }
 
@@ -16,6 +20,9 @@ const SettingsMenu = ({
   onClose,
   playbackRate,
   onPlaybackRateChange,
+  captionTracks,
+  activeCaptionLanguage,
+  onSelectCaptionLanguage,
   className,
 }: SettingsMenuProps) => {
   useEffect(() => {
@@ -30,6 +37,9 @@ const SettingsMenu = ({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  const isCaptionsOff =
+    activeCaptionLanguage === 'off' || activeCaptionLanguage === undefined;
 
   return (
     <div
@@ -57,6 +67,43 @@ const SettingsMenu = ({
           {playbackRate === rate && <Check className="h-4 w-4" />}
         </button>
       ))}
+
+      {captionTracks && captionTracks.length > 0 && onSelectCaptionLanguage && (
+        <>
+          <div className="px-3 py-1 text-xs font-medium text-white/60">Captions</div>
+          <button
+            type="button"
+            role="menuitemradio"
+            aria-checked={isCaptionsOff}
+            onClick={() => {
+              onSelectCaptionLanguage('off');
+              onClose();
+            }}
+            className="flex w-full items-center justify-between px-3 py-1.5 hover:bg-white/10"
+          >
+            <span>Off</span>
+            {isCaptionsOff && <Check className="h-4 w-4" />}
+          </button>
+          {captionTracks.map((track) => (
+            <button
+              key={track.id}
+              type="button"
+              role="menuitemradio"
+              aria-checked={activeCaptionLanguage === track.language}
+              onClick={() => {
+                onSelectCaptionLanguage(track.language);
+                onClose();
+              }}
+              className="flex w-full items-center justify-between px-3 py-1.5 hover:bg-white/10"
+            >
+              <span>{track.label}</span>
+              {activeCaptionLanguage === track.language && (
+                <Check className="h-4 w-4" />
+              )}
+            </button>
+          ))}
+        </>
+      )}
     </div>
   );
 };

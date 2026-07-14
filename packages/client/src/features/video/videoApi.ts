@@ -15,6 +15,9 @@ import type {
   VideoUserFeedQuery,
 } from '@network/shared';
 
+const captionMutationTags = (videoId: string) =>
+  [{ type: 'Video' as const, id: videoId }, 'MyVideos' as const, 'UserVideos' as const];
+
 export const videoApi = createApi({
   reducerPath: 'videoApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/video' }),
@@ -230,6 +233,44 @@ export const videoApi = createApi({
         'Video',
       ],
     }),
+
+    uploadCaption: builder.mutation<
+      ApiResponse<IVideoResponse>,
+      { videoId: string; formData: FormData }
+    >({
+      query: ({ videoId, formData }) => ({
+        url: `/${videoId}/captions`,
+        method: 'POST',
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+      invalidatesTags: (_result, _error, { videoId }) =>
+        captionMutationTags(videoId),
+    }),
+
+    deleteCaption: builder.mutation<
+      ApiResponse<IVideoResponse>,
+      { videoId: string; captionId: string }
+    >({
+      query: ({ videoId, captionId }) => ({
+        url: `/${videoId}/captions/${captionId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, { videoId }) =>
+        captionMutationTags(videoId),
+    }),
+
+    setDefaultCaption: builder.mutation<
+      ApiResponse<IVideoResponse>,
+      { videoId: string; captionId: string }
+    >({
+      query: ({ videoId, captionId }) => ({
+        url: `/${videoId}/captions/${captionId}/default`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: (_result, _error, { videoId }) =>
+        captionMutationTags(videoId),
+    }),
   }),
 });
 
@@ -245,4 +286,7 @@ export const {
   useGetVideoByIdQuery,
   useUpdateVideoMutation,
   useDeleteVideoMutation,
+  useUploadCaptionMutation,
+  useDeleteCaptionMutation,
+  useSetDefaultCaptionMutation,
 } = videoApi;

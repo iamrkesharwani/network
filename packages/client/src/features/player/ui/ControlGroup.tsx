@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Captions,
   Maximize,
   Minimize,
   Pause,
@@ -10,6 +11,7 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
+import type { ICaptionTrack } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import VolumeSlider from './VolumeSlider';
 import SettingsMenu from './SettingsMenu';
@@ -27,6 +29,9 @@ interface ControlGroupProps {
   onToggleTheaterMode?: () => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  captionTracks?: ICaptionTrack[];
+  activeCaptionLanguage?: string | 'off';
+  onSelectCaptionLanguage?: (language: string | 'off') => void;
   className?: string;
 }
 
@@ -49,10 +54,14 @@ const ControlGroup = ({
   onToggleTheaterMode,
   isFullscreen,
   onToggleFullscreen,
+  captionTracks,
+  activeCaptionLanguage,
+  onSelectCaptionLanguage,
   className,
 }: ControlGroupProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsContainerRef = useRef<HTMLDivElement>(null);
+  const hasCaptions = !!captionTracks && captionTracks.length > 0;
 
   useEffect(() => {
     if (!isSettingsOpen) return;
@@ -108,8 +117,20 @@ const ControlGroup = ({
       <div className="flex shrink-0 items-center gap-1">
         <div
           ref={settingsContainerRef}
-          className="relative flex shrink-0 items-center"
+          className="relative flex shrink-0 items-center gap-1"
         >
+          {hasCaptions && (
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen((open) => !open)}
+              aria-label="Captions"
+              aria-pressed={activeCaptionLanguage !== 'off'}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+            >
+              <Captions className="h-5 w-5" />
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => setIsSettingsOpen((open) => !open)}
@@ -125,6 +146,9 @@ const ControlGroup = ({
             onClose={() => setIsSettingsOpen(false)}
             playbackRate={playbackRate}
             onPlaybackRateChange={setPlaybackRate}
+            captionTracks={captionTracks}
+            activeCaptionLanguage={activeCaptionLanguage}
+            onSelectCaptionLanguage={onSelectCaptionLanguage}
           />
         </div>
 

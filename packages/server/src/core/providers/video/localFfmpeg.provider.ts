@@ -22,7 +22,7 @@ import { logger } from '../../utils/logger.js';
 import { transcodeDurationSeconds } from '../../metrics/queueMetrics.js';
 import type {
   IngestVideoResult,
-  IStorageProvider,
+  IPublicUrlStorageProvider,
   IVideoProvider,
   NormalizedWebhookPayload,
   WebhookVerifyParams,
@@ -32,17 +32,14 @@ const execFileAsync = promisify(execFile);
 const FFMPEG_EXEC_OPTIONS = { maxBuffer: 10 * 1024 * 1024 };
 
 export interface LocalFfmpegConfig {
-  processedStorage: IStorageProvider;
-  publicBaseUrl: string;
+  processedStorage: IPublicUrlStorageProvider;
 }
 
 export class LocalFfmpegVideoProvider implements IVideoProvider {
-  private readonly processedStorage: IStorageProvider;
-  private readonly publicBaseUrl: string;
+  private readonly processedStorage: IPublicUrlStorageProvider;
 
   constructor(config: LocalFfmpegConfig) {
     this.processedStorage = config.processedStorage;
-    this.publicBaseUrl = config.publicBaseUrl.replace(/\/+$/, '');
   }
 
   private buildProcessedKey(providerVideoId: string): string {
@@ -199,11 +196,15 @@ export class LocalFfmpegVideoProvider implements IVideoProvider {
   }
 
   buildPlaybackUrl(providerVideoId: string): string {
-    return `${this.publicBaseUrl}/${this.buildProcessedKey(providerVideoId)}`;
+    return this.processedStorage.buildPublicUrl(
+      this.buildProcessedKey(providerVideoId)
+    );
   }
 
   buildThumbnailUrl(providerVideoId: string): string {
-    return `${this.publicBaseUrl}/${this.buildThumbnailKey(providerVideoId)}`;
+    return this.processedStorage.buildPublicUrl(
+      this.buildThumbnailKey(providerVideoId)
+    );
   }
 
   async verifyWebhookSignature(

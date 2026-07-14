@@ -13,6 +13,7 @@ interface UseKeyboardShortcutsOptions {
   toggleFullscreen: () => void;
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
+  onToggleCaptions?: () => void;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -36,6 +37,7 @@ export function useKeyboardShortcuts({
   toggleFullscreen,
   onNavigatePrev,
   onNavigateNext,
+  onToggleCaptions,
 }: UseKeyboardShortcutsOptions): void {
   useEffect(() => {
     const container = containerRef.current;
@@ -61,6 +63,11 @@ export function useKeyboardShortcuts({
         case 'M':
           event.preventDefault();
           toggleMute();
+          return;
+        case 'c':
+        case 'C':
+          event.preventDefault();
+          if (onToggleCaptions) onToggleCaptions();
           return;
         case 'ArrowLeft':
           event.preventDefault();
@@ -106,5 +113,6 @@ export function useKeyboardShortcuts({
     toggleFullscreen,
     onNavigatePrev,
     onNavigateNext,
+    onToggleCaptions,
   ]);
 }

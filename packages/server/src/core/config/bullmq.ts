@@ -1,6 +1,6 @@
 import { env } from '../env/env.js';
 
-const url = new URL(env.REDIS_URI);
+const url = new URL(env.REDIS_URI_QUEUE);
 
 export const bullMqConnection = {
   host: url.hostname,

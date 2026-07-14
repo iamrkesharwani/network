@@ -13,18 +13,13 @@ import {
   getVideoById,
   updateVideo,
 } from '../services/video.crud.service.js';
+import { getVideoIdParam, getUsernameParam } from './params.js';
 
 const getFeedQuery = (req: Request): VideoFeedQuery =>
   req.query as unknown as VideoFeedQuery;
 
 const getUserFeedQuery = (req: Request): VideoUserFeedQuery =>
   req.query as unknown as VideoUserFeedQuery;
-
-const getVideoIdParam = (req: Request): string =>
-  req.params['videoId'] as string;
-
-const getUsernameParam = (req: Request): string =>
-  req.params['username'] as string;
 
 export const getFeed = asyncHandler(async (req: Request, res: Response) => {
   const { cursor, limit } = getFeedQuery(req);

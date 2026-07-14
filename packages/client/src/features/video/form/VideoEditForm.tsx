@@ -9,6 +9,7 @@ import {
   type ICreatorEvent,
   type VideoCategory,
   type VideoVisibility,
+  type ICaptionTrack,
 } from '@network/shared';
 import {
   useFinaliseVideoMutation,
@@ -26,6 +27,7 @@ import CategoryPicker from '../../upload/components/CategoryPicker';
 import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
 import ThumbnailPicker from '../../upload/components/ThumbnailPicker';
+import CaptionsManager from './CaptionsManager';
 
 type VideoFormValues = {
   title: string;
@@ -40,6 +42,7 @@ interface VideoEditFormProps {
   mode: 'finalise' | 'edit';
   videoId: string;
   thumbnailUrl?: string;
+  captions?: ICaptionTrack[];
   initialValues?: Partial<VideoUploadInput>;
   onSuccess: (
     video: IVideoResponse,
@@ -61,6 +64,7 @@ const VideoEditForm = ({
   mode,
   videoId,
   thumbnailUrl,
+  captions,
   initialValues,
   onSuccess,
 }: VideoEditFormProps) => {
@@ -201,6 +205,10 @@ const VideoEditForm = ({
             uploadThumbnail={handleThumbnailUpload}
           />
         </div>
+      )}
+
+      {mode === 'edit' && (
+        <CaptionsManager videoId={videoId} captions={captions ?? []} />
       )}
 
       {submitError && (

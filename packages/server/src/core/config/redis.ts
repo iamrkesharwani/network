@@ -15,9 +15,9 @@ const redisOptions: RedisOptions = {
   maxRetriesPerRequest: null,
 };
 
-export const redisClient = new Redis(env.REDIS_URI, redisOptions);
-export const pubClient = new Redis(env.REDIS_URI, redisOptions);
-export const subClient = new Redis(env.REDIS_URI, redisOptions);
+export const redisClient = new Redis(env.REDIS_URI_CORE, redisOptions);
+export const pubClient = new Redis(env.REDIS_URI_SOCKET, redisOptions);
+export const subClient = new Redis(env.REDIS_URI_SOCKET, redisOptions);
 
 redisClient.on('error', (err) => {
   logger.error(err, 'Redis client background error occurred.');

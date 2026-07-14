@@ -167,6 +167,7 @@ const VideoListRow = ({
           mode="edit"
           videoId={video.id}
           thumbnailUrl={video.thumbnailUrl}
+          captions={video.captions}
           initialValues={{
             title: video.title,
             description: video.description,

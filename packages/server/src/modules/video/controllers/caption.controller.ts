@@ -3,18 +3,29 @@ import type { CaptionUploadInput } from '@network/shared';
 import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { ApiResponse } from '../../../core/utils/ApiResponse.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
-import { verifyVttContent } from '../../../core/middleware/upload.middleware.js';
 import {
   addCaption,
   removeCaption,
   setDefaultCaption,
 } from '../services/video.caption.service.js';
+import { getVideoIdParam, getCaptionIdParam } from './params.js';
 
-const getVideoIdParam = (req: Request): string =>
-  req.params['videoId'] as string;
+const UTF8_BOM = '﻿';
 
-const getCaptionIdParam = (req: Request): string =>
-  req.params['captionId'] as string;
+const verifyVttContent = (buffer: Buffer): void => {
+  const text = buffer.toString('utf-8');
+  const withoutBom = text.startsWith(UTF8_BOM)
+    ? text.slice(UTF8_BOM.length)
+    : text;
+
+  if (!withoutBom.startsWith('WEBVTT')) {
+    throw new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      'File content is not a valid WebVTT caption file.'
+    );
+  }
+};
 
 export const uploadTheCaption = asyncHandler(
   async (req: Request, res: Response) => {

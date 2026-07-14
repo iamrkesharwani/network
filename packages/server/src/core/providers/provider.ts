@@ -7,6 +7,7 @@ import { CloudflareImagesProvider } from './image/cloudflareImage.provider.js';
 import { S3ImageProvider } from './image/s3Image.provider.js';
 
 import type { IStorageProvider } from './types.js';
+import type { IPublicUrlStorageProvider } from './types.js';
 import type { IVideoProvider } from './types.js';
 import type { IImageProvider } from './types.js';
 
@@ -30,7 +31,7 @@ function buildStorageProvider(): IStorageProvider {
   }
 }
 
-function buildProcessedStorageProvider(): IStorageProvider {
+function buildProcessedStorageProvider(): IPublicUrlStorageProvider {
   return new R2StorageProvider({
     accountId: env.CF_ACCOUNT_ID!,
     accessKeyId: env.CF_R2_ACCESS_KEY_ID!,
@@ -40,7 +41,9 @@ function buildProcessedStorageProvider(): IStorageProvider {
   });
 }
 
-function buildVideoProvider(processedStorage: IStorageProvider): IVideoProvider {
+function buildVideoProvider(
+  processedStorage: IPublicUrlStorageProvider
+): IVideoProvider {
   const name = env.VIDEO_PROVIDER;
   logger.info(`Video provider: ${name}`);
 
@@ -48,7 +51,6 @@ function buildVideoProvider(processedStorage: IStorageProvider): IVideoProvider 
     case 'local-ffmpeg':
       return new LocalFfmpegVideoProvider({
         processedStorage,
-        publicBaseUrl: env.CF_PUBLIC_URL!,
       });
 
     default:
@@ -91,7 +93,7 @@ function buildImageProvider(): IImageProvider {
 }
 
 export const storageProvider: IStorageProvider = buildStorageProvider();
-export const processedStorageProvider: IStorageProvider =
+export const processedStorageProvider: IPublicUrlStorageProvider =
   buildProcessedStorageProvider();
 export const videoProvider: IVideoProvider = buildVideoProvider(
   processedStorageProvider

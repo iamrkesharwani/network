@@ -72,20 +72,3 @@ export const uploadCaption = createMemUploadMiddleware(
   ALLOWED_CAPTION_MIME_TYPES,
   MAX_CAPTION_SIZE_BYTES
 ).single('caption');
-
-const UTF8_BOM = '﻿';
-
-export const verifyVttContent = (buffer: Buffer): void => {
-  const text = buffer.toString('utf-8');
-  const withoutBom = text.startsWith(UTF8_BOM)
-    ? text.slice(UTF8_BOM.length)
-    : text;
-
-  if (!withoutBom.startsWith('WEBVTT')) {
-    throw new ApiError(
-      400,
-      'VALIDATION_ERROR',
-      'File content is not a valid WebVTT caption file.'
-    );
-  }
-};
