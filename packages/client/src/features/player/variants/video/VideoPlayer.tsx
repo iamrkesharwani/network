@@ -14,6 +14,7 @@ import { usePictureInPictureSync } from '../../core/usePictureInPictureSync';
 import { useCaptions } from '../../core/useCaptions';
 import ProgressBar from '../../ui/ProgressBar';
 import ControlGroup from '../../ui/ControlGroup';
+import TopControls from '../../ui/TopControls';
 import Overlay from '../../ui/Overlay';
 import CaptionOverlay from '../../ui/CaptionOverlay';
 import TouchInactivityLayer, {
@@ -233,35 +234,46 @@ const VideoPlayer = ({
 
           <CaptionOverlay activeCueText={activeCueText} />
 
+          <TopControls
+            className={cn(
+              'absolute inset-x-0 top-0 bg-linear-to-b from-black/80 to-transparent px-3 pt-2 pb-6',
+              'opacity-100 transition-opacity duration-300',
+              'group-data-[controls-visible=false]/touch:opacity-0'
+            )}
+            playbackRate={engine.playbackRate}
+            setPlaybackRate={engine.setPlaybackRate}
+            isTheaterMode={isTheaterMode}
+            onToggleTheaterMode={handleToggleTheaterMode}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={handleToggleFullscreen}
+            captionTracks={video.captions}
+            activeCaptionLanguage={activeLanguage}
+            onSelectCaptionLanguage={setActiveLanguage}
+          />
+
           <div
             className={cn(
-              'absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-linear-to-t from-black/80 to-transparent px-3 pt-8 pb-2',
+              'absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-linear-to-t from-black/80 to-transparent pt-8 pb-1',
               'opacity-100 transition-opacity duration-300',
               'group-data-[controls-visible=false]/touch:opacity-0'
             )}
           >
+            <ControlGroup
+              className="px-3"
+              isPlaying={engine.isPlaying}
+              isMuted={engine.isMuted}
+              volume={engine.volume}
+              duration={engine.duration}
+              subscribeToTime={engine.subscribeToTime}
+              togglePlay={engine.togglePlay}
+              toggleMute={engine.toggleMute}
+              setVolume={engine.setVolume}
+            />
             <ProgressBar
               duration={engine.duration}
               subscribeToTime={engine.subscribeToTime}
               bufferedRangesRef={engine.bufferedRangesRef}
               onSeek={engine.seek}
-            />
-            <ControlGroup
-              isPlaying={engine.isPlaying}
-              isMuted={engine.isMuted}
-              volume={engine.volume}
-              playbackRate={engine.playbackRate}
-              togglePlay={engine.togglePlay}
-              toggleMute={engine.toggleMute}
-              setVolume={engine.setVolume}
-              setPlaybackRate={engine.setPlaybackRate}
-              isTheaterMode={isTheaterMode}
-              onToggleTheaterMode={handleToggleTheaterMode}
-              isFullscreen={isFullscreen}
-              onToggleFullscreen={handleToggleFullscreen}
-              captionTracks={video.captions}
-              activeCaptionLanguage={activeLanguage}
-              onSelectCaptionLanguage={setActiveLanguage}
             />
           </div>
         </TouchInactivityLayer>

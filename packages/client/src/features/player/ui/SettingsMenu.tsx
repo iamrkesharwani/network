@@ -46,11 +46,13 @@ const SettingsMenu = ({
       role="menu"
       aria-label="Playback settings"
       className={cn(
-        'absolute bottom-full right-0 mb-2 min-w-40 rounded-lg bg-black/90 py-2 text-sm text-white shadow-lg',
+        'absolute top-full right-0 mt-2 min-w-40 rounded-lg bg-black/90 py-2 text-sm text-white shadow-lg',
         className
       )}
     >
-      <div className="px-3 py-1 text-xs font-medium text-white/60">Playback speed</div>
+      <div className="px-3 py-1 text-xs font-medium text-white/60">
+        Playback speed
+      </div>
       {PLAYER_PLAYBACK_RATES.map((rate) => (
         <button
           key={rate}
@@ -70,7 +72,9 @@ const SettingsMenu = ({
 
       {captionTracks && captionTracks.length > 0 && onSelectCaptionLanguage && (
         <>
-          <div className="px-3 py-1 text-xs font-medium text-white/60">Captions</div>
+          <div className="px-3 py-1 text-xs font-medium text-white/60">
+            Captions
+          </div>
           <button
             type="button"
             role="menuitemradio"

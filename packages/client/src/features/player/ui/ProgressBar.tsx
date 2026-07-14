@@ -210,7 +210,8 @@ const ProgressBar = ({
   const handleKeyDown = useCallback(
     (event: ReactKeyboardEvent<HTMLDivElement>) => {
       let nextTime: number | null = null;
-      if (event.key === 'ArrowLeft') nextTime = latestTimeRef.current - PLAYER_SEEK_STEP_SECONDS;
+      if (event.key === 'ArrowLeft')
+        nextTime = latestTimeRef.current - PLAYER_SEEK_STEP_SECONDS;
       else if (event.key === 'ArrowRight')
         nextTime = latestTimeRef.current + PLAYER_SEEK_STEP_SECONDS;
       else if (event.key === 'Home') nextTime = 0;
@@ -247,7 +248,7 @@ const ProgressBar = ({
         className
       )}
     >
-      <div className="relative h-1 w-full rounded-full bg-white/25">
+      <div className="relative h-1.5 w-full rounded-full bg-white/25">
         <div
           ref={bufferedContainerRef}
           className="absolute inset-0 overflow-hidden rounded-full"

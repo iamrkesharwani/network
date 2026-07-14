@@ -1,37 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-  Captions,
-  Maximize,
-  Minimize,
-  Pause,
-  Play,
-  RectangleHorizontal,
-  Settings,
-  Volume1,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
-import type { ICaptionTrack } from '@network/shared';
+import { useEffect, useRef } from 'react';
+import { Pause, Play, Volume1, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '../../../shared/utils/cn';
 import VolumeSlider from './VolumeSlider';
-import SettingsMenu from './SettingsMenu';
 
 interface ControlGroupProps {
   isPlaying: boolean;
   isMuted: boolean;
   volume: number;
-  playbackRate: number;
+  duration: number;
+  subscribeToTime: (callback: (time: number) => void) => () => void;
   togglePlay: () => void;
   toggleMute: () => void;
   setVolume: (volume: number) => void;
-  setPlaybackRate: (rate: number) => void;
-  isTheaterMode?: boolean;
-  onToggleTheaterMode?: () => void;
-  isFullscreen?: boolean;
-  onToggleFullscreen?: () => void;
-  captionTracks?: ICaptionTrack[];
-  activeCaptionLanguage?: string | 'off';
-  onSelectCaptionLanguage?: (language: string | 'off') => void;
   className?: string;
 }
 
@@ -41,49 +21,61 @@ function VolumeIcon({ isMuted, volume }: { isMuted: boolean; volume: number }) {
   return <Volume2 className="h-5 w-5" />;
 }
 
+function formatClock(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+  const total = Math.floor(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const mm = m.toString().padStart(2, '0');
+  const ss = s.toString().padStart(2, '0');
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+function TimeDisplay({
+  duration,
+  subscribeToTime,
+}: {
+  duration: number;
+  subscribeToTime: (callback: (time: number) => void) => () => void;
+}) {
+  const currentRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    return subscribeToTime((time) => {
+      if (currentRef.current)
+        currentRef.current.textContent = formatClock(time);
+    });
+  }, [subscribeToTime]);
+
+  return (
+    <span className="font-mono text-xs tabular-nums text-white select-none sm:text-sm">
+      <span ref={currentRef}>{formatClock(0)}</span>
+      <span className="mx-1 text-white/60">/</span>
+      <span>{formatClock(duration)}</span>
+    </span>
+  );
+}
+
 const ControlGroup = ({
   isPlaying,
   isMuted,
   volume,
-  playbackRate,
+  duration,
+  subscribeToTime,
   togglePlay,
   toggleMute,
   setVolume,
-  setPlaybackRate,
-  isTheaterMode,
-  onToggleTheaterMode,
-  isFullscreen,
-  onToggleFullscreen,
-  captionTracks,
-  activeCaptionLanguage,
-  onSelectCaptionLanguage,
   className,
 }: ControlGroupProps) => {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const settingsContainerRef = useRef<HTMLDivElement>(null);
-  const hasCaptions = !!captionTracks && captionTracks.length > 0;
-
-  useEffect(() => {
-    if (!isSettingsOpen) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!settingsContainerRef.current?.contains(event.target as Node)) {
-        setIsSettingsOpen(false);
-      }
-    };
-
-    document.addEventListener('pointerdown', handlePointerDown);
-    return () => document.removeEventListener('pointerdown', handlePointerDown);
-  }, [isSettingsOpen]);
-
   return (
     <div
       className={cn(
-        '@container flex w-full items-center justify-between gap-2',
+        'flex w-full items-center justify-between gap-2',
         className
       )}
     >
-      <div className="flex min-w-0 items-center gap-1">
+      <div className="flex min-w-0 items-center gap-2">
         <button
           type="button"
           onClick={togglePlay}
@@ -97,6 +89,10 @@ const ControlGroup = ({
           )}
         </button>
 
+        <TimeDisplay duration={duration} subscribeToTime={subscribeToTime} />
+      </div>
+
+      <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={toggleMute}
@@ -110,75 +106,8 @@ const ControlGroup = ({
           volume={volume}
           isMuted={isMuted}
           onVolumeChange={setVolume}
-          className="ml-1 hidden w-20 @sm:flex"
+          className="w-20"
         />
-      </div>
-
-      <div className="flex shrink-0 items-center gap-1">
-        <div
-          ref={settingsContainerRef}
-          className="relative flex shrink-0 items-center gap-1"
-        >
-          {hasCaptions && (
-            <button
-              type="button"
-              onClick={() => setIsSettingsOpen((open) => !open)}
-              aria-label="Captions"
-              aria-pressed={activeCaptionLanguage !== 'off'}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
-            >
-              <Captions className="h-5 w-5" />
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setIsSettingsOpen((open) => !open)}
-            aria-label="Settings"
-            aria-haspopup="menu"
-            aria-expanded={isSettingsOpen}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
-          >
-            <Settings className="h-5 w-5" />
-          </button>
-          <SettingsMenu
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-            playbackRate={playbackRate}
-            onPlaybackRateChange={setPlaybackRate}
-            captionTracks={captionTracks}
-            activeCaptionLanguage={activeCaptionLanguage}
-            onSelectCaptionLanguage={onSelectCaptionLanguage}
-          />
-        </div>
-
-        {onToggleTheaterMode && (
-          <button
-            type="button"
-            onClick={onToggleTheaterMode}
-            aria-label={isTheaterMode ? 'Exit theater mode' : 'Theater mode'}
-            aria-pressed={isTheaterMode}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
-          >
-            <RectangleHorizontal className="h-5 w-5" />
-          </button>
-        )}
-
-        {onToggleFullscreen && (
-          <button
-            type="button"
-            onClick={onToggleFullscreen}
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-            aria-pressed={isFullscreen}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
-          >
-            {isFullscreen ? (
-              <Minimize className="h-5 w-5" />
-            ) : (
-              <Maximize className="h-5 w-5" />
-            )}
-          </button>
-        )}
       </div>
     </div>
   );
