@@ -15,6 +15,7 @@ import { useCaptions } from '../../core/useCaptions';
 import ProgressBar from '../../ui/ProgressBar';
 import ControlGroup from '../../ui/ControlGroup';
 import TopControls from '../../ui/TopControls';
+import SettingsMenu from '../../ui/SettingsMenu';
 import Overlay from '../../ui/Overlay';
 import CaptionOverlay from '../../ui/CaptionOverlay';
 import TouchInactivityLayer, {
@@ -66,6 +67,7 @@ const VideoPlayer = ({
   });
 
   const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleToggleTheaterMode = useCallback(() => {
     setIsTheaterMode((theater) => {
@@ -244,12 +246,19 @@ const VideoPlayer = ({
               'opacity-100 transition-opacity duration-300',
               'group-data-[controls-visible=false]/touch:opacity-0'
             )}
-            playbackRate={engine.playbackRate}
-            setPlaybackRate={engine.setPlaybackRate}
+            isSettingsOpen={isSettingsOpen}
+            onToggleSettings={() => setIsSettingsOpen((open) => !open)}
             isTheaterMode={isTheaterMode}
             onToggleTheaterMode={handleToggleTheaterMode}
             isFullscreen={isFullscreen}
             onToggleFullscreen={handleToggleFullscreen}
+          />
+
+          <SettingsMenu
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            playbackRate={engine.playbackRate}
+            onPlaybackRateChange={engine.setPlaybackRate}
             captionTracks={video.captions}
             activeCaptionLanguage={activeLanguage}
             onSelectCaptionLanguage={setActiveLanguage}
