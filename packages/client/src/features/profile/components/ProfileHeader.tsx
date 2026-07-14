@@ -13,7 +13,7 @@ const truncateBio = (bio: string): string =>
 
 const ProfileHeader = ({ profile }: ProfileHeaderProps) => {
   return (
-    <div className="py-4 md:sticky md:top-0 md:z-10 md:bg-surface-alt">
+    <div className="pb-4 md:sticky md:top-0 md:z-10 md:bg-surface-alt">
       <div className="flex items-center gap-4">
         <Avatar
           size="xl"
