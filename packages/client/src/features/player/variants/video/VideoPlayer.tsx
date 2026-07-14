@@ -222,6 +222,10 @@ const VideoPlayer = ({
             currentTimeRef={engine.currentTimeRef}
             seek={engine.seek}
             onToggleControls={() => touchLayerRef.current?.toggle()}
+            onCenterSingleTap={() => {
+              engine.togglePlay();
+              touchLayerRef.current?.reveal();
+            }}
           />
 
           <Overlay
@@ -236,7 +240,7 @@ const VideoPlayer = ({
 
           <TopControls
             className={cn(
-              'absolute inset-x-0 top-0 bg-linear-to-b from-black/80 to-transparent px-3 pt-2 pb-6',
+              'absolute inset-x-0 top-0 bg-linear-to-b from-black/80 to-transparent px-2 pt-2 pb-4',
               'opacity-100 transition-opacity duration-300',
               'group-data-[controls-visible=false]/touch:opacity-0'
             )}
@@ -253,13 +257,13 @@ const VideoPlayer = ({
 
           <div
             className={cn(
-              'absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-linear-to-t from-black/80 to-transparent pt-8 pb-1',
+              'absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-linear-to-t from-black/80 to-transparent pt-6 pb-1.5',
               'opacity-100 transition-opacity duration-300',
               'group-data-[controls-visible=false]/touch:opacity-0'
             )}
           >
             <ControlGroup
-              className="px-3"
+              className="px-2"
               isPlaying={engine.isPlaying}
               isMuted={engine.isMuted}
               volume={engine.volume}
@@ -270,6 +274,7 @@ const VideoPlayer = ({
               setVolume={engine.setVolume}
             />
             <ProgressBar
+              className="px-2"
               duration={engine.duration}
               subscribeToTime={engine.subscribeToTime}
               bufferedRangesRef={engine.bufferedRangesRef}

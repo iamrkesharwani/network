@@ -1,4 +1,4 @@
-import { AlertCircle, Loader2, Play, RefreshCw } from 'lucide-react';
+import { AlertCircle, Loader2, Pause, Play, RefreshCw } from 'lucide-react';
 import { cn } from '../../../shared/utils/cn';
 
 interface OverlayError {
@@ -53,7 +53,19 @@ const Overlay = ({
         >
           <Play className="h-7 w-7 translate-x-0.5" />
         </button>
-      ) : null}
+      ) : (
+        <button
+          type="button"
+          onClick={onTogglePlay}
+          aria-label="Pause"
+          className={cn(
+            'flex h-16 w-16 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity duration-300 pointer-events-none hover:bg-black/70',
+            'group-data-[controls-visible=true]/touch:pointer-events-auto group-data-[controls-visible=true]/touch:opacity-100'
+          )}
+        >
+          <Pause className="h-7 w-7" />
+        </button>
+      )}
     </div>
   );
 };

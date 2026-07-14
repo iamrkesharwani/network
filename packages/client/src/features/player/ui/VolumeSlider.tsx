@@ -26,7 +26,12 @@ function volumeFromClientX(clientX: number, trackRect: DOMRect): number {
   return clampVolume(ratio);
 }
 
-const VolumeSlider = ({ volume, isMuted, onVolumeChange, className }: VolumeSliderProps) => {
+const VolumeSlider = ({
+  volume,
+  isMuted,
+  onVolumeChange,
+  className,
+}: VolumeSliderProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const onVolumeChangeRef = useRef(onVolumeChange);
   onVolumeChangeRef.current = onVolumeChange;
@@ -52,7 +57,9 @@ const VolumeSlider = ({ volume, isMuted, onVolumeChange, className }: VolumeSlid
   const seekToClientX = useCallback((clientX: number) => {
     const track = containerRef.current;
     if (!track) return;
-    onVolumeChangeRef.current(volumeFromClientX(clientX, track.getBoundingClientRect()));
+    onVolumeChangeRef.current(
+      volumeFromClientX(clientX, track.getBoundingClientRect())
+    );
   }, []);
 
   const handleMouseMove = useCallback(
@@ -105,8 +112,10 @@ const VolumeSlider = ({ volume, isMuted, onVolumeChange, className }: VolumeSlid
   const handleKeyDown = useCallback(
     (event: ReactKeyboardEvent<HTMLDivElement>) => {
       let delta = 0;
-      if (event.key === 'ArrowRight' || event.key === 'ArrowUp') delta = PLAYER_VOLUME_STEP;
-      else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') delta = -PLAYER_VOLUME_STEP;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowUp')
+        delta = PLAYER_VOLUME_STEP;
+      else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown')
+        delta = -PLAYER_VOLUME_STEP;
       else return;
 
       event.preventDefault();
@@ -130,7 +139,7 @@ const VolumeSlider = ({ volume, isMuted, onVolumeChange, className }: VolumeSlid
       onTouchEnd={handleTouchEnd}
       onKeyDown={handleKeyDown}
       className={cn(
-        'relative flex min-h-11 w-full touch-none items-center select-none cursor-pointer',
+        'relative flex min-h-6 w-full touch-none items-center px-1.5 select-none cursor-pointer',
         className
       )}
     >

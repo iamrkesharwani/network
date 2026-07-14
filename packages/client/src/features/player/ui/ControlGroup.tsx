@@ -71,16 +71,16 @@ const ControlGroup = ({
   return (
     <div
       className={cn(
-        'flex w-full items-center justify-between gap-2',
+        'flex w-full items-center justify-between gap-1',
         className
       )}
     >
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 items-center gap-1">
         <button
           type="button"
           onClick={togglePlay}
           aria-label={isPlaying ? 'Pause' : 'Play'}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
         >
           {isPlaying ? (
             <Pause className="h-5 w-5" />
@@ -93,21 +93,21 @@ const ControlGroup = ({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
-          onClick={toggleMute}
-          aria-label={isMuted ? 'Unmute' : 'Mute'}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
-        >
-          <VolumeIcon isMuted={isMuted} volume={volume} />
-        </button>
-
         <VolumeSlider
           volume={volume}
           isMuted={isMuted}
           onVolumeChange={setVolume}
           className="w-20"
         />
+
+        <button
+          type="button"
+          onClick={toggleMute}
+          aria-label={isMuted ? 'Unmute' : 'Mute'}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+        >
+          <VolumeIcon isMuted={isMuted} volume={volume} />
+        </button>
       </div>
     </div>
   );

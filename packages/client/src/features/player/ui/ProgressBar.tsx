@@ -244,7 +244,7 @@ const ProgressBar = ({
       onTouchEnd={handleTouchEnd}
       onKeyDown={handleKeyDown}
       className={cn(
-        'group relative flex min-h-11 w-full touch-none items-center select-none cursor-pointer',
+        'group relative flex min-h-6 w-full touch-none items-center select-none cursor-pointer',
         className
       )}
     >
