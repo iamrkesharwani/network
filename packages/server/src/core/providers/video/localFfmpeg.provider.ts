@@ -1,9 +1,12 @@
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
+import { createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 import {
   LOCAL_TRANSCODE_OUTPUT_CONTAINER,
   LOCAL_TRANSCODE_VIDEO_CODEC,
@@ -57,6 +60,22 @@ export class LocalFfmpegVideoProvider implements IVideoProvider {
 
   private buildThumbnailKey(providerVideoId: string): string {
     return `${THUMBNAIL_KEY_PREFIX}/${providerVideoId}.jpg`;
+  }
+
+  private async downloadToLocalFile(
+    url: string,
+    destPath: string
+  ): Promise<void> {
+    const response = await fetch(url);
+    if (!response.ok || !response.body) {
+      throw new Error(
+        `Failed to download source media: HTTP ${response.status}`
+      );
+    }
+    await pipeline(
+      Readable.fromWeb(response.body as never),
+      createWriteStream(destPath)
+    );
   }
 
   private async probeDurationSeconds(url: string): Promise<number | null> {
@@ -159,11 +178,13 @@ export class LocalFfmpegVideoProvider implements IVideoProvider {
       `output.${LOCAL_TRANSCODE_OUTPUT_CONTAINER}`
     );
     const thumbnailPath = path.join(workDir, 'thumbnail.jpg');
+    const inputPath = path.join(workDir, 'input');
 
     try {
-      const inputDurationSeconds = await this.probeDurationSeconds(
-        params.storageUrl
-      );
+      await this.downloadToLocalFile(params.storageUrl, inputPath);
+
+      const inputDurationSeconds =
+        await this.probeDurationSeconds(inputPath);
 
       const transcodeStartMs = Date.now();
       await this.runFfmpegWithProgress(
@@ -173,7 +194,7 @@ export class LocalFfmpegVideoProvider implements IVideoProvider {
           '-loglevel',
           'error',
           '-i',
-          params.storageUrl,
+          inputPath,
           '-c:v',
           LOCAL_TRANSCODE_VIDEO_CODEC,
           '-preset',
