@@ -3,6 +3,7 @@ import usePageTitle from '../../../shared/hooks/usePageTitle';
 import FeedRenderer from '../../feed/components/FeedRenderer';
 import SearchTypeResults from '../components/SearchTypeResults';
 import SearchCreatorResults from '../components/SearchCreatorResults';
+import MobileSearchBar from '../components/MobileSearchBar';
 import { SEARCH_TYPES, type SearchType } from '@network/shared';
 
 type SearchTab = SearchType | 'all' | 'creator';
@@ -37,19 +38,24 @@ const SearchResultsPage = () => {
 
   if (!q) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center gap-2">
-        <p className="text-lg font-medium text-text-primary">
-          Search for videos, shorts, posts, and creators
-        </p>
-        <p className="text-sm text-text-muted">
-          Use the search bar above to get started.
-        </p>
+      <div className="flex flex-col gap-6">
+        <MobileSearchBar />
+        <div className="flex flex-col items-center justify-center py-24 text-center gap-2">
+          <p className="text-lg font-medium text-text-primary">
+            Search for videos, shorts, posts, and creators
+          </p>
+          <p className="text-sm text-text-muted">
+            Use the search bar above to get started.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-6">
+      <MobileSearchBar />
+
       <div className="flex items-center gap-1 border-b border-border overflow-x-auto">
         {TABS.map((tab) => (
           <button

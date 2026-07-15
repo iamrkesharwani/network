@@ -128,8 +128,8 @@ const ShortPlayer = ({
 
       <div className="absolute inset-0 bg-linear-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
 
-      <div className="absolute top-4 left-4 right-16 flex items-center gap-2 pointer-events-none">
-        <div className="w-8 h-8 rounded-full bg-surface-overlay ring-2 ring-white/20 overflow-hidden shrink-0">
+      <div className="absolute bottom-25 left-4 right-4 flex items-center gap-1.5 pointer-events-none">
+        <div className="w-6 h-6 rounded-full bg-surface-overlay ring-2 ring-white/20 overflow-hidden shrink-0">
           {short.author.avatarUrl && (
             <img
               src={short.author.avatarUrl}
@@ -138,7 +138,7 @@ const ShortPlayer = ({
             />
           )}
         </div>
-        <span className="text-sm font-medium text-white/90 truncate">
+        <span className="text-xs font-medium text-white/90 truncate min-w-0">
           @{short.author.username}
         </span>
       </div>
@@ -214,7 +214,7 @@ const ShortPlayer = ({
         </div>
       </div>
 
-      <div className="absolute bottom-20 md:bottom-4 left-4 right-16">
+      <div className="absolute bottom-16 md:bottom-4 left-4 right-16">
         <p className="text-sm font-semibold text-white leading-snug line-clamp-2 mb-2">
           {short.title}
         </p>
