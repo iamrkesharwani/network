@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { CLIENT_ROUTES, type IVideoResponse } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import CommentsPlaceholder from './CommentsPlaceholder';
+import LikeButton from './LikeButton';
+import ShareButton from './ShareButton';
 
 interface VideoMetaRailProps {
   video: IVideoResponse;
@@ -37,10 +39,19 @@ const VideoMetaRail = ({ video }: VideoMetaRailProps) => {
           </Link>
         </div>
 
-        <CommentsPlaceholder compact className="lg:hidden" />
+        <div className="flex items-center gap-2 lg:hidden">
+          <LikeButton compact />
+          <ShareButton compact />
+          <CommentsPlaceholder compact />
+        </div>
       </div>
 
       <CommentsPlaceholder className="hidden lg:flex" />
+
+      <div className="hidden items-center gap-3 lg:flex">
+        <LikeButton className="flex-1" />
+        <ShareButton className="flex-1" />
+      </div>
     </div>
   );
 };
