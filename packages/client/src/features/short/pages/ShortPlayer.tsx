@@ -11,10 +11,13 @@ import {
 import { formatCount } from '@network/shared';
 import type { IShortResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
+import { useAuth } from '../../auth/useAuth';
 import { useVideoSource } from '../../player/core/useVideoSource';
 import { useMediaEngine } from '../../player/core/useMediaEngine';
 import { useKeyboardShortcuts } from '../../player/core/useKeyboardShortcuts';
 import { usePictureInPictureSync } from '../../player/core/usePictureInPictureSync';
+import { useTelemetry } from '../../player/core/useTelemetry';
+import { useResumePlayback } from '../../player/core/useResumePlayback';
 import Overlay from '../../player/ui/Overlay';
 import DoubleTapSeekZones from '../../player/ui/DoubleTapSeekZones';
 
@@ -44,6 +47,8 @@ const ShortPlayer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const { user } = useAuth();
+
   const {
     state: sourceState,
     error: sourceError,
@@ -57,6 +62,21 @@ const ShortPlayer = ({
     if (isActive) engine.play();
     else engine.pause();
   }, [isActive, engine.play, engine.pause]);
+
+  useTelemetry({
+    contentType: 'short',
+    contentId: short?.id ?? '',
+    userId: user?.id,
+    currentTimeRef: engine.currentTimeRef,
+    duration: engine.duration,
+  });
+
+  useResumePlayback({
+    contentType: 'short',
+    contentId: short?.id ?? '',
+    userId: user?.id,
+    seek: engine.seek,
+  });
 
   useKeyboardShortcuts({
     containerRef,

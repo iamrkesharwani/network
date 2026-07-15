@@ -1,16 +1,23 @@
 import { useEffect, type RefObject } from 'react';
-import { PLAYER_TELEMETRY_INTERVAL_MS } from '@network/shared';
+import { PLAYER_TELEMETRY_INTERVAL_MS, type HistoryContentType } from '@network/shared';
 import { axiosInstance } from '../../../shared/lib/http/axiosClient';
 import { getAccessToken } from '../../../shared/lib/http/authToken';
 import { getCsrfTokenFromCookie } from '../../../shared/lib/http/csrf';
 
 interface UseTelemetryOptions {
-  videoId: string;
+  contentType: HistoryContentType;
+  contentId: string;
   userId: string | undefined;
   currentTimeRef: RefObject<number>;
+  duration: number;
 }
 
-function sendProgress(videoId: string, userId: string, currentTime: number): void {
+function sendProgress(
+  contentType: HistoryContentType,
+  contentId: string,
+  currentTime: number,
+  duration: number
+): void {
   const token = getAccessToken();
   const csrf = getCsrfTokenFromCookie();
 
@@ -18,20 +25,32 @@ function sendProgress(videoId: string, userId: string, currentTime: number): voi
   if (token) headers.Authorization = `Bearer ${token}`;
   if (csrf) headers['X-CSRF-Token'] = csrf;
 
-  fetch(`${axiosInstance.defaults.baseURL}/telemetry/progress`, {
+  fetch(`${axiosInstance.defaults.baseURL}/history/progress`, {
     method: 'POST',
     headers,
     credentials: 'include',
     keepalive: true,
-    body: JSON.stringify({ userId, videoId, currentTime }),
+    body: JSON.stringify({
+      contentType,
+      contentId,
+      currentTime,
+      ...(duration > 0 && { duration }),
+    }),
   }).catch(() => {});
 }
 
-export function useTelemetry({ videoId, userId, currentTimeRef }: UseTelemetryOptions): void {
+export function useTelemetry({
+  contentType,
+  contentId,
+  userId,
+  currentTimeRef,
+  duration,
+}: UseTelemetryOptions): void {
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !contentId) return;
 
-    const tick = () => sendProgress(videoId, userId, currentTimeRef.current);
+    const tick = () =>
+      sendProgress(contentType, contentId, currentTimeRef.current, duration);
 
     const intervalId = window.setInterval(tick, PLAYER_TELEMETRY_INTERVAL_MS);
 
@@ -45,5 +64,5 @@ export function useTelemetry({ videoId, userId, currentTimeRef }: UseTelemetryOp
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       tick();
     };
-  }, [videoId, userId, currentTimeRef]);
+  }, [contentType, contentId, userId, currentTimeRef, duration]);
 }

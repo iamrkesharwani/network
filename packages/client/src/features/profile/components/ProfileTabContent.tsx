@@ -3,6 +3,7 @@ import VideosTabPanel from './VideosTabPanel';
 import ShortsTabPanel from './ShortsTabPanel';
 import PostsTabPanel from './PostsTabPanel';
 import StatsTabPanel from './StatsTabPanel';
+import HistoryTabPanel from './HistoryTabPanel';
 
 export interface ProfileTabContentProps {
   tab: ProfileTab;
@@ -23,6 +24,9 @@ const ProfileTabContent = ({
   }
   if (tab === 'posts') {
     return <PostsTabPanel username={username} isOwner={isOwner} />;
+  }
+  if (tab === 'history') {
+    return <HistoryTabPanel />;
   }
 
   return <StatsTabPanel />;

@@ -16,6 +16,7 @@ import { useMediaEngine } from '../../core/useMediaEngine';
 import { useKeyboardShortcuts } from '../../core/useKeyboardShortcuts';
 import { useOrientationLock } from '../../core/useOrientationLock';
 import { useTelemetry } from '../../core/useTelemetry';
+import { useResumePlayback } from '../../core/useResumePlayback';
 import { usePictureInPictureSync } from '../../core/usePictureInPictureSync';
 import { useCaptions } from '../../core/useCaptions';
 import ProgressBar from '../../ui/ProgressBar';
@@ -67,9 +68,18 @@ const VideoPlayer = ({
   usePictureInPictureSync(videoRef);
 
   useTelemetry({
-    videoId: video.id,
+    contentType: 'video',
+    contentId: video.id,
     userId: user?.id,
     currentTimeRef: engine.currentTimeRef,
+    duration: engine.duration,
+  });
+
+  useResumePlayback({
+    contentType: 'video',
+    contentId: video.id,
+    userId: user?.id,
+    seek: engine.seek,
   });
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);

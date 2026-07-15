@@ -45,7 +45,9 @@ const ProfilePage = () => {
 
   const requestedTab = getActiveProfileTab(location.pathname);
   const activeTab =
-    requestedTab === 'stats' && !isOwner ? null : requestedTab;
+    (requestedTab === 'stats' || requestedTab === 'history') && !isOwner
+      ? null
+      : requestedTab;
 
   return (
     <div>

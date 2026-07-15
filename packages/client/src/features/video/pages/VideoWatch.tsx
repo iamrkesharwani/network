@@ -50,7 +50,7 @@ const VideoWatch = () => {
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_360px] lg:gap-4">
         <VideoPlayer
           video={video}
-          className="-mx-4 md:-mx-5 md:-mt-5 lg:mr-0"
+          className="-mx-4 max-md:w-[calc(100%_+_2rem)] md:-mx-5 md:-mt-5 md:max-lg:w-[calc(100%_+_2.5rem)] lg:mr-0"
           upNextSlot={
             <UpNextRail
               videoId={video.id}

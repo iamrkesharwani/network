@@ -59,6 +59,7 @@ export const routes: RouteObject[] = [
               { path: CLIENT_ROUTES.PROFILE_SHORTS, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.PROFILE_POSTS, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.PROFILE_STATS, element: <ProfilePage /> },
+              { path: CLIENT_ROUTES.PROFILE_HISTORY, element: <ProfilePage /> },
               {
                 element: <RequireAuth />,
                 children: [

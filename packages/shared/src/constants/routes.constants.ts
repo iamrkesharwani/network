@@ -25,5 +25,6 @@ export const CLIENT_ROUTES = {
   PROFILE_SHORTS: '/profile/:username/shorts',
   PROFILE_POSTS: '/profile/:username/posts',
   PROFILE_STATS: '/profile/:username/stats',
+  PROFILE_HISTORY: '/profile/:username/history',
   SETTINGS: '/settings',
 } as const;
