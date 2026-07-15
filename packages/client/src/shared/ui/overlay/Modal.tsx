@@ -44,13 +44,13 @@ const Modal = ({ isOpen, onClose, title, children, className }: ModalProps) => {
         role="dialog"
         aria-modal="true"
         className={cn(
-          'relative w-full max-w-lg rounded-xl border shadow-2xl transition-all duration-200',
+          'relative flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border shadow-2xl transition-all duration-200',
           'border-border bg-surface text-text-primary',
           className
         )}
       >
         {title && (
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
             <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
             <button
               onClick={onClose}
@@ -61,7 +61,7 @@ const Modal = ({ isOpen, onClose, title, children, className }: ModalProps) => {
             </button>
           </div>
         )}
-        <div className="p-6">{children}</div>
+        <div className="overflow-y-auto p-6">{children}</div>
       </div>
     </div>,
     document.body

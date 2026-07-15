@@ -39,7 +39,7 @@ const ToastProvider = ({ children }: { children: ReactNode }) => {
       {isMounted &&
         createPortal(
           <div
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 w-full max-w-80 px-4 pointer-events-none"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 w-full max-w-80 px-4 pointer-events-none"
             aria-live="assertive"
             aria-atomic="false"
           >

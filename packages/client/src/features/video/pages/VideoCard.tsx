@@ -182,6 +182,7 @@ const VideoCard = ({
       <ReportModal
         contentType="video"
         contentId={video.id}
+        authorId={video.author.id}
         isOpen={reportOpen}
         onClose={() => setReportOpen(false)}
       />

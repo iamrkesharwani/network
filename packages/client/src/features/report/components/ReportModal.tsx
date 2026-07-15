@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CheckCircle2, ShieldOff } from 'lucide-react';
 import {
   REPORT_REASON_CATALOG,
   REPORT_NOTE_MAX_LENGTH,
@@ -8,12 +9,14 @@ import {
 import Modal from '../../../shared/ui/overlay/Modal';
 import Button from '../../../shared/ui/primitives/Button';
 import { useToast } from '../../../shared/hooks/useToast';
+import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import { cn } from '../../../shared/utils/cn';
 import { useCreateReportMutation } from '../reportApi';
 
 export interface ReportModalProps {
   contentType: ReportableContentType;
   contentId: string;
+  authorId: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -26,17 +29,23 @@ const REASON_ENTRIES = Object.entries(REPORT_REASON_CATALOG) as [
 const ReportModal = ({
   contentType,
   contentId,
+  authorId,
   isOpen,
   onClose,
 }: ReportModalProps) => {
+  const currentUserId = useAppSelector((state) => state.auth.user?.id);
+  const isOwnContent = !!currentUserId && currentUserId === authorId;
+
   const [reasonCode, setReasonCode] = useState<ReportReasonCode | null>(null);
   const [note, setNote] = useState('');
+  const [submitted, setSubmitted] = useState(false);
   const [createReport, { isLoading }] = useCreateReportMutation();
   const { addToast } = useToast();
 
   const handleClose = () => {
     setReasonCode(null);
     setNote('');
+    setSubmitted(false);
     onClose();
   };
 
@@ -50,18 +59,57 @@ const ReportModal = ({
         reasonCode,
         ...(note.trim() && { note: note.trim() }),
       }).unwrap();
-      addToast(
-        'Report submitted. Thanks for helping keep the community safe.',
-        'success'
-      );
-      handleClose();
+      setSubmitted(true);
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ??
         'Could not submit your report. Please try again.';
       addToast(message, 'error');
+      handleClose();
     }
   };
+
+  if (isOwnContent) {
+    return (
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title="Can't report your own content"
+      >
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-alt">
+            <ShieldOff className="h-6 w-6 text-text-muted" strokeWidth={1.5} />
+          </div>
+          <p className="text-sm text-text-secondary">
+            You can't report your own content. If you'd like it taken down,
+            delete it or make it unlisted from its options menu instead.
+          </p>
+          <Button size="sm" onClick={handleClose} className="w-full sm:w-auto">
+            Got it
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <Modal isOpen={isOpen} onClose={handleClose} title="Report submitted">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-muted">
+            <CheckCircle2 className="h-6 w-6 text-primary" strokeWidth={1.5} />
+          </div>
+          <p className="text-sm text-text-secondary">
+            Thanks for reporting this. Our community jury will review it and
+            take action if needed.
+          </p>
+          <Button size="sm" onClick={handleClose} className="w-full sm:w-auto">
+            Done
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Report content">
@@ -79,7 +127,7 @@ const ReportModal = ({
                 'flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors',
                 reasonCode === code
                   ? 'border-primary bg-primary-muted text-text-primary'
-                  : 'border-border text-text-secondary hover:bg-surface-raised'
+                  : 'border-border bg-surface-alt text-text-secondary hover:bg-surface-raised'
               )}
             >
               <input
@@ -114,7 +162,7 @@ const ReportModal = ({
             Cancel
           </Button>
           <Button
-            variant="danger"
+            variant='primary'
             size="sm"
             onClick={handleSubmit}
             isLoading={isLoading}

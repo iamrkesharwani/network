@@ -96,7 +96,11 @@ export const getUserPosts = async (
 
   const extraFilter = isOwner
     ? { ...(visibilityQuery !== undefined && { visibility: visibilityQuery }) }
-    : { visibility: 'public', status: 'READY', moderationStatus: 'active' };
+    : {
+        visibility: 'public',
+        status: 'READY',
+        moderationStatus: { $nin: ['jury_removed', 'admin_removed'] },
+      };
 
   const result = await postRepository.findByUserId(
     userId,

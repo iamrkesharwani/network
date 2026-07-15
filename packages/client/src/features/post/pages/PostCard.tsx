@@ -174,6 +174,7 @@ const PostCard = ({
       <ReportModal
         contentType="post"
         contentId={post.id}
+        authorId={post.author.id}
         isOpen={reportOpen}
         onClose={() => setReportOpen(false)}
       />

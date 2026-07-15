@@ -188,6 +188,7 @@ const ShortCard = ({
       <ReportModal
         contentType="short"
         contentId={short.id}
+        authorId={short.author.id}
         isOpen={reportOpen}
         onClose={() => setReportOpen(false)}
       />

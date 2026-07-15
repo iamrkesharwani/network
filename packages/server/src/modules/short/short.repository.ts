@@ -43,7 +43,7 @@ export const findPublicFeed = async (
       status: 'READY',
       visibility: 'public',
       deletedAt: null,
-      moderationStatus: 'active',
+      moderationStatus: { $nin: ['jury_removed', 'admin_removed'] },
     },
     cursor,
     limit
@@ -69,7 +69,7 @@ export const searchPublic = async (
       status: 'READY',
       visibility: 'public',
       deletedAt: null,
-      moderationStatus: 'active',
+      moderationStatus: { $nin: ['jury_removed', 'admin_removed'] },
     },
     cursor,
     limit
@@ -117,7 +117,7 @@ export const findRelated = async (
     status: 'READY',
     visibility: 'public',
     deletedAt: null,
-    moderationStatus: 'active',
+    moderationStatus: { $nin: ['jury_removed', 'admin_removed'] },
   };
 
   if (cursor) {

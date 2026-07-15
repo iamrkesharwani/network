@@ -67,7 +67,7 @@ const Sidebar = ({
             path: buildProfilePath(authUser.username),
             icon: User,
           },
-          { name: 'Jury Duty', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel },
+          { name: 'Jury', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel },
           { name: 'Settings', path: CLIENT_ROUTES.SETTINGS, icon: Settings },
         ]
       : []),
