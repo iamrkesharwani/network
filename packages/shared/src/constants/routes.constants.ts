@@ -27,4 +27,7 @@ export const CLIENT_ROUTES = {
   PROFILE_STATS: '/profile/:username/stats',
   PROFILE_HISTORY: '/profile/:username/history',
   SETTINGS: '/settings',
+  JURY_QUEUE: '/jury',
+  JURY_APPEALS: '/jury/appeals',
+  JURY_CASE: '/jury/:caseId',
 } as const;

@@ -10,6 +10,8 @@ import { feedApi } from '../../features/feed/feedApi';
 import { userApi } from '../../features/user/userApi';
 import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
+import { reportApi } from '../../features/report/reportApi';
+import { juryApi } from '../../features/jury/juryApi';
 
 export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
   configureStore({
@@ -26,7 +28,9 @@ export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
         feedApi.middleware,
         userApi.middleware,
         searchApi.middleware,
-        historyApi.middleware
+        historyApi.middleware,
+        reportApi.middleware,
+        juryApi.middleware
       ),
     devTools: import.meta.env.MODE !== 'production',
   });

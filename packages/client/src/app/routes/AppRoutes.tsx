@@ -24,6 +24,9 @@ import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
 import ProfilePage from '../../features/profile/pages/ProfilePage';
 import SettingsPage from '../../features/creator/pages/SettingsPage';
 import SearchResultsPage from '../../features/search/pages/SearchResultsPage';
+import JuryQueuePage from '../../features/jury/pages/JuryQueuePage';
+import JuryCaseDetailPage from '../../features/jury/pages/JuryCaseDetailPage';
+import AppealsPage from '../../features/jury/pages/AppealsPage';
 import NotFound from './NotFound';
 
 export const routes: RouteObject[] = [
@@ -92,6 +95,18 @@ export const routes: RouteObject[] = [
                   {
                     path: CLIENT_ROUTES.MESSAGES,
                     element: <MessagesPlaceholder />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.JURY_QUEUE,
+                    element: <JuryQueuePage />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.JURY_APPEALS,
+                    element: <AppealsPage />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.JURY_CASE,
+                    element: <JuryCaseDetailPage />,
                   },
                 ],
               },

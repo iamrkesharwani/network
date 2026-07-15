@@ -108,6 +108,7 @@ const PostListRow = ({
         {isOwner && (
           <CardOptionsMenu
             itemLabel="Post"
+            isOwner={isOwner}
             onEdit={() => setEditConfirmOpen(true)}
             onDeleteClick={() => setDeleteConfirmOpen(true)}
             visibilityAction={{

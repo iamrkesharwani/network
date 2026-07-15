@@ -143,6 +143,7 @@ const VideoListRow = ({
         {isOwner && (
           <CardOptionsMenu
             itemLabel="Video"
+            isOwner={isOwner}
             onEdit={() => setEditConfirmOpen(true)}
             onDeleteClick={() => setDeleteConfirmOpen(true)}
             visibilityAction={{

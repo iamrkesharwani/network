@@ -115,7 +115,7 @@ export const getUserVideos = async (
 
   const extraFilter = isOwner
     ? { ...(visibilityQuery !== undefined && { visibility: visibilityQuery }) }
-    : { visibility: 'public', status: 'READY' };
+    : { visibility: 'public', status: 'READY', moderationStatus: 'active' };
 
   const result = await videoRepository.findByUserId(
     userId,

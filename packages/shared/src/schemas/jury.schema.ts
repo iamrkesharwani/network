@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { isValidObjectId } from '../utils/validators.js';
 import { JURY_VOTE_CHOICES } from '../constants/jury.constants.js';
+import { reportContentTypeSchema } from './report.schema.js';
 import {
   DEFAULT_PAGE_LIMIT,
   MAX_PAGE_LIMIT,
@@ -9,6 +10,13 @@ import {
 export const juryCaseIdParamSchema = z.object({
   caseId: z.string().refine(isValidObjectId, {
     message: 'Invalid case ID.',
+  }),
+});
+
+export const juryContentParamSchema = z.object({
+  contentType: reportContentTypeSchema,
+  contentId: z.string().refine(isValidObjectId, {
+    message: 'Invalid content ID.',
   }),
 });
 

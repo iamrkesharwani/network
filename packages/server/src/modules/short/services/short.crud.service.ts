@@ -106,7 +106,7 @@ export const getUserShorts = async (
 
   const extraFilter = isOwner
     ? { ...(visibilityQuery !== undefined && { visibility: visibilityQuery }) }
-    : { visibility: 'public', status: 'READY' };
+    : { visibility: 'public', status: 'READY', moderationStatus: 'active' };
 
   const result = await shortRepository.findByUserId(
     userId,

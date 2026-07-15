@@ -9,6 +9,9 @@ import Modal from '../../../shared/ui/overlay/Modal';
 import PostMedia from '../components/PostMedia';
 import PostFooter from '../components/PostFooter';
 import PostEditForm from '../form/PostEditForm';
+import ReportModal from '../../report/components/ReportModal';
+import RemovedContentBanner from '../../jury/components/RemovedContentBanner';
+import AppealModal from '../../jury/components/AppealModal';
 
 export interface PostCardProps {
   post: IPostResponse;
@@ -31,7 +34,10 @@ const PostCard = ({
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [appealOpen, setAppealOpen] = useState(false);
 
+  const isRemoved = isOwner && post.moderationStatus === 'jury_removed';
   const isUnlisted = post.visibility === 'unlisted';
   const daysLeft =
     isOwner && isUnlisted ? formatDaysLeft(post.unlistedAt) : null;
@@ -79,18 +85,18 @@ const PostCard = ({
             avatarUrl={post.author.avatarUrl}
             createdAt={post.createdAt}
             menu={
-              isOwner && (
-                <CardOptionsMenu
-                  itemLabel="Post"
-                  onEdit={() => setEditConfirmOpen(true)}
-                  onDeleteClick={() => setDeleteConfirmOpen(true)}
-                  visibilityAction={{
-                    label: isUnlisted ? 'Make public' : 'Make unlisted',
-                    toPublic: isUnlisted,
-                    onClick: () => setVisibilityConfirmOpen(true),
-                  }}
-                />
-              )
+              <CardOptionsMenu
+                itemLabel="Post"
+                isOwner={isOwner}
+                onEdit={() => setEditConfirmOpen(true)}
+                onDeleteClick={() => setDeleteConfirmOpen(true)}
+                visibilityAction={{
+                  label: isUnlisted ? 'Make public' : 'Make unlisted',
+                  toPublic: isUnlisted,
+                  onClick: () => setVisibilityConfirmOpen(true),
+                }}
+                onReport={() => setReportOpen(true)}
+              />
             }
           />
         }
@@ -103,7 +109,14 @@ const PostCard = ({
             />
           ) : undefined
         }
-        footer={<PostFooter post={post} daysLeft={daysLeft} />}
+        footer={
+          <>
+            {isRemoved && (
+              <RemovedContentBanner onAppealClick={() => setAppealOpen(true)} />
+            )}
+            <PostFooter post={post} daysLeft={daysLeft} />
+          </>
+        }
       />
 
       <ConfirmModal
@@ -157,6 +170,20 @@ const PostCard = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ReportModal
+        contentType="post"
+        contentId={post.id}
+        isOpen={reportOpen}
+        onClose={() => setReportOpen(false)}
+      />
+
+      <AppealModal
+        contentType="post"
+        contentId={post.id}
+        isOpen={appealOpen}
+        onClose={() => setAppealOpen(false)}
+      />
     </>
   );
 };

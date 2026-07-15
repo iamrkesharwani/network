@@ -75,7 +75,12 @@ export const searchPublic = async (
   const result = await hybridSearchPaginate(
     PostModel,
     q,
-    { status: 'READY', visibility: 'public', deletedAt: null },
+    {
+      status: 'READY',
+      visibility: 'public',
+      deletedAt: null,
+      moderationStatus: 'active',
+    },
     cursor,
     limit
   );

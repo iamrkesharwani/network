@@ -6,6 +6,9 @@ import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import VideoEditForm from '../form/VideoEditForm';
+import ReportModal from '../../report/components/ReportModal';
+import RemovedContentBanner from '../../jury/components/RemovedContentBanner';
+import AppealModal from '../../jury/components/AppealModal';
 import { formatDaysLeft, type IVideoResponse } from '@network/shared';
 
 export interface VideoCardProps {
@@ -27,7 +30,10 @@ const VideoCard = ({
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [appealOpen, setAppealOpen] = useState(false);
 
+  const isRemoved = isOwner && video.moderationStatus === 'jury_removed';
   const isReady = video.status === 'READY';
   const isUnlisted = video.visibility === 'unlisted';
   const daysLeft =
@@ -93,21 +99,24 @@ const VideoCard = ({
           isUnlisted={isOwner && isUnlisted}
           daysLeft={daysLeft}
         />
+        {isRemoved && (
+          <RemovedContentBanner onAppealClick={() => setAppealOpen(true)} />
+        )}
         <VideoCardFooter
           video={video}
           menu={
-            isOwner && (
-              <CardOptionsMenu
-                itemLabel="Video"
-                onEdit={handleEditClick}
-                onDeleteClick={handleDeleteClick}
-                visibilityAction={{
-                  label: isUnlisted ? 'Make public' : 'Make unlisted',
-                  toPublic: isUnlisted,
-                  onClick: handleVisibilityClick,
-                }}
-              />
-            )
+            <CardOptionsMenu
+              itemLabel="Video"
+              isOwner={isOwner}
+              onEdit={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+              visibilityAction={{
+                label: isUnlisted ? 'Make public' : 'Make unlisted',
+                toPublic: isUnlisted,
+                onClick: handleVisibilityClick,
+              }}
+              onReport={() => setReportOpen(true)}
+            />
           }
         />
       </div>
@@ -169,6 +178,20 @@ const VideoCard = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ReportModal
+        contentType="video"
+        contentId={video.id}
+        isOpen={reportOpen}
+        onClose={() => setReportOpen(false)}
+      />
+
+      <AppealModal
+        contentType="video"
+        contentId={video.id}
+        isOpen={appealOpen}
+        onClose={() => setAppealOpen(false)}
+      />
     </>
   );
 };

@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   UploadCloud,
   FileText,
+  Gavel,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
@@ -66,6 +67,7 @@ const Sidebar = ({
             path: buildProfilePath(authUser.username),
             icon: User,
           },
+          { name: 'Jury Duty', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel },
           { name: 'Settings', path: CLIENT_ROUTES.SETTINGS, icon: Settings },
         ]
       : []),

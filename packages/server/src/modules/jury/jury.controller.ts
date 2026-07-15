@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import type {
   JuryAppealCreateInput,
   JuryAppealResolveInput,
+  JuryContentParam,
   JuryMineQuery,
   JuryVoteInput,
 } from '@network/shared';
@@ -17,6 +18,7 @@ import {
 import {
   listAssignedForJuror,
   getCaseForViewer,
+  getCaseForContentOwner,
 } from './services/jury.query.service.js';
 import * as juryAppealRepository from './repository/jury-appeal.repository.js';
 import { toAppealResponse, toVoteResponse } from './services/jury.mappers.js';
@@ -48,6 +50,25 @@ export const getCase = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json(new ApiResponse(result, 'Case fetched successfully'));
 });
+
+export const getCaseForContent = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+    }
+
+    const { contentType, contentId } = req.params as unknown as JuryContentParam;
+    const result = await getCaseForContentOwner(
+      contentType,
+      contentId,
+      req.user.id
+    );
+
+    res
+      .status(200)
+      .json(new ApiResponse(result, 'Case fetched successfully'));
+  }
+);
 
 export const vote = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {

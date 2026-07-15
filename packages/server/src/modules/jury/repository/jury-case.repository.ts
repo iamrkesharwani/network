@@ -86,3 +86,16 @@ export const findTimedOutCases = (
   })
     .limit(limit)
     .exec();
+
+export const findLatestResolvedCaseForContent = (
+  contentType: ReportableContentType,
+  contentId: string
+): Promise<IJuryCaseDocument | null> =>
+  JuryCaseModel.findOne({
+    contentType,
+    contentId: new mongoose.Types.ObjectId(contentId),
+    isAppeal: false,
+    status: { $in: ['resolved', 'appealed'] },
+  })
+    .sort({ createdAt: -1 })
+    .exec();

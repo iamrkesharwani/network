@@ -4,6 +4,7 @@ import { requireAuth, requireRole } from '../../core/middleware/auth.middleware.
 import {
   juryVoteSchema,
   juryCaseIdParamSchema,
+  juryContentParamSchema,
   juryAppealCreateSchema,
   juryAppealIdParamSchema,
   juryAppealResolveSchema,
@@ -14,6 +15,13 @@ import * as juryController from './jury.controller.js';
 const router = Router();
 
 router.get('/assigned', requireAuth, juryController.listAssigned);
+
+router.get(
+  '/cases/content/:contentType/:contentId',
+  requireAuth,
+  validate({ params: juryContentParamSchema }),
+  juryController.getCaseForContent
+);
 
 router.get(
   '/cases/:caseId',

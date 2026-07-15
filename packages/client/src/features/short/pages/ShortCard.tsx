@@ -8,6 +8,9 @@ import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import ShortEditForm from '../form/ShortEditForm';
+import ReportModal from '../../report/components/ReportModal';
+import RemovedContentBanner from '../../jury/components/RemovedContentBanner';
+import AppealModal from '../../jury/components/AppealModal';
 import { formatDaysLeft, type IShortResponse } from '@network/shared';
 
 export interface ShortCardProps {
@@ -33,7 +36,10 @@ const ShortCard = ({
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [appealOpen, setAppealOpen] = useState(false);
 
+  const isRemoved = isOwner && short.moderationStatus === 'jury_removed';
   const isReady = short.status === 'READY';
   const isUnlisted = short.visibility === 'unlisted';
   const daysLeft =
@@ -82,18 +88,18 @@ const ShortCard = ({
             avatarUrl={short.author.avatarUrl}
             createdAt={short.createdAt}
             menu={
-              isOwner && (
-                <CardOptionsMenu
-                  itemLabel="Short"
-                  onEdit={() => setEditConfirmOpen(true)}
-                  onDeleteClick={() => setDeleteConfirmOpen(true)}
-                  visibilityAction={{
-                    label: isUnlisted ? 'Make public' : 'Make unlisted',
-                    toPublic: isUnlisted,
-                    onClick: () => setVisibilityConfirmOpen(true),
-                  }}
-                />
-              )
+              <CardOptionsMenu
+                itemLabel="Short"
+                isOwner={isOwner}
+                onEdit={() => setEditConfirmOpen(true)}
+                onDeleteClick={() => setDeleteConfirmOpen(true)}
+                visibilityAction={{
+                  label: isUnlisted ? 'Make public' : 'Make unlisted',
+                  toPublic: isUnlisted,
+                  onClick: () => setVisibilityConfirmOpen(true),
+                }}
+                onReport={() => setReportOpen(true)}
+              />
             }
           />
         }
@@ -109,12 +115,17 @@ const ShortCard = ({
           />
         }
         footer={
-          <ShortCardFooter
-            short={short}
-            onTitleClick={
-              onThumbnailClick ? () => onThumbnailClick(short) : undefined
-            }
-          />
+          <>
+            {isRemoved && (
+              <RemovedContentBanner onAppealClick={() => setAppealOpen(true)} />
+            )}
+            <ShortCardFooter
+              short={short}
+              onTitleClick={
+                onThumbnailClick ? () => onThumbnailClick(short) : undefined
+              }
+            />
+          </>
         }
       />
 
@@ -173,6 +184,20 @@ const ShortCard = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ReportModal
+        contentType="short"
+        contentId={short.id}
+        isOpen={reportOpen}
+        onClose={() => setReportOpen(false)}
+      />
+
+      <AppealModal
+        contentType="short"
+        contentId={short.id}
+        isOpen={appealOpen}
+        onClose={() => setAppealOpen(false)}
+      />
     </>
   );
 };

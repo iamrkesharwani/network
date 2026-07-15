@@ -4,6 +4,7 @@ import {
   juryAppealCreateSchema,
   juryAppealResolveSchema,
   juryMineQuerySchema,
+  juryContentParamSchema,
 } from '../schemas/jury.schema.js';
 import type {
   JuryCaseStatus,
@@ -17,6 +18,7 @@ export type JuryVoteInput = z.infer<typeof juryVoteSchema>;
 export type JuryAppealCreateInput = z.infer<typeof juryAppealCreateSchema>;
 export type JuryAppealResolveInput = z.infer<typeof juryAppealResolveSchema>;
 export type JuryMineQuery = z.infer<typeof juryMineQuerySchema>;
+export type JuryContentParam = z.infer<typeof juryContentParamSchema>;
 
 export interface IJuryCaseResponse {
   id: string;

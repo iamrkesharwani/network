@@ -148,6 +148,7 @@ const ShortListRow = ({
         {isOwner && (
           <CardOptionsMenu
             itemLabel="Short"
+            isOwner={isOwner}
             onEdit={() => setEditConfirmOpen(true)}
             onDeleteClick={() => setDeleteConfirmOpen(true)}
             visibilityAction={{
