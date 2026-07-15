@@ -1,4 +1,4 @@
-import { Captions, Gauge } from 'lucide-react';
+import { Captions, Gauge, Lock } from 'lucide-react';
 import { cn } from '../../../../shared/utils/cn';
 import { rateLabel, type SettingsView } from './SettingsMenu';
 import PanelHeader from './PanelHeader';
@@ -8,11 +8,13 @@ function RootPanel({
   hasCaptions,
   onNavigate,
   onClose,
+  onLock,
 }: {
   playbackRate: number;
   hasCaptions: boolean;
   onNavigate: (view: SettingsView) => void;
   onClose: () => void;
+  onLock?: () => void;
 }) {
   return (
     <div className="w-64 max-w-full px-1 py-1">
@@ -22,11 +24,11 @@ function RootPanel({
         <button
           type="button"
           onClick={() => onNavigate('speed')}
-          className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm text-white hover:bg-white/10"
+          className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm text-text-primary hover:bg-surface-raised"
         >
-          <Gauge className="h-4 w-4 shrink-0 text-white/70" />
+          <Gauge className="h-4 w-4 shrink-0 text-icon" />
           <span className="flex-1 text-left">Playback speed</span>
-          <span className="text-white/60">{rateLabel(playbackRate)}</span>
+          <span className="text-text-secondary">{rateLabel(playbackRate)}</span>
         </button>
 
         <button
@@ -35,23 +37,34 @@ function RootPanel({
           disabled={!hasCaptions}
           aria-disabled={!hasCaptions}
           className={cn(
-            'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm text-white',
+            'flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm text-text-primary',
             hasCaptions
-              ? 'hover:bg-white/10'
-              : 'cursor-not-allowed text-white/40'
+              ? 'hover:bg-surface-raised'
+              : 'cursor-not-allowed text-text-muted'
           )}
         >
           <Captions
             className={cn(
               'h-4 w-4 shrink-0',
-              hasCaptions ? 'text-white/70' : 'text-white/30'
+              hasCaptions ? 'text-icon' : 'text-text-muted'
             )}
           />
           <span className="flex-1 text-left">Captions</span>
           {!hasCaptions && (
-            <span className="text-xs text-white/40">Unavailable</span>
+            <span className="text-xs text-text-muted">Unavailable</span>
           )}
         </button>
+
+        {onLock && (
+          <button
+            type="button"
+            onClick={onLock}
+            className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm text-text-primary hover:bg-surface-raised"
+          >
+            <Lock className="h-4 w-4 shrink-0 text-icon" />
+            <span className="flex-1 text-left">Lock</span>
+          </button>
+        )}
       </div>
     </div>
   );

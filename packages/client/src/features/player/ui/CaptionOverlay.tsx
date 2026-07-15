@@ -15,7 +15,7 @@ const CaptionOverlay = ({ activeCueText, className }: CaptionOverlayProps) => {
         className
       )}
     >
-      <p className="max-w-[90%] rounded bg-black/70 px-3 py-1.5 text-center text-sm whitespace-pre-line text-white sm:text-base">
+      <p className="max-w-[90%] rounded bg-surface/70 px-3 py-1.5 text-center text-sm whitespace-pre-line text-text-primary sm:text-base">
         {activeCueText}
       </p>
     </div>

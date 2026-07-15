@@ -17,11 +17,13 @@ import {
   usernameParamSchema,
   captionUploadSchema,
   captionIdParamSchema,
+  relatedFeedQuerySchema,
 } from '@network/shared';
 
 import * as videoCrudController from './controllers/crud.controller.js';
 import * as videoUploadController from './controllers/upload.controller.js';
 import * as videoCaptionController from './controllers/caption.controller.js';
+import * as videoRelatedController from './controllers/related.controller.js';
 
 const router = Router();
 
@@ -84,6 +86,12 @@ router.get(
   '/feed',
   validate({ query: videoFeedQuerySchema }),
   videoCrudController.getFeed
+);
+
+router.get(
+  '/:videoId/related',
+  validate({ params: videoIdParamSchema, query: relatedFeedQuerySchema }),
+  videoRelatedController.getRelated
 );
 
 router.get(

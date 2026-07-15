@@ -142,7 +142,11 @@ export function useMediaEngine(
       setIsPlaying(true);
       setError(null);
     };
-    const handleEnded = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      currentTimeRef.current = video.duration;
+      subscribersRef.current.forEach((callback) => callback(video.duration));
+    };
     const handleLoadedMetadata = () => setDuration(video.duration || 0);
     const handleVolumeChange = () => {
       setVolumeState(video.volume);

@@ -49,7 +49,7 @@ function TimeDisplay({
   }, [subscribeToTime]);
 
   return (
-    <span className="font-mono text-xs tabular-nums text-white select-none sm:text-sm">
+    <span className="rounded-full bg-black/50 px-2.5 py-1 font-mono text-xs tabular-nums text-white select-none sm:text-sm">
       <span ref={currentRef}>{formatClock(0)}</span>
       <span className="mx-1 text-white/60">/</span>
       <span>{formatClock(duration)}</span>
@@ -80,7 +80,7 @@ const ControlGroup = ({
           type="button"
           onClick={togglePlay}
           aria-label={isPlaying ? 'Pause' : 'Play'}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
         >
           {isPlaying ? (
             <Pause className="h-5 w-5" />
@@ -104,7 +104,7 @@ const ControlGroup = ({
           type="button"
           onClick={toggleMute}
           aria-label={isMuted ? 'Unmute' : 'Mute'}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
         >
           <VolumeIcon isMuted={isMuted} volume={volume} />
         </button>

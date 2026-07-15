@@ -143,14 +143,14 @@ const VolumeSlider = ({
         className
       )}
     >
-      <div className="relative h-1 w-full rounded-full bg-white/25">
+      <div className="relative h-1 w-full rounded-full bg-text-primary/25">
         <div
-          className="absolute inset-y-0 left-0 rounded-full bg-white"
+          className="absolute inset-y-0 left-0 rounded-full bg-text-primary"
           style={{ width: `${(displayedVolume * 100).toFixed(2)}%` }}
         />
         <div
           className={cn(
-            '-translate-x-1/2 -translate-y-1/2 absolute top-1/2 h-3 w-3 rounded-full bg-white shadow transition-opacity',
+            '-translate-x-1/2 -translate-y-1/2 absolute top-1/2 h-3 w-3 rounded-full bg-text-primary shadow transition-opacity',
             isDragging ? 'opacity-100' : 'opacity-90'
           )}
           style={{ left: `${(displayedVolume * 100).toFixed(2)}%` }}

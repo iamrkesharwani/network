@@ -77,6 +77,15 @@ export const searchPublic = async (
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 
+export const getRelatedShorts = async (
+  tags: string[],
+  cursor: string | null,
+  limit: number
+) => {
+  const result = await shortRepository.findRelated(tags, cursor, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
+
 export const getMyShorts = async (
   userId: string,
   cursor: string | null,

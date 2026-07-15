@@ -129,7 +129,7 @@ function SpeedPanel({
       <PanelHeader title="Playback speed" onBack={onBack} onClose={onClose} />
 
       <div className="flex flex-col items-center gap-5 px-3 pt-4 pb-2">
-        <span className="font-mono text-2xl tabular-nums text-white">
+        <span className="font-mono text-2xl tabular-nums text-text-primary">
           {rateLabel(rates[activeIndex] ?? playbackRate)}
         </span>
 
@@ -148,7 +148,7 @@ function SpeedPanel({
           onKeyDown={handleKeyDown}
           className="relative flex h-8 w-full touch-none items-center px-1 select-none cursor-pointer"
         >
-          <div className="relative h-1 w-full rounded-full bg-white/25">
+          <div className="relative h-1 w-full rounded-full bg-text-primary/20">
             <div
               className="absolute inset-y-0 left-0 rounded-full bg-primary"
               style={{ width: `${thumbPercent}%` }}
@@ -158,7 +158,7 @@ function SpeedPanel({
                 key={rate}
                 className={cn(
                   '-translate-x-1/2 -translate-y-1/2 absolute top-1/2 h-1.5 w-1.5 rounded-full',
-                  index <= activeIndex ? 'bg-primary' : 'bg-white/40'
+                  index <= activeIndex ? 'bg-primary' : 'bg-text-primary/40'
                 )}
                 style={{ left: `${(index / lastIndex) * 100}%` }}
               />
@@ -170,7 +170,7 @@ function SpeedPanel({
           </div>
         </div>
 
-        <div className="flex w-full justify-between px-1 text-[11px] text-white/60 select-none">
+        <div className="flex w-full justify-between px-1 text-[11px] text-text-secondary select-none">
           {rates.map((rate) => (
             <span key={rate}>{rateLabel(rate)}</span>
           ))}

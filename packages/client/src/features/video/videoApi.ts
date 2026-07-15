@@ -13,6 +13,8 @@ import type {
   VideoUpdateInput,
   VideoFeedQuery,
   VideoUserFeedQuery,
+  IRelatedFeedBatch,
+  RelatedFeedQuery,
 } from '@network/shared';
 
 const captionMutationTags = (videoId: string) =>
@@ -92,6 +94,17 @@ export const videoApi = createApi({
       forceRefetch: ({ currentArg, previousArg }) =>
         currentArg?.cursor !== previousArg?.cursor,
       providesTags: ['Video'],
+    }),
+
+    getRelated: builder.query<
+      ApiResponse<IRelatedFeedBatch>,
+      { videoId: string } & RelatedFeedQuery
+    >({
+      query: ({ videoId, ...params }) => ({
+        url: `/${videoId}/related`,
+        method: 'GET',
+        params,
+      }),
     }),
 
     getMyVideos: builder.query<
@@ -280,6 +293,7 @@ export const {
   useUploadThumbnailMutation,
   useFinaliseVideoMutation,
   useGetFeedQuery,
+  useLazyGetRelatedQuery,
   useGetMyVideosQuery,
   useGetUserVideosQuery,
   useGetUserVisibilityCountsQuery,

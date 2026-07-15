@@ -14,6 +14,7 @@ interface UseKeyboardShortcutsOptions {
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
   onToggleCaptions?: () => void;
+  enabled?: boolean;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -38,10 +39,11 @@ export function useKeyboardShortcuts({
   onNavigatePrev,
   onNavigateNext,
   onToggleCaptions,
+  enabled = true,
 }: UseKeyboardShortcutsOptions): void {
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || !enabled) return;
 
     const isContainerActive = () =>
       container.contains(document.activeElement) || container.matches(':hover');
@@ -114,5 +116,6 @@ export function useKeyboardShortcuts({
     onNavigatePrev,
     onNavigateNext,
     onToggleCaptions,
+    enabled,
   ]);
 }

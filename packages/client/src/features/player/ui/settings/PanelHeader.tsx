@@ -16,19 +16,19 @@ function PanelHeader({
           type="button"
           onClick={onBack}
           aria-label="Back"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-primary hover:bg-surface-raised"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
       )}
-      <span className="flex-1 truncate px-1 text-sm font-medium text-white">
+      <span className="flex-1 truncate px-1 text-sm font-medium text-text-primary">
         {title}
       </span>
       <button
         type="button"
         onClick={onClose}
         aria-label="Close settings"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-primary hover:bg-surface-raised"
       >
         <X className="h-4 w-4" />
       </button>

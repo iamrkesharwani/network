@@ -1,4 +1,5 @@
 import type { PaginatedResponse } from '@network/shared';
+import { RELATED_SCORE_WEIGHTS, ONE_DAY_MS } from '@network/shared';
 import { ShortModel, type IShortDocument } from './short.model.js';
 import type { UpdateShortData, WebhookUpdateData } from './short.types.js';
 import mongoose from 'mongoose';
@@ -95,6 +96,110 @@ export const findByUserId = async (
   });
 
   return result;
+};
+
+export const findRelated = async (
+  tags: string[],
+  cursor: string | null,
+  limit: number
+): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
+  const baseMatch: mongoose.QueryFilter<IShortDocument> = {
+    status: 'READY',
+    visibility: 'public',
+    deletedAt: null,
+  };
+
+  if (cursor) {
+    const result = await paginateQuery(ShortModel, baseMatch, cursor, limit);
+
+    await ShortModel.populate(result.data, {
+      path: 'userId',
+      select: 'username avatarUrl',
+    });
+
+    return result;
+  }
+
+  const scored = await ShortModel.aggregate<IShortDocument>([
+    { $match: baseMatch },
+    {
+      $addFields: {
+        _relevanceScore: {
+          $add: [
+            {
+              $multiply: [
+                { $size: { $setIntersection: ['$tags', tags] } },
+                RELATED_SCORE_WEIGHTS.tagOverlap,
+              ],
+            },
+            {
+              $divide: [
+                RELATED_SCORE_WEIGHTS.recency,
+                {
+                  $add: [
+                    1,
+                    {
+                      $divide: [
+                        { $subtract: ['$$NOW', '$createdAt'] },
+                        ONE_DAY_MS,
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              $multiply: [
+                { $ln: { $add: ['$views', 1] } },
+                RELATED_SCORE_WEIGHTS.views,
+              ],
+            },
+            {
+              $multiply: [
+                { $ln: { $add: ['$likes', 1] } },
+                RELATED_SCORE_WEIGHTS.likes,
+              ],
+            },
+          ],
+        },
+      },
+    },
+    { $sort: { _relevanceScore: -1, _id: -1 } },
+    { $limit: limit },
+    { $project: { _relevanceScore: 0 } },
+  ]);
+
+  let combined = scored;
+
+  if (combined.length < limit) {
+    const alreadySelected = combined.map((doc) => doc._id);
+    const backfill = (await ShortModel.find({
+      ...baseMatch,
+      _id: { $nin: alreadySelected },
+    })
+      .sort({ _id: -1 })
+      .limit(limit - combined.length)
+      .lean()
+      .exec()) as IShortDocument[];
+
+    combined = [...combined, ...backfill];
+  }
+
+  await ShortModel.populate(combined, {
+    path: 'userId',
+    select: 'username avatarUrl',
+  });
+
+  const lastItem = combined[combined.length - 1];
+
+  return {
+    data: combined,
+    meta: {
+      nextCursor: lastItem ? String(lastItem._id) : null,
+      hasNextPage: combined.length >= limit,
+      limit,
+    },
+  };
 };
 
 export const countByVisibility = async (

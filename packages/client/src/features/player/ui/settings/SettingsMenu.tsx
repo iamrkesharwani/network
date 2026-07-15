@@ -13,13 +13,14 @@ interface SettingsMenuProps {
   captionTracks?: ICaptionTrack[];
   activeCaptionLanguage?: string | 'off';
   onSelectCaptionLanguage?: (language: string | 'off') => void;
+  onLock?: () => void;
   className?: string;
 }
 
 export type SettingsView = 'root' | 'speed' | 'captions';
 
 export function rateLabel(rate: number): string {
-  return rate === 1 ? 'Normal' : `${rate}x`;
+  return `${rate}x`;
 }
 
 const SettingsMenu = ({
@@ -30,6 +31,7 @@ const SettingsMenu = ({
   captionTracks,
   activeCaptionLanguage,
   onSelectCaptionLanguage,
+  onLock,
   className,
 }: SettingsMenuProps) => {
   const [view, setView] = useState<SettingsView>('root');
@@ -58,7 +60,7 @@ const SettingsMenu = ({
   return (
     <div
       className={cn(
-        'absolute inset-0 z-20 flex items-center justify-center bg-black/60 p-4',
+        'absolute inset-0 z-20 flex items-center justify-center bg-surface/60 p-4',
         className
       )}
       onClick={onClose}
@@ -68,7 +70,7 @@ const SettingsMenu = ({
         aria-modal="true"
         aria-label="Player settings"
         onClick={(event) => event.stopPropagation()}
-        className="max-w-[calc(100%-1rem)] rounded-xl bg-black/90 py-1 text-white shadow-xl"
+        className="max-w-[calc(100%-1rem)] rounded-xl bg-surface-overlay py-1 text-text-primary shadow-xl"
       >
         {view === 'root' && (
           <RootPanel
@@ -76,6 +78,13 @@ const SettingsMenu = ({
             hasCaptions={hasCaptions}
             onNavigate={setView}
             onClose={onClose}
+            onLock={
+              onLock &&
+              (() => {
+                onLock();
+                onClose();
+              })
+            }
           />
         )}
 

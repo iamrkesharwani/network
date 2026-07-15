@@ -30,26 +30,26 @@ const Overlay = ({
       )}
     >
       {error ? (
-        <div className="pointer-events-auto flex flex-col items-center gap-3 rounded-lg bg-black/70 px-6 py-5 text-center text-white">
+        <div className="pointer-events-auto flex flex-col items-center gap-3 rounded-lg bg-surface/70 px-6 py-5 text-center text-text-primary">
           <AlertCircle className="h-8 w-8 text-error" />
           <p className="max-w-64 text-sm">{error.message}</p>
           <button
             type="button"
             onClick={onRetry}
-            className="flex min-h-11 items-center gap-1.5 rounded-full bg-white/10 px-4 text-sm font-medium hover:bg-white/20"
+            className="flex min-h-11 items-center gap-1.5 rounded-full bg-text-primary/10 px-4 text-sm font-medium hover:bg-text-primary/20"
           >
             <RefreshCw className="h-4 w-4" />
             Retry
           </button>
         </div>
       ) : isBuffering ? (
-        <Loader2 className="h-10 w-10 animate-spin text-white" />
+        <Loader2 className="h-10 w-10 animate-spin text-text-primary" />
       ) : isPaused ? (
         <button
           type="button"
           onClick={onTogglePlay}
           aria-label="Play"
-          className="pointer-events-auto flex h-16 w-16 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+          className="pointer-events-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface/50 text-text-primary transition-colors hover:bg-surface/70"
         >
           <Play className="h-7 w-7 translate-x-0.5" />
         </button>
@@ -59,7 +59,7 @@ const Overlay = ({
           onClick={onTogglePlay}
           aria-label="Pause"
           className={cn(
-            'flex h-16 w-16 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity duration-300 pointer-events-none hover:bg-black/70',
+            'flex h-16 w-16 items-center justify-center rounded-full bg-surface/50 text-text-primary opacity-0 transition-opacity duration-300 pointer-events-none hover:bg-surface/70',
             'group-data-[controls-visible=true]/touch:pointer-events-auto group-data-[controls-visible=true]/touch:opacity-100'
           )}
         >

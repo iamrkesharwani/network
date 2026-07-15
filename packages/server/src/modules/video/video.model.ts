@@ -243,6 +243,7 @@ videoSchema.index({
 
 videoSchema.index({ deletedAt: 1 });
 videoSchema.index({ visibility: 1, unlistedAt: 1 });
+videoSchema.index({ status: 1, visibility: 1, category: 1, deletedAt: 1 });
 videoSchema.index({ title: 'text', description: 'text', tags: 'text' });
 videoSchema.index({ searchTokens: 1 });
 

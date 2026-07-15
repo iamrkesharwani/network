@@ -1,16 +1,9 @@
-import {
-  Maximize,
-  Minimize,
-  RectangleHorizontal,
-  Settings,
-} from 'lucide-react';
+import { Maximize, Minimize, Settings } from 'lucide-react';
 import { cn } from '../../../shared/utils/cn';
 
 interface TopControlsProps {
   isSettingsOpen: boolean;
   onToggleSettings: () => void;
-  isTheaterMode?: boolean;
-  onToggleTheaterMode?: () => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
   className?: string;
@@ -19,8 +12,6 @@ interface TopControlsProps {
 const TopControls = ({
   isSettingsOpen,
   onToggleSettings,
-  isTheaterMode,
-  onToggleTheaterMode,
   isFullscreen,
   onToggleFullscreen,
   className,
@@ -35,22 +26,10 @@ const TopControls = ({
         aria-label="Settings"
         aria-haspopup="dialog"
         aria-expanded={isSettingsOpen}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
       >
         <Settings className="h-5 w-5" />
       </button>
-
-      {onToggleTheaterMode && (
-        <button
-          type="button"
-          onClick={onToggleTheaterMode}
-          aria-label={isTheaterMode ? 'Exit theater mode' : 'Theater mode'}
-          aria-pressed={isTheaterMode}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
-        >
-          <RectangleHorizontal className="h-5 w-5" />
-        </button>
-      )}
 
       {onToggleFullscreen && (
         <button
@@ -58,7 +37,7 @@ const TopControls = ({
           onClick={onToggleFullscreen}
           aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           aria-pressed={isFullscreen}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
         >
           {isFullscreen ? (
             <Minimize className="h-5 w-5" />

@@ -86,7 +86,7 @@ const ProgressBar = ({
       container.innerHTML = '';
       ranges.forEach((range) => {
         const segment = document.createElement('div');
-        segment.className = 'absolute inset-y-0 rounded-full bg-white/40';
+        segment.className = 'absolute inset-y-0 rounded-full bg-text-primary/40';
         segment.style.left = `${(ratioOf(range.start, duration) * 100).toFixed(2)}%`;
         segment.style.width = `${(ratioOf(range.end - range.start, duration) * 100).toFixed(2)}%`;
         container.appendChild(segment);
@@ -248,7 +248,7 @@ const ProgressBar = ({
         className
       )}
     >
-      <div className="relative h-1.5 w-full rounded-full bg-white/25">
+      <div className="relative h-1.5 w-full rounded-full bg-text-primary/25">
         <div
           ref={bufferedContainerRef}
           className="absolute inset-0 overflow-hidden rounded-full"
@@ -270,7 +270,7 @@ const ProgressBar = ({
 
       {hoverTime !== null && !isDragging && (
         <div
-          className="pointer-events-none absolute bottom-full mb-2 hidden -translate-x-1/2 rounded-md bg-black/80 px-2 py-1 text-xs text-white pointer-fine:block"
+          className="pointer-events-none absolute bottom-full mb-2 hidden -translate-x-1/2 rounded-md bg-surface-overlay px-2 py-1 text-xs text-text-primary pointer-fine:block"
           style={{
             left: `${(ratioOf(hoverTime, duration) * 100).toFixed(2)}%`,
           }}

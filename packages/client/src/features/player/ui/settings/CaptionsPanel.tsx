@@ -31,7 +31,7 @@ function CaptionsPanel({
             onSelectCaptionLanguage('off');
             onClose();
           }}
-          className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-white hover:bg-white/10"
+          className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-text-primary hover:bg-surface-raised"
         >
           <span>Off</span>
           {isCaptionsOff && <Check className="h-4 w-4" />}
@@ -46,7 +46,7 @@ function CaptionsPanel({
               onSelectCaptionLanguage(track.language);
               onClose();
             }}
-            className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-white hover:bg-white/10"
+            className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-text-primary hover:bg-surface-raised"
           >
             <span>{track.label}</span>
             {activeCaptionLanguage === track.language && (

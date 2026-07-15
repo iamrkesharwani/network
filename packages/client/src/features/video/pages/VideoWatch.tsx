@@ -1,12 +1,19 @@
+import { useRef } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-import { CLIENT_ROUTES, formatCount } from '@network/shared';
+import { CLIENT_ROUTES } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useGetVideoByIdQuery } from '../videoApi';
 import VideoPlayer from '../../player/variants/video/VideoPlayer';
+import VideoWatchSkeleton from '../skeleton/VideoWatchSkeleton';
+import VideoDescription from '../components/VideoDescription';
+import VideoMetaRail from '../components/VideoMetaRail';
+import LikesViewsCount from '../components/LikesViewsCount';
+import UpNextRail from '../components/UpNextRail';
+import SuggestionsGrid from '../components/SuggestionsGrid';
 
 const VideoWatch = () => {
   const { videoId } = useParams<{ videoId: string }>();
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, isError } = useGetVideoByIdQuery(videoId ?? '', {
     skip: !videoId,
@@ -21,11 +28,7 @@ const VideoWatch = () => {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-text-muted" />
-      </div>
-    );
+    return <VideoWatchSkeleton />;
   }
 
   if (isError || !video) {
@@ -43,41 +46,33 @@ const VideoWatch = () => {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 py-4">
-      <VideoPlayer video={video} />
+    <div className="flex w-full flex-col">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_360px] lg:gap-4">
+        <VideoPlayer
+          video={video}
+          className="-mx-4 md:-mx-5 md:-mt-5 lg:mr-0"
+          upNextSlot={
+            <UpNextRail
+              videoId={video.id}
+              onShowMore={() =>
+                suggestionsRef.current?.scrollIntoView({ behavior: 'smooth' })
+              }
+            />
+          }
+        />
 
-      <div className="flex flex-col gap-2">
-        <h1 className="text-lg font-semibold text-text">{video.title}</h1>
+        <VideoMetaRail video={video} />
+      </div>
 
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-surface-overlay ring-1 ring-border">
-            {video.author.avatarUrl && (
-              <img
-                src={video.author.avatarUrl}
-                alt={video.author.username}
-                className="h-full w-full object-cover"
-              />
-            )}
-          </div>
-          <Link
-            to={CLIENT_ROUTES.PROFILE.replace(
-              ':username',
-              video.author.username
-            )}
-            className="text-sm font-medium text-text hover:underline"
-          >
-            @{video.author.username}
-          </Link>
-          <span className="text-sm text-text-muted">
-            {formatCount(video.views)} views · {formatCount(video.likes)} likes
-          </span>
+      <div className="flex flex-col gap-4 py-4">
+        <VideoDescription
+          description={video.description}
+          trailing={<LikesViewsCount likes={video.likes} views={video.views} />}
+        />
+
+        <div ref={suggestionsRef}>
+          <SuggestionsGrid videoId={video.id} />
         </div>
-
-        {video.description && (
-          <p className="whitespace-pre-wrap text-sm text-text-secondary">
-            {video.description}
-          </p>
-        )}
       </div>
     </div>
   );

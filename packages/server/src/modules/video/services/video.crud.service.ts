@@ -2,6 +2,7 @@ import type {
   IVideoResponse,
   VideoUpdateInput,
   ContentVisibility,
+  VideoCategory,
 } from '@network/shared';
 import * as videoRepository from '../video.repository.js';
 import { logger } from '../../../core/utils/logger.js';
@@ -74,6 +75,23 @@ export const searchPublic = async (
   limit: number
 ) => {
   const result = await videoRepository.searchPublic(q, cursor, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
+
+export const getRelatedVideos = async (
+  excludeVideoId: string,
+  category: VideoCategory,
+  tags: string[],
+  cursor: string | null,
+  limit: number
+) => {
+  const result = await videoRepository.findRelated(
+    excludeVideoId,
+    category,
+    tags,
+    cursor,
+    limit
+  );
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 

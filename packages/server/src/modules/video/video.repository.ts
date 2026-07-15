@@ -1,4 +1,5 @@
-import type { PaginatedResponse } from '@network/shared';
+import type { PaginatedResponse, VideoCategory } from '@network/shared';
+import { RELATED_SCORE_WEIGHTS, ONE_DAY_MS } from '@network/shared';
 import { VideoModel, type IVideoDocument } from './video.model.js';
 import type {
   UpdateVideoData,
@@ -96,6 +97,121 @@ export const findByUserId = async (
   });
 
   return result;
+};
+
+export const findRelated = async (
+  excludeVideoId: string,
+  category: VideoCategory,
+  tags: string[],
+  cursor: string | null,
+  limit: number
+): Promise<Omit<PaginatedResponse<IVideoDocument>, 'success' | 'message'>> => {
+  const excludeObjectId = new mongoose.Types.ObjectId(excludeVideoId);
+  const baseMatch: mongoose.QueryFilter<IVideoDocument> = {
+    status: 'READY',
+    visibility: 'public',
+    deletedAt: null,
+    _id: { $ne: excludeObjectId },
+  };
+
+  if (cursor) {
+    const result = await paginateQuery(VideoModel, baseMatch, cursor, limit);
+
+    await VideoModel.populate(result.data, {
+      path: 'userId',
+      select: 'username avatarUrl',
+    });
+
+    return result;
+  }
+
+  const scored = await VideoModel.aggregate<IVideoDocument>([
+    { $match: baseMatch },
+    {
+      $addFields: {
+        _relevanceScore: {
+          $add: [
+            {
+              $cond: [
+                { $eq: ['$category', category] },
+                RELATED_SCORE_WEIGHTS.categoryMatch,
+                0,
+              ],
+            },
+            {
+              $multiply: [
+                { $size: { $setIntersection: ['$tags', tags] } },
+                RELATED_SCORE_WEIGHTS.tagOverlap,
+              ],
+            },
+            {
+              $divide: [
+                RELATED_SCORE_WEIGHTS.recency,
+                {
+                  $add: [
+                    1,
+                    {
+                      $divide: [
+                        { $subtract: ['$$NOW', '$createdAt'] },
+                        ONE_DAY_MS,
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              $multiply: [
+                { $ln: { $add: ['$views', 1] } },
+                RELATED_SCORE_WEIGHTS.views,
+              ],
+            },
+            {
+              $multiply: [
+                { $ln: { $add: ['$likes', 1] } },
+                RELATED_SCORE_WEIGHTS.likes,
+              ],
+            },
+          ],
+        },
+      },
+    },
+    { $sort: { _relevanceScore: -1, _id: -1 } },
+    { $limit: limit },
+    { $project: { _relevanceScore: 0 } },
+  ]);
+
+  let combined = scored;
+
+  if (combined.length < limit) {
+    const alreadySelected = combined.map((doc) => doc._id);
+    const backfill = (await VideoModel.find({
+      ...baseMatch,
+      _id: { $nin: [...alreadySelected, excludeObjectId] },
+    })
+      .sort({ _id: -1 })
+      .limit(limit - combined.length)
+      .lean()
+      .exec()) as IVideoDocument[];
+
+    combined = [...combined, ...backfill];
+  }
+
+  await VideoModel.populate(combined, {
+    path: 'userId',
+    select: 'username avatarUrl',
+  });
+
+  const lastItem = combined[combined.length - 1];
+
+  return {
+    data: combined,
+    meta: {
+      nextCursor: lastItem ? String(lastItem._id) : null,
+      hasNextPage: combined.length >= limit,
+      limit,
+    },
+  };
 };
 
 export const countByVisibility = async (

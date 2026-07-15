@@ -1,5 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import { Lock } from 'lucide-react';
 import type { IVideoResponse } from '@network/shared';
 import { cn } from '../../../../shared/utils/cn';
 import { useAppDispatch } from '../../../../shared/hooks/useAppDispatch';
@@ -25,15 +31,15 @@ import DoubleTapSeekZones from '../../ui/DoubleTapSeekZones';
 
 interface VideoPlayerProps {
   video: IVideoResponse;
-  onTheaterModeChange?: (isTheaterMode: boolean) => void;
   onEnded?: () => void;
+  upNextSlot?: ReactNode;
   className?: string;
 }
 
 const VideoPlayer = ({
   video,
-  onTheaterModeChange,
   onEnded,
+  upNextSlot,
   className,
 }: VideoPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,30 +72,8 @@ const VideoPlayer = ({
     currentTimeRef: engine.currentTimeRef,
   });
 
-  const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-  const handleToggleTheaterMode = useCallback(() => {
-    setIsTheaterMode((theater) => {
-      const next = !theater;
-      onTheaterModeChange?.(next);
-      return next;
-    });
-  }, [onTheaterModeChange]);
-
-  useEffect(() => {
-    if (!isTheaterMode) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsTheaterMode(false);
-        onTheaterModeChange?.(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isTheaterMode, onTheaterModeChange]);
+  const [isLocked, setIsLocked] = useState(false);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -105,9 +89,7 @@ const VideoPlayer = ({
     }
 
     container.requestFullscreen().catch(() => {});
-    setIsTheaterMode(false);
-    onTheaterModeChange?.(false);
-  }, [onTheaterModeChange]);
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -122,6 +104,7 @@ const VideoPlayer = ({
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  const [isEnded, setIsEnded] = useState(false);
   const shouldAutoplayNextRef = useRef(false);
   const onEndedRef = useRef(onEnded);
   onEndedRef.current = onEnded;
@@ -132,11 +115,17 @@ const VideoPlayer = ({
 
     const handleEnded = () => {
       shouldAutoplayNextRef.current = true;
+      setIsEnded(true);
       onEndedRef.current?.();
     };
+    const handleSeeking = () => setIsEnded(false);
 
     videoEl.addEventListener('ended', handleEnded);
-    return () => videoEl.removeEventListener('ended', handleEnded);
+    videoEl.addEventListener('seeking', handleSeeking);
+    return () => {
+      videoEl.removeEventListener('ended', handleEnded);
+      videoEl.removeEventListener('seeking', handleSeeking);
+    };
   }, []);
 
   useEffect(() => {
@@ -167,6 +156,7 @@ const VideoPlayer = ({
     setVolume: engine.setVolume,
     toggleFullscreen: handleToggleFullscreen,
     onToggleCaptions: handleToggleCaptions,
+    enabled: !isLocked,
   });
 
   const isBuffering = sourceState === 'buffering' || engine.isBuffering;
@@ -178,43 +168,44 @@ const VideoPlayer = ({
   };
 
   return (
-    <>
-      {isTheaterMode &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-40 bg-black/90"
-            onClick={handleToggleTheaterMode}
-          />,
-          document.body
-        )}
-      <div
-        ref={containerRef}
-        tabIndex={-1}
-        className={cn(
-          'group/player relative aspect-video w-full overflow-hidden rounded-lg bg-black',
-          isTheaterMode &&
-            'fixed top-1/2 left-1/2 z-50 w-[min(100vw,calc(100vh*16/9))] max-w-400 -translate-x-1/2 -translate-y-1/2 px-4',
-          className
-        )}
+    <div
+      ref={containerRef}
+      tabIndex={-1}
+      className={cn(
+        'group/player relative aspect-video w-full overflow-hidden bg-surface',
+        className
+      )}
+    >
+      <video
+        ref={videoRef}
+        poster={video.thumbnailUrl}
+        className="h-full w-full object-contain"
+        playsInline
       >
-        <video
-          ref={videoRef}
-          poster={video.thumbnailUrl}
-          className="h-full w-full object-contain"
-          playsInline
-        >
-          {video.captions.map((track) => (
-            <track
-              key={track.id}
-              kind="subtitles"
-              src={track.url}
-              srcLang={track.language}
-              label={track.label}
-              default={track.isDefault}
-            />
-          ))}
-        </video>
+        {video.captions.map((track) => (
+          <track
+            key={track.id}
+            kind="subtitles"
+            src={track.url}
+            srcLang={track.language}
+            label={track.label}
+            default={track.isDefault}
+          />
+        ))}
+      </video>
 
+      <CaptionOverlay activeCueText={activeCueText} />
+
+      {isLocked ? (
+        <button
+          type="button"
+          onClick={() => setIsLocked(false)}
+          aria-label="Unlock controls"
+          className="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity duration-300 hover:bg-black/70 group-hover/player:opacity-100"
+        >
+          <Lock className="h-4 w-4" />
+        </button>
+      ) : (
         <TouchInactivityLayer
           ref={touchLayerRef}
           disableAutoHide={!engine.isPlaying}
@@ -238,18 +229,14 @@ const VideoPlayer = ({
             onRetry={handleRetry}
           />
 
-          <CaptionOverlay activeCueText={activeCueText} />
-
           <TopControls
             className={cn(
-              'absolute inset-x-0 top-0 bg-linear-to-b from-black/80 to-transparent px-2 pt-2 pb-4',
+              'absolute inset-x-0 top-0 px-2 pt-2 pb-4',
               'opacity-100 transition-opacity duration-300',
               'group-data-[controls-visible=false]/touch:opacity-0'
             )}
             isSettingsOpen={isSettingsOpen}
             onToggleSettings={() => setIsSettingsOpen((open) => !open)}
-            isTheaterMode={isTheaterMode}
-            onToggleTheaterMode={handleToggleTheaterMode}
             isFullscreen={isFullscreen}
             onToggleFullscreen={handleToggleFullscreen}
           />
@@ -262,37 +249,44 @@ const VideoPlayer = ({
             captionTracks={video.captions}
             activeCaptionLanguage={activeLanguage}
             onSelectCaptionLanguage={setActiveLanguage}
+            onLock={() => setIsLocked(true)}
           />
 
-          <div
-            className={cn(
-              'absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-linear-to-t from-black/80 to-transparent pt-6 pb-1.5',
-              'opacity-100 transition-opacity duration-300',
-              'group-data-[controls-visible=false]/touch:opacity-0'
-            )}
-          >
-            <ControlGroup
-              className="px-2"
-              isPlaying={engine.isPlaying}
-              isMuted={engine.isMuted}
-              volume={engine.volume}
-              duration={engine.duration}
-              subscribeToTime={engine.subscribeToTime}
-              togglePlay={engine.togglePlay}
-              toggleMute={engine.toggleMute}
-              setVolume={engine.setVolume}
-            />
-            <ProgressBar
-              className="px-2"
-              duration={engine.duration}
-              subscribeToTime={engine.subscribeToTime}
-              bufferedRangesRef={engine.bufferedRangesRef}
-              onSeek={engine.seek}
-            />
-          </div>
+          {isEnded && upNextSlot ? (
+            <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-surface/90 via-surface/60 to-transparent pt-10 pb-2">
+              {upNextSlot}
+            </div>
+          ) : (
+            <div
+              className={cn(
+                'absolute inset-x-0 bottom-0 flex flex-col gap-0.5 pt-6 pb-1.5',
+                'opacity-100 transition-opacity duration-300',
+                'group-data-[controls-visible=false]/touch:opacity-0'
+              )}
+            >
+              <ControlGroup
+                className="px-2"
+                isPlaying={engine.isPlaying}
+                isMuted={engine.isMuted}
+                volume={engine.volume}
+                duration={engine.duration}
+                subscribeToTime={engine.subscribeToTime}
+                togglePlay={engine.togglePlay}
+                toggleMute={engine.toggleMute}
+                setVolume={engine.setVolume}
+              />
+              <ProgressBar
+                className="px-2"
+                duration={engine.duration}
+                subscribeToTime={engine.subscribeToTime}
+                bufferedRangesRef={engine.bufferedRangesRef}
+                onSeek={engine.seek}
+              />
+            </div>
+          )}
         </TouchInactivityLayer>
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 
