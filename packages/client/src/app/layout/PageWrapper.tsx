@@ -34,7 +34,7 @@ const PageWrapper = () => {
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
 
-        <main className="flex-1 min-w-0 overflow-y-auto">
+        <main className="flex-1 min-w-0 overflow-y-auto pb-14 md:pb-0">
           <div className="w-full px-4 py-4 sm:px-5 sm:py-5">
             <Outlet />
           </div>

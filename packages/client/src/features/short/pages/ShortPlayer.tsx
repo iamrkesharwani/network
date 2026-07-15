@@ -156,7 +156,7 @@ const ShortPlayer = ({
         )}
       </button>
 
-      <div className="absolute right-3 bottom-4 flex flex-col items-center gap-5">
+      <div className="absolute right-3 bottom-20 md:bottom-4 flex flex-col items-center gap-5">
         <button
           type="button"
           onClick={onLike}
@@ -214,7 +214,7 @@ const ShortPlayer = ({
         </div>
       </div>
 
-      <div className="absolute bottom-4 left-4 right-16">
+      <div className="absolute bottom-20 md:bottom-4 left-4 right-16">
         <p className="text-sm font-semibold text-white leading-snug line-clamp-2 mb-2">
           {short.title}
         </p>

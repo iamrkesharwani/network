@@ -3,6 +3,7 @@ import { CLIENT_ROUTES } from '@network/shared';
 import AppInitGate from './AppInitGate';
 import RequireAuth from './RequireAuth';
 import PageWrapper from '../layout/PageWrapper';
+import MobileAppShell from '../layout/MobileAppShell';
 import Login from '../../features/auth/pages/Login';
 import Register from '../../features/auth/pages/Register';
 import VerifyEmail from '../../features/auth/pages/VerifyEmail';
@@ -12,7 +13,9 @@ import ResetPassword from '../../features/auth/pages/ResetPassword';
 import OAuthCallback from '../../features/auth/pages/OAuthCallback';
 import Feed from '../../features/feed/Feed';
 import VideoWatch from '../../features/video/pages/VideoWatch';
+import ShortsEntry from '../../features/short/pages/ShortsEntry';
 import ShortWatch from '../../features/short/pages/ShortWatch';
+import MessagesPlaceholder from '../../features/message/pages/MessagesPlaceholder';
 import UploadHub from '../../features/upload/components/UploadHub';
 import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
@@ -38,46 +41,59 @@ export const routes: RouteObject[] = [
   {
     element: <AppInitGate />,
     children: [
-      { path: CLIENT_ROUTES.SHORT_WATCH, element: <ShortWatch /> },
       {
-        element: <PageWrapper />,
+        element: <MobileAppShell />,
         children: [
-          { path: CLIENT_ROUTES.FEED, element: <Feed /> },
-          { path: CLIENT_ROUTES.VIDEO_WATCH, element: <VideoWatch /> },
-          { path: CLIENT_ROUTES.SEARCH, element: <SearchResultsPage /> },
-          { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
-          { path: CLIENT_ROUTES.POST_WATCH, element: <PostsFeedPage /> },
-          { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
-          { path: CLIENT_ROUTES.PROFILE_VIDEOS, element: <ProfilePage /> },
-          { path: CLIENT_ROUTES.PROFILE_SHORTS, element: <ProfilePage /> },
-          { path: CLIENT_ROUTES.PROFILE_POSTS, element: <ProfilePage /> },
-          { path: CLIENT_ROUTES.PROFILE_STATS, element: <ProfilePage /> },
+          { path: CLIENT_ROUTES.SHORTS, element: <ShortsEntry /> },
+          { path: CLIENT_ROUTES.SHORT_WATCH, element: <ShortWatch /> },
           {
-            element: <RequireAuth />,
+            element: <PageWrapper />,
             children: [
-              { path: CLIENT_ROUTES.UPLOAD, element: <UploadHub /> },
+              { path: CLIENT_ROUTES.FEED, element: <Feed /> },
+              { path: CLIENT_ROUTES.VIDEO_WATCH, element: <VideoWatch /> },
+              { path: CLIENT_ROUTES.SEARCH, element: <SearchResultsPage /> },
+              { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
+              { path: CLIENT_ROUTES.POST_WATCH, element: <PostsFeedPage /> },
+              { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
+              { path: CLIENT_ROUTES.PROFILE_VIDEOS, element: <ProfilePage /> },
+              { path: CLIENT_ROUTES.PROFILE_SHORTS, element: <ProfilePage /> },
+              { path: CLIENT_ROUTES.PROFILE_POSTS, element: <ProfilePage /> },
+              { path: CLIENT_ROUTES.PROFILE_STATS, element: <ProfilePage /> },
               {
-                path: CLIENT_ROUTES.UPLOAD_VIDEO,
-                element: <VideoUploadWizard />,
+                element: <RequireAuth />,
+                children: [
+                  { path: CLIENT_ROUTES.UPLOAD, element: <UploadHub /> },
+                  {
+                    path: CLIENT_ROUTES.UPLOAD_VIDEO,
+                    element: <VideoUploadWizard />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.UPLOAD_VIDEO_FINALIZE,
+                    element: <VideoUploadWizard />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.UPLOAD_SHORT,
+                    element: <ShortUploadWizard />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.UPLOAD_SHORT_FINALIZE,
+                    element: <ShortUploadWizard />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.UPLOAD_POST,
+                    element: <PostComposer />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.UPLOAD_POST_FINALIZE,
+                    element: <PostComposer />,
+                  },
+                  { path: CLIENT_ROUTES.SETTINGS, element: <SettingsPage /> },
+                  {
+                    path: CLIENT_ROUTES.MESSAGES,
+                    element: <MessagesPlaceholder />,
+                  },
+                ],
               },
-              {
-                path: CLIENT_ROUTES.UPLOAD_VIDEO_FINALIZE,
-                element: <VideoUploadWizard />,
-              },
-              {
-                path: CLIENT_ROUTES.UPLOAD_SHORT,
-                element: <ShortUploadWizard />,
-              },
-              {
-                path: CLIENT_ROUTES.UPLOAD_SHORT_FINALIZE,
-                element: <ShortUploadWizard />,
-              },
-              { path: CLIENT_ROUTES.UPLOAD_POST, element: <PostComposer /> },
-              {
-                path: CLIENT_ROUTES.UPLOAD_POST_FINALIZE,
-                element: <PostComposer />,
-              },
-              { path: CLIENT_ROUTES.SETTINGS, element: <SettingsPage /> },
             ],
           },
         ],

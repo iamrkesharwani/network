@@ -1,18 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Menu, Search, X, Bell, Sun, Moon } from 'lucide-react';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Menu, Search, X, Bell, Sun, Moon, UploadCloud } from 'lucide-react';
 import { useTheme } from '../../shared/hooks/useTheme';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
-import { useDebounce } from '../../shared/hooks/useDebounce';
 import Avatar from '../../shared/ui/primitives/Avatar';
 import {
   SITE_NAME,
   CLIENT_ROUTES,
-  SEARCH_DEBOUNCE_MS,
   SEARCH_FOCUS_SHORTCUT_KEY,
 } from '@network/shared';
 import LogoIcon from '../../public/Logo.svg?react';
 import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
+import { useSearchNavigation } from '../../features/search/hooks/useSearchNavigation';
 
 export interface NavbarProps {
   onMobileMenuClick: () => void;
@@ -21,27 +20,14 @@ export interface NavbarProps {
 const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
   const { isDark, toggle } = useTheme();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [searchInput, setSearchInput] = useState(searchParams.get('q') ?? '');
-  const debouncedSearchInput = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setSearchInput(searchParams.get('q') ?? '');
-  }, [searchParams]);
-
-  useEffect(() => {
-    const trimmed = debouncedSearchInput.trim();
-    const currentQuery = searchParams.get('q') ?? '';
-
-    if (!trimmed) {
-      if (currentQuery) navigate(CLIENT_ROUTES.FEED);
-      return;
-    }
-    if (trimmed === currentQuery) return;
-    navigate(`${CLIENT_ROUTES.SEARCH}?q=${encodeURIComponent(trimmed)}`);
-  }, [debouncedSearchInput]);
+  const {
+    searchInput,
+    setSearchInput,
+    searchInputRef,
+    handleSearchSubmit,
+    handleSearchKeyDown,
+    handleClearSearch,
+  } = useSearchNavigation();
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -52,24 +38,7 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = searchInput.trim();
-    if (!trimmed) return;
-    navigate(`${CLIENT_ROUTES.SEARCH}?q=${encodeURIComponent(trimmed)}`);
-  };
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') e.currentTarget.blur();
-  };
-
-  const handleClearSearch = () => {
-    setSearchInput('');
-    navigate(CLIENT_ROUTES.FEED);
-    searchInputRef.current?.focus();
-  };
+  }, [searchInputRef]);
 
   return (
     <header className="sticky top-0 z-40 w-full h-14 bg-surface border-b border-border flex items-center px-4 sm:px-6">
@@ -119,7 +88,15 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
         </form>
       </div>
 
-      <div className="flex items-center gap-1 ml-auto shrink-0">
+      <Link
+        to={CLIENT_ROUTES.UPLOAD}
+        aria-label="Upload"
+        className="ml-auto p-2 rounded-lg md:hidden text-icon hover:text-icon-hover hover:bg-surface-raised transition-colors focus:outline-none"
+      >
+        <UploadCloud className="w-5 h-5" />
+      </Link>
+
+      <div className="hidden md:flex items-center gap-1 ml-auto shrink-0">
         <button
           onClick={toggle}
           aria-label="Toggle theme"
