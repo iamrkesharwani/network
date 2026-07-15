@@ -4,6 +4,7 @@ import {
   SHORT_STATUS,
   SHORT_TITLE_MAX_LENGTH,
   SHORT_DESCRIPTION_MAX_LENGTH,
+  MODERATION_STATUS,
   type IShort,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
@@ -106,6 +107,11 @@ const shortSchema = new Schema<IShortDocument>(
       default: [],
       select: false,
     },
+    moderationStatus: {
+      type: String,
+      enum: MODERATION_STATUS,
+      default: 'active',
+    },
   },
   {
     timestamps: true,
@@ -168,6 +174,7 @@ shortSchema.index({ status: 1, visibility: 1, _id: -1 });
 shortSchema.index({ userId: 1, status: 1, _id: -1 });
 shortSchema.index({ deletedAt: 1 });
 shortSchema.index({ visibility: 1, unlistedAt: 1 });
+shortSchema.index({ moderationStatus: 1 });
 shortSchema.index({ title: 'text', description: 'text', tags: 'text' });
 shortSchema.index({ searchTokens: 1 });
 

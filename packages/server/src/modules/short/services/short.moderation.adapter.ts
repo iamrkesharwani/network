@@ -11,4 +11,7 @@ export const shortModerationAdapter: ModerationContentAdapter = {
 
     return { exists: true, ownerId: getOwnerId(short.userId) };
   },
+  setModerationStatus(contentId, status) {
+    return shortRepository.setModerationStatus(contentId, status);
+  },
 };

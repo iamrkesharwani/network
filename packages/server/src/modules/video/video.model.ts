@@ -6,6 +6,7 @@ import {
   VIDEO_TITLE_MAX_LENGTH,
   VIDEO_DESCRIPTION_MAX_LENGTH,
   CAPTION_LABEL_MAX_LENGTH,
+  MODERATION_STATUS,
   type IVideo,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
@@ -171,6 +172,11 @@ const videoSchema = new Schema<IVideoDocument>(
       default: [],
       select: false,
     },
+    moderationStatus: {
+      type: String,
+      enum: MODERATION_STATUS,
+      default: 'active',
+    },
   },
   {
     timestamps: true,
@@ -244,6 +250,7 @@ videoSchema.index({
 videoSchema.index({ deletedAt: 1 });
 videoSchema.index({ visibility: 1, unlistedAt: 1 });
 videoSchema.index({ status: 1, visibility: 1, category: 1, deletedAt: 1 });
+videoSchema.index({ moderationStatus: 1 });
 videoSchema.index({ title: 'text', description: 'text', tags: 'text' });
 videoSchema.index({ searchTokens: 1 });
 

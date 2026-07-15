@@ -1,4 +1,8 @@
-import type { PaginatedResponse, VideoCategory } from '@network/shared';
+import type {
+  ModerationStatus,
+  PaginatedResponse,
+  VideoCategory,
+} from '@network/shared';
 import { RELATED_SCORE_WEIGHTS, ONE_DAY_MS } from '@network/shared';
 import { VideoModel, type IVideoDocument } from './video.model.js';
 import type {
@@ -40,7 +44,12 @@ export const findPublicFeed = async (
 ): Promise<Omit<PaginatedResponse<IVideoDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     VideoModel,
-    { status: 'READY', visibility: 'public', deletedAt: null },
+    {
+      status: 'READY',
+      visibility: 'public',
+      deletedAt: null,
+      moderationStatus: 'active',
+    },
     cursor,
     limit
   );
@@ -278,6 +287,13 @@ export const softDeleteById = (id: string): Promise<IVideoDocument | null> =>
 
 export const deleteById = (id: string): Promise<IVideoDocument | null> =>
   VideoModel.findByIdAndDelete(id).select('+storageKey').exec();
+
+export const setModerationStatus = async (
+  id: string,
+  status: ModerationStatus
+): Promise<void> => {
+  await VideoModel.updateOne({ _id: id }, { $set: { moderationStatus: status } }).exec();
+};
 
 export const findByIdWithCaptionStorageKeys = (
   id: string

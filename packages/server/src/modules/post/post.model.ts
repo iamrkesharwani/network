@@ -5,6 +5,7 @@ import {
   POST_MEDIA_TYPE,
   POST_TEXT_MAX_LENGTH,
   MAX_POST_IMAGES,
+  MODERATION_STATUS,
   type IPost,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
@@ -87,6 +88,11 @@ const postSchema = new Schema<IPostDocument>(
       default: [],
       select: false,
     },
+    moderationStatus: {
+      type: String,
+      enum: MODERATION_STATUS,
+      default: 'active',
+    },
   },
   {
     timestamps: true,
@@ -157,6 +163,7 @@ postSchema.index({ userId: 1, status: 1, _id: -1 });
 
 postSchema.index({ deletedAt: 1 });
 postSchema.index({ visibility: 1, unlistedAt: 1 });
+postSchema.index({ moderationStatus: 1 });
 postSchema.index({ text: 'text', tags: 'text' });
 postSchema.index({ searchTokens: 1 });
 

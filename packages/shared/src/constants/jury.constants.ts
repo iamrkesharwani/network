@@ -1,7 +1,11 @@
-import { SEVENTY_TWO_HOURS_MS } from './time.constants.js';
+import { SEVENTY_TWO_HOURS_MS, ONE_HOUR_SECONDS } from './time.constants.js';
 
 export const JURY_QUEUE_NAME = 'jury-assignment';
 export const JURY_JOB_ID_PREFIX = 'jury-case';
+
+export const JURY_TIMEOUT_QUEUE_NAME = 'jury-timeout-sweep';
+export const JURY_TIMEOUT_JOB_ID = 'jury-timeout-sweep';
+export const JURY_TIMEOUT_SWEEP_INTERVAL_MS = ONE_HOUR_SECONDS * 1000;
 
 export const JURY_POOL_SIZE = 5;
 export const JURY_CONSENSUS_THRESHOLD = 4;

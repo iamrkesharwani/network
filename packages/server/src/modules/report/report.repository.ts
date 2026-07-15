@@ -82,6 +82,31 @@ export const markInReviewForContent = async (
   ).exec();
 };
 
+export const findLatestForContent = (
+  contentType: ReportableContentType,
+  contentId: string
+): Promise<IReportDocument | null> => {
+  return ReportModel.findOne({
+    contentType,
+    contentId: new mongoose.Types.ObjectId(contentId),
+    status: 'in_review',
+  })
+    .sort({ createdAt: -1 })
+    .exec();
+};
+
+export const findReporterIdsForContent = async (
+  contentType: ReportableContentType,
+  contentId: string
+): Promise<string[]> => {
+  const ids = await ReportModel.distinct('reporterId', {
+    contentType,
+    contentId: new mongoose.Types.ObjectId(contentId),
+  }).exec();
+
+  return (ids as mongoose.Types.ObjectId[]).map((id) => id.toString());
+};
+
 export const findByReporterPaginated = async (
   reporterId: string,
   cursor: string | null,

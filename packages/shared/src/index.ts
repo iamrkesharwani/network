@@ -39,6 +39,7 @@ export * from './constants/general.constants.js';
 export * from './constants/history.constants.js';
 export * from './constants/jury.constants.js';
 export * from './constants/media.constants.js';
+export * from './constants/moderation.constants.js';
 export * from './constants/player.constants.js';
 export * from './constants/post.constants.js';
 export * from './constants/progressRing.constants.js';

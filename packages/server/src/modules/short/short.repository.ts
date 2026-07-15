@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from '@network/shared';
+import type { ModerationStatus, PaginatedResponse } from '@network/shared';
 import { RELATED_SCORE_WEIGHTS, ONE_DAY_MS } from '@network/shared';
 import { ShortModel, type IShortDocument } from './short.model.js';
 import type { UpdateShortData, WebhookUpdateData } from './short.types.js';
@@ -39,7 +39,12 @@ export const findPublicFeed = async (
 ): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     ShortModel,
-    { status: 'READY', visibility: 'public', deletedAt: null },
+    {
+      status: 'READY',
+      visibility: 'public',
+      deletedAt: null,
+      moderationStatus: 'active',
+    },
     cursor,
     limit
   );
@@ -268,3 +273,10 @@ export const softDeleteById = (id: string): Promise<IShortDocument | null> =>
 
 export const deleteById = (id: string): Promise<IShortDocument | null> =>
   ShortModel.findByIdAndDelete(id).select('+storageKey').exec();
+
+export const setModerationStatus = async (
+  id: string,
+  status: ModerationStatus
+): Promise<void> => {
+  await ShortModel.updateOne({ _id: id }, { $set: { moderationStatus: status } }).exec();
+};

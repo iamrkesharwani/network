@@ -2,6 +2,8 @@ import { z } from 'zod';
 import {
   juryVoteSchema,
   juryAppealCreateSchema,
+  juryAppealResolveSchema,
+  juryMineQuerySchema,
 } from '../schemas/jury.schema.js';
 import type {
   JuryCaseStatus,
@@ -13,6 +15,8 @@ import type { ReportableContentType } from './report.types.js';
 
 export type JuryVoteInput = z.infer<typeof juryVoteSchema>;
 export type JuryAppealCreateInput = z.infer<typeof juryAppealCreateSchema>;
+export type JuryAppealResolveInput = z.infer<typeof juryAppealResolveSchema>;
+export type JuryMineQuery = z.infer<typeof juryMineQuerySchema>;
 
 export interface IJuryCaseResponse {
   id: string;
@@ -34,10 +38,16 @@ export interface IJuryVoteResponse {
   votedAt: string;
 }
 
+export interface IJuryAssignmentResponse extends IJuryCaseResponse {
+  myVote?: JuryVoteChoice;
+  votedAt?: string;
+}
+
 export interface IJuryAppealResponse {
   id: string;
   caseId: string;
   status: AppealStatus;
   reason: string;
   createdAt: string;
+  resolvedAt?: string;
 }

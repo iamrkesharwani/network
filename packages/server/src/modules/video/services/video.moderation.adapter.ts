@@ -11,4 +11,7 @@ export const videoModerationAdapter: ModerationContentAdapter = {
 
     return { exists: true, ownerId: getOwnerId(video.userId) };
   },
+  setModerationStatus(contentId, status) {
+    return videoRepository.setModerationStatus(contentId, status);
+  },
 };

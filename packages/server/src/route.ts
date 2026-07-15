@@ -11,6 +11,7 @@ import userRoutes from './modules/user/user.routes.js';
 import historyRoutes from './modules/history/history.routes.js';
 import searchRoutes from './modules/search/search.routes.js';
 import reportRoutes from './modules/report/report.routes.js';
+import juryRoutes from './modules/jury/jury.routes.js';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/user', userRoutes);
 router.use('/history', historyRoutes);
 router.use('/search', searchRoutes);
 router.use('/reports', reportRoutes);
+router.use('/jury', juryRoutes);
 
 export default router;

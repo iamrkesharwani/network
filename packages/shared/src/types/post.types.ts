@@ -12,6 +12,7 @@ import {
   POST_MEDIA_TYPE,
 } from '../constants/post.constants.js';
 import type { ICreatorEvent } from './creator.types.js';
+import type { ModerationStatus } from '../constants/moderation.constants.js';
 
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type PostUpdateInput = z.infer<typeof postUpdateSchema>;
@@ -36,6 +37,7 @@ export interface IPost {
   deletedAt?: string | null;
   unlistedAt?: string | null;
   unlistedExpiryWarnedAt?: string | null;
+  moderationStatus: ModerationStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,8 +48,10 @@ export interface IPostAuthor {
   avatarUrl?: string;
 }
 
-export interface IPostResponse
-  extends Omit<IPost, 'userId' | 'deletedAt' | 'unlistedExpiryWarnedAt'> {
+export interface IPostResponse extends Omit<
+  IPost,
+  'userId' | 'deletedAt' | 'unlistedExpiryWarnedAt'
+> {
   author: IPostAuthor;
 }
 

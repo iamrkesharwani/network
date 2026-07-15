@@ -58,6 +58,26 @@ export const requireAuth = async (
   }
 };
 
+export const requireRole = (
+  allowedRoles: UserRole[]
+): ((req: Request, _res: Response, next: NextFunction) => void) => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      return next(
+        new ApiError(401, 'UNAUTHORIZED', 'Authentication required.')
+      );
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return next(
+        new ApiError(403, 'FORBIDDEN', 'You do not have access to this resource.')
+      );
+    }
+
+    next();
+  };
+};
+
 export const optionalAuth = async (
   req: Request,
   _res: Response,

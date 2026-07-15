@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 import { PostModel, type IPostDocument } from './post.model.js';
-import type { PaginatedResponse, PostVisibility } from '@network/shared';
+import type {
+  ModerationStatus,
+  PaginatedResponse,
+  PostVisibility,
+} from '@network/shared';
 import { paginateQuery } from '../../core/utils/paginate.js';
 import { hybridSearchPaginate } from '../../core/utils/hybridSearchPaginate.js';
 import type { UpdatePostData } from './post.types.js';
@@ -45,7 +49,12 @@ export const findPublicFeed = async (
 ): Promise<Omit<PaginatedResponse<IPostDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     PostModel,
-    { status: 'READY', visibility: 'public', deletedAt: null },
+    {
+      status: 'READY',
+      visibility: 'public',
+      deletedAt: null,
+      moderationStatus: 'active',
+    },
     cursor,
     limit
   );
@@ -162,4 +171,11 @@ export const softDeleteById = (id: string): Promise<IPostDocument | null> => {
 
 export const deleteById = (id: string): Promise<IPostDocument | null> => {
   return PostModel.findByIdAndDelete(id).select('+storageKey').exec();
+};
+
+export const setModerationStatus = async (
+  id: string,
+  status: ModerationStatus
+): Promise<void> => {
+  await PostModel.updateOne({ _id: id }, { $set: { moderationStatus: status } }).exec();
 };

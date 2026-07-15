@@ -11,4 +11,7 @@ export const postModerationAdapter: ModerationContentAdapter = {
 
     return { exists: true, ownerId: getOwnerId(post.userId) };
   },
+  setModerationStatus(contentId, status) {
+    return postRepository.setModerationStatus(contentId, status);
+  },
 };

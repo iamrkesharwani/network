@@ -18,12 +18,12 @@ export const unlockBadge = async (
   return result.modifiedCount > 0;
 };
 
-export const addUnlockedFeatures = (
+export const setUnlockedFeatures = (
   userId: string,
   features: string[]
 ): Promise<ICreatorDocument> =>
   CreatorModel.findOneAndUpdate(
     { userId: new mongoose.Types.ObjectId(userId) },
-    { $addToSet: { unlockedFeatures: { $each: features } } },
+    { $set: { unlockedFeatures: features } },
     { returnDocument: 'after', upsert: true }
   ).exec();

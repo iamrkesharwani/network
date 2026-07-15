@@ -27,6 +27,13 @@ import { registerModerationContentAdapter } from './core/moderation/moderationCo
 import { videoModerationAdapter } from './modules/video/services/video.moderation.adapter.js';
 import { shortModerationAdapter } from './modules/short/services/short.moderation.adapter.js';
 import { postModerationAdapter } from './modules/post/services/post.moderation.adapter.js';
+import { startTrustDecayWorker } from './core/trust/trustDecay.worker.js';
+import { scheduleTrustDecay } from './core/trust/trustDecay.queue.js';
+import { registerJuryCaseTrigger } from './modules/report/report.hooks.js';
+import { openCaseFromReport } from './modules/jury/services/jury.case.service.js';
+import { startJuryAssignmentWorker } from './modules/jury/jury-assignment.worker.js';
+import { startJuryTimeoutWorker } from './modules/jury/jury-timeout.worker.js';
+import { scheduleJuryTimeoutSweep } from './modules/jury/jury-timeout.queue.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -52,6 +59,14 @@ const startWeb = async () => {
     registerModerationContentAdapter(videoModerationAdapter);
     registerModerationContentAdapter(shortModerationAdapter);
     registerModerationContentAdapter(postModerationAdapter);
+
+    startTrustDecayWorker();
+    await scheduleTrustDecay();
+
+    registerJuryCaseTrigger(openCaseFromReport);
+    startJuryAssignmentWorker();
+    startJuryTimeoutWorker();
+    await scheduleJuryTimeoutSweep();
 
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Web server listening on port ${port}`);

@@ -13,6 +13,7 @@ import {
   SHORT_STATUS,
 } from '../constants/short.constants.js';
 import type { ICreatorEvent } from './creator.types.js';
+import type { ModerationStatus } from '../constants/moderation.constants.js';
 
 export type ShortUploadInput = z.infer<typeof shortUploadSchema>;
 export type ShortUpdateInput = z.infer<typeof shortUpdateSchema>;
@@ -53,6 +54,7 @@ export interface IShort {
   deletedAt?: string | null;
   unlistedAt?: string | null;
   unlistedExpiryWarnedAt?: string | null;
+  moderationStatus: ModerationStatus;
   createdAt: string;
   updatedAt: string;
 }

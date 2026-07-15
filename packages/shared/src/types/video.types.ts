@@ -15,6 +15,7 @@ import {
 } from '../constants/video.constants.js';
 import type { ICreatorEvent } from './creator.types.js';
 import type { ICaptionTrack } from './caption.types.js';
+import type { ModerationStatus } from '../constants/moderation.constants.js';
 
 export type VideoUploadInput = z.infer<typeof videoUploadSchema>;
 export type VideoUpdateInput = z.infer<typeof videoUpdateSchema>;
@@ -58,6 +59,7 @@ export interface IVideo {
   deletedAt?: string | null;
   unlistedAt?: string | null;
   unlistedExpiryWarnedAt?: string | null;
+  moderationStatus: ModerationStatus;
   createdAt: string;
   updatedAt: string;
 }

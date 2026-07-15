@@ -79,3 +79,22 @@ export const countDistinctActivityDays = async (
   );
   return days.size;
 };
+
+export const findDecayCandidateUserIds = async (
+  cutoff: Date
+): Promise<string[]> => {
+  const docs = await CreatorModel.aggregate<{
+    userId: mongoose.Types.ObjectId;
+  }>([
+    { $match: { trustScore: { $gt: 0 } } },
+    {
+      $addFields: {
+        lastActiveAt: { $ifNull: [{ $max: '$uploadActivity' }, '$createdAt'] },
+      },
+    },
+    { $match: { lastActiveAt: { $lt: cutoff } } },
+    { $project: { userId: 1, _id: 0 } },
+  ]);
+
+  return docs.map((doc) => doc.userId.toString());
+};
