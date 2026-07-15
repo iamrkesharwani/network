@@ -8,6 +8,9 @@ import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import VideoEditForm from '../form/VideoEditForm';
+import MediaProcessingBar from '../../../shared/ui/card/MediaProcessingBar';
+import { getMediaProcessingLabel } from '../../../shared/utils/mediaProcessingLabel';
+import { cn } from '../../../shared/utils/cn';
 
 export interface VideoListRowProps {
   video: IVideoResponse;
@@ -31,8 +34,10 @@ const VideoListRow = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isUnlisted = video.visibility === 'unlisted';
+  const isReady = video.status === 'READY';
   const daysLeft =
     isOwner && isUnlisted ? formatDaysLeft(video.unlistedAt) : null;
+  const processingLabel = getMediaProcessingLabel(video.status, video.progress);
 
   const handleEditConfirm = () => {
     setEditConfirmOpen(false);
@@ -73,6 +78,8 @@ const VideoListRow = ({
         <Link
           to={`/video/${video.id}`}
           className="relative shrink-0 w-32 aspect-video rounded-lg overflow-hidden bg-surface-raised"
+          tabIndex={isReady ? 0 : -1}
+          aria-disabled={!isReady}
         >
           {video.thumbnailUrl && !thumbError ? (
             <img
@@ -92,20 +99,45 @@ const VideoListRow = ({
           <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded text-[10px] font-medium bg-black/70 text-text-secondary">
             {formatDuration(video.duration)}
           </span>
+          {!isReady && (
+            <>
+              <div className="absolute inset-0 bg-surface/70 backdrop-blur-[1px]" />
+              <MediaProcessingBar
+                progress={video.progress}
+                isFailed={processingLabel.isFailed}
+              />
+            </>
+          )}
         </Link>
 
         <div className="flex-1 min-w-0">
-          <Link to={`/video/${video.id}`} className="block">
+          <Link
+            to={`/video/${video.id}`}
+            className="block"
+            tabIndex={isReady ? 0 : -1}
+            aria-disabled={!isReady}
+          >
             <h3 className="text-sm font-semibold text-text-primary leading-snug line-clamp-2">
               {video.title}
             </h3>
           </Link>
-          <p className="mt-1 text-xs text-text-muted">
-            {formatCount(video.views)} views · {formatCount(video.likes)} likes
-            {isUnlisted && ' · Unlisted'}
-            {daysLeft !== null &&
-              ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
-          </p>
+          {isReady ? (
+            <p className="mt-1 text-xs text-text-muted">
+              {formatCount(video.views)} views · {formatCount(video.likes)} likes
+              {isUnlisted && ' · Unlisted'}
+              {daysLeft !== null &&
+                ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}
+            </p>
+          ) : (
+            <p
+              className={cn(
+                'mt-1 text-xs font-medium',
+                processingLabel.isFailed ? 'text-error' : 'text-text-muted'
+              )}
+            >
+              {processingLabel.text}
+            </p>
+          )}
         </div>
 
         {isOwner && (

@@ -1,4 +1,7 @@
-import { storageProvider, videoProvider } from '../../../core/providers/provider.js';
+import {
+  storageProvider,
+  videoProvider,
+} from '../../../core/providers/provider.js';
 import type { IngestVideoResult } from '../../../core/providers/types.js';
 
 export interface IngestFromStorageParams {
@@ -6,6 +9,7 @@ export interface IngestFromStorageParams {
   fileName: string;
   fileSizeBytes: number;
   userId: string;
+  onProgress?: (percent: number) => void;
 }
 
 export const ingestFromStorage = async (
@@ -18,5 +22,6 @@ export const ingestFromStorage = async (
     fileName: params.fileName,
     fileSizeBytes: params.fileSizeBytes,
     userId: params.userId,
+    ...(params.onProgress && { onProgress: params.onProgress }),
   });
 };

@@ -11,6 +11,7 @@ export interface IMediaStatusEvent {
   thumbnailUrl?: string;
   duration?: number;
   errorMessage?: string;
+  progress?: number;
 }
 
 export interface IUnlistedExpiryWarningEvent {

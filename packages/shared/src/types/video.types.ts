@@ -45,6 +45,7 @@ export interface IVideo {
   playbackUrl?: string;
   status: VideoStatus;
   errorMessage?: string;
+  progress?: number;
   storageKey?: string;
   metricsRecorded?: boolean;
   category: VideoCategory;

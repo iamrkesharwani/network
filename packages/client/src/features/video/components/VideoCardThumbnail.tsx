@@ -5,6 +5,9 @@ import { CLIENT_ROUTES, type IVideoResponse } from '@network/shared';
 import MediaDurationBadge from '../../../shared/ui/card/MediaDurationBadge';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBadge';
+import MediaProcessingBar from '../../../shared/ui/card/MediaProcessingBar';
+import { getMediaProcessingLabel } from '../../../shared/utils/mediaProcessingLabel';
+import { cn } from '../../../shared/utils/cn';
 
 interface VideoCardThumbnailProps {
   video: IVideoResponse;
@@ -20,6 +23,7 @@ const VideoCardThumbnail = ({
   daysLeft = null,
 }: VideoCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
+  const processingLabel = getMediaProcessingLabel(video.status, video.progress);
 
   return (
     <Link
@@ -61,11 +65,20 @@ const VideoCardThumbnail = ({
 
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">
-          <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-surface-overlay text-text-secondary border border-border capitalize tracking-wide">
-            {video.status === 'FAILED'
-              ? '⚠ Processing failed'
-              : video.status.toLowerCase()}
+          <span
+            className={cn(
+              'px-3 py-1.5 rounded-lg text-xs font-medium border tracking-wide',
+              processingLabel.isFailed
+                ? 'bg-error-subtle text-error border-error/30'
+                : 'bg-surface-overlay text-text-secondary border-border'
+            )}
+          >
+            {processingLabel.text}
           </span>
+          <MediaProcessingBar
+            progress={video.progress}
+            isFailed={processingLabel.isFailed}
+          />
         </div>
       )}
     </Link>

@@ -24,11 +24,22 @@ const processIngestJob = async (
   const { mediaType, mediaId, userId, storageKey, fileName, fileSizeBytes } =
     job.data;
 
+  const emitProgress = (percent: number): void => {
+    const progressEvent: IMediaStatusEvent = {
+      id: mediaId,
+      mediaType,
+      status: 'PROCESSING',
+      progress: percent,
+    };
+    emitToUser(userId, MEDIA_STATUS_SOCKET_EVENT, progressEvent);
+  };
+
   const { providerVideoId, readyPayload } = await ingestFromStorage({
     storageKey,
     fileName,
     fileSizeBytes,
     userId,
+    onProgress: emitProgress,
   });
 
   await setProviderMediaType(providerVideoId, mediaType);
@@ -57,12 +68,14 @@ const processIngestJob = async (
   if (readyPayload) {
     await adapter.processReadyPayload(readyPayload);
 
-    await storageProvider.deleteObject(storageKey).catch((e) =>
-      logger.warn(
-        e,
-        `Failed to delete raw upload object ${storageKey} after successful transcode`
-      )
-    );
+    await storageProvider
+      .deleteObject(storageKey)
+      .catch((e) =>
+        logger.warn(
+          e,
+          `Failed to delete raw upload object ${storageKey} after successful transcode`
+        )
+      );
   }
 
   mediaIngestJobDurationSeconds.observe((Date.now() - jobStartMs) / 1000);
@@ -99,12 +112,14 @@ export const startMediaIngestWorker = (): Worker<MediaIngestJobData> => {
         'We could not process this upload. Please try uploading again.'
       );
 
-      await storageProvider.deleteObject(job.data.storageKey).catch((e) =>
-        logger.warn(
-          e,
-          `Failed to delete raw upload object ${job.data.storageKey} after exhausted ingest retries`
-        )
-      );
+      await storageProvider
+        .deleteObject(job.data.storageKey)
+        .catch((e) =>
+          logger.warn(
+            e,
+            `Failed to delete raw upload object ${job.data.storageKey} after exhausted ingest retries`
+          )
+        );
 
       const statusEvent: IMediaStatusEvent = {
         id: job.data.mediaId,

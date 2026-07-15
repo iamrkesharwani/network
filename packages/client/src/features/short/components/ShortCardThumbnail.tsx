@@ -5,6 +5,9 @@ import type { IShortResponse } from '@network/shared';
 import MediaDurationBadge from '../../../shared/ui/card/MediaDurationBadge';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBadge';
+import MediaProcessingBar from '../../../shared/ui/card/MediaProcessingBar';
+import { getMediaProcessingLabel } from '../../../shared/utils/mediaProcessingLabel';
+import { cn } from '../../../shared/utils/cn';
 
 interface ShortCardThumbnailProps {
   short: IShortResponse;
@@ -24,6 +27,7 @@ const ShortCardThumbnail = ({
   daysLeft = null,
 }: ShortCardThumbnailProps) => {
   const [thumbError, setThumbError] = useState(false);
+  const processingLabel = getMediaProcessingLabel(short.status, short.progress);
 
   return (
     <Link
@@ -71,11 +75,20 @@ const ShortCardThumbnail = ({
 
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface/70 backdrop-blur-[2px]">
-          <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-surface-overlay text-text-secondary border border-border capitalize tracking-wide">
-            {short.status === 'FAILED'
-              ? '⚠ Processing failed'
-              : short.status.toLowerCase()}
+          <span
+            className={cn(
+              'px-3 py-1.5 rounded-lg text-xs font-medium border tracking-wide',
+              processingLabel.isFailed
+                ? 'bg-error-subtle text-error border-error/30'
+                : 'bg-surface-overlay text-text-secondary border-border'
+            )}
+          >
+            {processingLabel.text}
           </span>
+          <MediaProcessingBar
+            progress={short.progress}
+            isFailed={processingLabel.isFailed}
+          />
         </div>
       )}
     </Link>

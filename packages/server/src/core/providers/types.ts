@@ -98,6 +98,7 @@ export interface IVideoProvider {
     fileName: string;
     fileSizeBytes: number;
     userId: string;
+    onProgress?: (percent: number) => void;
   }): Promise<IngestVideoResult>;
 
   deleteVideo(providerVideoId: string): Promise<void>;

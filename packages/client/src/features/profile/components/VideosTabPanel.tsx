@@ -12,7 +12,6 @@ import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
 import VisibilityFilter, {
   type VisibilityFilterValue,
 } from './VisibilityFilter';
-import ProcessingShelf from './ProcessingShelf';
 import { useProfileViewMode } from '../hooks/useProfileViewMode';
 
 export interface VideosTabPanelProps {
@@ -49,9 +48,6 @@ const VideosTabPanel = ({ username, isOwner }: VideosTabPanelProps) => {
 
   const videos = data?.data ?? [];
   const hasNextPage = data?.meta.hasNextPage ?? false;
-  const processingVideos = isOwner
-    ? videos.filter((video) => video.status !== 'READY')
-    : [];
 
   const handleLoadMore = () => {
     if (data?.meta.nextCursor) setCursor(data.meta.nextCursor);
@@ -59,10 +55,6 @@ const VideosTabPanel = ({ username, isOwner }: VideosTabPanelProps) => {
 
   const handleDelete = async (video: IVideoResponse) => {
     await deleteVideo(video.id).unwrap();
-  };
-
-  const handleDeleteById = async (videoId: string) => {
-    await deleteVideo(videoId).unwrap();
   };
 
   const handleToggleVisibility = async (video: IVideoResponse) => {
@@ -74,10 +66,6 @@ const VideosTabPanel = ({ username, isOwner }: VideosTabPanelProps) => {
 
   return (
     <div>
-      {isOwner && (
-        <ProcessingShelf items={processingVideos} onDelete={handleDeleteById} />
-      )}
-
       <div className="flex items-center justify-between mb-4">
         {isOwner ? (
           <VisibilityFilter

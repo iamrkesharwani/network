@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import {
   MEDIA_STATUS_SOCKET_EVENT,
   type IMediaStatusEvent,
 } from '@network/shared';
+import type { RootState } from '../../app/store/store';
 import { useAppSelector } from './useAppSelector';
 import { useAppDispatch } from './useAppDispatch';
 import { useSocket } from './useSocket';
@@ -12,9 +14,32 @@ import { videoApi } from '../../features/video/videoApi';
 import { shortApi } from '../../features/short/shortApi';
 import { postApi } from '../../features/post/postApi';
 
+interface MediaCachePatch {
+  status: IMediaStatusEvent['status'];
+  progress?: number;
+  duration?: number;
+  playbackUrl?: string;
+  thumbnailUrl?: string;
+  errorMessage?: string;
+}
+
+const buildMediaPatch = (event: IMediaStatusEvent): MediaCachePatch => ({
+  status: event.status,
+  progress: event.status === 'PROCESSING' ? event.progress : undefined,
+  ...(event.duration !== undefined && { duration: event.duration }),
+  ...(event.playbackUrl !== undefined && { playbackUrl: event.playbackUrl }),
+  ...(event.thumbnailUrl !== undefined && {
+    thumbnailUrl: event.thumbnailUrl,
+  }),
+  ...(event.errorMessage !== undefined && {
+    errorMessage: event.errorMessage,
+  }),
+});
+
 export const useMediaStatusSocket = (): void => {
   const { accessToken } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
+  const store = useStore<RootState>();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const socketRef = useSocket(accessToken);
@@ -24,30 +49,68 @@ export const useMediaStatusSocket = (): void => {
     if (!socket) return;
 
     const handleMediaStatus = (event: IMediaStatusEvent) => {
+      const patch = buildMediaPatch(event);
+
       if (event.mediaType === 'video') {
         dispatch(
-          videoApi.util.invalidateTags([
-            { type: 'Video', id: event.id },
-            'MyVideos',
-            'Video',
-          ])
+          videoApi.util.updateQueryData('getVideoById', event.id, (draft) => {
+            Object.assign(draft.data, patch);
+          })
         );
+        for (const listEndpoint of ['getMyVideos', 'getUserVideos'] as const) {
+          const cachedArgs = videoApi.util.selectCachedArgsForQuery(
+            store.getState(),
+            listEndpoint
+          );
+          for (const args of cachedArgs) {
+            dispatch(
+              videoApi.util.updateQueryData(listEndpoint, args, (draft) => {
+                const item = draft.data.find((v) => v.id === event.id);
+                if (item) Object.assign(item, patch);
+              })
+            );
+          }
+        }
       } else if (event.mediaType === 'short') {
         dispatch(
-          shortApi.util.invalidateTags([
-            { type: 'Short', id: event.id },
-            'MyShorts',
-            'Short',
-          ])
+          shortApi.util.updateQueryData('getShortById', event.id, (draft) => {
+            Object.assign(draft.data, patch);
+          })
         );
+        for (const listEndpoint of ['getMyShorts', 'getUserShorts'] as const) {
+          const cachedArgs = shortApi.util.selectCachedArgsForQuery(
+            store.getState(),
+            listEndpoint
+          );
+          for (const args of cachedArgs) {
+            dispatch(
+              shortApi.util.updateQueryData(listEndpoint, args, (draft) => {
+                const item = draft.data.find((s) => s.id === event.id);
+                if (item) Object.assign(item, patch);
+              })
+            );
+          }
+        }
       } else {
         dispatch(
-          postApi.util.invalidateTags([
-            { type: 'Post', id: event.id },
-            'MyPosts',
-            'Post',
-          ])
+          postApi.util.updateQueryData('getPostById', event.id, (draft) => {
+            Object.assign(draft.data, patch);
+          })
         );
+        for (const listEndpoint of ['getMyPosts', 'getUserPosts'] as const) {
+          const cachedArgs = postApi.util.selectCachedArgsForQuery(
+            store.getState(),
+            listEndpoint
+          );
+          for (const args of cachedArgs) {
+            dispatch(
+              postApi.util.updateQueryData(listEndpoint, args, (draft) => {
+                const item = draft.data.find((p) => p.id === event.id);
+                if (item) Object.assign(item, patch);
+              })
+            );
+          }
+        }
       }
 
       const label = event.title ? `"${event.title}"` : 'Your post';
@@ -67,5 +130,5 @@ export const useMediaStatusSocket = (): void => {
     return () => {
       socket.off(MEDIA_STATUS_SOCKET_EVENT, handleMediaStatus);
     };
-  }, [accessToken, dispatch, addToast, navigate, socketRef]);
+  }, [accessToken, dispatch, addToast, navigate, socketRef, store]);
 };

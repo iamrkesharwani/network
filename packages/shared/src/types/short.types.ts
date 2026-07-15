@@ -42,6 +42,7 @@ export interface IShort {
   playbackUrl?: string;
   status: ShortStatus;
   errorMessage?: string;
+  progress?: number;
   storageKey?: string;
   metricsRecorded?: boolean;
   tags: string[];
