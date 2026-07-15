@@ -69,3 +69,10 @@ export const webhookLimiter = createLimiter(
   'Too many webhook requests.',
   'rl:webhook:'
 );
+
+export const searchLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  120,
+  'Too many search requests. Please wait before searching again.',
+  'rl:search:'
+);

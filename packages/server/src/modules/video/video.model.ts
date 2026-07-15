@@ -8,6 +8,7 @@ import {
   CAPTION_LABEL_MAX_LENGTH,
   type IVideo,
 } from '@network/shared';
+import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
 
 const captionSchema = new Schema(
   {
@@ -57,7 +58,8 @@ export interface ICaptionSubdocument {
 }
 
 export interface IVideoDocument
-  extends Omit<
+  extends
+    Omit<
       IVideo,
       | 'id'
       | 'userId'
@@ -72,6 +74,7 @@ export interface IVideoDocument
   unlistedAt: Date | null;
   unlistedExpiryWarnedAt: Date | null;
   captions: mongoose.Types.DocumentArray<ICaptionSubdocument>;
+  searchTokens: string[];
 }
 
 const videoSchema = new Schema<IVideoDocument>(
@@ -163,6 +166,11 @@ const videoSchema = new Schema<IVideoDocument>(
       type: Date,
       default: null,
     },
+    searchTokens: {
+      type: [String],
+      default: [],
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -179,6 +187,7 @@ const videoSchema = new Schema<IVideoDocument>(
         delete json['metricsRecorded'];
         delete json['deletedAt'];
         delete json['unlistedExpiryWarnedAt'];
+        delete json['searchTokens'];
 
         const raw = json['userId'] as
           | {
@@ -234,5 +243,9 @@ videoSchema.index({
 
 videoSchema.index({ deletedAt: 1 });
 videoSchema.index({ visibility: 1, unlistedAt: 1 });
+videoSchema.index({ title: 'text', description: 'text', tags: 'text' });
+videoSchema.index({ searchTokens: 1 });
+
+attachSearchTokenHooks(videoSchema, ['title', 'description', 'tags']);
 
 export const VideoModel = mongoose.model<IVideoDocument>('Video', videoSchema);

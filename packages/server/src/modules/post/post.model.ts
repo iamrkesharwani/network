@@ -7,9 +7,11 @@ import {
   MAX_POST_IMAGES,
   type IPost,
 } from '@network/shared';
+import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
 
 export interface IPostDocument
-  extends Omit<
+  extends
+    Omit<
       IPost,
       'id' | 'userId' | 'deletedAt' | 'unlistedAt' | 'unlistedExpiryWarnedAt'
     >,
@@ -18,6 +20,7 @@ export interface IPostDocument
   deletedAt: Date | null;
   unlistedAt: Date | null;
   unlistedExpiryWarnedAt: Date | null;
+  searchTokens: string[];
 }
 
 const postSchema = new Schema<IPostDocument>(
@@ -79,6 +82,11 @@ const postSchema = new Schema<IPostDocument>(
       type: Date,
       default: null,
     },
+    searchTokens: {
+      type: [String],
+      default: [],
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -92,6 +100,7 @@ const postSchema = new Schema<IPostDocument>(
         delete json['__v'];
         delete json['deletedAt'];
         delete json['unlistedExpiryWarnedAt'];
+        delete json['searchTokens'];
 
         const raw = json['userId'] as
           | {
@@ -148,5 +157,9 @@ postSchema.index({ userId: 1, status: 1, _id: -1 });
 
 postSchema.index({ deletedAt: 1 });
 postSchema.index({ visibility: 1, unlistedAt: 1 });
+postSchema.index({ text: 'text', tags: 'text' });
+postSchema.index({ searchTokens: 1 });
+
+attachSearchTokenHooks(postSchema, ['text', 'tags']);
 
 export const PostModel = mongoose.model<IPostDocument>('Post', postSchema);

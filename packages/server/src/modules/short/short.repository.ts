@@ -3,6 +3,7 @@ import { ShortModel, type IShortDocument } from './short.model.js';
 import type { UpdateShortData, WebhookUpdateData } from './short.types.js';
 import mongoose from 'mongoose';
 import { paginateQuery } from '../../core/utils/paginate.js';
+import { hybridSearchPaginate } from '../../core/utils/hybridSearchPaginate.js';
 
 export const createPlaceholder = (
   userId: string,
@@ -37,6 +38,27 @@ export const findPublicFeed = async (
 ): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     ShortModel,
+    { status: 'READY', visibility: 'public', deletedAt: null },
+    cursor,
+    limit
+  );
+
+  await ShortModel.populate(result.data, {
+    path: 'userId',
+    select: 'username avatarUrl',
+  });
+
+  return result;
+};
+
+export const searchPublic = async (
+  q: string,
+  cursor: string | null,
+  limit: number
+): Promise<Omit<PaginatedResponse<IShortDocument>, 'success' | 'message'>> => {
+  const result = await hybridSearchPaginate(
+    ShortModel,
+    q,
     { status: 'READY', visibility: 'public', deletedAt: null },
     cursor,
     limit
@@ -88,8 +110,10 @@ export const countByVisibility = async (
     { $group: { _id: '$visibility', count: { $sum: 1 } } },
   ]);
 
-  const publicCount = counts.find((count) => count._id === 'public')?.count ?? 0;
-  const unlistedCount = counts.find((count) => count._id === 'unlisted')?.count ?? 0;
+  const publicCount =
+    counts.find((count) => count._id === 'public')?.count ?? 0;
+  const unlistedCount =
+    counts.find((count) => count._id === 'unlisted')?.count ?? 0;
   return {
     all: publicCount + unlistedCount,
     public: publicCount,

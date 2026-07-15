@@ -6,9 +6,11 @@ import {
   SHORT_DESCRIPTION_MAX_LENGTH,
   type IShort,
 } from '@network/shared';
+import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
 
 export interface IShortDocument
-  extends Omit<
+  extends
+    Omit<
       IShort,
       'id' | 'userId' | 'deletedAt' | 'unlistedAt' | 'unlistedExpiryWarnedAt'
     >,
@@ -17,6 +19,7 @@ export interface IShortDocument
   deletedAt: Date | null;
   unlistedAt: Date | null;
   unlistedExpiryWarnedAt: Date | null;
+  searchTokens: string[];
 }
 
 const shortSchema = new Schema<IShortDocument>(
@@ -98,6 +101,11 @@ const shortSchema = new Schema<IShortDocument>(
       type: Date,
       default: null,
     },
+    searchTokens: {
+      type: [String],
+      default: [],
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -114,6 +122,7 @@ const shortSchema = new Schema<IShortDocument>(
         delete json['metricsRecorded'];
         delete json['deletedAt'];
         delete json['unlistedExpiryWarnedAt'];
+        delete json['searchTokens'];
 
         const raw = json['userId'] as
           | {
@@ -159,5 +168,9 @@ shortSchema.index({ status: 1, visibility: 1, _id: -1 });
 shortSchema.index({ userId: 1, status: 1, _id: -1 });
 shortSchema.index({ deletedAt: 1 });
 shortSchema.index({ visibility: 1, unlistedAt: 1 });
+shortSchema.index({ title: 'text', description: 'text', tags: 'text' });
+shortSchema.index({ searchTokens: 1 });
+
+attachSearchTokenHooks(shortSchema, ['title', 'description', 'tags']);
 
 export const ShortModel = mongoose.model<IShortDocument>('Short', shortSchema);

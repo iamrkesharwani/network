@@ -1,9 +1,16 @@
-import { Link } from 'react-router-dom';
-import { Menu, Search, Bell, Sun, Moon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Menu, Search, X, Bell, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../shared/hooks/useTheme';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
+import { useDebounce } from '../../shared/hooks/useDebounce';
 import Avatar from '../../shared/ui/primitives/Avatar';
-import { SITE_NAME, CLIENT_ROUTES } from '@network/shared';
+import {
+  SITE_NAME,
+  CLIENT_ROUTES,
+  SEARCH_DEBOUNCE_MS,
+  SEARCH_FOCUS_SHORTCUT_KEY,
+} from '@network/shared';
 import LogoIcon from '../../public/Logo.svg?react';
 import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
 
@@ -14,6 +21,55 @@ export interface NavbarProps {
 const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
   const { isDark, toggle } = useTheme();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(searchParams.get('q') ?? '');
+  const debouncedSearchInput = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setSearchInput(searchParams.get('q') ?? '');
+  }, [searchParams]);
+
+  useEffect(() => {
+    const trimmed = debouncedSearchInput.trim();
+    const currentQuery = searchParams.get('q') ?? '';
+
+    if (!trimmed) {
+      if (currentQuery) navigate(CLIENT_ROUTES.FEED);
+      return;
+    }
+    if (trimmed === currentQuery) return;
+    navigate(`${CLIENT_ROUTES.SEARCH}?q=${encodeURIComponent(trimmed)}`);
+  }, [debouncedSearchInput]);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key.toLowerCase() === SEARCH_FOCUS_SHORTCUT_KEY) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = searchInput.trim();
+    if (!trimmed) return;
+    navigate(`${CLIENT_ROUTES.SEARCH}?q=${encodeURIComponent(trimmed)}`);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') e.currentTarget.blur();
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    navigate(CLIENT_ROUTES.FEED);
+    searchInputRef.current?.focus();
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full h-14 bg-surface border-b border-border flex items-center px-4 sm:px-6">
@@ -36,14 +92,31 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
       </div>
 
       <div className="hidden md:flex flex-1 justify-center px-10">
-        <div className="relative w-full max-w-md">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="relative w-full max-w-md"
+        >
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-icon pointer-events-none" />
           <input
-            type="search"
+            ref={searchInputRef}
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
             placeholder="Search videos, creators..."
-            className="w-full h-9 pl-9 pr-4 rounded-lg bg-surface-raised border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:bg-surface transition-all"
+            className="w-full h-9 pl-9 pr-9 rounded-lg bg-surface-raised border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:bg-surface transition-all"
           />
-        </div>
+          {searchInput && (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              aria-label="Clear search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-icon hover:text-icon-hover hover:bg-surface-overlay transition-colors focus:outline-none"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </form>
       </div>
 
       <div className="flex items-center gap-1 ml-auto shrink-0">
@@ -66,7 +139,11 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
             </button>
 
             <Link
-              to={user?.username ? buildProfilePath(user.username) : CLIENT_ROUTES.LOGIN}
+              to={
+                user?.username
+                  ? buildProfilePath(user.username)
+                  : CLIENT_ROUTES.LOGIN
+              }
               className="ml-1 rounded-full ring-2 ring-transparent hover:ring-primary transition-all focus:outline-none"
             >
               <Avatar

@@ -12,8 +12,7 @@ const renderSkeletonForPath = (pathname: string) => {
   if (pathname.startsWith('/explore')) return <ExploreSkeleton />;
   if (pathname.startsWith('/profile/')) return <ProfileSkeleton />;
   if (pathname.startsWith(CLIENT_ROUTES.SETTINGS)) return <SettingsSkeleton />;
-  if (pathname.startsWith(CLIENT_ROUTES.FEED) || pathname === '/')
-    return <FeedSkeleton />;
+  if (pathname === CLIENT_ROUTES.FEED) return <FeedSkeleton />;
   return <DefaultPageSkeleton />;
 };
 

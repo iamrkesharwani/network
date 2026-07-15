@@ -68,6 +68,15 @@ export const getPublicFeed = async (cursor: string | null, limit: number) => {
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 
+export const searchPublic = async (
+  q: string,
+  cursor: string | null,
+  limit: number
+) => {
+  const result = await videoRepository.searchPublic(q, cursor, limit);
+  return { ...result, data: result.data.map(toResponseFromLean) };
+};
+
 export const getMyVideos = async (
   userId: string,
   cursor: string | null,

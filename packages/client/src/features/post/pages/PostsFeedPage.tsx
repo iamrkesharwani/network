@@ -1,37 +1,112 @@
-import { useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { DEFAULT_PAGE_LIMIT } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
-import { useLivePostFeed } from '../../feed/hooks/useLivePostFeed';
-import PostGrid from './PostGrid';
+import InfiniteScroll from '../../../shared/ui/list/InfiniteScroll';
+import {
+  useFeedColumns,
+  type FeedColumnCount,
+} from '../../feed/hooks/useFeedColumns';
+import { useLiveFeed } from '../../feed/hooks/useLiveFeed';
+import { COL_CLASS } from '../../video/utils/videoGrid';
+import { useGetPostByIdQuery, postApi } from '../postApi';
+import PostGridTile from './PostGridTile';
+import PostEmptyState from '../components/PostEmptyState';
+import PostErrorState from '../components/PostErrorState';
+import { PostGridSkeleton } from '../skeleton/PostGridSkeleton';
 
 const PostsFeedPage = () => {
-  usePageTitle('Posts');
-  const mainScrollRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    mainScrollRef.current = document.querySelector('main');
-  }, []);
+  const { postId } = useParams<{ postId?: string }>();
+  const { postsPerBlock } = useFeedColumns(false);
 
   const {
-    items: posts,
+    data: pinnedData,
+    isLoading: isPinnedLoading,
+    isError: isPinnedError,
+  } = useGetPostByIdQuery(postId ?? '', { skip: !postId });
+  const pinnedPost = postId ? pinnedData?.data : undefined;
+
+  usePageTitle(pinnedPost ? `Post by @${pinnedPost.author.username}` : 'Posts');
+
+  const {
+    items,
     isLoading,
     isFetchingNextPage,
     isError,
     hasNextPage,
     loadMore,
     retry,
-  } = useLivePostFeed();
+  } = useLiveFeed((args) => postApi.useGetFeedQuery(args), DEFAULT_PAGE_LIMIT);
+
+  const continuation = pinnedPost
+    ? items.filter((item) => item.id !== pinnedPost.id)
+    : items;
+
+  if (postId && isPinnedLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-text-muted" />
+      </div>
+    );
+  }
+
+  if (postId && (isPinnedError || !pinnedPost)) {
+    return (
+      <PostEmptyState
+        message="This post couldn't be found"
+        subMessage="It may have been removed."
+      />
+    );
+  }
+
+  if (!pinnedPost && isLoading && items.length === 0) {
+    return <PostGridSkeleton count={postsPerBlock} />;
+  }
+
+  if (!pinnedPost && isError && items.length === 0) {
+    return <PostErrorState onRetry={retry} />;
+  }
+
+  if (!pinnedPost && items.length === 0) {
+    return (
+      <PostEmptyState
+        message="No posts yet"
+        subMessage="When posts are added they'll appear here."
+      />
+    );
+  }
 
   return (
-    <PostGrid
-      posts={posts}
-      isLoading={isLoading}
-      isFetchingNextPage={isFetchingNextPage}
-      isError={isError}
-      hasNextPage={hasNextPage}
-      onLoadMore={loadMore}
-      onRetry={retry}
-      scrollRef={mainScrollRef as React.RefObject<HTMLElement | null>}
-    />
+    <div className="flex flex-col gap-8">
+      <InfiniteScroll
+        isLoading={isFetchingNextPage}
+        hasMore={hasNextPage}
+        onLoadMore={loadMore}
+      >
+        <div
+          className={`grid gap-4 ${COL_CLASS[postsPerBlock as FeedColumnCount]}`}
+        >
+          {pinnedPost && <PostGridTile post={pinnedPost} variant="detail" />}
+          {continuation.map((item) => (
+            <PostGridTile key={item.id} post={item} variant="detail" />
+          ))}
+        </div>
+      </InfiniteScroll>
+
+      {pinnedPost && isError && continuation.length === 0 && (
+        <PostErrorState onRetry={retry} />
+      )}
+      {pinnedPost &&
+        !isError &&
+        continuation.length === 0 &&
+        !isFetchingNextPage &&
+        !hasNextPage && (
+          <PostEmptyState
+            message="No more posts"
+            subMessage="You've seen everything for now."
+          />
+        )}
+    </div>
   );
 };
 

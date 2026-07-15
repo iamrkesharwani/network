@@ -1,4 +1,4 @@
-import { type RouteObject, Navigate } from 'react-router-dom';
+import { type RouteObject } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import AppInitGate from './AppInitGate';
 import RequireAuth from './RequireAuth';
@@ -20,6 +20,7 @@ import PostComposer from '../../features/post/form/PostComposer';
 import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
 import ProfilePage from '../../features/profile/pages/ProfilePage';
 import SettingsPage from '../../features/creator/pages/SettingsPage';
+import SearchResultsPage from '../../features/search/pages/SearchResultsPage';
 import NotFound from './NotFound';
 
 export const routes: RouteObject[] = [
@@ -41,13 +42,11 @@ export const routes: RouteObject[] = [
       {
         element: <PageWrapper />,
         children: [
-          {
-            path: '/',
-            element: <Navigate to={CLIENT_ROUTES.FEED} replace />,
-          },
           { path: CLIENT_ROUTES.FEED, element: <Feed /> },
           { path: CLIENT_ROUTES.VIDEO_WATCH, element: <VideoWatch /> },
+          { path: CLIENT_ROUTES.SEARCH, element: <SearchResultsPage /> },
           { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
+          { path: CLIENT_ROUTES.POST_WATCH, element: <PostsFeedPage /> },
           { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
           { path: CLIENT_ROUTES.PROFILE_VIDEOS, element: <ProfilePage /> },
           { path: CLIENT_ROUTES.PROFILE_SHORTS, element: <ProfilePage /> },

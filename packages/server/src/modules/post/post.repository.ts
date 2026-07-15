@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { PostModel, type IPostDocument } from './post.model.js';
 import type { PaginatedResponse, PostVisibility } from '@network/shared';
 import { paginateQuery } from '../../core/utils/paginate.js';
+import { hybridSearchPaginate } from '../../core/utils/hybridSearchPaginate.js';
 import type { UpdatePostData } from './post.types.js';
 
 export const createTextOrImagePost = async (
@@ -57,6 +58,27 @@ export const findPublicFeed = async (
   return result;
 };
 
+export const searchPublic = async (
+  q: string,
+  cursor: string | null,
+  limit: number
+): Promise<Omit<PaginatedResponse<IPostDocument>, 'success' | 'message'>> => {
+  const result = await hybridSearchPaginate(
+    PostModel,
+    q,
+    { status: 'READY', visibility: 'public', deletedAt: null },
+    cursor,
+    limit
+  );
+
+  await PostModel.populate(result.data, {
+    path: 'userId',
+    select: 'username avatarUrl',
+  });
+
+  return result;
+};
+
 export const findByUserId = async (
   userId: string,
   cursor: string | null,
@@ -95,8 +117,10 @@ export const countByVisibility = async (
     { $group: { _id: '$visibility', count: { $sum: 1 } } },
   ]);
 
-  const publicCount = counts.find((count) => count._id === 'public')?.count ?? 0;
-  const unlistedCount = counts.find((count) => count._id === 'unlisted')?.count ?? 0;
+  const publicCount =
+    counts.find((count) => count._id === 'public')?.count ?? 0;
+  const unlistedCount =
+    counts.find((count) => count._id === 'unlisted')?.count ?? 0;
   return {
     all: publicCount + unlistedCount,
     public: publicCount,

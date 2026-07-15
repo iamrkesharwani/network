@@ -9,6 +9,7 @@ import uploadRoutes from './modules/upload/upload.routes.js';
 import feedRoutes from './modules/feed/feed.routes.js';
 import userRoutes from './modules/user/user.routes.js';
 import telemetryRoutes from './modules/telemetry/telemetry.routes.js';
+import searchRoutes from './modules/search/search.routes.js';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/uploads', uploadRoutes);
 router.use('/feed', feedRoutes);
 router.use('/user', userRoutes);
 router.use('/telemetry', telemetryRoutes);
+router.use('/search', searchRoutes);
 
 export default router;

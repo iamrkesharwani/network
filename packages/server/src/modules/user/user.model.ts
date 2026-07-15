@@ -11,10 +11,12 @@ import {
   VIEW_MODES,
   type IUser,
 } from '@network/shared';
+import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
 
 export interface IUserDocument extends IUser, Document {
   password?: string;
   googleId?: string;
+  searchTokens: string[];
 }
 
 const profileViewModeSchema = new Schema(
@@ -95,6 +97,11 @@ const userSchema = new Schema<IUserDocument>(
       unique: true,
     },
     preferences: { type: preferencesSchema, default: undefined },
+    searchTokens: {
+      type: [String],
+      default: [],
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -107,10 +114,16 @@ const userSchema = new Schema<IUserDocument>(
         delete json['__v'];
         delete json['password'];
         delete json['googleId'];
+        delete json['searchTokens'];
         return json;
       },
     },
   }
 );
+
+userSchema.index({ name: 'text', username: 'text' });
+userSchema.index({ searchTokens: 1 });
+
+attachSearchTokenHooks(userSchema, ['name', 'username']);
 
 export const User = mongoose.model<IUserDocument>('User', userSchema);

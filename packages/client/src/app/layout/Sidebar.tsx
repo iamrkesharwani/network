@@ -37,9 +37,7 @@ const Sidebar = ({
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [logout, { isLoading }] = useLogoutMutation();
-  const isAuthenticated = useAppSelector(
-    (state) => state.auth.isAuthenticated
-  );
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const authUser = useAppSelector((state) => state.auth.user);
 
   const handleLogout = async () => {
@@ -58,7 +56,7 @@ const Sidebar = ({
   };
 
   const navItems = [
-    { name: 'Feed', path: CLIENT_ROUTES.FEED, icon: Home },
+    { name: 'Home', path: CLIENT_ROUTES.FEED, icon: Home },
     { name: 'Posts', path: CLIENT_ROUTES.POSTS, icon: FileText },
     { name: 'Upload', path: CLIENT_ROUTES.UPLOAD, icon: UploadCloud },
     ...(isAuthenticated && authUser?.username
@@ -127,6 +125,7 @@ const Sidebar = ({
             <NavLink
               key={item.name}
               to={item.path}
+              end={item.path === CLIENT_ROUTES.FEED}
               onClick={onMobileClose}
               title={!showLabels ? item.name : undefined}
               className={({ isActive }) =>

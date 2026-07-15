@@ -7,6 +7,7 @@ import type {
 } from './video.types.js';
 import mongoose from 'mongoose';
 import { paginateQuery } from '../../core/utils/paginate.js';
+import { hybridSearchPaginate } from '../../core/utils/hybridSearchPaginate.js';
 
 export const createPlaceholder = (
   userId: string,
@@ -25,9 +26,7 @@ export const findById = (id: string): Promise<IVideoDocument | null> =>
 export const findByIdWithStorageKey = (
   id: string
 ): Promise<IVideoDocument | null> =>
-  VideoModel.findOne({ _id: id, deletedAt: null })
-    .select('+storageKey')
-    .exec();
+  VideoModel.findOne({ _id: id, deletedAt: null }).select('+storageKey').exec();
 
 export const findByProviderVideoId = (
   providerVideoId: string
@@ -40,6 +39,27 @@ export const findPublicFeed = async (
 ): Promise<Omit<PaginatedResponse<IVideoDocument>, 'success' | 'message'>> => {
   const result = await paginateQuery(
     VideoModel,
+    { status: 'READY', visibility: 'public', deletedAt: null },
+    cursor,
+    limit
+  );
+
+  await VideoModel.populate(result.data, {
+    path: 'userId',
+    select: 'username avatarUrl',
+  });
+
+  return result;
+};
+
+export const searchPublic = async (
+  q: string,
+  cursor: string | null,
+  limit: number
+): Promise<Omit<PaginatedResponse<IVideoDocument>, 'success' | 'message'>> => {
+  const result = await hybridSearchPaginate(
+    VideoModel,
+    q,
     { status: 'READY', visibility: 'public', deletedAt: null },
     cursor,
     limit
@@ -91,8 +111,10 @@ export const countByVisibility = async (
     { $group: { _id: '$visibility', count: { $sum: 1 } } },
   ]);
 
-  const publicCount = counts.find((count) => count._id === 'public')?.count ?? 0;
-  const unlistedCount = counts.find((count) => count._id === 'unlisted')?.count ?? 0;
+  const publicCount =
+    counts.find((count) => count._id === 'public')?.count ?? 0;
+  const unlistedCount =
+    counts.find((count) => count._id === 'unlisted')?.count ?? 0;
   return {
     all: publicCount + unlistedCount,
     public: publicCount,

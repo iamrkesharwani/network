@@ -2,18 +2,22 @@ import { useEffect, useState } from 'react';
 import {
   MOBILE_MAX,
   TABLET_MAX,
-  FEED_VIDEOS_PER_BLOCK_FIRST_MOBILE_PORTRAIT,
-  FEED_VIDEOS_PER_BLOCK_MOBILE_PORTRAIT,
+  FEED_VIDEO_ROWS_PER_BLOCK_FIRST_MOBILE_PORTRAIT,
+  FEED_VIDEO_ROWS_PER_BLOCK_MOBILE_PORTRAIT,
   FEED_SHORTS_PER_BLOCK_MOBILE_PORTRAIT,
-  FEED_VIDEOS_PER_BLOCK_FIRST_COMPACT,
-  FEED_VIDEOS_PER_BLOCK_COMPACT,
+  FEED_POSTS_PER_BLOCK_MOBILE_PORTRAIT,
+  FEED_VIDEO_ROWS_PER_BLOCK_FIRST_COMPACT,
+  FEED_VIDEO_ROWS_PER_BLOCK_COMPACT,
   FEED_SHORTS_PER_BLOCK_COMPACT,
-  FEED_VIDEOS_PER_BLOCK_FIRST_TABLET_LANDSCAPE,
-  FEED_VIDEOS_PER_BLOCK_TABLET_LANDSCAPE,
+  FEED_POSTS_PER_BLOCK_COMPACT,
+  FEED_VIDEO_ROWS_PER_BLOCK_FIRST_TABLET_LANDSCAPE,
+  FEED_VIDEO_ROWS_PER_BLOCK_TABLET_LANDSCAPE,
   FEED_SHORTS_PER_BLOCK_TABLET_LANDSCAPE,
-  FEED_VIDEOS_PER_BLOCK_FIRST_DESKTOP,
-  FEED_VIDEOS_PER_BLOCK_DESKTOP,
+  FEED_POSTS_PER_BLOCK_TABLET_LANDSCAPE,
+  FEED_VIDEO_ROWS_PER_BLOCK_FIRST_DESKTOP,
+  FEED_VIDEO_ROWS_PER_BLOCK_DESKTOP,
   FEED_SHORTS_PER_BLOCK_DESKTOP,
+  FEED_POSTS_PER_BLOCK_DESKTOP,
 } from '@network/shared';
 import type { ShortColCount } from '../../short/utils/shortGrid';
 
@@ -27,6 +31,7 @@ export interface FeedColumnsResult {
   firstVideoBlockSize: number;
   videosPerBlock: number;
   shortsPerBlock: ShortColCount;
+  postsPerBlock: number;
 }
 
 export const computeFeedColumns = (
@@ -38,57 +43,69 @@ export const computeFeedColumns = (
   const isLandscape = width >= height;
 
   if (isMobile && !isLandscape) {
+    const columns: FeedColumnCount = 1;
     return {
-      columns: 1,
+      columns,
       widthMode: 'edge',
       showChatRail: false,
-      firstVideoBlockSize: FEED_VIDEOS_PER_BLOCK_FIRST_MOBILE_PORTRAIT,
-      videosPerBlock: FEED_VIDEOS_PER_BLOCK_MOBILE_PORTRAIT,
+      firstVideoBlockSize:
+        FEED_VIDEO_ROWS_PER_BLOCK_FIRST_MOBILE_PORTRAIT * columns,
+      videosPerBlock: FEED_VIDEO_ROWS_PER_BLOCK_MOBILE_PORTRAIT * columns,
       shortsPerBlock: FEED_SHORTS_PER_BLOCK_MOBILE_PORTRAIT,
+      postsPerBlock: FEED_POSTS_PER_BLOCK_MOBILE_PORTRAIT,
     };
   }
 
   if (isMobile && isLandscape) {
+    const columns: FeedColumnCount = 2;
     return {
-      columns: 2,
+      columns,
       widthMode: 'full',
       showChatRail: false,
-      firstVideoBlockSize: FEED_VIDEOS_PER_BLOCK_FIRST_COMPACT,
-      videosPerBlock: FEED_VIDEOS_PER_BLOCK_COMPACT,
+      firstVideoBlockSize: FEED_VIDEO_ROWS_PER_BLOCK_FIRST_COMPACT * columns,
+      videosPerBlock: FEED_VIDEO_ROWS_PER_BLOCK_COMPACT * columns,
       shortsPerBlock: FEED_SHORTS_PER_BLOCK_COMPACT,
+      postsPerBlock: FEED_POSTS_PER_BLOCK_COMPACT,
     };
   }
 
   const isTablet = width < TABLET_MAX;
   if (isTablet) {
     if (isLandscape) {
+      const columns: FeedColumnCount = 3;
       return {
-        columns: 3,
+        columns,
         widthMode: 'full',
         showChatRail: false,
-        firstVideoBlockSize: FEED_VIDEOS_PER_BLOCK_FIRST_TABLET_LANDSCAPE,
-        videosPerBlock: FEED_VIDEOS_PER_BLOCK_TABLET_LANDSCAPE,
+        firstVideoBlockSize:
+          FEED_VIDEO_ROWS_PER_BLOCK_FIRST_TABLET_LANDSCAPE * columns,
+        videosPerBlock: FEED_VIDEO_ROWS_PER_BLOCK_TABLET_LANDSCAPE * columns,
         shortsPerBlock: FEED_SHORTS_PER_BLOCK_TABLET_LANDSCAPE,
+        postsPerBlock: FEED_POSTS_PER_BLOCK_TABLET_LANDSCAPE,
       };
     }
 
+    const columns: FeedColumnCount = 2;
     return {
-      columns: 2,
+      columns,
       widthMode: 'full',
       showChatRail: false,
-      firstVideoBlockSize: FEED_VIDEOS_PER_BLOCK_FIRST_COMPACT,
-      videosPerBlock: FEED_VIDEOS_PER_BLOCK_COMPACT,
+      firstVideoBlockSize: FEED_VIDEO_ROWS_PER_BLOCK_FIRST_COMPACT * columns,
+      videosPerBlock: FEED_VIDEO_ROWS_PER_BLOCK_COMPACT * columns,
       shortsPerBlock: FEED_SHORTS_PER_BLOCK_COMPACT,
+      postsPerBlock: FEED_POSTS_PER_BLOCK_COMPACT,
     };
   }
 
+  const columns: FeedColumnCount = isChatOpen ? 2 : 3;
   return {
-    columns: isChatOpen ? 2 : 3,
+    columns,
     widthMode: 'full',
     showChatRail: isChatOpen,
-    firstVideoBlockSize: FEED_VIDEOS_PER_BLOCK_FIRST_DESKTOP,
-    videosPerBlock: FEED_VIDEOS_PER_BLOCK_DESKTOP,
+    firstVideoBlockSize: FEED_VIDEO_ROWS_PER_BLOCK_FIRST_DESKTOP * columns,
+    videosPerBlock: FEED_VIDEO_ROWS_PER_BLOCK_DESKTOP * columns,
     shortsPerBlock: FEED_SHORTS_PER_BLOCK_DESKTOP,
+    postsPerBlock: FEED_POSTS_PER_BLOCK_DESKTOP,
   };
 };
 

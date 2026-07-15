@@ -12,6 +12,7 @@ import { creatorApi } from '../../features/creator/creatorApi';
 import { uploadApi } from '../../features/upload/uploadApi';
 import { feedApi } from '../../features/feed/feedApi';
 import { userApi } from '../../features/user/userApi';
+import { searchApi } from '../../features/search/searchApi';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
   [uploadApi.reducerPath]: uploadApi.reducer,
   [feedApi.reducerPath]: feedApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
+  [searchApi.reducerPath]: searchApi.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
