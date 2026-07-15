@@ -44,6 +44,7 @@ export * from './constants/player.constants.js';
 export * from './constants/post.constants.js';
 export * from './constants/progressRing.constants.js';
 export * from './constants/provider.constants.js';
+export * from './constants/redis.constants.js';
 export * from './constants/related.constants.js';
 export * from './constants/report.constants.js';
 export * from './constants/retention.constants.js';

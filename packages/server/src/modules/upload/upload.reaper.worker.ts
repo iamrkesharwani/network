@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { UPLOAD_REAPER_QUEUE_NAME } from '@network/shared';
-import { bullMqConnection } from '../../core/config/bullmq.js';
+import { attachWorkerErrorBackoff, bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import { reapExpiredSessions } from './services/upload.reaper.service.js';
 
@@ -25,9 +25,7 @@ export const startUploadReaperWorker = (): Worker => {
     logger.error(error, `Upload session reaper job failed: id=${job?.id}`);
   });
 
-  worker.on('error', (error) => {
-    logger.error(error, 'Upload reaper worker connection error');
-  });
+  attachWorkerErrorBackoff(worker, 'Upload reaper');
 
   logger.info('Upload session reaper worker started');
   return worker;

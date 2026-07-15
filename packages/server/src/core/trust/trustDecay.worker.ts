@@ -4,7 +4,7 @@ import {
   TRUST_DECAY_INACTIVITY_THRESHOLD_MS,
   TRUST_DECAY_POINTS,
 } from '@network/shared';
-import { bullMqConnection } from '../config/bullmq.js';
+import { attachWorkerErrorBackoff, bullMqConnection } from '../config/bullmq.js';
 import { logger } from '../utils/logger.js';
 import * as creatorRepository from '../../modules/creator/creator.repository.js';
 import { applyTrustDecay } from '../../modules/creator/services/creator.trust.signals.service.js';
@@ -46,9 +46,7 @@ export const startTrustDecayWorker = (): Worker => {
     logger.error(error, `Trust decay job failed: id=${job?.id}`);
   });
 
-  worker.on('error', (error) => {
-    logger.error(error, 'Trust decay worker connection error');
-  });
+  attachWorkerErrorBackoff(worker, 'Trust decay');
 
   logger.info('Trust decay worker started');
   return worker;

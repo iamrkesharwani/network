@@ -4,7 +4,7 @@ import {
   MEDIA_STATUS_SOCKET_EVENT,
   type IMediaStatusEvent,
 } from '@network/shared';
-import { bullMqConnection } from '../../core/config/bullmq.js';
+import { attachWorkerErrorBackoff, bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import { emitToUser } from '../../core/config/socket.js';
 import { storageProvider } from '../../core/providers/provider.js';
@@ -136,9 +136,7 @@ export const startMediaIngestWorker = (): Worker<MediaIngestJobData> => {
     }
   });
 
-  worker.on('error', (error) => {
-    logger.error(error, 'Media ingest worker connection error');
-  });
+  attachWorkerErrorBackoff(worker, 'Media ingest');
 
   logger.info('Media ingest worker started (concurrency=10)');
   return worker;

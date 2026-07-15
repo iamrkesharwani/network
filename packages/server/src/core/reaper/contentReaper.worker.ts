@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { CONTENT_REAPER_QUEUE_NAME } from '@network/shared';
-import { bullMqConnection } from '../config/bullmq.js';
+import { attachWorkerErrorBackoff, bullMqConnection } from '../config/bullmq.js';
 import { logger } from '../utils/logger.js';
 import { getContentReaperAdapters } from './contentReaper.registry.js';
 
@@ -32,9 +32,7 @@ export const startContentReaperWorker = (): Worker => {
     logger.error(error, `Content reaper job failed: id=${job?.id}`);
   });
 
-  worker.on('error', (error) => {
-    logger.error(error, 'Content reaper worker connection error');
-  });
+  attachWorkerErrorBackoff(worker, 'Content reaper');
 
   logger.info('Content reaper worker started');
   return worker;

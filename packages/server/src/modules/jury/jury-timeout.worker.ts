@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { JURY_TIMEOUT_QUEUE_NAME } from '@network/shared';
-import { bullMqConnection } from '../../core/config/bullmq.js';
+import { attachWorkerErrorBackoff, bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import * as juryCaseRepository from './repository/jury-case.repository.js';
 import { finalizeTimedOutCase } from './services/jury.consensus.service.js';
@@ -36,9 +36,7 @@ export const startJuryTimeoutWorker = (): Worker => {
     logger.error(error, `Jury timeout sweep job failed: id=${job?.id}`);
   });
 
-  worker.on('error', (error) => {
-    logger.error(error, 'Jury timeout worker connection error');
-  });
+  attachWorkerErrorBackoff(worker, 'Jury timeout');
 
   logger.info('Jury timeout worker started');
   return worker;

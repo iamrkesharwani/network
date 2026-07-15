@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { HISTORY_FLUSH_QUEUE_NAME } from '@network/shared';
-import { bullMqConnection } from '../../core/config/bullmq.js';
+import { attachWorkerErrorBackoff, bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import { flushBufferedProgressToMongo } from './services/history.progress.service.js';
 
@@ -25,9 +25,7 @@ export const startHistoryFlushWorker = (): Worker => {
     logger.error(error, `History flush job failed: id=${job?.id}`);
   });
 
-  worker.on('error', (error) => {
-    logger.error(error, 'History flush worker connection error');
-  });
+  attachWorkerErrorBackoff(worker, 'History flush');
 
   logger.info('History flush worker started');
   return worker;

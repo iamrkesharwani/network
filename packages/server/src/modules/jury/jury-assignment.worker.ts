@@ -1,6 +1,6 @@
 import { Worker, type Job } from 'bullmq';
 import { JURY_QUEUE_NAME } from '@network/shared';
-import { bullMqConnection } from '../../core/config/bullmq.js';
+import { attachWorkerErrorBackoff, bullMqConnection } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import { getModerationContentAdapter } from '../../core/moderation/moderationContent.registry.js';
 import { selectJuryPool } from './services/jury.eligibility.service.js';
@@ -68,9 +68,7 @@ export const startJuryAssignmentWorker = (): Worker<JuryAssignmentJobData> => {
     );
   });
 
-  worker.on('error', (error) => {
-    logger.error(error, 'Jury assignment worker connection error');
-  });
+  attachWorkerErrorBackoff(worker, 'Jury assignment');
 
   logger.info('Jury assignment worker started');
   return worker;

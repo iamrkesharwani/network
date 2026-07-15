@@ -1,16 +1,20 @@
 import { Redis, type RedisOptions } from 'ioredis';
+import {
+  REDIS_RECONNECT_MAX_ATTEMPTS,
+  REDIS_RECONNECT_BACKOFF_STEP_MS,
+  REDIS_RECONNECT_BACKOFF_CAP_MS,
+} from '@network/shared';
 import { env } from '../env/env.js';
 import { logger } from '../utils/logger.js';
 
 const redisOptions: RedisOptions = {
   lazyConnect: true,
   retryStrategy: (times: number) => {
-    if (times > 10) {
+    if (times > REDIS_RECONNECT_MAX_ATTEMPTS) {
       logger.error('Redis max retries reached. Exhausted connection attempts.');
       return null;
     }
-    const delay = Math.min(times * 50, 2000);
-    return delay;
+    return Math.min(times * REDIS_RECONNECT_BACKOFF_STEP_MS, REDIS_RECONNECT_BACKOFF_CAP_MS);
   },
   maxRetriesPerRequest: null,
 };
