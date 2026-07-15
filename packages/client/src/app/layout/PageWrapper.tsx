@@ -35,7 +35,7 @@ const PageWrapper = () => {
         />
 
         <main className="flex-1 min-w-0 overflow-y-auto pb-14 md:pb-0">
-          <div className="w-full px-4 py-4 sm:px-5 sm:py-5">
+          <div className="w-full px-4 pt-0 pb-4 md:px-5 md:pt-5 md:pb-5">
             <Outlet />
           </div>
         </main>
