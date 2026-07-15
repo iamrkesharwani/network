@@ -10,6 +10,7 @@ import feedRoutes from './modules/feed/feed.routes.js';
 import userRoutes from './modules/user/user.routes.js';
 import historyRoutes from './modules/history/history.routes.js';
 import searchRoutes from './modules/search/search.routes.js';
+import reportRoutes from './modules/report/report.routes.js';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/feed', feedRoutes);
 router.use('/user', userRoutes);
 router.use('/history', historyRoutes);
 router.use('/search', searchRoutes);
+router.use('/reports', reportRoutes);
 
 export default router;

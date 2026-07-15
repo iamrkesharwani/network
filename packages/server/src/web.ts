@@ -23,6 +23,10 @@ import { shortReaperAdapter } from './modules/short/services/short.reaper.servic
 import { postReaperAdapter } from './modules/post/services/post.reaper.service.js';
 import { startHistoryFlushWorker } from './modules/history/history.flush.worker.js';
 import { scheduleHistoryFlush } from './modules/history/history.flush.queue.js';
+import { registerModerationContentAdapter } from './core/moderation/moderationContent.registry.js';
+import { videoModerationAdapter } from './modules/video/services/video.moderation.adapter.js';
+import { shortModerationAdapter } from './modules/short/services/short.moderation.adapter.js';
+import { postModerationAdapter } from './modules/post/services/post.moderation.adapter.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -44,6 +48,10 @@ const startWeb = async () => {
 
     startHistoryFlushWorker();
     await scheduleHistoryFlush();
+
+    registerModerationContentAdapter(videoModerationAdapter);
+    registerModerationContentAdapter(shortModerationAdapter);
+    registerModerationContentAdapter(postModerationAdapter);
 
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Web server listening on port ${port}`);

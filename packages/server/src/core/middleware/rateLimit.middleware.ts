@@ -76,3 +76,10 @@ export const searchLimiter = createLimiter(
   'Too many search requests. Please wait before searching again.',
   'rl:search:'
 );
+
+export const reportLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  30,
+  'Too many reports submitted. Please wait before reporting more content.',
+  'rl:report:'
+);
