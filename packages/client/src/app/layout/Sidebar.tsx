@@ -2,7 +2,6 @@ import { NavLink } from 'react-router-dom';
 import {
   Home,
   User,
-  Settings,
   LogIn,
   UserPlus,
   X,
@@ -44,7 +43,6 @@ const Sidebar = ({
             icon: User,
           },
           { name: 'Jury', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel },
-          { name: 'Settings', path: CLIENT_ROUTES.SETTINGS, icon: Settings },
         ]
       : []),
   ];

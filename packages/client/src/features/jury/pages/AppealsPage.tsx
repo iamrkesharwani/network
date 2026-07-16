@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { ScrollText } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, ScrollText } from 'lucide-react';
 import {
+  CLIENT_ROUTES,
   REPORTABLE_CONTENT_TYPES,
   type ReportableContentType,
 } from '@network/shared';
@@ -77,13 +79,22 @@ const AppealsPage = () => {
   };
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-8 pt-3">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-3xl font-semibold text-text-primary">Appeals</h1>
-        <p className="max-w-sm text-sm text-text-secondary">
-          Appeal the decision for a senior-jury review here.
-        </p>
-      </div>
+    <div>
+      <Link
+        to={CLIENT_ROUTES.JURY_QUEUE}
+        className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to jury
+      </Link>
+
+      <div className="mx-auto flex max-w-xl flex-col gap-8 pt-3">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-3xl font-semibold text-text-primary">Appeals</h1>
+          <p className="max-w-sm text-sm text-text-secondary">
+            Appeal the decision for a senior-jury review here.
+          </p>
+        </div>
 
       <div className="flex flex-col gap-4 rounded-xl border border-border p-5">
         <h2 className="text-center text-sm font-semibold text-text-primary">
@@ -197,6 +208,7 @@ const AppealsPage = () => {
             </span>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

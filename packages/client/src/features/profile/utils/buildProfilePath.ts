@@ -10,6 +10,7 @@ const TAB_ROUTES: Record<ProfileTab, string> = {
   posts: CLIENT_ROUTES.PROFILE_POSTS,
   stats: CLIENT_ROUTES.PROFILE_STATS,
   history: CLIENT_ROUTES.PROFILE_HISTORY,
+  jury: CLIENT_ROUTES.JURY_QUEUE,
   settings: CLIENT_ROUTES.SETTINGS,
 };
 

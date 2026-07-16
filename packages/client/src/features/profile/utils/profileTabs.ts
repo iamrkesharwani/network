@@ -4,6 +4,7 @@ import {
   FileText,
   BarChart3,
   History,
+  Gavel,
   Settings,
 } from 'lucide-react';
 
@@ -13,6 +14,7 @@ export type ProfileTab =
   | 'posts'
   | 'stats'
   | 'history'
+  | 'jury'
   | 'settings';
 
 export interface ProfileTabDef {
@@ -28,6 +30,7 @@ export const PROFILE_TABS: ProfileTabDef[] = [
   { id: 'posts', label: 'Posts', icon: FileText, ownerOnly: false },
   { id: 'stats', label: 'Stats', icon: BarChart3, ownerOnly: true },
   { id: 'history', label: 'History', icon: History, ownerOnly: true },
+  { id: 'jury', label: 'Jury', icon: Gavel, ownerOnly: true },
   { id: 'settings', label: 'Settings', icon: Settings, ownerOnly: true },
 ];
 

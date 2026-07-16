@@ -31,8 +31,9 @@ export const SETTINGS_TABS: SettingsTabDef[] = [
   },
 ];
 
-export const getActiveSettingsTab = (pathname: string): SettingsTab => {
+export const getActiveSettingsTab = (pathname: string): SettingsTab | null => {
   if (pathname.endsWith('/preferences')) return 'preferences';
   if (pathname.endsWith('/account')) return 'account';
-  return 'my-info';
+  if (pathname.includes('/my-info')) return 'my-info';
+  return null;
 };

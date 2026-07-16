@@ -7,7 +7,7 @@ interface SettingsNavProps {
 }
 
 const SettingsNav = ({ activeTab }: SettingsNavProps) => (
-  <div className="flex items-center gap-1 border-b border-border md:flex-col md:items-stretch md:gap-0.5 md:border-b-0 md:border-r md:pr-4">
+  <div className="sticky top-14 flex w-56 shrink-0 flex-col gap-2">
     {SETTINGS_TABS.map((tab) => {
       const isActive = tab.id === activeTab;
       return (
@@ -15,14 +15,13 @@ const SettingsNav = ({ activeTab }: SettingsNavProps) => (
           key={tab.id}
           to={tab.path}
           className={cn(
-            'flex items-center gap-2 border-b-2 -mb-px px-4 py-2.5 text-sm font-medium transition-colors',
-            'md:mb-0 md:rounded-lg md:border-b-0 md:px-3',
+            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
             isActive
-              ? 'border-primary text-primary md:bg-primary-subtle'
-              : 'border-transparent text-text-secondary hover:text-text-primary'
+              ? 'bg-primary-subtle text-primary'
+              : 'text-text-secondary hover:text-text-primary hover:bg-surface-raised'
           )}
         >
-          <tab.icon className="h-4 w-4" />
+          <tab.icon className="h-4.5 w-4.5" />
           {tab.label}
         </Link>
       );

@@ -43,9 +43,7 @@ const PreferencesTab = () => {
         </PreferenceOptionCard>
       </div>
 
-      <h3 className="mb-2 text-sm font-semibold text-text-primary">
-        Playback
-      </h3>
+      <h3 className="mb-2 text-sm font-semibold text-text-primary">Playback</h3>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <PreferenceOptionCard
           label="Playback speed"

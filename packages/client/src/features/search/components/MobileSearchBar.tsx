@@ -16,7 +16,7 @@ const MobileSearchBar = () => {
   } = useSearchNavigation(!hasInitialQuery);
 
   return (
-    <form onSubmit={handleSearchSubmit} className="relative md:hidden">
+    <form onSubmit={handleSearchSubmit} className="relative md:hidden pt-2">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-icon pointer-events-none" />
       <input
         ref={searchInputRef}
