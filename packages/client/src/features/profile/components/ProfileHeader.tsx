@@ -28,7 +28,12 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
             <h1 className="text-lg font-semibold font-display text-text-primary truncate">
               {profile.name}
             </h1>
-            {isOwner && <TrustBadge />}
+            {isOwner && (
+              <TrustBadge
+                username={profile.username}
+                className="hidden md:inline-flex"
+              />
+            )}
           </div>
           <p className="text-sm text-text-secondary truncate">
             @{profile.username}
@@ -40,6 +45,14 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
           )}
         </div>
       </div>
+
+      {isOwner && (
+        <TrustBadge
+          username={profile.username}
+          variant="full"
+          className="mt-4 md:hidden"
+        />
+      )}
     </div>
   );
 };

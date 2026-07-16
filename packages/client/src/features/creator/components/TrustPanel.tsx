@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ShieldCheck, Lock, CheckCircle2 } from 'lucide-react';
 import {
   TRUST_TIER_LABELS,
@@ -6,9 +7,11 @@ import {
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { useGetMyProfileQuery } from '../creatorApi';
+import TrustScoreInfoModal from './TrustScoreInfoModal';
 
 const TrustPanel = () => {
   const { data, isLoading } = useGetMyProfileQuery();
+  const [infoOpen, setInfoOpen] = useState(false);
 
   if (isLoading || !data) return null;
 
@@ -73,6 +76,19 @@ const TrustPanel = () => {
           );
         })}
       </div>
+
+      <button
+        type="button"
+        onClick={() => setInfoOpen(true)}
+        className="mt-4 text-xs font-medium text-primary hover:underline"
+      >
+        How to increase trust score?
+      </button>
+
+      <TrustScoreInfoModal
+        isOpen={infoOpen}
+        onClose={() => setInfoOpen(false)}
+      />
     </div>
   );
 };

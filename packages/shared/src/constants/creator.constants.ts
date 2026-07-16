@@ -103,3 +103,16 @@ export const TRUST_FEATURE_LABELS: Record<TrustFeatureId, string> = {
   priority_processing: 'Priority processing',
   extended_uploads: 'Extended uploads',
 };
+
+export const TRUST_SIGNAL_LABELS: Record<TrustSignalType, string> = {
+  PUBLISH: 'Publish a video, short, or post',
+  VIDEO_MILESTONE: 'A video hits a view milestone',
+  CREATOR_MILESTONE: 'Your total views hit a milestone',
+  FIRST_UPLOAD_BADGE: 'Earn the "1st Upload" badge',
+  TENTH_UPLOAD_BADGE: 'Earn the "10th Upload" badge',
+  CONSISTENT_CREATOR_BADGE: 'Earn the "Consistent" badge (10 active days)',
+  JURY_VOTE_MAJORITY: 'Vote with the majority on a jury review',
+  JURY_VOTE_MINORITY: 'Vote against the majority on a jury review',
+  VALID_REPORT_FILED: 'File a report that gets upheld',
+  FALSE_REPORT_FILED: 'File a report that gets rejected',
+};
