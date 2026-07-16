@@ -46,6 +46,7 @@ const VideoPlayer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const touchLayerRef = useRef<TouchInactivityLayerHandle>(null);
+  const lockLayerRef = useRef<TouchInactivityLayerHandle>(null);
 
   const dispatch = useAppDispatch();
   const { user } = useAuth();
@@ -207,14 +208,31 @@ const VideoPlayer = ({
       <CaptionOverlay activeCueText={activeCueText} />
 
       {isLocked ? (
-        <button
-          type="button"
-          onClick={() => setIsLocked(false)}
-          aria-label="Unlock controls"
-          className="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity duration-300 hover:bg-black/70 group-hover/player:opacity-100"
+        <TouchInactivityLayer
+          ref={lockLayerRef}
+          className="group/touch absolute inset-0"
         >
-          <Lock className="h-4 w-4" />
-        </button>
+          <div
+            className="absolute inset-0"
+            onClick={() => lockLayerRef.current?.toggle()}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLocked(false);
+              }}
+              aria-label="Unlock controls"
+              className={cn(
+                'absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white transition-opacity duration-300 hover:bg-black/70',
+                'opacity-100 transition-opacity duration-300',
+                'group-data-[controls-visible=false]/touch:opacity-0'
+              )}
+            >
+              <Lock className="h-4 w-4" />
+            </button>
+          </div>
+        </TouchInactivityLayer>
       ) : (
         <TouchInactivityLayer
           ref={touchLayerRef}

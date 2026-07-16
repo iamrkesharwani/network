@@ -1,17 +1,25 @@
-import { useRef } from 'react';
-import type { IPostResponse } from '@network/shared';
+import { useEffect, useRef, useState } from 'react';
+import { POST_TILE_HEIGHT_PX, type IPostResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { useVirtualGrid } from '../../../shared/hooks/useVirtualGrid';
-import PostCard from './PostCard';
+import { useGridCols } from '../../video/hooks/useGridCols';
+import {
+  COL_CLASS,
+  chunkIntoRows,
+  type ColCount,
+} from '../../video/utils/videoGrid';
+import PostGridTile from './PostGridTile';
 import PostEmptyState from '../components/PostEmptyState';
 import PostErrorState from '../components/PostErrorState';
 import PostEndDivider from '../components/PostEndDivider';
 import {
-  PostGridSkeleton,
-  PostRowSkeleton,
-} from '../skeleton/PostGridSkeleton';
+  PostTileGridSkeleton,
+  PostTileRowSkeleton,
+} from '../skeleton/PostGridTileSkeleton';
 
-type PostRow = IPostResponse | 'skeleton' | 'end';
+type PostRow = IPostResponse[] | 'skeleton' | 'end';
+
+const ROW_GAP_PX = 16;
 
 export interface PostGridProps {
   posts: IPostResponse[];
@@ -29,14 +37,9 @@ export interface PostGridProps {
   emptyMessage?: string;
   emptySubMessage?: string;
   scrollRef?: React.RefObject<HTMLElement | null>;
+  forceCols?: ColCount;
   hideEndDivider?: boolean;
 }
-
-const estimatePostHeight = (post: IPostResponse): number => {
-  const textLen = post.text?.length ?? 0;
-  const hasMedia = post.mediaType !== 'none';
-  return 92 + Math.min(textLen, 280) * 0.42 + (hasMedia ? 300 : 0);
-};
 
 const PostGrid = ({
   posts,
@@ -49,19 +52,43 @@ const PostGrid = ({
   onRetry,
   isOwner = false,
   isError = false,
-  skeletonCount = 5,
+  skeletonCount = 8,
   className,
   emptyMessage = 'No posts yet',
   emptySubMessage = "When posts are added they'll appear here.",
   scrollRef: externalScrollRef,
+  forceCols,
   hideEndDivider = false,
 }: PostGridProps) => {
+  const autoCols = useGridCols();
+  const cols: ColCount = forceCols ?? autoCols;
   const internalScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = (externalScrollRef ??
     internalScrollRef) as React.RefObject<HTMLDivElement | null>;
+  const [scrollMargin, setScrollMargin] = useState(0);
+
+  useEffect(() => {
+    const scrollEl = externalScrollRef?.current;
+    const wrapperEl = internalScrollRef.current;
+    if (!externalScrollRef || !scrollEl || !wrapperEl) return;
+
+    const measure = () => {
+      const wrapperTop = wrapperEl.getBoundingClientRect().top;
+      const scrollTop = scrollEl.getBoundingClientRect().top;
+      setScrollMargin(wrapperTop - scrollTop + scrollEl.scrollTop);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(scrollEl);
+    observer.observe(wrapperEl);
+    return () => observer.disconnect();
+  }, [externalScrollRef]);
+
+  const postRows = chunkIntoRows(posts, cols);
 
   const rows: PostRow[] = [
-    ...posts,
+    ...postRows,
     ...(isFetchingNextPage
       ? (['skeleton'] as const)
       : !hasNextPage && posts.length > 0 && !hideEndDivider
@@ -75,15 +102,16 @@ const PostGrid = ({
     estimateSize: (i) => {
       const row = rows[i];
       if (row === 'skeleton' || row === 'end') return 80;
-      return estimatePostHeight(row);
+      return POST_TILE_HEIGHT_PX + ROW_GAP_PX;
     },
+    scrollMargin: externalScrollRef ? scrollMargin : undefined,
     hasNextPage,
     isFetchingNextPage,
     onLoadMore,
   });
 
   if (isLoading && posts.length === 0) {
-    return <PostGridSkeleton count={skeletonCount} />;
+    return <PostTileGridSkeleton count={skeletonCount} cols={cols} />;
   }
 
   if (isError && posts.length === 0) {
@@ -99,7 +127,7 @@ const PostGrid = ({
   return (
     <div
       ref={internalScrollRef}
-      className={cn('w-full max-w-2xl mx-auto relative', className)}
+      className={cn('w-full relative', className)}
       style={{ height: virtualizer.getTotalSize() }}
     >
       {virtualizer.getVirtualItems().map((virtualRow) => {
@@ -115,21 +143,27 @@ const PostGrid = ({
               top: 0,
               left: 0,
               width: '100%',
-              transform: `translateY(${virtualRow.start}px)`,
-              paddingBottom: '16px',
+              transform: `translateY(${virtualRow.start - scrollMargin}px)`,
+              paddingBottom: `${ROW_GAP_PX}px`,
             }}
           >
             {row === 'skeleton' ? (
-              <PostRowSkeleton />
+              <PostTileRowSkeleton cols={cols} />
             ) : row === 'end' ? (
               <PostEndDivider />
             ) : (
-              <PostCard
-                post={row}
-                isOwner={isOwner}
-                onDelete={onDelete}
-                onToggleVisibility={onToggleVisibility}
-              />
+              <div className={`grid ${COL_CLASS[cols]} gap-4`}>
+                {row.map((post) => (
+                  <PostGridTile
+                    key={post.id}
+                    post={post}
+                    variant="detail"
+                    isOwner={isOwner}
+                    onDelete={onDelete}
+                    onToggleVisibility={onToggleVisibility}
+                  />
+                ))}
+              </div>
             )}
           </div>
         );

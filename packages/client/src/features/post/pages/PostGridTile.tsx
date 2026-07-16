@@ -16,12 +16,18 @@ export interface PostGridTileProps {
   post: IPostResponse;
   className?: string;
   variant?: 'preview' | 'detail';
+  isOwner?: boolean;
+  onDelete?: (post: IPostResponse) => Promise<void> | void;
+  onToggleVisibility?: (post: IPostResponse) => Promise<void> | void;
 }
 
 const PostGridTile = ({
   post,
   className,
   variant = 'preview',
+  isOwner = false,
+  onDelete,
+  onToggleVisibility,
 }: PostGridTileProps) => {
   const navigate = useNavigate();
   const [detailOpen, setDetailOpen] = useState(false);
@@ -103,7 +109,12 @@ const PostGridTile = ({
         onClose={() => setDetailOpen(false)}
         title="Post"
       >
-        <PostCard post={post} />
+        <PostCard
+          post={post}
+          isOwner={isOwner}
+          onDelete={onDelete}
+          onToggleVisibility={onToggleVisibility}
+        />
       </Modal>
     </>
   );
