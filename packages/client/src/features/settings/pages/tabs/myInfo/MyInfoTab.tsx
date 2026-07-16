@@ -1,9 +1,9 @@
 import { useLocation } from 'react-router-dom';
-import { getActiveMyInfoSegment } from '../../utils/myInfoSegments';
-import MyInfoOverview from './myInfo/MyInfoOverview';
-import BasicInfoCard from '../../components/myInfo/BasicInfoCard';
-import PersonalDetailsCard from '../../components/myInfo/PersonalDetailsCard';
-import LinksCard from '../../components/myInfo/LinksCard';
+import { getActiveMyInfoSegment } from '../../../utils/myInfoSegments';
+import MyInfoOverview from './MyInfoOverview';
+import BasicInfoCard from '../../../components/myInfo/BasicInfoCard';
+import PersonalDetailsCard from '../../../components/myInfo/PersonalDetailsCard';
+import LinksCard from '../../../components/myInfo/LinksCard';
 
 const MyInfoTab = () => {
   const location = useLocation();

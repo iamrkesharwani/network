@@ -10,6 +10,7 @@ const TAB_ROUTES: Record<ProfileTab, string> = {
   posts: CLIENT_ROUTES.PROFILE_POSTS,
   stats: CLIENT_ROUTES.PROFILE_STATS,
   history: CLIENT_ROUTES.PROFILE_HISTORY,
+  settings: CLIENT_ROUTES.SETTINGS,
 };
 
 export const buildProfileTabPath = (

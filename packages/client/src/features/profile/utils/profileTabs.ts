@@ -1,6 +1,19 @@
-import { Video, Film, FileText, BarChart3, History } from 'lucide-react';
+import {
+  Video,
+  Film,
+  FileText,
+  BarChart3,
+  History,
+  Settings,
+} from 'lucide-react';
 
-export type ProfileTab = 'videos' | 'shorts' | 'posts' | 'stats' | 'history';
+export type ProfileTab =
+  | 'videos'
+  | 'shorts'
+  | 'posts'
+  | 'stats'
+  | 'history'
+  | 'settings';
 
 export interface ProfileTabDef {
   id: ProfileTab;
@@ -15,6 +28,7 @@ export const PROFILE_TABS: ProfileTabDef[] = [
   { id: 'posts', label: 'Posts', icon: FileText, ownerOnly: false },
   { id: 'stats', label: 'Stats', icon: BarChart3, ownerOnly: true },
   { id: 'history', label: 'History', icon: History, ownerOnly: true },
+  { id: 'settings', label: 'Settings', icon: Settings, ownerOnly: true },
 ];
 
 export const getActiveProfileTab = (pathname: string): ProfileTab | null => {
