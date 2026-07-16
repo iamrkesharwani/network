@@ -212,14 +212,10 @@ const TrustScoreInfoModal = ({ isOpen, onClose }: TrustScoreInfoModalProps) => {
                       'absolute -left-5 top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2',
                       isCurrent
                         ? 'border-primary bg-primary'
-                        : achieved
-                          ? 'border-primary bg-surface'
-                          : 'border-border bg-surface'
+                        : 'border-border bg-surface'
                     )}
                   >
-                    {achieved && !isCurrent && (
-                      <Check className="w-2 h-2 text-primary" />
-                    )}
+                    {achieved && <Check className="w-2 h-2 text-white" />}
                   </div>
                   <div className="flex items-center justify-between gap-3">
                     <span
