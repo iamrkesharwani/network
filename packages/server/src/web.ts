@@ -34,6 +34,7 @@ import { openCaseFromReport } from './modules/jury/services/jury.case.service.js
 import { startJuryAssignmentWorker } from './modules/jury/jury-assignment.worker.js';
 import { startJuryTimeoutWorker } from './modules/jury/jury-timeout.worker.js';
 import { scheduleJuryTimeoutSweep } from './modules/jury/jury-timeout.queue.js';
+import { startAccountLifecycleWorker } from './modules/account/account.lifecycle.worker.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -67,6 +68,8 @@ const startWeb = async () => {
     startJuryAssignmentWorker();
     startJuryTimeoutWorker();
     await scheduleJuryTimeoutSweep();
+
+    startAccountLifecycleWorker();
 
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Web server listening on port ${port}`);

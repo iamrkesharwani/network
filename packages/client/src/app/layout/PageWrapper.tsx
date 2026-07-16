@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { useMediaStatusSocket } from '../../shared/hooks/useMediaStatusSocket';
 import { usePreference } from '../../features/settings/hooks/usePreference';
+import DeactivatedAccountBanner from '../../features/settings/components/DeactivatedAccountBanner';
 
 const PageWrapper = () => {
   useMediaStatusSocket();
@@ -15,6 +16,7 @@ const PageWrapper = () => {
   return (
     <div className="h-screen bg-surface-alt flex flex-col overflow-hidden">
       <Navbar onMobileMenuClick={() => setIsMobileSidebarOpen(true)} />
+      <DeactivatedAccountBanner />
 
       <div className="flex flex-1 w-full min-h-0">
         <Sidebar

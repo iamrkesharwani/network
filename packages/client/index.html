@@ -34,6 +34,18 @@
         background-color: #0d0d0f;
       }
     </style>
+
+    <script>
+      (function () {
+        try {
+          const raw = localStorage.getItem('network:preferences:v1');
+          const theme = raw && JSON.parse(raw).appearance?.theme;
+          if (theme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (error) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"><!--ssr-outlet--></div>

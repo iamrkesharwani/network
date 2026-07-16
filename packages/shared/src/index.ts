@@ -1,3 +1,4 @@
+export * from './schemas/account.schema.js';
 export * from './schemas/auth.schema.js';
 export * from './schemas/caption.schema.js';
 export * from './schemas/feed.schema.js';
@@ -13,6 +14,7 @@ export * from './schemas/upload.schema.js';
 export * from './schemas/user.schema.js';
 export * from './schemas/video.schema.js';
 
+export * from './types/account.types.js';
 export * from './types/api.types.js';
 export * from './types/auth.types.js';
 export * from './types/caption.types.js';
@@ -31,6 +33,7 @@ export * from './types/user.types.js';
 export * from './types/video.types.js';
 export * from './types/socket.types.js';
 
+export * from './constants/account.constants.js';
 export * from './constants/api.constants.js';
 export * from './constants/auth.constants.js';
 export * from './constants/breakpoints.constants.js';

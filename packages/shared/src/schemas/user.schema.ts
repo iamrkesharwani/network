@@ -8,6 +8,15 @@ import {
   USERNAME_MAX_LENGTH,
   BIO_MAX_LENGTH,
   NAME_MIN_LENGTH,
+  MIN_AGE_YEARS,
+  GENDER_OPTIONS,
+  GENDER_SELF_DESCRIBE_MAX_LENGTH,
+  PRONOUNS_MAX_LENGTH,
+  LOCATION_MAX_LENGTH,
+  WEBSITE_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  SOCIAL_LINKS_MAX,
+  SOCIAL_LINK_PLATFORM_MAX_LENGTH,
 } from '../constants/user.constants.js';
 
 export const userRegistrationSchema = z.object({
@@ -92,5 +101,79 @@ export const userProfileUpdateSchema = z.object({
   avatarUrl: z
     .url('Avatar must be a valid URL.')
     .startsWith('https://', 'Avatar URL must use HTTPS.')
+    .optional(),
+});
+
+export const basicProfileSchema = userProfileUpdateSchema.extend({
+  username: userRegistrationSchema.shape.username,
+});
+
+const latestAllowedBirthDate = () => {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - MIN_AGE_YEARS);
+  return date;
+};
+
+export const personalDetailsSchema = z
+  .object({
+    dateOfBirth: z.coerce
+      .date()
+      .max(
+        latestAllowedBirthDate(),
+        `You must be at least ${MIN_AGE_YEARS} years old.`
+      )
+      .optional(),
+    gender: z.enum(GENDER_OPTIONS).optional(),
+    genderSelfDescribe: z
+      .string()
+      .trim()
+      .max(
+        GENDER_SELF_DESCRIBE_MAX_LENGTH,
+        `Cannot exceed ${GENDER_SELF_DESCRIBE_MAX_LENGTH} characters.`
+      )
+      .optional(),
+    pronouns: z
+      .string()
+      .trim()
+      .max(PRONOUNS_MAX_LENGTH, `Cannot exceed ${PRONOUNS_MAX_LENGTH} characters.`)
+      .optional(),
+  })
+  .refine(
+    (data) =>
+      data.gender !== 'self-describe' ||
+      (data.genderSelfDescribe && data.genderSelfDescribe.length > 0),
+    {
+      message: 'Please describe your gender.',
+      path: ['genderSelfDescribe'],
+    }
+  );
+
+const socialLinkSchema = z.object({
+  platform: z
+    .string()
+    .trim()
+    .min(1, 'Platform is required.')
+    .max(
+      SOCIAL_LINK_PLATFORM_MAX_LENGTH,
+      `Cannot exceed ${SOCIAL_LINK_PLATFORM_MAX_LENGTH} characters.`
+    ),
+  url: z.url('Enter a valid URL.'),
+});
+
+export const contactLinksSchema = z.object({
+  location: z
+    .string()
+    .trim()
+    .max(LOCATION_MAX_LENGTH, `Cannot exceed ${LOCATION_MAX_LENGTH} characters.`)
+    .optional(),
+  website: z
+    .url('Enter a valid URL.')
+    .max(WEBSITE_MAX_LENGTH, `Cannot exceed ${WEBSITE_MAX_LENGTH} characters.`)
+    .optional(),
+  socialLinks: z.array(socialLinkSchema).max(SOCIAL_LINKS_MAX).optional(),
+  phone: z
+    .string()
+    .trim()
+    .max(PHONE_MAX_LENGTH, `Cannot exceed ${PHONE_MAX_LENGTH} characters.`)
     .optional(),
 });

@@ -22,7 +22,7 @@ import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
 import PostComposer from '../../features/post/form/PostComposer';
 import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
 import ProfilePage from '../../features/profile/pages/ProfilePage';
-import SettingsPage from '../../features/creator/pages/SettingsPage';
+import SettingsPage from '../../features/settings/pages/SettingsPage';
 import SearchResultsPage from '../../features/search/pages/SearchResultsPage';
 import JuryQueuePage from '../../features/jury/pages/JuryQueuePage';
 import JuryCaseDetailPage from '../../features/jury/pages/JuryCaseDetailPage';
@@ -92,6 +92,22 @@ export const routes: RouteObject[] = [
                     element: <PostComposer />,
                   },
                   { path: CLIENT_ROUTES.SETTINGS, element: <SettingsPage /> },
+                  {
+                    path: CLIENT_ROUTES.SETTINGS_MY_INFO,
+                    element: <SettingsPage />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.SETTINGS_PREFERENCES,
+                    element: <SettingsPage />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.SETTINGS_SECURITY,
+                    element: <SettingsPage />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.SETTINGS_ACCOUNT,
+                    element: <SettingsPage />,
+                  },
                   {
                     path: CLIENT_ROUTES.MESSAGES,
                     element: <MessagesPlaceholder />,

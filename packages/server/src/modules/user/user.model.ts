@@ -2,11 +2,21 @@ import mongoose, { Schema, type Document } from 'mongoose';
 import {
   USER_ROLES,
   AUTH_PROVIDERS,
+  GENDER_OPTIONS,
+  USER_STATUSES,
+  DEFAULT_USER_STATUS,
   EMAIL_MAX_LENGTH,
   NAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   USERNAME_MAX_LENGTH,
   BIO_MAX_LENGTH,
+  GENDER_SELF_DESCRIBE_MAX_LENGTH,
+  PRONOUNS_MAX_LENGTH,
+  LOCATION_MAX_LENGTH,
+  WEBSITE_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  SOCIAL_LINKS_MAX,
+  SOCIAL_LINK_PLATFORM_MAX_LENGTH,
   type IUser,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
@@ -16,6 +26,14 @@ export interface IUserDocument extends IUser, Document {
   googleId?: string;
   searchTokens: string[];
 }
+
+const socialLinkSchema = new Schema(
+  {
+    platform: { type: String, maxlength: SOCIAL_LINK_PLATFORM_MAX_LENGTH },
+    url: { type: String },
+  },
+  { _id: false }
+);
 
 const userSchema = new Schema<IUserDocument>(
   {
@@ -75,6 +93,63 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       sparse: true,
       unique: true,
+    },
+    usernameChangedAt: {
+      type: Date,
+      default: null,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    gender: {
+      type: String,
+      enum: GENDER_OPTIONS,
+    },
+    genderSelfDescribe: {
+      type: String,
+      trim: true,
+      maxlength: GENDER_SELF_DESCRIBE_MAX_LENGTH,
+    },
+    pronouns: {
+      type: String,
+      trim: true,
+      maxlength: PRONOUNS_MAX_LENGTH,
+    },
+    location: {
+      type: String,
+      trim: true,
+      maxlength: LOCATION_MAX_LENGTH,
+    },
+    website: {
+      type: String,
+      trim: true,
+      maxlength: WEBSITE_MAX_LENGTH,
+    },
+    socialLinks: {
+      type: [socialLinkSchema],
+      default: undefined,
+      validate: {
+        validator: (links: unknown[]) => links.length <= SOCIAL_LINKS_MAX,
+        message: `Cannot have more than ${SOCIAL_LINKS_MAX} social links.`,
+      },
+    },
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: PHONE_MAX_LENGTH,
+    },
+    status: {
+      type: String,
+      enum: USER_STATUSES,
+      default: DEFAULT_USER_STATUS,
+    },
+    deactivatedAt: {
+      type: Date,
+      default: null,
+    },
+    reactivateAt: {
+      type: Date,
+      default: null,
     },
     searchTokens: {
       type: [String],

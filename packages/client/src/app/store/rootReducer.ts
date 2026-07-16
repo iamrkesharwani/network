@@ -13,6 +13,8 @@ import { creatorApi } from '../../features/creator/creatorApi';
 import { uploadApi } from '../../features/upload/uploadApi';
 import { feedApi } from '../../features/feed/feedApi';
 import { preferencesApi } from '../../features/settings/preferencesApi';
+import { settingsApi } from '../../features/settings/settingsApi';
+import { accountApi } from '../../features/settings/accountApi';
 import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
@@ -33,6 +35,8 @@ const rootReducer = combineReducers({
   [uploadApi.reducerPath]: uploadApi.reducer,
   [feedApi.reducerPath]: feedApi.reducer,
   [preferencesApi.reducerPath]: preferencesApi.reducer,
+  [settingsApi.reducerPath]: settingsApi.reducer,
+  [accountApi.reducerPath]: accountApi.reducer,
   [searchApi.reducerPath]: searchApi.reducer,
   [historyApi.reducerPath]: historyApi.reducer,
   [reportApi.reducerPath]: reportApi.reducer,

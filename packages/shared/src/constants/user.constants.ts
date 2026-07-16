@@ -19,3 +19,28 @@ export const BIO_MAX_LENGTH = 160;
 export const PROFILE_BIO_PREVIEW_MAX_LENGTH = 100;
 export const PROFILE_CONTENT_TYPES = ['video', 'short', 'post'] as const;
 export type ProfileContentType = (typeof PROFILE_CONTENT_TYPES)[number];
+
+export const USERNAME_CHANGE_COOLDOWN_DAYS = 30;
+export const MIN_AGE_YEARS = 13;
+
+export const GENDER_OPTIONS = [
+  'male',
+  'female',
+  'nonbinary',
+  'self-describe',
+  'prefer-not-to-say',
+] as const;
+export type GenderOption = (typeof GENDER_OPTIONS)[number];
+
+export const GENDER_SELF_DESCRIBE_MAX_LENGTH = 50;
+export const PRONOUNS_MAX_LENGTH = 30;
+export const LOCATION_MAX_LENGTH = 100;
+export const WEBSITE_MAX_LENGTH = 2048;
+export const PHONE_MAX_LENGTH = 20;
+
+export const SOCIAL_LINKS_MAX = 5;
+export const SOCIAL_LINK_PLATFORM_MAX_LENGTH = 30;
+
+export const USER_STATUSES = ['active', 'deactivated', 'pending_deletion'] as const;
+export type UserStatus = (typeof USER_STATUSES)[number];
+export const DEFAULT_USER_STATUS: UserStatus = 'active';

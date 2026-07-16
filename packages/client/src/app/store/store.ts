@@ -8,6 +8,8 @@ import { creatorApi } from '../../features/creator/creatorApi';
 import { uploadApi } from '../../features/upload/uploadApi';
 import { feedApi } from '../../features/feed/feedApi';
 import { preferencesApi } from '../../features/settings/preferencesApi';
+import { settingsApi } from '../../features/settings/settingsApi';
+import { accountApi } from '../../features/settings/accountApi';
 import { preferencesSyncMiddleware } from '../../features/settings/preferencesSyncMiddleware';
 import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
@@ -28,6 +30,8 @@ export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
         uploadApi.middleware,
         feedApi.middleware,
         preferencesApi.middleware,
+        settingsApi.middleware,
+        accountApi.middleware,
         searchApi.middleware,
         historyApi.middleware,
         reportApi.middleware,
