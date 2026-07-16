@@ -105,14 +105,14 @@ export const TRUST_FEATURE_LABELS: Record<TrustFeatureId, string> = {
 };
 
 export const TRUST_SIGNAL_LABELS: Record<TrustSignalType, string> = {
-  PUBLISH: 'Publish a video, short, or post',
-  VIDEO_MILESTONE: 'A video hits a view milestone',
-  CREATOR_MILESTONE: 'Your total views hit a milestone',
-  FIRST_UPLOAD_BADGE: 'Earn the "1st Upload" badge',
-  TENTH_UPLOAD_BADGE: 'Earn the "10th Upload" badge',
-  CONSISTENT_CREATOR_BADGE: 'Earn the "Consistent" badge (10 active days)',
-  JURY_VOTE_MAJORITY: 'Vote with the majority on a jury review',
-  JURY_VOTE_MINORITY: 'Vote against the majority on a jury review',
-  VALID_REPORT_FILED: 'File a report that gets upheld',
-  FALSE_REPORT_FILED: 'File a report that gets rejected',
+  PUBLISH: 'First Publish',
+  VIDEO_MILESTONE: 'View Milestone',
+  CREATOR_MILESTONE: 'Total Views Milestone',
+  FIRST_UPLOAD_BADGE: '1st Upload',
+  TENTH_UPLOAD_BADGE: '10th Upload',
+  CONSISTENT_CREATOR_BADGE: 'Consistent Creator',
+  JURY_VOTE_MAJORITY: 'Majority Vote',
+  JURY_VOTE_MINORITY: 'Minority Vote',
+  VALID_REPORT_FILED: 'Valid Report',
+  FALSE_REPORT_FILED: 'Rejected Report',
 };

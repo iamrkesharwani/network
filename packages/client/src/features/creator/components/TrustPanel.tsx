@@ -27,7 +27,7 @@ const TrustPanel = () => {
     : 100;
 
   return (
-    <div className="rounded-xl border border-border bg-surface-overlay p-4">
+    <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-primary" />
