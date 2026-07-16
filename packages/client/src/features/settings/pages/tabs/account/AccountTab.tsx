@@ -12,7 +12,11 @@ const AccountTab = () => {
   if (!user) return null;
 
   return (
-    <div className="max-w-lg">
+    <div>
+      <h2 className="mb-6 font-display text-2xl font-bold text-text-primary sm:text-3xl">
+        Account
+      </h2>
+
       <div className="mb-8 border-b border-border pb-8">
         {user.hasPassword ? <ChangePasswordSection /> : <AddPasswordSection />}
       </div>
