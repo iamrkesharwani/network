@@ -2,6 +2,11 @@ import type {
   BadgeId,
   VideoMilestoneId,
   CreatorMilestoneId,
+  TrustTierId,
+  TrustFeatureId,
+  BADGE_CATALOG,
+  VIDEO_MILESTONE_CATALOG,
+  CREATOR_MILESTONE_CATALOG,
 } from '../constants/creator.constants.js';
 
 export interface ICreatorEvent {
@@ -23,6 +28,16 @@ export interface ICreatorEvent {
   }>;
 }
 
+export interface ICreatorTrustSummary {
+  score: number;
+  tier: TrustTierId;
+  unlockedFeatures: TrustFeatureId[];
+  nextTier: {
+    id: TrustTierId;
+    pointsToNext: number;
+  } | null;
+}
+
 export interface ICreatorProfile {
   badges: Array<{ id: BadgeId; unlockedAt: string }>;
   videoMilestones: Array<{
@@ -36,12 +51,13 @@ export interface ICreatorProfile {
   videoPublishCount: number;
   shortPublishCount: number;
   postPublishCount: number;
+  trust: ICreatorTrustSummary;
 }
 
 export interface ICreatorCatalog {
-  badges: typeof import('../constants/creator.constants.js').BADGE_CATALOG;
-  videoMilestones: typeof import('../constants/creator.constants.js').VIDEO_MILESTONE_CATALOG;
-  creatorMilestones: typeof import('../constants/creator.constants.js').CREATOR_MILESTONE_CATALOG;
+  badges: typeof BADGE_CATALOG;
+  videoMilestones: typeof VIDEO_MILESTONE_CATALOG;
+  creatorMilestones: typeof CREATOR_MILESTONE_CATALOG;
 }
 
 export interface IVisibilityCounts {

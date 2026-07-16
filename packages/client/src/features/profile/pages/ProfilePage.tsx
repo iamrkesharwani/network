@@ -51,7 +51,7 @@ const ProfilePage = () => {
 
   return (
     <div>
-      <ProfileHeader profile={profile} />
+      <ProfileHeader profile={profile} isOwner={isOwner} />
 
       {isMobile ? (
         activeTab === null ? (

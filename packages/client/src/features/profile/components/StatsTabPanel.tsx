@@ -2,6 +2,7 @@ import { Loader2 } from 'lucide-react';
 import { useGetMyProfileQuery } from '../../creator/creatorApi';
 import Contribution from '../../creator/components/Contribution';
 import BadgeShowcase from '../../creator/components/BadgeShowcase';
+import TrustPanel from '../../creator/components/TrustPanel';
 
 const StatsTabPanel = () => {
   const { data, isLoading } = useGetMyProfileQuery();
@@ -21,6 +22,13 @@ const StatsTabPanel = () => {
 
   return (
     <div className="space-y-8">
+      <div>
+        <p className="text-xs font-medium text-text-secondary mb-3">
+          Trust score
+        </p>
+        <TrustPanel />
+      </div>
+
       <div>
         <p className="text-xs font-medium text-text-secondary mb-3">
           Publishing activity

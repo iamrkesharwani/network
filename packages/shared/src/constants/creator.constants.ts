@@ -13,11 +13,6 @@ export const BADGE_CATALOG = {
   },
 } as const;
 
-export const BADGE_IDS = Object.keys(
-  BADGE_CATALOG
-) as (keyof typeof BADGE_CATALOG)[];
-export type BadgeId = (typeof BADGE_IDS)[number];
-
 export const VIDEO_MILESTONE_CATALOG = {
   VIDEO_1K_VIEWS: { label: '1K Views', threshold: 1_000 },
   VIDEO_10K_VIEWS: { label: '10K Views', threshold: 10_000 },
@@ -25,20 +20,26 @@ export const VIDEO_MILESTONE_CATALOG = {
   VIDEO_1M_VIEWS: { label: '1M Views', threshold: 1_000_000 },
 } as const;
 
-export const VIDEO_MILESTONE_IDS = Object.keys(
-  VIDEO_MILESTONE_CATALOG
-) as (keyof typeof VIDEO_MILESTONE_CATALOG)[];
-export type VideoMilestoneId = (typeof VIDEO_MILESTONE_IDS)[number];
-
 export const CREATOR_MILESTONE_CATALOG = {
   CREATOR_10K_VIEWS: { label: '10K Total Views', threshold: 10_000 },
   CREATOR_100K_VIEWS: { label: '100K Total Views', threshold: 100_000 },
   CREATOR_1M_VIEWS: { label: '1M Total Views', threshold: 1_000_000 },
 } as const;
 
+export const BADGE_IDS = Object.keys(
+  BADGE_CATALOG
+) as (keyof typeof BADGE_CATALOG)[];
+export type BadgeId = (typeof BADGE_IDS)[number];
+
+export const VIDEO_MILESTONE_IDS = Object.keys(
+  VIDEO_MILESTONE_CATALOG
+) as (keyof typeof VIDEO_MILESTONE_CATALOG)[];
+export type VideoMilestoneId = (typeof VIDEO_MILESTONE_IDS)[number];
+
 export const CREATOR_MILESTONE_IDS = Object.keys(
   CREATOR_MILESTONE_CATALOG
 ) as (keyof typeof CREATOR_MILESTONE_CATALOG)[];
+
 export type CreatorMilestoneId = (typeof CREATOR_MILESTONE_IDS)[number];
 
 export const VIDEO_MILESTONE_LIST = VIDEO_MILESTONE_IDS.map((id) => ({
@@ -75,8 +76,10 @@ export const TRUST_FEATURE_IDS = [
 ] as const;
 export type TrustFeatureId = (typeof TRUST_FEATURE_IDS)[number];
 
+export type TrustTierId = 'NEWCOMER' | 'ESTABLISHED' | 'TRUSTED' | 'VETERAN';
+
 export interface TrustTierDefinition {
-  id: 'NEWCOMER' | 'ESTABLISHED' | 'TRUSTED' | 'VETERAN';
+  id: TrustTierId;
   minScore: number;
   unlocks: TrustFeatureId[];
 }
@@ -87,3 +90,16 @@ export const TRUST_TIERS: TrustTierDefinition[] = [
   { id: 'TRUSTED', minScore: 150, unlocks: ['priority_processing'] },
   { id: 'VETERAN', minScore: 400, unlocks: ['extended_uploads'] },
 ];
+
+export const TRUST_TIER_LABELS: Record<TrustTierId, string> = {
+  NEWCOMER: 'Newcomer',
+  ESTABLISHED: 'Established',
+  TRUSTED: 'Trusted',
+  VETERAN: 'Veteran',
+};
+
+export const TRUST_FEATURE_LABELS: Record<TrustFeatureId, string> = {
+  extended_tags: 'Extended tags',
+  priority_processing: 'Priority processing',
+  extended_uploads: 'Extended uploads',
+};
