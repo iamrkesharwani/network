@@ -9,7 +9,9 @@ export const deactivateUser = (
     userId,
     { $set: { status: 'deactivated', deactivatedAt, reactivateAt } },
     { returnDocument: 'after', runValidators: true }
-  ).exec();
+  )
+    .select('+password')
+    .exec();
 
 export const reactivateUser = (
   userId: string
@@ -20,4 +22,6 @@ export const reactivateUser = (
       $set: { status: 'active', deactivatedAt: null, reactivateAt: null },
     },
     { returnDocument: 'after', runValidators: true }
-  ).exec();
+  )
+    .select('+password')
+    .exec();

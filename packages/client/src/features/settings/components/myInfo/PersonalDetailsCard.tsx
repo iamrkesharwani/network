@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
+import { HeartHandshake, MessageCircle, Users2 } from 'lucide-react';
 import type { z } from 'zod';
 import {
   personalDetailsSchema,
@@ -11,11 +13,13 @@ import {
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchPersonalDetailsMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
-import FloatingInput from '../../../upload/components/FloatingInput';
+import BorderedInput from '../BorderedInput';
 import Select from '../../../../shared/ui/primitives/Select';
 import DatePicker from '../../../../shared/ui/calendar/DatePicker';
 import Button from '../../../../shared/ui/primitives/Button';
 import MyInfoFormHeader from './MyInfoFormHeader';
+import PronounsInput from './PronounsInput';
+import SaveSuccessModal from '../SaveSuccessModal';
 
 const genderLabels: Record<(typeof GENDER_OPTIONS)[number], string> = {
   male: 'Male',
@@ -42,6 +46,7 @@ const PersonalDetailsCard = () => {
   const user = useAppSelector((state) => state.auth.user);
   const [patchPersonalDetails, { isLoading }] =
     usePatchPersonalDetailsMutation();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const {
     register,
@@ -59,7 +64,7 @@ const PersonalDetailsCard = () => {
       dateOfBirth: user?.dateOfBirth,
       gender: user?.gender,
       genderSelfDescribe: user?.genderSelfDescribe ?? '',
-      pronouns: user?.pronouns ?? '',
+      pronouns: user?.pronouns ?? [],
       relationshipStatus: user?.relationshipStatus,
     },
     completenessRules: [],
@@ -69,6 +74,7 @@ const PersonalDetailsCard = () => {
 
   const onSubmit = submit(async (data) => {
     await patchPersonalDetails(data).unwrap();
+    setShowSuccess(true);
   });
 
   if (!user) return null;
@@ -104,6 +110,7 @@ const PersonalDetailsCard = () => {
           render={({ field }) => (
             <Select
               label="Gender"
+              icon={Users2}
               value={field.value}
               onChange={field.onChange}
               options={GENDER_OPTIONS.map((option) => ({
@@ -116,10 +123,17 @@ const PersonalDetailsCard = () => {
           )}
         />
 
-        <FloatingInput
-          label="Pronouns"
-          {...register('pronouns')}
-          error={errors.pronouns?.message}
+        <Controller
+          control={control}
+          name="pronouns"
+          render={({ field }) => (
+            <PronounsInput
+              icon={MessageCircle}
+              value={field.value ?? []}
+              onChange={field.onChange}
+              error={errors.pronouns?.message}
+            />
+          )}
         />
 
         <Controller
@@ -128,6 +142,7 @@ const PersonalDetailsCard = () => {
           render={({ field }) => (
             <Select
               label="Relationship status"
+              icon={HeartHandshake}
               value={field.value}
               onChange={field.onChange}
               options={RELATIONSHIP_STATUSES.map((option) => ({
@@ -142,8 +157,9 @@ const PersonalDetailsCard = () => {
       </div>
 
       {gender === 'others' && (
-        <FloatingInput
+        <BorderedInput
           label="Describe your gender"
+          placeholder="How do you describe your gender?"
           {...register('genderSelfDescribe')}
           error={errors.genderSelfDescribe?.message}
         />
@@ -158,6 +174,8 @@ const PersonalDetailsCard = () => {
       <Button type="submit" isLoading={isLoading}>
         Save
       </Button>
+
+      <SaveSuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} />
     </motion.form>
   );
 };

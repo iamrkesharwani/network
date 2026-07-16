@@ -8,25 +8,26 @@ export interface MyInfoFieldCheck {
 export const BASIC_FIELDS: MyInfoFieldCheck[] = [
   { label: 'Bio', isFilled: (user) => !!user.bio },
   { label: 'Avatar', isFilled: (user) => !!user.avatarUrl },
+  { label: 'Phone', isFilled: (user) => !!user.phone },
 ];
 
 export const PERSONAL_FIELDS: MyInfoFieldCheck[] = [
   { label: 'Date of birth', isFilled: (user) => !!user.dateOfBirth },
   { label: 'Gender', isFilled: (user) => !!user.gender },
-  { label: 'Pronouns', isFilled: (user) => !!user.pronouns },
+  { label: 'Pronouns', isFilled: (user) => !!user.pronouns?.length },
+  { label: 'Relationship status', isFilled: (user) => !!user.relationshipStatus },
 ];
 
-export const CONTACT_FIELDS: MyInfoFieldCheck[] = [
+export const LINKS_FIELDS: MyInfoFieldCheck[] = [
   { label: 'Location', isFilled: (user) => !!user.location },
   { label: 'Website', isFilled: (user) => !!user.website },
-  { label: 'Phone', isFilled: (user) => !!user.phone },
   { label: 'Social links', isFilled: (user) => !!user.socialLinks?.length },
 ];
 
 export const ALL_MY_INFO_FIELDS: MyInfoFieldCheck[] = [
   ...BASIC_FIELDS,
   ...PERSONAL_FIELDS,
-  ...CONTACT_FIELDS,
+  ...LINKS_FIELDS,
 ];
 
 export interface FieldsCompletion {

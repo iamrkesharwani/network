@@ -1,5 +1,7 @@
+import { AtSign } from 'lucide-react';
 import type { UseFormRegisterReturn } from 'react-hook-form';
-import FloatingInput from '../../upload/components/FloatingInput';
+import BorderedInput from './BorderedInput';
+import LockedFieldNotice from './LockedFieldNotice';
 import { useUsernameCooldown } from '../hooks/useUsernameCooldown';
 
 interface UsernameFieldProps {
@@ -15,17 +17,22 @@ const UsernameField = ({
 }: UsernameFieldProps) => {
   const cooldown = useUsernameCooldown(usernameChangedAt);
 
+  if (cooldown.isInCooldown) {
+    return (
+      <LockedFieldNotice
+        label="Username"
+        message={`You can change your username again in ${cooldown.daysRemaining}d ${cooldown.hoursRemaining}h.`}
+      />
+    );
+  }
+
   return (
-    <FloatingInput
+    <BorderedInput
       label="Username"
+      icon={AtSign}
+      placeholder="yourusername"
       {...registration}
-      disabled={cooldown.isInCooldown}
       error={error}
-      hint={
-        cooldown.isInCooldown
-          ? `You can change your username again in ${cooldown.daysRemaining} day${cooldown.daysRemaining === 1 ? '' : 's'}.`
-          : undefined
-      }
     />
   );
 };

@@ -41,11 +41,12 @@ export const RELATIONSHIP_STATUSES = [
 export type RelationshipStatus = (typeof RELATIONSHIP_STATUSES)[number];
 
 export const GENDER_SELF_DESCRIBE_MAX_LENGTH = 50;
-export const PRONOUNS_MAX_LENGTH = 30;
+export const PRONOUN_MAX_LENGTH = 20;
+export const PRONOUNS_MAX_COUNT = 3;
 export const WEBSITE_MAX_LENGTH = 2048;
 export const PHONE_NUMBER_MAX_LENGTH = 15;
 
-export const SOCIAL_LINKS_MAX = 5;
+export const SOCIAL_LINKS_MAX = 10;
 export const SOCIAL_LINK_PLATFORM_MAX_LENGTH = 30;
 
 export const SOCIAL_PLATFORMS = [
@@ -55,7 +56,6 @@ export const SOCIAL_PLATFORMS = [
   'linkedin',
   'github',
   'facebook',
-  'tiktok',
   'other',
 ] as const;
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];

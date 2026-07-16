@@ -17,5 +17,5 @@ export interface OAuthUserPayload {
 
 export interface UpdateOAuthData {
   authProviders?: string[];
-  googleId?: string;
+  googleId?: string | undefined;
 }

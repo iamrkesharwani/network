@@ -28,6 +28,7 @@ export type CaptureLocationInput = z.infer<typeof captureLocationSchema>;
 export interface IUserSocialLink {
   platform: SocialPlatform;
   url: string;
+  customLabel?: string;
 }
 
 export interface IUserPhone {
@@ -50,12 +51,13 @@ export interface IUser {
   avatarUrl?: string;
   role: (typeof USER_ROLES)[number];
   authProviders: (typeof AUTH_PROVIDERS)[number][];
+  hasPassword: boolean;
   isEmailVerified: boolean;
   usernameChangedAt?: Date | null;
   dateOfBirth?: Date;
   gender?: GenderOption;
   genderSelfDescribe?: string;
-  pronouns?: string;
+  pronouns?: string[];
   relationshipStatus?: RelationshipStatus;
   location?: IUserLocationEntry[];
   website?: string;

@@ -57,7 +57,8 @@ const LocationSection = () => {
 
   return (
     <div className="mb-6">
-      <p className="mb-2.5 text-sm font-medium text-text-secondary">
+      <p className="mb-2.5 flex items-center gap-1.5 text-sm font-medium text-text-secondary">
+        <MapPin className="h-3.5 w-3.5 shrink-0" />
         Location
       </p>
 

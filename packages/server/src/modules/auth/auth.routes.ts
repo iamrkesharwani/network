@@ -12,6 +12,7 @@ import {
   changePasswordSchema,
   changeEmailSchema,
   confirmEmailChangeSchema,
+  confirmAddPasswordSchema,
   requestResetPasswordSchema,
   completeResetPasswordSchema,
 } from '@network/shared';
@@ -79,6 +80,21 @@ router.post(
   authLimiter,
   validate({ body: confirmEmailChangeSchema }),
   authEmailChangeController.confirmEmailChange
+);
+
+router.post(
+  '/add-password/request',
+  requireAuth,
+  authLimiter,
+  authPasswordController.requestAddPassword
+);
+
+router.post(
+  '/add-password/confirm',
+  requireAuth,
+  authLimiter,
+  validate({ body: confirmAddPasswordSchema }),
+  authPasswordController.confirmAddPassword
 );
 
 router.post(

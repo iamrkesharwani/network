@@ -7,7 +7,7 @@ import { cn } from '../../../../../shared/utils/cn';
 import {
   BASIC_FIELDS,
   PERSONAL_FIELDS,
-  CONTACT_FIELDS,
+  LINKS_FIELDS,
   ALL_MY_INFO_FIELDS,
   computeFieldsCompletion,
 } from '../../../utils/myInfoCompletion';
@@ -29,10 +29,10 @@ const TILES = [
   },
   {
     id: 'contact',
-    title: 'Contact & Links',
+    title: 'Links',
     icon: Link2,
     path: CLIENT_ROUTES.SETTINGS_MY_INFO_CONTACT,
-    fields: CONTACT_FIELDS,
+    fields: LINKS_FIELDS,
   },
 ] as const;
 
@@ -45,7 +45,7 @@ const MyInfoOverview = () => {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-bold text-text-primary">
+        <h2 className="font-display text-2xl font-bold text-text-primary sm:text-3xl">
           My Info
         </h2>
         <span className="text-xs font-semibold text-primary">
@@ -67,14 +67,14 @@ const MyInfoOverview = () => {
           const Icon = tile.icon;
 
           return (
-            <Link key={tile.id} to={tile.path} className="group block outline-none">
+            <Link key={tile.id} to={tile.path} className="group block h-full outline-none">
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06, duration: 0.25 }}
                 whileHover={{ y: -2 }}
                 className={cn(
-                  'flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-colors group-hover:border-primary/30 group-focus-visible:ring-2 group-focus-visible:ring-primary',
+                  'flex h-full items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-colors group-hover:border-primary/30 group-focus-visible:ring-2 group-focus-visible:ring-primary',
                   'sm:flex-col sm:items-center sm:gap-0 sm:p-6 sm:text-center'
                 )}
               >

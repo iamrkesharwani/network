@@ -15,7 +15,7 @@ const MyInfoFormHeader = ({ title }: MyInfoFormHeaderProps) => (
       <ArrowLeft className="h-3.5 w-3.5" />
       Back to My Info
     </Link>
-    <h3 className="font-display text-lg font-bold text-text-primary">
+    <h3 className="font-display text-2xl font-bold text-text-primary sm:text-3xl">
       {title}
     </h3>
   </div>

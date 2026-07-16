@@ -79,6 +79,16 @@ export const linkOAuthProvider = async (
   return user.save();
 };
 
+export const unlinkOAuthProvider = async (
+  user: IUserDocument,
+  provider: OAuthProvider
+): Promise<IUserDocument> => {
+  user.authProviders = user.authProviders.filter((p) => p !== provider);
+  (user as IUserDocument & UpdateOAuthData)[providerIdFieldMap[provider]] =
+    undefined;
+  return user.save();
+};
+
 export const markEmailVerified = async (
   user: IUserDocument
 ): Promise<IUserDocument> => {

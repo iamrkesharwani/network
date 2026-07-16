@@ -11,6 +11,7 @@ export interface SelectOption<T extends string> {
 
 interface SelectProps<T extends string> {
   label?: string;
+  icon?: ComponentType<{ className?: string }>;
   value: T | undefined;
   onChange: (value: T) => void;
   options: SelectOption<T>[];
@@ -21,6 +22,7 @@ interface SelectProps<T extends string> {
 
 function Select<T extends string>({
   label,
+  icon: Icon,
   value,
   onChange,
   options,
@@ -56,7 +58,8 @@ function Select<T extends string>({
   return (
     <div className={cn('relative mb-6', containerClassName)} ref={rootRef}>
       {label && (
-        <p className="mb-2.5 text-sm font-medium text-text-secondary">
+        <p className="mb-2.5 flex items-center gap-1.5 text-sm font-medium text-text-secondary">
+          {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
           {label}
         </p>
       )}

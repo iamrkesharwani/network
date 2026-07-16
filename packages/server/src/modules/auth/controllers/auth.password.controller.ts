@@ -56,3 +56,42 @@ export const completePasswordReset = asyncHandler(
       );
   }
 );
+
+export const requestAddPassword = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(
+        401,
+        'UNAUTHORIZED',
+        'Authentication required to add a password'
+      );
+    }
+
+    await passwordService.requestAddPassword(req.user.id);
+
+    res
+      .status(200)
+      .json(new ApiResponse(null, 'Verification code sent to your email'));
+  }
+);
+
+export const confirmAddPassword = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(
+        401,
+        'UNAUTHORIZED',
+        'Authentication required to add a password'
+      );
+    }
+
+    const { otp, newPassword } = req.body;
+    const user = await passwordService.confirmAddPassword(
+      req.user.id,
+      otp,
+      newPassword
+    );
+
+    res.status(200).json(new ApiResponse(user, 'Password added successfully'));
+  }
+);

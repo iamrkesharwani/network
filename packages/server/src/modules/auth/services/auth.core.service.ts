@@ -2,11 +2,11 @@ import * as authRepository from '../auth.repository.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { hashPassword, verifyPassword } from '../../../core/utils/hash.js';
 import { generateUniqueUsername } from '../../../core/utils/username.js';
+import { toUserResponse } from '../../../core/utils/toUserResponse.js';
 import {
   DUMMY_PASSWORD_HASH,
   LOGIN_LOCKOUT_MAX_ATTEMPTS,
   LOGIN_LOCKOUT_DURATION_SECONDS,
-  type IUser,
   type LoginInput,
   type UserRegistrationInput,
 } from '@network/shared';
@@ -47,7 +47,7 @@ export const registerLocal = async (data: UserRegistrationInput) => {
 
   sendVerificationEmail(user.email).catch(() => {});
 
-  return { user: user.toJSON() as unknown as IUser };
+  return { user: toUserResponse(user) };
 };
 
 export const loginLocal = async (data: LoginInput) => {
@@ -99,7 +99,7 @@ export const loginLocal = async (data: LoginInput) => {
   const accessToken = await generateAccessToken(user.id, user.role);
   const refreshToken = await generateRefreshToken(user.id);
 
-  return { user: user.toJSON() as unknown as IUser, accessToken, refreshToken };
+  return { user: toUserResponse(user), accessToken, refreshToken };
 };
 
 export const refreshAuthTokens = async (token: string) => {
@@ -114,7 +114,7 @@ export const refreshAuthTokens = async (token: string) => {
     throw new ApiError(401, 'UNAUTHORIZED', 'Invalid or expired refresh token');
   }
 
-  const user = await authRepository.findById(result.userId);
+  const user = await authRepository.findByIdWithPassword(result.userId);
   if (!user) {
     throw new ApiError(401, 'UNAUTHORIZED', 'User account no longer exists');
   }
@@ -122,7 +122,7 @@ export const refreshAuthTokens = async (token: string) => {
   const accessToken = await generateAccessToken(user.id, user.role);
   const refreshToken = await generateRefreshToken(user.id);
 
-  return { user: user.toJSON() as unknown as IUser, accessToken, refreshToken };
+  return { user: toUserResponse(user), accessToken, refreshToken };
 };
 
 export const logoutUser = async (token: string) => {

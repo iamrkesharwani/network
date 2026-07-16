@@ -42,7 +42,9 @@ export const updateBasicProfile = (
     userId,
     { $set: set },
     { returnDocument: 'after', runValidators: true }
-  ).exec();
+  )
+    .select('+password')
+    .exec();
 };
 
 export const updatePersonalDetails = (
@@ -64,7 +66,9 @@ export const updatePersonalDetails = (
     userId,
     { $set: set },
     { returnDocument: 'after', runValidators: true }
-  ).exec();
+  )
+    .select('+password')
+    .exec();
 };
 
 export const updateContactLinks = (
@@ -79,7 +83,9 @@ export const updateContactLinks = (
     userId,
     { $set: set },
     { returnDocument: 'after', runValidators: true }
-  ).exec();
+  )
+    .select('+password')
+    .exec();
 };
 
 export const updateAvatarUrl = (
@@ -90,7 +96,9 @@ export const updateAvatarUrl = (
     userId,
     { $set: { avatarUrl } },
     { returnDocument: 'after', runValidators: true }
-  ).exec();
+  )
+    .select('+password')
+    .exec();
 
 export const appendLocationEntry = (
   userId: string,
@@ -107,4 +115,6 @@ export const appendLocationEntry = (
       },
     },
     { returnDocument: 'after' }
-  ).exec();
+  )
+    .select('+password')
+    .exec();

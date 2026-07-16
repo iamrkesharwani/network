@@ -1,20 +1,24 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { AlignLeft, User } from 'lucide-react';
 import { basicProfileSchema, type BasicProfileInput } from '@network/shared';
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchBasicProfileMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
-import FloatingInput from '../../../upload/components/FloatingInput';
-import FloatingTextarea from '../../../upload/components/FloatingTextarea';
+import BorderedInput from '../BorderedInput';
+import BorderedTextarea from '../BorderedTextarea';
 import Button from '../../../../shared/ui/primitives/Button';
 import AvatarEditor from '../AvatarEditor';
 import UsernameField from '../UsernameField';
 import MyInfoFormHeader from './MyInfoFormHeader';
 import EmailChangeField from './EmailChangeField';
 import PhoneField from './PhoneField';
+import SaveSuccessModal from '../SaveSuccessModal';
 
 const BasicInfoCard = () => {
   const user = useAppSelector((state) => state.auth.user);
   const [patchBasicProfile, { isLoading }] = usePatchBasicProfileMutation();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const {
     register,
@@ -38,6 +42,7 @@ const BasicInfoCard = () => {
 
   const onSubmit = submit(async (data) => {
     await patchBasicProfile(data).unwrap();
+    setShowSuccess(true);
   });
 
   if (!user) return null;
@@ -57,8 +62,10 @@ const BasicInfoCard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-        <FloatingInput
+        <BorderedInput
           label="Name"
+          icon={User}
+          placeholder="Your full name"
           {...register('name')}
           error={errors.name?.message}
         />
@@ -78,8 +85,10 @@ const BasicInfoCard = () => {
         />
       </div>
 
-      <FloatingTextarea
+      <BorderedTextarea
         label="Bio"
+        icon={AlignLeft}
+        placeholder="Tell people a bit about yourself"
         rows={3}
         {...register('bio')}
         error={errors.bio?.message}
@@ -95,6 +104,8 @@ const BasicInfoCard = () => {
       <Button type="submit" isLoading={isLoading}>
         Save
       </Button>
+
+      <SaveSuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} />
     </motion.form>
   );
 };

@@ -11,6 +11,7 @@ import { ApiError } from '../../../core/utils/ApiError.js';
 import * as userRepository from '../user.repository.js';
 import { imageProvider } from '../../../core/providers/provider.js';
 import type { IUserDocument } from '../user.model.js';
+import { toUserResponse as toBaseUserResponse } from '../../../core/utils/toUserResponse.js';
 
 export interface ProfileOwnerContext {
   userId: string;
@@ -25,10 +26,10 @@ const computeIsMinor = (dateOfBirth: Date | undefined): boolean | undefined => {
 };
 
 const toUserResponse = (user: IUserDocument): IUser => {
-  const json = user.toJSON() as unknown as IUser;
+  const base = toBaseUserResponse(user);
   const isMinor = computeIsMinor(user.dateOfBirth);
   return {
-    ...json,
+    ...base,
     ...(isMinor !== undefined && { isMinor }),
   };
 };

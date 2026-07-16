@@ -14,17 +14,19 @@ import {
   USERNAME_MAX_LENGTH,
   BIO_MAX_LENGTH,
   GENDER_SELF_DESCRIBE_MAX_LENGTH,
-  PRONOUNS_MAX_LENGTH,
+  PRONOUN_MAX_LENGTH,
+  PRONOUNS_MAX_COUNT,
   WEBSITE_MAX_LENGTH,
   PHONE_NUMBER_MAX_LENGTH,
   SOCIAL_LINKS_MAX,
+  SOCIAL_LINK_PLATFORM_MAX_LENGTH,
   type IUser,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
 
 export interface IUserDocument extends IUser, Document {
-  password?: string;
-  googleId?: string;
+  password?: string | undefined;
+  googleId?: string | undefined;
   searchTokens: string[];
 }
 
@@ -32,6 +34,7 @@ const socialLinkSchema = new Schema(
   {
     platform: { type: String, enum: SOCIAL_PLATFORMS },
     url: { type: String },
+    customLabel: { type: String, maxlength: SOCIAL_LINK_PLATFORM_MAX_LENGTH },
   },
   { _id: false }
 );
@@ -129,9 +132,14 @@ const userSchema = new Schema<IUserDocument>(
       maxlength: GENDER_SELF_DESCRIBE_MAX_LENGTH,
     },
     pronouns: {
-      type: String,
-      trim: true,
-      maxlength: PRONOUNS_MAX_LENGTH,
+      type: [String],
+      default: undefined,
+      validate: {
+        validator: (entries: string[]) =>
+          entries.length <= PRONOUNS_MAX_COUNT &&
+          entries.every((entry) => entry.length <= PRONOUN_MAX_LENGTH),
+        message: `Cannot exceed ${PRONOUNS_MAX_COUNT} pronouns of ${PRONOUN_MAX_LENGTH} characters each.`,
+      },
     },
     relationshipStatus: {
       type: String,

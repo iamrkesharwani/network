@@ -1,8 +1,9 @@
-import { type ReactNode } from 'react';
+import { type ComponentType, type ReactNode } from 'react';
 import { Pencil } from 'lucide-react';
 
 interface MaskedFieldRowProps {
   label: string;
+  icon?: ComponentType<{ className?: string }>;
   maskedValue: string;
   isEditing: boolean;
   onEdit: () => void;
@@ -11,6 +12,7 @@ interface MaskedFieldRowProps {
 
 const MaskedFieldRow = ({
   label,
+  icon: Icon,
   maskedValue,
   isEditing,
   onEdit,
@@ -19,23 +21,22 @@ const MaskedFieldRow = ({
   if (isEditing) return <>{children}</>;
 
   return (
-    <div className="relative mb-6 text-left field-root">
-      <div className="flex items-center justify-between border-b border-white/9 py-[0.55rem] pb-[0.65rem]">
-        <span className="text-base font-medium text-text-primary">
-          {maskedValue}
-        </span>
+    <div className="mb-6">
+      <p className="mb-2.5 flex items-center gap-1.5 text-sm font-medium text-text-secondary">
+        {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
+        {label}
+      </p>
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-raised px-3.5 py-2.5">
+        <span className="text-sm font-medium text-text-primary">{maskedValue}</span>
         <button
           type="button"
           onClick={onEdit}
-          className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover"
+          className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover"
         >
           <Pencil className="h-3.5 w-3.5" />
           Edit
         </button>
       </div>
-      <label className="absolute left-[0.1rem] -top-2 text-[0.68rem] font-normal text-text-muted">
-        {label}
-      </label>
     </div>
   );
 };

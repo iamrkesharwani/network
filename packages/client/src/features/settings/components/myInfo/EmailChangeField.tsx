@@ -1,13 +1,16 @@
 import { useState } from 'react';
+import { Mail } from 'lucide-react';
 import { maskEmail } from '@network/shared';
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import {
   useRequestEmailChangeMutation,
   useConfirmEmailChangeMutation,
 } from '../../../auth/authApi';
-import FloatingInput from '../../../upload/components/FloatingInput';
+import BorderedInput from '../BorderedInput';
 import Button from '../../../../shared/ui/primitives/Button';
+import ConfirmModal from '../../../../shared/ui/overlay/ConfirmModal';
 import MaskedFieldRow from './MaskedFieldRow';
+import LockedFieldNotice from '../LockedFieldNotice';
 
 type Step = 'masked' | 'new-email' | 'otp';
 
@@ -19,6 +22,7 @@ const EmailChangeField = () => {
   const [oldOtp, setOldOtp] = useState('');
   const [newOtp, setNewOtp] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showGoogleUnlinkConfirm, setShowGoogleUnlinkConfirm] = useState(false);
 
   const [requestEmailChange, { isLoading: isRequesting }] =
     useRequestEmailChangeMutation();
@@ -46,6 +50,21 @@ const EmailChangeField = () => {
     }
   };
 
+  const isGoogleLinked = user.authProviders.includes('google');
+
+  const handleSendCodesClick = () => {
+    if (isGoogleLinked) {
+      setShowGoogleUnlinkConfirm(true);
+      return;
+    }
+    handleSendCodes();
+  };
+
+  const handleConfirmGoogleUnlink = () => {
+    setShowGoogleUnlinkConfirm(false);
+    handleSendCodes();
+  };
+
   const handleConfirm = async () => {
     setError(null);
     try {
@@ -59,10 +78,20 @@ const EmailChangeField = () => {
     }
   };
 
+  if (!user.hasPassword) {
+    return (
+      <LockedFieldNotice
+        label="Email"
+        message="Managed by Google sign-in. Add a password in Security to change your email."
+      />
+    );
+  }
+
   if (step === 'masked') {
     return (
       <MaskedFieldRow
         label="Email"
+        icon={Mail}
         maskedValue={maskEmail(user.email)}
         isEditing={false}
         onEdit={() => setStep('new-email')}
@@ -79,15 +108,18 @@ const EmailChangeField = () => {
           Enter your new email and current password
         </p>
 
-        <FloatingInput
+        <BorderedInput
           label="New email"
+          icon={Mail}
           type="email"
+          placeholder="you@example.com"
           value={newEmail}
           onChange={(event) => setNewEmail(event.target.value)}
         />
-        <FloatingInput
+        <BorderedInput
           label="Current password"
           type="password"
+          placeholder="Enter your password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />
@@ -106,11 +138,22 @@ const EmailChangeField = () => {
             type="button"
             size="sm"
             isLoading={isRequesting}
-            onClick={handleSendCodes}
+            onClick={handleSendCodesClick}
           >
             Send codes
           </Button>
         </div>
+
+        <ConfirmModal
+          isOpen={showGoogleUnlinkConfirm}
+          onClose={() => setShowGoogleUnlinkConfirm(false)}
+          onConfirm={handleConfirmGoogleUnlink}
+          intent="warning"
+          title="This will disconnect Google sign-in"
+          description="Changing your email disconnects Google sign-in from this account. You'll still be able to log in with your email and password."
+          confirmLabel="Continue"
+          isLoading={isRequesting}
+        />
       </div>
     );
   }
@@ -121,13 +164,15 @@ const EmailChangeField = () => {
         Enter the codes sent to both your current and new email addresses
       </p>
 
-      <FloatingInput
+      <BorderedInput
         label="Code sent to current email"
+        placeholder="6-digit code"
         value={oldOtp}
         onChange={(event) => setOldOtp(event.target.value)}
       />
-      <FloatingInput
+      <BorderedInput
         label="Code sent to new email"
+        placeholder="6-digit code"
         value={newOtp}
         onChange={(event) => setNewOtp(event.target.value)}
       />

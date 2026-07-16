@@ -78,7 +78,8 @@ const authSlice = createSlice({
           settingsApi.endpoints.uploadAvatar.matchFulfilled,
           settingsApi.endpoints.captureLocation.matchFulfilled,
           accountApi.endpoints.reactivateAccount.matchFulfilled,
-          authApi.endpoints.confirmEmailChange.matchFulfilled
+          authApi.endpoints.confirmEmailChange.matchFulfilled,
+          authApi.endpoints.confirmAddPassword.matchFulfilled
         ),
         (state, action) => {
           state.user = action.payload.data;

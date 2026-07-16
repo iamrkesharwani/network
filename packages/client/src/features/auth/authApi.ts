@@ -9,6 +9,7 @@ import type {
   ChangePasswordInput,
   ChangeEmailInput,
   ConfirmEmailChangeInput,
+  ConfirmAddPasswordInput,
   IUser,
   ApiResponse,
 } from '@network/shared';
@@ -100,6 +101,22 @@ export const authApi = createApi({
         data,
       }),
     }),
+    requestAddPassword: builder.mutation<ApiResponse<null>, void>({
+      query: () => ({
+        url: '/add-password/request',
+        method: 'POST',
+      }),
+    }),
+    confirmAddPassword: builder.mutation<
+      ApiResponse<IUser>,
+      ConfirmAddPasswordInput
+    >({
+      query: (data) => ({
+        url: '/add-password/confirm',
+        method: 'POST',
+        data,
+      }),
+    }),
   }),
 });
 
@@ -114,4 +131,6 @@ export const {
   useChangePasswordMutation,
   useRequestEmailChangeMutation,
   useConfirmEmailChangeMutation,
+  useRequestAddPasswordMutation,
+  useConfirmAddPasswordMutation,
 } = authApi;

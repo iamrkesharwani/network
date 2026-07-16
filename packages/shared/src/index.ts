@@ -60,6 +60,7 @@ export * from './constants/retention.constants.js';
 export * from './constants/routes.constants.js';
 export * from './constants/search.constants.js';
 export * from './constants/short.constants.js';
+export * from './constants/socialPlatformCatalog.constants.js';
 export * from './constants/storage.constants.js';
 export * from './constants/tag.constants.js';
 export * from './constants/time.constants.js';

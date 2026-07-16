@@ -3,7 +3,7 @@ import { getActiveMyInfoSegment } from '../../utils/myInfoSegments';
 import MyInfoOverview from './myInfo/MyInfoOverview';
 import BasicInfoCard from '../../components/myInfo/BasicInfoCard';
 import PersonalDetailsCard from '../../components/myInfo/PersonalDetailsCard';
-import ContactLinksCard from '../../components/myInfo/ContactLinksCard';
+import LinksCard from '../../components/myInfo/LinksCard';
 
 const MyInfoTab = () => {
   const location = useLocation();
@@ -11,7 +11,7 @@ const MyInfoTab = () => {
 
   if (segment === 'basic') return <BasicInfoCard />;
   if (segment === 'personal') return <PersonalDetailsCard />;
-  if (segment === 'contact') return <ContactLinksCard />;
+  if (segment === 'contact') return <LinksCard />;
 
   return <MyInfoOverview />;
 };

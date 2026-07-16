@@ -4,13 +4,15 @@ import { hashPassword, verifyPassword } from '../../../core/utils/hash.js';
 import { redisClient } from '../../../core/config/redis.js';
 import { randomInt } from 'node:crypto';
 import { revokeAllRefreshTokensForUser } from '../../../core/utils/token.js';
-import { queuePasswordResetEmail } from '../../email/email.js';
+import { queuePasswordResetEmail, queueOtpEmail } from '../../email/email.js';
 import { tryStartOtpCooldown } from '../../../core/utils/otpCooldown.js';
+import { toUserResponse } from '../../../core/utils/toUserResponse.js';
 import {
   OTP_MAX_ATTEMPTS,
   OTP_CODE_MIN,
   OTP_CODE_MAX,
   OTP_VERIFICATION_TTL_SECONDS,
+  type IUser,
 } from '@network/shared';
 
 export const changePassword = async (
@@ -112,4 +114,100 @@ export const completePasswordReset = async (
 
   await redisClient.del(tokenKey);
   await redisClient.del(attemptsKey);
+};
+
+const addPasswordTokenKey = (userId: string): string =>
+  `add_password_verify:${userId}`;
+const addPasswordAttemptsKey = (userId: string): string =>
+  `add_password_attempts:${userId}`;
+
+export const requestAddPassword = async (userId: string): Promise<void> => {
+  const user = await authRepository.findByIdWithPassword(userId);
+  if (!user) {
+    throw new ApiError(404, 'NOT_FOUND', 'User not found');
+  }
+  if (user.password) {
+    throw new ApiError(
+      400,
+      'BAD_REQUEST',
+      'You already have a password. Use change password instead.'
+    );
+  }
+
+  const canSend = await tryStartOtpCooldown('add_password', userId);
+  if (!canSend) return;
+
+  const otp = randomInt(OTP_CODE_MIN, OTP_CODE_MAX).toString();
+  const hashedOtp = await hashPassword(otp);
+
+  await redisClient.set(
+    addPasswordTokenKey(userId),
+    hashedOtp,
+    'EX',
+    OTP_VERIFICATION_TTL_SECONDS
+  );
+  await redisClient.set(
+    addPasswordAttemptsKey(userId),
+    '0',
+    'EX',
+    OTP_VERIFICATION_TTL_SECONDS,
+    'NX'
+  );
+
+  await queueOtpEmail({ to: user.email, userName: user.name, otp });
+};
+
+export const confirmAddPassword = async (
+  userId: string,
+  otp: string,
+  newPassword: string
+): Promise<IUser> => {
+  const tokenKey = addPasswordTokenKey(userId);
+  const attemptsKey = addPasswordAttemptsKey(userId);
+
+  const hashedOtp = await redisClient.get(tokenKey);
+  if (!hashedOtp) {
+    throw new ApiError(400, 'BAD_REQUEST', 'Code expired or invalid');
+  }
+
+  const attempts = parseInt((await redisClient.get(attemptsKey)) ?? '0', 10);
+  if (attempts >= OTP_MAX_ATTEMPTS) {
+    await redisClient.del(tokenKey);
+    await redisClient.del(attemptsKey);
+    throw new ApiError(
+      429,
+      'RATE_LIMIT_EXCEEDED',
+      'Too many incorrect attempts. Please request a new code.'
+    );
+  }
+
+  const isValid = await verifyPassword(hashedOtp, otp);
+  if (!isValid) {
+    await redisClient.incr(attemptsKey);
+    throw new ApiError(400, 'BAD_REQUEST', 'Incorrect code');
+  }
+
+  const user = await authRepository.findByIdWithPassword(userId);
+  if (!user) {
+    throw new ApiError(404, 'NOT_FOUND', 'User not found');
+  }
+  if (user.password) {
+    throw new ApiError(
+      400,
+      'BAD_REQUEST',
+      'You already have a password. Use change password instead.'
+    );
+  }
+
+  const updated = await authRepository.updatePassword(
+    user,
+    await hashPassword(newPassword)
+  );
+
+  await revokeAllRefreshTokensForUser(userId);
+
+  await redisClient.del(tokenKey);
+  await redisClient.del(attemptsKey);
+
+  return toUserResponse(updated);
 };

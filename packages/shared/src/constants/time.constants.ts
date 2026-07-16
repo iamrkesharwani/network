@@ -5,6 +5,7 @@ export const FIFTEEN_MINUTES_SECONDS = 15 * 60;
 export const TEN_MINUTES_MS = 10 * 60 * 1000;
 export const TEN_SECONDS_MS = 10 * 1000;
 export const FIVE_MINUTES_MS = 5 * 60 * 1000;
+export const ONE_HOUR_MS = 60 * 60 * 1000;
 export const ONE_HOUR_SECONDS = 60 * 60;
 export const SIX_HOURS_SECONDS = 6 * 60 * 60;
 export const FIVE_MINUTES_SECONDS = 5 * 60;

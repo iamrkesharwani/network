@@ -13,6 +13,7 @@ import { redisClient } from '../../../core/config/redis.js';
 import { revokeAllRefreshTokensForUser } from '../../../core/utils/token.js';
 import { queueOtpEmail } from '../../email/email.js';
 import { tryStartOtpCooldown } from '../../../core/utils/otpCooldown.js';
+import { toUserResponse } from '../../../core/utils/toUserResponse.js';
 
 interface PendingEmailChange {
   newEmail: string;
@@ -30,8 +31,15 @@ export const requestEmailChange = async (
   password: string
 ): Promise<void> => {
   const user = await authRepository.findByIdWithPassword(userId);
-  if (!user || !user.password) {
+  if (!user) {
     throw new ApiError(404, 'NOT_FOUND', 'User not found');
+  }
+  if (!user.password) {
+    throw new ApiError(
+      400,
+      'BAD_REQUEST',
+      'Add a password in Security before changing your email.'
+    );
   }
 
   const isValidPassword = await verifyPassword(user.password, password);
@@ -126,14 +134,19 @@ export const confirmEmailChange = async (
     );
   }
 
-  const user = await authRepository.findById(userId);
+  let user = await authRepository.findByIdWithPassword(userId);
   if (!user) throw new ApiError(404, 'NOT_FOUND', 'User not found');
 
-  await authRepository.updateEmail(user, pending.newEmail);
+  user = await authRepository.updateEmail(user, pending.newEmail);
+
+  if (user.password && user.authProviders.includes('google')) {
+    user = await authRepository.unlinkOAuthProvider(user, 'google');
+  }
+
   await revokeAllRefreshTokensForUser(userId);
 
   await redisClient.del(pendingKey(userId));
   await redisClient.del(attemptsKey(userId));
 
-  return user.toJSON() as unknown as IUser;
+  return toUserResponse(user);
 };

@@ -1,8 +1,9 @@
-import React, { forwardRef, useId, type ReactNode } from 'react';
+import React, { forwardRef, useId, type ComponentType, type ReactNode } from 'react';
 import { cn } from '../../../shared/utils/cn';
 
 interface BaseProps {
   label: string;
+  icon?: ComponentType<{ className?: string }>;
   error?: string;
   hint?: ReactNode;
   containerClassName?: string;
@@ -14,7 +15,7 @@ const FloatingTextarea = forwardRef<
   BaseProps & React.TextareaHTMLAttributes<HTMLTextAreaElement>
 >(
   (
-    { label, error, hint, containerClassName, counter, className, ...props },
+    { label, icon: Icon, error, hint, containerClassName, counter, className, ...props },
     ref
   ) => {
     const id = useId();
@@ -42,8 +43,9 @@ const FloatingTextarea = forwardRef<
 
         <label
           htmlFor={id}
-          className="field-label absolute left-[0.1rem] top-[0.55rem] text-base font-normal text-[--color-text-muted] pointer-events-none origin-left"
+          className="field-label absolute left-[0.1rem] top-[0.55rem] flex items-center gap-1.5 text-base font-normal text-[--color-text-muted] pointer-events-none origin-left"
         >
+          {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
           {label}
         </label>
 

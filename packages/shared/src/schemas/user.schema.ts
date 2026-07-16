@@ -12,12 +12,25 @@ import {
   GENDER_OPTIONS,
   RELATIONSHIP_STATUSES,
   GENDER_SELF_DESCRIBE_MAX_LENGTH,
-  PRONOUNS_MAX_LENGTH,
+  PRONOUN_MAX_LENGTH,
+  PRONOUNS_MAX_COUNT,
   WEBSITE_MAX_LENGTH,
   PHONE_NUMBER_MAX_LENGTH,
   SOCIAL_LINKS_MAX,
   SOCIAL_PLATFORMS,
+  SOCIAL_LINK_PLATFORM_MAX_LENGTH,
 } from '../constants/user.constants.js';
+import { SOCIAL_PLATFORM_DOMAINS } from '../constants/socialPlatformCatalog.constants.js';
+
+const socialLinkHostnameMatches = (url: string, domains: string[]): boolean => {
+  if (domains.length === 0) return true;
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+    return domains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+  } catch {
+    return false;
+  }
+};
 
 export const userRegistrationSchema = z.object({
   name: z
@@ -146,9 +159,14 @@ export const personalDetailsSchema = z
       )
       .optional(),
     pronouns: z
-      .string()
-      .trim()
-      .max(PRONOUNS_MAX_LENGTH, `Cannot exceed ${PRONOUNS_MAX_LENGTH} characters.`)
+      .array(
+        z
+          .string()
+          .trim()
+          .min(1)
+          .max(PRONOUN_MAX_LENGTH, `Cannot exceed ${PRONOUN_MAX_LENGTH} characters.`)
+      )
+      .max(PRONOUNS_MAX_COUNT, `Cannot add more than ${PRONOUNS_MAX_COUNT} pronouns.`)
       .optional(),
     relationshipStatus: z.enum(RELATIONSHIP_STATUSES).optional(),
   })
@@ -162,15 +180,50 @@ export const personalDetailsSchema = z
     }
   );
 
-const socialLinkSchema = z.object({
-  platform: z.enum(SOCIAL_PLATFORMS),
-  url: z.url('Enter a valid URL.'),
-});
+const socialLinkSchema = z
+  .object({
+    platform: z.enum(SOCIAL_PLATFORMS),
+    url: z.url('Enter a valid URL.'),
+    customLabel: z
+      .string()
+      .trim()
+      .max(
+        SOCIAL_LINK_PLATFORM_MAX_LENGTH,
+        `Cannot exceed ${SOCIAL_LINK_PLATFORM_MAX_LENGTH} characters.`
+      )
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.platform === 'other') {
+      if (!data.customLabel) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Enter a platform name.',
+          path: ['customLabel'],
+        });
+      }
+      return;
+    }
+
+    const domains = SOCIAL_PLATFORM_DOMAINS[data.platform] ?? [];
+    if (!socialLinkHostnameMatches(data.url, domains)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `URL must be a ${data.platform} link.`,
+        path: ['url'],
+      });
+    }
+  });
 
 export const contactLinksSchema = z.object({
+  phone: phoneSchema.optional(),
   website: z
-    .url('Enter a valid URL.')
-    .max(WEBSITE_MAX_LENGTH, `Cannot exceed ${WEBSITE_MAX_LENGTH} characters.`)
+    .union([
+      z.literal(''),
+      z
+        .url('Enter a valid URL.')
+        .max(WEBSITE_MAX_LENGTH, `Cannot exceed ${WEBSITE_MAX_LENGTH} characters.`),
+    ])
     .optional(),
   socialLinks: z.array(socialLinkSchema).max(SOCIAL_LINKS_MAX).optional(),
 });

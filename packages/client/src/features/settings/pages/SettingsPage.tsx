@@ -16,7 +16,7 @@ const SettingsPage = () => {
     <div className="flex flex-col gap-6 md:flex-row md:gap-10">
       <SettingsNav activeTab={activeTab} />
 
-      <div className="min-w-0 flex-1 pt-6 md:pt-0">
+      <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 pt-6 md:pt-10">
         {activeTab === 'my-info' && <MyInfoTab />}
         {activeTab === 'preferences' && <PreferencesTab />}
         {activeTab === 'security' && <SecurityTab />}

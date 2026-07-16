@@ -59,6 +59,11 @@ export const confirmEmailChangeSchema = z.object({
   newEmailOtp: otpCodeSchema,
 });
 
+export const confirmAddPasswordSchema = z.object({
+  otp: otpCodeSchema,
+  newPassword: passwordValidation,
+});
+
 export const refreshSchema = z.object({
   token: z.string().trim().min(1, 'Refresh token is required.'),
 });

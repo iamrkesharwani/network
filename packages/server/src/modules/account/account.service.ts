@@ -2,6 +2,7 @@ import { ONE_DAY_MS, type IUser, type DeactivateAccountInput } from '@network/sh
 import { ApiError } from '../../core/utils/ApiError.js';
 import { revokeAllRefreshTokensForUser } from '../../core/utils/token.js';
 import * as accountRepository from './account.repository.js';
+import { toUserResponse } from '../../core/utils/toUserResponse.js';
 import {
   scheduleAutoReactivate,
   cancelAutoReactivate,
@@ -24,7 +25,7 @@ export const deactivateAccount = async (
   await revokeAllRefreshTokensForUser(userId);
   await scheduleAutoReactivate(userId, data.days * ONE_DAY_MS);
 
-  return updated.toJSON() as unknown as IUser;
+  return toUserResponse(updated);
 };
 
 export const reactivateAccount = async (userId: string): Promise<IUser> => {
@@ -33,5 +34,5 @@ export const reactivateAccount = async (userId: string): Promise<IUser> => {
 
   await cancelAutoReactivate(userId);
 
-  return updated.toJSON() as unknown as IUser;
+  return toUserResponse(updated);
 };

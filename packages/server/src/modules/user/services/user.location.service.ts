@@ -1,6 +1,7 @@
 import type { IUser, CaptureLocationInput } from '@network/shared';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import * as userRepository from '../user.repository.js';
+import { toUserResponse } from '../../../core/utils/toUserResponse.js';
 
 export const captureLocation = async (
   userId: string,
@@ -13,5 +14,5 @@ export const captureLocation = async (
   });
   if (!updated) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
 
-  return updated.toJSON() as unknown as IUser;
+  return toUserResponse(updated);
 };
