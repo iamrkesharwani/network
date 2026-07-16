@@ -1,8 +1,10 @@
 import type { Request, Response } from 'express';
+import { REFRESH_TOKEN_COOKIE_NAME } from '@network/shared';
 import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { ApiResponse } from '../../../core/utils/ApiResponse.js';
 import * as passwordService from '../services/auth.password.service.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
+import { cookieOptions } from './auth.core.controller.js';
 
 export const changePassword = asyncHandler(
   async (req: Request, res: Response) => {
@@ -15,11 +17,17 @@ export const changePassword = asyncHandler(
     }
 
     const { oldPassword, newPassword } = req.body;
-    await passwordService.changePassword(req.user.id, oldPassword, newPassword);
+    const { accessToken, refreshToken } = await passwordService.changePassword(
+      req.user.id,
+      oldPassword,
+      newPassword
+    );
+
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
 
     res
       .status(200)
-      .json(new ApiResponse(null, 'Password changed successfully'));
+      .json(new ApiResponse({ accessToken }, 'Password changed successfully'));
   }
 );
 
@@ -86,12 +94,15 @@ export const confirmAddPassword = asyncHandler(
     }
 
     const { otp, newPassword } = req.body;
-    const user = await passwordService.confirmAddPassword(
-      req.user.id,
-      otp,
-      newPassword
-    );
+    const { user, accessToken, refreshToken } =
+      await passwordService.confirmAddPassword(req.user.id, otp, newPassword);
 
-    res.status(200).json(new ApiResponse(user, 'Password added successfully'));
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse({ user, accessToken }, 'Password added successfully')
+      );
   }
 );

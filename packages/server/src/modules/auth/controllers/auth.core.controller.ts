@@ -7,7 +7,7 @@ import * as authCoreService from '../services/auth.core.service.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { setCsrfCookie } from '../../../core/middleware/csrf.middleware.js';
 
-const cookieOptions = {
+export const cookieOptions = {
   httpOnly: true,
   secure: env.SECURE_COOKIES,
   sameSite: 'strict' as const,

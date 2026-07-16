@@ -78,11 +78,25 @@ const authSlice = createSlice({
           settingsApi.endpoints.uploadAvatar.matchFulfilled,
           settingsApi.endpoints.captureLocation.matchFulfilled,
           accountApi.endpoints.reactivateAccount.matchFulfilled,
-          authApi.endpoints.confirmEmailChange.matchFulfilled,
-          authApi.endpoints.confirmAddPassword.matchFulfilled
+          authApi.endpoints.confirmEmailChange.matchFulfilled
         ),
         (state, action) => {
           state.user = action.payload.data;
+        }
+      )
+      .addMatcher(
+        authApi.endpoints.changePassword.matchFulfilled,
+        (state, action) => {
+          state.accessToken = action.payload.data.accessToken;
+        }
+      )
+      .addMatcher(
+        authApi.endpoints.confirmAddPassword.matchFulfilled,
+        (state, action) => {
+          state.user = action.payload.data.user;
+          if (action.payload.data.accessToken) {
+            state.accessToken = action.payload.data.accessToken;
+          }
         }
       )
       .addMatcher(

@@ -77,7 +77,10 @@ export const authApi = createApi({
         data,
       }),
     }),
-    changePassword: builder.mutation<ApiResponse<null>, ChangePasswordInput>({
+    changePassword: builder.mutation<
+      ApiResponse<{ accessToken: string }>,
+      ChangePasswordInput
+    >({
       query: (data) => ({
         url: '/change-password',
         method: 'POST',
@@ -108,7 +111,7 @@ export const authApi = createApi({
       }),
     }),
     confirmAddPassword: builder.mutation<
-      ApiResponse<IUser>,
+      AuthSuccessResponse,
       ConfirmAddPasswordInput
     >({
       query: (data) => ({

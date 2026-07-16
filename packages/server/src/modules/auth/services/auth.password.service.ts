@@ -3,7 +3,11 @@ import { ApiError } from '../../../core/utils/ApiError.js';
 import { hashPassword, verifyPassword } from '../../../core/utils/hash.js';
 import { redisClient } from '../../../core/config/redis.js';
 import { randomInt } from 'node:crypto';
-import { revokeAllRefreshTokensForUser } from '../../../core/utils/token.js';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  revokeAllRefreshTokensForUser,
+} from '../../../core/utils/token.js';
 import { queuePasswordResetEmail, queueOtpEmail } from '../../email/email.js';
 import { tryStartOtpCooldown } from '../../../core/utils/otpCooldown.js';
 import { toUserResponse } from '../../../core/utils/toUserResponse.js';
@@ -35,6 +39,11 @@ export const changePassword = async (
   await authRepository.updatePassword(user, await hashPassword(newPassword));
 
   await revokeAllRefreshTokensForUser(user.id);
+
+  const accessToken = await generateAccessToken(user.id, user.role);
+  const refreshToken = await generateRefreshToken(user.id);
+
+  return { accessToken, refreshToken };
 };
 
 export const requestPasswordReset = async (email: string) => {
@@ -161,7 +170,7 @@ export const confirmAddPassword = async (
   userId: string,
   otp: string,
   newPassword: string
-): Promise<IUser> => {
+): Promise<{ user: IUser; accessToken: string; refreshToken: string }> => {
   const tokenKey = addPasswordTokenKey(userId);
   const attemptsKey = addPasswordAttemptsKey(userId);
 
@@ -209,5 +218,8 @@ export const confirmAddPassword = async (
   await redisClient.del(tokenKey);
   await redisClient.del(attemptsKey);
 
-  return toUserResponse(updated);
+  const accessToken = await generateAccessToken(updated.id, updated.role);
+  const refreshToken = await generateRefreshToken(updated.id);
+
+  return { user: toUserResponse(updated), accessToken, refreshToken };
 };
