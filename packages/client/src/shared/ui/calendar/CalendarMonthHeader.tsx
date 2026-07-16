@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Select from '../primitives/Select';
-import { MONTH_LABELS } from './utils/dateGrid';
+import { MONTH_LABELS, MONTH_SHORT_LABELS } from './utils/dateGrid';
 
 interface CalendarMonthHeaderProps {
   monthAnchor: Date;
@@ -46,17 +46,19 @@ const CalendarMonthHeader = ({
 
       <Select
         value={MONTH_LABELS[monthAnchor.getMonth()]}
-        onChange={(label) =>
-          onSelectMonth(MONTH_LABELS.indexOf(label))
-        }
+        onChange={(label) => onSelectMonth(MONTH_LABELS.indexOf(label))}
         options={MONTH_LABELS.map((label) => ({ value: label, label }))}
-        containerClassName="mb-0 flex-1"
+        triggerLabel={MONTH_SHORT_LABELS[monthAnchor.getMonth()]}
+        containerClassName="mb-0 min-w-[76px] flex-1"
       />
 
       <Select
         value={String(monthAnchor.getFullYear())}
         onChange={(year) => onSelectYear(Number(year))}
-        options={years.map((year) => ({ value: String(year), label: String(year) }))}
+        options={years.map((year) => ({
+          value: String(year),
+          label: String(year),
+        }))}
         containerClassName="mb-0 w-24"
       />
 

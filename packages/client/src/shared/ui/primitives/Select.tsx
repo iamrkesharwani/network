@@ -18,6 +18,7 @@ interface SelectProps<T extends string> {
   placeholder?: string;
   error?: string;
   containerClassName?: string;
+  triggerLabel?: string;
 }
 
 function Select<T extends string>({
@@ -29,6 +30,7 @@ function Select<T extends string>({
   placeholder = 'Select...',
   error,
   containerClassName,
+  triggerLabel,
 }: SelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -88,7 +90,9 @@ function Select<T extends string>({
           )}
         >
           {selected?.icon && <selected.icon className="h-4 w-4 shrink-0" />}
-          <span className="truncate">{selected?.label ?? placeholder}</span>
+          <span className={triggerLabel ? 'whitespace-nowrap' : 'truncate'}>
+            {selected ? (triggerLabel ?? selected.label) : placeholder}
+          </span>
         </span>
         <ChevronDown
           className={cn(
