@@ -39,22 +39,36 @@ const AddPasswordSection = () => {
 
   return (
     <div>
-      <h3 className="mb-2 text-sm font-semibold text-text-primary">
-        Add a password
-      </h3>
-      <p className="mb-4 text-sm text-text-secondary">
-        You signed in with Google and don't have a password yet. Add one so you
-        can also log in directly with your email.
-      </p>
-
-      {step === 'intro' && (
-        <Button type="button" isLoading={isRequesting} onClick={handleSendCode}>
-          Send verification code
-        </Button>
-      )}
-
-      {step === 'confirm' && (
+      {step === 'intro' ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-text-primary">
+              Add a password
+            </h3>
+            <p className="text-sm text-text-secondary sm:max-w-md">
+              You signed in with Google and don't have a password yet. Add one
+              so you can also log in directly with your email.
+            </p>
+          </div>
+          <Button
+            type="button"
+            isLoading={isRequesting}
+            onClick={handleSendCode}
+            className="w-full shrink-0 sm:w-auto"
+          >
+            Send verification code
+          </Button>
+        </div>
+      ) : (
         <>
+          <h3 className="mb-2 text-sm font-semibold text-text-primary">
+            Add a password
+          </h3>
+          <p className="mb-4 text-sm text-text-secondary">
+            You signed in with Google and don't have a password yet. Add one so
+            you can also log in directly with your email.
+          </p>
+
           <OtpInput label="Verification code" value={otp} onChange={setOtp} />
           <BorderedInput
             label="New password"
@@ -69,6 +83,7 @@ const AddPasswordSection = () => {
             type="button"
             isLoading={isConfirming}
             onClick={handleConfirm}
+            className="w-full sm:w-auto"
           >
             Set password
           </Button>

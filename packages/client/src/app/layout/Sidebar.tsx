@@ -3,7 +3,6 @@ import {
   Home,
   User,
   Settings,
-  LogOut,
   LogIn,
   UserPlus,
   X,
@@ -13,13 +12,8 @@ import {
   FileText,
   Gavel,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
-import { useLogoutMutation } from '../../features/auth/authApi';
-import { clearCredentials } from '../../features/auth/authSlice';
-import { setAccessToken } from '../../shared/lib/axiosInstance';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
-import { useAppDispatch } from '../../shared/hooks/useAppDispatch';
 import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
 
 export interface SidebarProps {
@@ -35,26 +29,8 @@ const Sidebar = ({
   isCollapsed,
   onToggleCollapse,
 }: SidebarProps) => {
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const [logout, { isLoading }] = useLogoutMutation();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const authUser = useAppSelector((state) => state.auth.user);
-
-  const handleLogout = async () => {
-    try {
-      await logout().unwrap();
-    } catch (error) {
-      console.error(
-        'Server logout failed, forcing local session clear:',
-        error
-      );
-    } finally {
-      setAccessToken(null);
-      dispatch(clearCredentials());
-      navigate(CLIENT_ROUTES.LOGIN, { replace: true });
-    }
-  };
 
   const navItems = [
     { name: 'Home', path: CLIENT_ROUTES.FEED, icon: Home },
@@ -161,82 +137,51 @@ const Sidebar = ({
           ))}
         </nav>
 
-        <div className="px-2 py-4 border-t border-border shrink-0 space-y-1">
-          {isAuthenticated ? (
-            <button
-              onClick={handleLogout}
-              disabled={isLoading}
-              title={
-                !showLabels
-                  ? isLoading
-                    ? 'Logging out...'
-                    : 'Log Out'
-                  : undefined
-              }
+        {!isAuthenticated && (
+          <div className="px-2 py-4 border-t border-border shrink-0 space-y-1">
+            <NavLink
+              to={CLIENT_ROUTES.LOGIN}
+              onClick={onMobileClose}
+              title={!showLabels ? 'Log in' : undefined}
               className={[
-                'group flex items-center rounded-lg text-sm font-medium text-text-secondary hover:text-error hover:bg-error-subtle transition-all focus:outline-none w-full',
+                'group flex items-center rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-all focus:outline-none w-full',
                 !showLabels
                   ? 'justify-center px-0 py-2.5 w-10 mx-auto'
                   : 'gap-3 px-3 py-2.5',
               ].join(' ')}
             >
-              <LogOut
+              <LogIn
                 className={[
-                  'shrink-0 text-icon group-hover:text-error transition-colors',
+                  'shrink-0 text-icon group-hover:text-icon-hover transition-colors',
                   !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
                 ].join(' ')}
                 strokeWidth={1.75}
               />
-              {showLabels && (
-                <span>{isLoading ? 'Logging out...' : 'Log Out'}</span>
-              )}
-            </button>
-          ) : (
-            <>
-              <NavLink
-                to={CLIENT_ROUTES.LOGIN}
-                onClick={onMobileClose}
-                title={!showLabels ? 'Log in' : undefined}
-                className={[
-                  'group flex items-center rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-all focus:outline-none w-full',
-                  !showLabels
-                    ? 'justify-center px-0 py-2.5 w-10 mx-auto'
-                    : 'gap-3 px-3 py-2.5',
-                ].join(' ')}
-              >
-                <LogIn
-                  className={[
-                    'shrink-0 text-icon group-hover:text-icon-hover transition-colors',
-                    !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
-                  ].join(' ')}
-                  strokeWidth={1.75}
-                />
-                {showLabels && <span>Log in</span>}
-              </NavLink>
+              {showLabels && <span>Log in</span>}
+            </NavLink>
 
-              <NavLink
-                to={CLIENT_ROUTES.REGISTER}
-                onClick={onMobileClose}
-                title={!showLabels ? 'Sign up' : undefined}
+            <NavLink
+              to={CLIENT_ROUTES.REGISTER}
+              onClick={onMobileClose}
+              title={!showLabels ? 'Sign up' : undefined}
+              className={[
+                'group flex items-center rounded-lg text-sm font-medium text-primary hover:bg-primary-muted transition-all focus:outline-none w-full',
+                !showLabels
+                  ? 'justify-center px-0 py-2.5 w-10 mx-auto'
+                  : 'gap-3 px-3 py-2.5',
+              ].join(' ')}
+            >
+              <UserPlus
                 className={[
-                  'group flex items-center rounded-lg text-sm font-medium text-primary hover:bg-primary-muted transition-all focus:outline-none w-full',
-                  !showLabels
-                    ? 'justify-center px-0 py-2.5 w-10 mx-auto'
-                    : 'gap-3 px-3 py-2.5',
+                  'shrink-0',
+                  !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
                 ].join(' ')}
-              >
-                <UserPlus
-                  className={[
-                    'shrink-0',
-                    !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
-                  ].join(' ')}
-                  strokeWidth={1.75}
-                />
-                {showLabels && <span>Sign up</span>}
-              </NavLink>
-            </>
-          )}
-        </div>
+                strokeWidth={1.75}
+              />
+              {showLabels && <span>Sign up</span>}
+            </NavLink>
+          </div>
+        )}
       </aside>
     </>
   );

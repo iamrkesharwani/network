@@ -22,7 +22,6 @@ const readIsSidebarCollapsed = (): boolean => {
 
 const AppShellSkeleton = ({ children }: AppShellSkeletonProps) => {
   const isCollapsed = readIsSidebarCollapsed();
-  const sidebarWidth = isCollapsed ? 'w-14' : 'w-56';
   return (
     <div
       className="bg-surface-alt flex flex-col"
@@ -48,7 +47,8 @@ const AppShellSkeleton = ({ children }: AppShellSkeletonProps) => {
 
       <div className="flex flex-1 w-full min-h-0">
         <aside
-          className={`hidden md:flex md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] ${sidebarWidth} flex-col bg-surface border-r border-border shrink-0 transition-all duration-300`}
+          style={{ width: 'var(--sidebar-width)' }}
+          className="hidden md:flex md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] flex-col bg-surface border-r border-border shrink-0 transition-all duration-300"
         >
           <div
             className={`h-12 border-b border-border flex items-center shrink-0 ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'}`}

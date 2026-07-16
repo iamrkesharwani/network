@@ -11,3 +11,7 @@ export const deactivateAccountSchema = z.object({
     .min(DEACTIVATION_MIN_DAYS, `Must be at least ${DEACTIVATION_MIN_DAYS} day.`)
     .max(DEACTIVATION_MAX_DAYS, `Cannot exceed ${DEACTIVATION_MAX_DAYS} days.`),
 });
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, 'Password is required.'),
+});

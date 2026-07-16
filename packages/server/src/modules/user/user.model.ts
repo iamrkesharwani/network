@@ -185,6 +185,14 @@ const userSchema = new Schema<IUserDocument>(
       type: Date,
       default: null,
     },
+    deletionRequestedAt: {
+      type: Date,
+      default: null,
+    },
+    deletionScheduledAt: {
+      type: Date,
+      default: null,
+    },
     searchTokens: {
       type: [String],
       default: [],

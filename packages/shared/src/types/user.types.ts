@@ -68,6 +68,8 @@ export interface IUser {
   status: UserStatus;
   deactivatedAt?: Date | null;
   reactivateAt?: Date | null;
+  deletionRequestedAt?: Date | null;
+  deletionScheduledAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

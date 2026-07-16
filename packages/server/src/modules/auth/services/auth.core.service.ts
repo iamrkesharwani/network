@@ -19,6 +19,7 @@ import {
 } from '../../../core/utils/token.js';
 import { redisClient } from '../../../core/config/redis.js';
 import { sendVerificationEmail } from './auth.verify.service.js';
+import { cancelPendingDeletion } from '../../account/account.service.js';
 
 export const registerLocal = async (data: UserRegistrationInput) => {
   const existingUser = data.username
@@ -96,10 +97,13 @@ export const loginLocal = async (data: LoginInput) => {
     );
   }
 
-  const accessToken = await generateAccessToken(user.id, user.role);
-  const refreshToken = await generateRefreshToken(user.id);
+  const activeUser =
+    user.status === 'pending_deletion' ? await cancelPendingDeletion(user) : user;
 
-  return { user: toUserResponse(user), accessToken, refreshToken };
+  const accessToken = await generateAccessToken(activeUser.id, activeUser.role);
+  const refreshToken = await generateRefreshToken(activeUser.id);
+
+  return { user: toUserResponse(activeUser), accessToken, refreshToken };
 };
 
 export const refreshAuthTokens = async (token: string) => {

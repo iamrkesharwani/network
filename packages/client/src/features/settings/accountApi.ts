@@ -1,6 +1,11 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from '../../shared/lib/axiosBaseQuery';
-import type { ApiResponse, IUser, DeactivateAccountInput } from '@network/shared';
+import type {
+  ApiResponse,
+  IUser,
+  DeactivateAccountInput,
+  DeleteAccountInput,
+} from '@network/shared';
 
 export const accountApi = createApi({
   reducerPath: 'accountApi',
@@ -12,8 +17,14 @@ export const accountApi = createApi({
     reactivateAccount: builder.mutation<ApiResponse<IUser>, void>({
       query: () => ({ url: '/reactivate', method: 'POST' }),
     }),
+    deleteAccount: builder.mutation<ApiResponse<IUser>, DeleteAccountInput>({
+      query: (data) => ({ url: '/delete', method: 'POST', data }),
+    }),
   }),
 });
 
-export const { useDeactivateAccountMutation, useReactivateAccountMutation } =
-  accountApi;
+export const {
+  useDeactivateAccountMutation,
+  useReactivateAccountMutation,
+  useDeleteAccountMutation,
+} = accountApi;

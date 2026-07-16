@@ -35,6 +35,11 @@ import { startJuryAssignmentWorker } from './modules/jury/jury-assignment.worker
 import { startJuryTimeoutWorker } from './modules/jury/jury-timeout.worker.js';
 import { scheduleJuryTimeoutSweep } from './modules/jury/jury-timeout.queue.js';
 import { startAccountLifecycleWorker } from './modules/account/account.lifecycle.worker.js';
+import { registerAccountDeletionAdapter } from './modules/account/account.deletion.registry.js';
+import { startAccountDeletionWorker } from './modules/account/account.deletion.worker.js';
+import { videoDeletionAdapter } from './modules/video/services/video.deletion.service.js';
+import { shortDeletionAdapter } from './modules/short/services/short.deletion.service.js';
+import { postDeletionAdapter } from './modules/post/services/post.deletion.service.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -70,6 +75,11 @@ const startWeb = async () => {
     await scheduleJuryTimeoutSweep();
 
     startAccountLifecycleWorker();
+
+    registerAccountDeletionAdapter(videoDeletionAdapter);
+    registerAccountDeletionAdapter(shortDeletionAdapter);
+    registerAccountDeletionAdapter(postDeletionAdapter);
+    startAccountDeletionWorker();
 
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Web server listening on port ${port}`);
