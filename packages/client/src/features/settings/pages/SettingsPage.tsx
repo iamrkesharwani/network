@@ -4,8 +4,7 @@ import { getActiveSettingsTab } from '../utils/settingsTabs';
 import SettingsNav from '../components/SettingsNav';
 import MyInfoTab from './tabs/MyInfoTab';
 import PreferencesTab from './tabs/PreferencesTab';
-import SecurityTab from './tabs/SecurityTab';
-import AccountTab from './tabs/AccountTab';
+import AccountTab from './tabs/account/AccountTab';
 
 const SettingsPage = () => {
   usePageTitle('Settings');
@@ -19,7 +18,6 @@ const SettingsPage = () => {
       <div className="mx-auto w-full min-w-0 max-w-2xl flex-1 pt-6 md:pt-0">
         {activeTab === 'my-info' && <MyInfoTab />}
         {activeTab === 'preferences' && <PreferencesTab />}
-        {activeTab === 'security' && <SecurityTab />}
         {activeTab === 'account' && <AccountTab />}
       </div>
     </div>

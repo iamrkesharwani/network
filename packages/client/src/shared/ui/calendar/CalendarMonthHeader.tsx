@@ -68,8 +68,10 @@ const CalendarMonthHeader = ({
         options={MONTH_LABELS.map((label, index) => ({
           value: label,
           label,
-          disabled: isMonthDisabled(index),
-        }))}
+          index,
+        }))
+          .filter(({ index }) => !isMonthDisabled(index))
+          .map(({ value, label }) => ({ value, label }))}
         triggerLabel={MONTH_SHORT_LABELS[monthAnchor.getMonth()]}
         containerClassName="mb-0 min-w-[76px] flex-1"
       />
