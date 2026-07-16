@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { COUNTRIES, type CountryDialCode } from '@network/shared';
@@ -31,8 +31,12 @@ const matchesQuery = (country: CountryDialCode, query: string) => {
 const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const filtered = COUNTRIES.filter((country) => matchesQuery(country, query));
 
   useEffect(() => {
     if (!isOpen) return;
@@ -56,8 +60,32 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [query, isOpen]);
+
+  useEffect(() => {
+    optionRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedIndex]);
+
   const selected = COUNTRIES.find((country) => country.iso2 === value) ?? COUNTRIES[0];
-  const filtered = COUNTRIES.filter((country) => matchesQuery(country, query));
+
+  const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setHighlightedIndex((index) => Math.min(index + 1, filtered.length - 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setHighlightedIndex((index) => Math.max(index - 1, 0));
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      const country = filtered[highlightedIndex];
+      if (country) {
+        onChange(country.iso2);
+        setIsOpen(false);
+      }
+    }
+  };
 
   return (
     <div className={cn('relative', containerClassName)} ref={rootRef}>
@@ -98,6 +126,7 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
                 ref={searchRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={handleSearchKeyDown}
                 placeholder="Search country or code…"
                 className="w-full rounded-md bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none placeholder:text-text-muted"
               />
@@ -107,14 +136,19 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
               {filtered.length === 0 && (
                 <p className="px-3.5 py-2 text-sm text-text-muted">No countries found.</p>
               )}
-              {filtered.map((country) => {
+              {filtered.map((country, index) => {
                 const isSelected = country.iso2 === value;
+                const isHighlighted = index === highlightedIndex;
                 return (
                   <button
                     key={country.iso2}
+                    ref={(el) => {
+                      optionRefs.current[index] = el;
+                    }}
                     type="button"
                     role="option"
                     aria-selected={isSelected}
+                    onMouseEnter={() => setHighlightedIndex(index)}
                     onClick={() => {
                       onChange(country.iso2);
                       setIsOpen(false);
@@ -123,7 +157,9 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
                       'flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm transition-colors cursor-pointer',
                       isSelected
                         ? 'bg-primary-muted text-primary'
-                        : 'text-text-primary hover:bg-surface-overlay'
+                        : isHighlighted
+                          ? 'bg-surface-overlay text-text-primary'
+                          : 'text-text-primary hover:bg-surface-overlay'
                     )}
                   >
                     <FlagIcon iso2={country.iso2} />

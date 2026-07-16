@@ -42,6 +42,7 @@ const socialLinkSchema = new Schema(
 const phoneSchema = new Schema(
   {
     dialCode: { type: String },
+    iso2: { type: String },
     number: { type: String, maxlength: PHONE_NUMBER_MAX_LENGTH },
   },
   { _id: false }

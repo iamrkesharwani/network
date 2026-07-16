@@ -33,6 +33,7 @@ export interface IUserSocialLink {
 
 export interface IUserPhone {
   dialCode: string;
+  iso2?: string;
   number: string;
 }
 

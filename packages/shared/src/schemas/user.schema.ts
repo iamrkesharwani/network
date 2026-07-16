@@ -119,6 +119,7 @@ export const userProfileUpdateSchema = z.object({
 
 export const phoneSchema = z.object({
   dialCode: z.string().trim().min(1, 'Country code is required.'),
+  iso2: z.string().trim().length(2).optional(),
   number: z
     .string()
     .trim()

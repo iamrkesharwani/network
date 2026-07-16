@@ -1,12 +1,26 @@
 import { useState } from 'react';
 import { Phone } from 'lucide-react';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
-import { COUNTRIES, maskPhoneNumber, type BasicProfileInput } from '@network/shared';
+import {
+  COUNTRIES,
+  DEFAULT_COUNTRY_ISO2,
+  maskPhoneNumber,
+  type BasicProfileInput,
+} from '@network/shared';
 import CountrySelect from './CountrySelect';
 import MaskedFieldRow from './MaskedFieldRow';
 
 const findCountryByDialCode = (dialCode: string | undefined) =>
   COUNTRIES.find((country) => country.dialCode === dialCode) ?? COUNTRIES[0];
+
+const resolveSelectedCountry = (phone: { dialCode?: string; iso2?: string } | undefined) => {
+  if (phone?.iso2) {
+    const byIso2 = COUNTRIES.find((country) => country.iso2 === phone.iso2);
+    if (byIso2) return byIso2;
+  }
+  if (phone?.dialCode) return findCountryByDialCode(phone.dialCode);
+  return COUNTRIES.find((country) => country.iso2 === DEFAULT_COUNTRY_ISO2) ?? COUNTRIES[0];
+};
 
 interface PhoneFieldProps {
   control: Control<BasicProfileInput>;
@@ -22,10 +36,10 @@ const PhoneField = ({ control, errors, hasExistingPhone }: PhoneFieldProps) => {
       control={control}
       name="phone"
       render={({ field }) => {
-        const dialCode = field.value?.dialCode ?? COUNTRIES[0]?.dialCode;
+        const selectedCountry = resolveSelectedCountry(field.value);
         const number = field.value?.number ?? '';
         const maskedValue = number
-          ? `${findCountryByDialCode(dialCode).dialCode} ${maskPhoneNumber(number)}`
+          ? `${selectedCountry.dialCode} ${maskPhoneNumber(number)}`
           : 'Not added';
 
         return (
@@ -44,11 +58,11 @@ const PhoneField = ({ control, errors, hasExistingPhone }: PhoneFieldProps) => {
               <div className="flex items-start gap-2">
                 <CountrySelect
                   containerClassName="w-32 shrink-0"
-                  value={findCountryByDialCode(dialCode).iso2}
+                  value={selectedCountry.iso2}
                   onChange={(iso2) => {
                     const country = COUNTRIES.find((c) => c.iso2 === iso2);
                     if (country) {
-                      field.onChange({ ...field.value, dialCode: country.dialCode, number });
+                      field.onChange({ dialCode: country.dialCode, iso2: country.iso2, number });
                     }
                   }}
                 />
@@ -58,7 +72,8 @@ const PhoneField = ({ control, errors, hasExistingPhone }: PhoneFieldProps) => {
                     value={number}
                     onChange={(event) =>
                       field.onChange({
-                        dialCode: findCountryByDialCode(dialCode).dialCode,
+                        dialCode: selectedCountry.dialCode,
+                        iso2: selectedCountry.iso2,
                         number: event.target.value.replace(/\D/g, ''),
                       })
                     }

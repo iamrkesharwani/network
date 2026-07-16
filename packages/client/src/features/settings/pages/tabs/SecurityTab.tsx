@@ -9,6 +9,7 @@ import {
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
 import BorderedInput from '../../components/BorderedInput';
 import Button from '../../../../shared/ui/primitives/Button';
+import OtpInput from '../../../auth/components/OtpInput';
 
 const AddPasswordSection = () => {
   const [step, setStep] = useState<'intro' | 'confirm'>('intro');
@@ -58,12 +59,7 @@ const AddPasswordSection = () => {
 
       {step === 'confirm' && (
         <>
-          <BorderedInput
-            label="Verification code"
-            placeholder="6-digit code"
-            value={otp}
-            onChange={(event) => setOtp(event.target.value)}
-          />
+          <OtpInput label="Verification code" value={otp} onChange={setOtp} />
           <BorderedInput
             label="New password"
             type="password"

@@ -11,6 +11,7 @@ import Button from '../../../../shared/ui/primitives/Button';
 import ConfirmModal from '../../../../shared/ui/overlay/ConfirmModal';
 import MaskedFieldRow from './MaskedFieldRow';
 import LockedFieldNotice from '../LockedFieldNotice';
+import OtpInput from '../../../auth/components/OtpInput';
 
 type Step = 'masked' | 'new-email' | 'otp';
 
@@ -164,18 +165,8 @@ const EmailChangeField = () => {
         Enter the codes sent to both your current and new email addresses
       </p>
 
-      <BorderedInput
-        label="Code sent to current email"
-        placeholder="6-digit code"
-        value={oldOtp}
-        onChange={(event) => setOldOtp(event.target.value)}
-      />
-      <BorderedInput
-        label="Code sent to new email"
-        placeholder="6-digit code"
-        value={newOtp}
-        onChange={(event) => setNewOtp(event.target.value)}
-      />
+      <OtpInput label="Code sent to current email" value={oldOtp} onChange={setOldOtp} />
+      <OtpInput label="Code sent to new email" value={newOtp} onChange={setNewOtp} />
 
       {error && (
         <p role="alert" className="mb-3 text-sm text-error">
