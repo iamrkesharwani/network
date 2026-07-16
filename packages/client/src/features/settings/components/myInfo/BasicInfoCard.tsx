@@ -7,6 +7,7 @@ import FloatingTextarea from '../../../upload/components/FloatingTextarea';
 import Button from '../../../../shared/ui/primitives/Button';
 import AvatarEditor from '../AvatarEditor';
 import UsernameField from '../UsernameField';
+import MyInfoFormHeader from './MyInfoFormHeader';
 
 const BasicInfoCard = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -41,13 +42,8 @@ const BasicInfoCard = () => {
   if (!user) return null;
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="mb-8 border-b border-border pb-8 last:mb-0 last:border-0 last:pb-0"
-    >
-      <h3 className="mb-4 text-sm font-semibold text-text-primary">
-        Basic info
-      </h3>
+    <form onSubmit={onSubmit} className="max-w-lg">
+      <MyInfoFormHeader title="Basic" />
 
       <AvatarEditor currentAvatarUrl={user.avatarUrl} name={user.name} />
 

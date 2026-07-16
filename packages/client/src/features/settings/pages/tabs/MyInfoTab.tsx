@@ -1,13 +1,19 @@
+import { useLocation } from 'react-router-dom';
+import { getActiveMyInfoSegment } from '../../utils/myInfoSegments';
+import MyInfoOverview from './myInfo/MyInfoOverview';
 import BasicInfoCard from '../../components/myInfo/BasicInfoCard';
 import PersonalDetailsCard from '../../components/myInfo/PersonalDetailsCard';
 import ContactLinksCard from '../../components/myInfo/ContactLinksCard';
 
-const MyInfoTab = () => (
-  <div className="max-w-lg">
-    <BasicInfoCard />
-    <PersonalDetailsCard />
-    <ContactLinksCard />
-  </div>
-);
+const MyInfoTab = () => {
+  const location = useLocation();
+  const segment = getActiveMyInfoSegment(location.pathname);
+
+  if (segment === 'basic') return <BasicInfoCard />;
+  if (segment === 'personal') return <PersonalDetailsCard />;
+  if (segment === 'contact') return <ContactLinksCard />;
+
+  return <MyInfoOverview />;
+};
 
 export default MyInfoTab;

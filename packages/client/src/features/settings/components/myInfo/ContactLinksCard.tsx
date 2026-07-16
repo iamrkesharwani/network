@@ -10,6 +10,7 @@ import { usePatchContactLinksMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
 import FloatingInput from '../../../upload/components/FloatingInput';
 import Button from '../../../../shared/ui/primitives/Button';
+import MyInfoFormHeader from './MyInfoFormHeader';
 
 const ContactLinksCard = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -44,10 +45,8 @@ const ContactLinksCard = () => {
   if (!user) return null;
 
   return (
-    <form onSubmit={onSubmit}>
-      <h3 className="mb-4 text-sm font-semibold text-text-primary">
-        Contact &amp; links
-      </h3>
+    <form onSubmit={onSubmit} className="max-w-lg">
+      <MyInfoFormHeader title="Contact & Links" />
 
       <FloatingInput
         label="Location"

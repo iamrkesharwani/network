@@ -9,6 +9,7 @@ import { usePatchPersonalDetailsMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
 import FloatingInput from '../../../upload/components/FloatingInput';
 import Button from '../../../../shared/ui/primitives/Button';
+import MyInfoFormHeader from './MyInfoFormHeader';
 
 const genderLabels: Record<(typeof GENDER_OPTIONS)[number], string> = {
   male: 'Male',
@@ -64,13 +65,8 @@ const PersonalDetailsCard = () => {
   if (!user) return null;
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="mb-8 border-b border-border pb-8 last:mb-0 last:border-0 last:pb-0"
-    >
-      <h3 className="mb-4 text-sm font-semibold text-text-primary">
-        Personal details
-      </h3>
+    <form onSubmit={onSubmit} className="max-w-lg">
+      <MyInfoFormHeader title="Personal" />
 
       <FloatingInput
         label="Date of birth"

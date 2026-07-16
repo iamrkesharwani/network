@@ -97,6 +97,18 @@ export const routes: RouteObject[] = [
                     element: <SettingsPage />,
                   },
                   {
+                    path: CLIENT_ROUTES.SETTINGS_MY_INFO_BASIC,
+                    element: <SettingsPage />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.SETTINGS_MY_INFO_PERSONAL,
+                    element: <SettingsPage />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.SETTINGS_MY_INFO_CONTACT,
+                    element: <SettingsPage />,
+                  },
+                  {
                     path: CLIENT_ROUTES.SETTINGS_PREFERENCES,
                     element: <SettingsPage />,
                   },
