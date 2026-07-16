@@ -6,7 +6,11 @@ interface PreferenceSwitchProps {
   onChange: (checked: boolean) => void;
 }
 
-const PreferenceSwitch = ({ label, checked, onChange }: PreferenceSwitchProps) => (
+const PreferenceSwitch = ({
+  label,
+  checked,
+  onChange,
+}: PreferenceSwitchProps) => (
   <button
     type="button"
     role="switch"
@@ -20,8 +24,8 @@ const PreferenceSwitch = ({ label, checked, onChange }: PreferenceSwitchProps) =
   >
     <span
       className={cn(
-        'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform',
-        checked ? 'translate-x-5' : 'translate-x-0.5'
+        'absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform',
+        checked ? 'translate-x-5' : 'translate-x-0'
       )}
     />
   </button>
