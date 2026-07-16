@@ -10,7 +10,7 @@ import SettingsNav from '../components/general/SettingsNav';
 import SettingsMobileMenu from '../components/general/SettingsMobileMenu';
 import SettingsMobileTabScreen from '../components/general/SettingsMobileTabScreen';
 import MyInfoTab from './tabs/myInfo/MyInfoTab';
-import PreferencesTab from './tabs/PreferencesTab';
+import PreferencesTab from './tabs/preference/PreferencesTab';
 import AccountTab from './tabs/account/AccountTab';
 
 const renderTabContent = (tab: SettingsTab) => (

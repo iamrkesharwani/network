@@ -101,7 +101,7 @@ const BasicInfoCard = () => {
         </p>
       )}
 
-      <Button type="submit" isLoading={isLoading}>
+      <Button className="w-full sm:w-auto" type="submit" isLoading={isLoading}>
         Save
       </Button>
 

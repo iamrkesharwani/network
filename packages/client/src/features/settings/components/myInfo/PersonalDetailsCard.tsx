@@ -175,7 +175,7 @@ const PersonalDetailsCard = () => {
         </p>
       )}
 
-      <Button type="submit" isLoading={isLoading}>
+      <Button type="submit" isLoading={isLoading} className="w-full sm:w-auto">
         Save
       </Button>
 
