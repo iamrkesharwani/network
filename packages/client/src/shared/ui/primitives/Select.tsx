@@ -7,6 +7,7 @@ export interface SelectOption<T extends string> {
   value: T;
   label: string;
   icon?: ComponentType<{ className?: string }>;
+  disabled?: boolean;
 }
 
 interface SelectProps<T extends string> {
@@ -120,15 +121,24 @@ function Select<T extends string>({
                   type="button"
                   role="option"
                   aria-selected={isSelected}
+                  disabled={option.disabled}
+                  aria-disabled={option.disabled}
                   onClick={() => {
+                    if (option.disabled) return;
                     onChange(option.value);
                     setIsOpen(false);
                   }}
                   className={cn(
-                    'flex w-full items-center justify-between gap-2 px-3.5 py-2 text-left text-sm transition-colors cursor-pointer',
-                    isSelected
+                    'flex w-full items-center justify-between gap-2 px-3.5 py-2 text-left text-sm transition-colors',
+                    option.disabled
+                      ? 'cursor-not-allowed text-text-muted/40'
+                      : 'cursor-pointer',
+                    !option.disabled && isSelected
                       ? 'bg-primary-muted text-primary'
-                      : 'text-text-primary hover:bg-surface-overlay'
+                      : '',
+                    !option.disabled && !isSelected
+                      ? 'text-text-primary hover:bg-surface-overlay'
+                      : ''
                   )}
                 >
                   <span className="flex min-w-0 items-center gap-2">
@@ -137,7 +147,9 @@ function Select<T extends string>({
                     )}
                     <span className="whitespace-nowrap">{option.label}</span>
                   </span>
-                  {isSelected && <Check className="h-3.5 w-3.5 shrink-0" />}
+                  {isSelected && !option.disabled && (
+                    <Check className="h-3.5 w-3.5 shrink-0" />
+                  )}
                 </button>
               );
             })}

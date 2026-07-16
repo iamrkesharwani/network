@@ -31,14 +31,32 @@ const CalendarMonthHeader = ({
     (_, i) => latestYear - i
   );
 
+  const monthValue = (date: Date) => date.getFullYear() * 12 + date.getMonth();
+  const anchorValue = monthValue(monthAnchor);
+  const isPrevDisabled = minDate ? anchorValue <= monthValue(minDate) : false;
+  const isNextDisabled = maxDate ? anchorValue >= monthValue(maxDate) : false;
+
+  const selectedYear = monthAnchor.getFullYear();
+  const isMonthDisabled = (monthIndex: number) => {
+    const candidateValue = selectedYear * 12 + monthIndex;
+    if (minDate && candidateValue < monthValue(minDate)) return true;
+    if (maxDate && candidateValue > monthValue(maxDate)) return true;
+    return false;
+  };
+
   return (
     <div className="mb-2 flex items-center gap-2">
       <button
         type="button"
         onClick={onPrevMonth}
+        disabled={isPrevDisabled}
         aria-label="Previous month"
+        aria-disabled={isPrevDisabled}
         className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-icon transition-colors hover:bg-surface-overlay hover:text-icon-hover'
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-icon transition-colors',
+          isPrevDisabled
+            ? 'cursor-not-allowed opacity-30'
+            : 'hover:bg-surface-overlay hover:text-icon-hover'
         )}
       >
         <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
@@ -47,7 +65,11 @@ const CalendarMonthHeader = ({
       <Select
         value={MONTH_LABELS[monthAnchor.getMonth()]}
         onChange={(label) => onSelectMonth(MONTH_LABELS.indexOf(label))}
-        options={MONTH_LABELS.map((label) => ({ value: label, label }))}
+        options={MONTH_LABELS.map((label, index) => ({
+          value: label,
+          label,
+          disabled: isMonthDisabled(index),
+        }))}
         triggerLabel={MONTH_SHORT_LABELS[monthAnchor.getMonth()]}
         containerClassName="mb-0 min-w-[76px] flex-1"
       />
@@ -65,9 +87,14 @@ const CalendarMonthHeader = ({
       <button
         type="button"
         onClick={onNextMonth}
+        disabled={isNextDisabled}
         aria-label="Next month"
+        aria-disabled={isNextDisabled}
         className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-icon transition-colors hover:bg-surface-overlay hover:text-icon-hover'
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-icon transition-colors',
+          isNextDisabled
+            ? 'cursor-not-allowed opacity-30'
+            : 'hover:bg-surface-overlay hover:text-icon-hover'
         )}
       >
         <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
