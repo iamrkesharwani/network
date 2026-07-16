@@ -24,6 +24,20 @@ export const preferencesInitialState: PreferencesState = {
   notifications: {},
 };
 
+export const mergeWithPreferencesDefaults = (
+  partial: Partial<PreferencesState> | null | undefined
+): PreferencesState => ({
+  ...preferencesInitialState,
+  ...partial,
+  appearance: { ...preferencesInitialState.appearance, ...partial?.appearance },
+  layout: { ...preferencesInitialState.layout, ...partial?.layout },
+  playback: { ...preferencesInitialState.playback, ...partial?.playback },
+  notifications: {
+    ...preferencesInitialState.notifications,
+    ...partial?.notifications,
+  },
+});
+
 export type SetPreferenceSectionAction =
   | { section: 'appearance'; patch: Partial<IPreferencesAppearance> }
   | { section: 'layout'; patch: Partial<IPreferencesLayout> }
@@ -72,7 +86,7 @@ const preferencesSlice = createSlice({
       }
     },
     hydratePreferences: (_state, action: PayloadAction<PreferencesState>) =>
-      action.payload,
+      mergeWithPreferencesDefaults(action.payload),
   },
 });
 
