@@ -1,26 +1,19 @@
-import {
-  PROFILE_VIEW_MODE_STORAGE_KEY,
-  type ProfileContentType,
-  type ViewMode,
-} from '@network/shared';
+import type { ProfileContentType, ViewMode } from '@network/shared';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
-import { useAppSelector } from '../../../shared/hooks/useAppSelector';
-import { useDeviceSyncedPreference } from '../../user/hooks/useDeviceSyncedPreference';
+import { usePreference } from '../../settings/hooks/usePreference';
+
+const DEFAULT_VIEW_MODE: ViewMode = 'grid';
 
 export const useProfileViewMode = (
   contentType: ProfileContentType
 ): [ViewMode, (mode: ViewMode) => void] => {
   const isMobile = useIsMobileLayout();
-  const dbValue = useAppSelector(
-    (state) => state.auth.user?.preferences?.profileViewMode?.[contentType]
-  );
+  const [layout, setLayout] = usePreference('layout');
+  const viewMode = layout.profileViewMode?.[contentType] ?? DEFAULT_VIEW_MODE;
 
-  const [viewMode, setViewMode] = useDeviceSyncedPreference<ViewMode>({
-    storageKey: `${PROFILE_VIEW_MODE_STORAGE_KEY}:${contentType}`,
-    defaultValue: 'grid',
-    dbValue,
-    toPatch: (mode) => ({ profileViewMode: { [contentType]: mode } }),
-  });
+  const setViewMode = (mode: ViewMode) => {
+    setLayout({ profileViewMode: { [contentType]: mode } });
+  };
 
-  return [isMobile ? viewMode : 'grid', setViewMode];
+  return [isMobile ? viewMode : DEFAULT_VIEW_MODE, setViewMode];
 };

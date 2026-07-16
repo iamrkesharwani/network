@@ -1,16 +1,27 @@
 import type { ReactNode } from 'react';
-import { SIDEBAR_COLLAPSED_STORAGE_KEY } from '@network/shared';
+import { PREFERENCES_STORAGE_KEY } from '@network/shared';
 import Skeleton from './Skeleton';
 
 interface AppShellSkeletonProps {
   children?: ReactNode;
 }
 
+const readIsSidebarCollapsed = (): boolean => {
+  if (typeof window === 'undefined') return true;
+  try {
+    const raw = localStorage.getItem(PREFERENCES_STORAGE_KEY);
+    if (!raw) return true;
+    const stored = JSON.parse(raw) as {
+      appearance?: { sidebarCollapsed?: boolean };
+    };
+    return stored.appearance?.sidebarCollapsed !== false;
+  } catch {
+    return true;
+  }
+};
+
 const AppShellSkeleton = ({ children }: AppShellSkeletonProps) => {
-  const isCollapsed =
-    typeof window === 'undefined'
-      ? true
-      : localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) !== 'false';
+  const isCollapsed = readIsSidebarCollapsed();
   const sidebarWidth = isCollapsed ? 'w-14' : 'w-56';
   return (
     <div

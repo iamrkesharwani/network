@@ -7,8 +7,6 @@ import {
   USERNAME_MIN_LENGTH,
   USERNAME_MAX_LENGTH,
   BIO_MAX_LENGTH,
-  THEMES,
-  VIEW_MODES,
   type IUser,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
@@ -18,24 +16,6 @@ export interface IUserDocument extends IUser, Document {
   googleId?: string;
   searchTokens: string[];
 }
-
-const profileViewModeSchema = new Schema(
-  {
-    video: { type: String, enum: VIEW_MODES },
-    short: { type: String, enum: VIEW_MODES },
-    post: { type: String, enum: VIEW_MODES },
-  },
-  { _id: false }
-);
-
-const preferencesSchema = new Schema(
-  {
-    theme: { type: String, enum: THEMES },
-    sidebarCollapsed: { type: Boolean },
-    profileViewMode: { type: profileViewModeSchema, default: undefined },
-  },
-  { _id: false }
-);
 
 const userSchema = new Schema<IUserDocument>(
   {
@@ -96,7 +76,6 @@ const userSchema = new Schema<IUserDocument>(
       sparse: true,
       unique: true,
     },
-    preferences: { type: preferencesSchema, default: undefined },
     searchTokens: {
       type: [String],
       default: [],

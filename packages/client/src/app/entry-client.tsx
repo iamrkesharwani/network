@@ -11,6 +11,9 @@ import App from './App';
 import '../index.css';
 import { routes } from './routes/AppRoutes';
 import SessionResolver from '../shared/lib/sessionResolver';
+import PreferencesSync from '../features/settings/PreferencesSync';
+import { preferencesInitialState } from '../features/settings/preferencesSlice';
+import { readStoredPreferences } from '../features/settings/lib/preferencesStorage';
 
 const store = createAppStore({
   auth: {
@@ -19,6 +22,7 @@ const store = createAppStore({
     isAuthenticated: false,
     isInitialized: false,
   },
+  preferences: readStoredPreferences() ?? preferencesInitialState,
 });
 
 const router = createBrowserRouter(routes);
@@ -29,6 +33,7 @@ hydrateRoot(
     <Provider store={store}>
       <App>
         <SessionResolver store={store} />
+        <PreferencesSync />
         <RouterProvider router={router} />
       </App>
     </Provider>

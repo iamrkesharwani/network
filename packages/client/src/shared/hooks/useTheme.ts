@@ -1,20 +1,22 @@
-import { THEME_STORAGE_KEY, type Theme } from '@network/shared';
-import { useAppSelector } from './useAppSelector';
-import { useDeviceSyncedPreference } from '../../features/user/hooks/useDeviceSyncedPreference';
+import { useCallback } from 'react';
+import type { Theme } from '@network/shared';
+import { usePreference } from '../../features/settings/hooks/usePreference';
+
+const DEFAULT_THEME: Theme = 'dark';
 
 export const useTheme = () => {
-  const dbValue = useAppSelector((state) => state.auth.user?.preferences?.theme);
-  const [theme, setTheme] = useDeviceSyncedPreference<Theme>({
-    storageKey: THEME_STORAGE_KEY,
-    defaultValue: 'dark',
-    dbValue,
-    toPatch: (value) => ({ theme: value }),
-  });
+  const [appearance, setAppearance] = usePreference('appearance');
+  const theme = appearance.theme ?? DEFAULT_THEME;
+
+  const set = useCallback(
+    (next: Theme) => setAppearance({ theme: next }),
+    [setAppearance]
+  );
 
   return {
     theme,
     isDark: theme === 'dark',
-    toggle: () => setTheme(theme === 'light' ? 'dark' : 'light'),
-    set: setTheme,
+    toggle: () => set(theme === 'light' ? 'dark' : 'light'),
+    set,
   };
 };

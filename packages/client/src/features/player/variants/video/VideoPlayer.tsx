@@ -8,9 +8,8 @@ import {
 import { Lock } from 'lucide-react';
 import type { IVideoResponse } from '@network/shared';
 import { cn } from '../../../../shared/utils/cn';
-import { useAppDispatch } from '../../../../shared/hooks/useAppDispatch';
 import { useAuth } from '../../../auth/useAuth';
-import { setVolumePreference } from '../../store/playerSlice';
+import { usePreference } from '../../../settings/hooks/usePreference';
 import { useVideoSource } from '../../core/useVideoSource';
 import { useMediaEngine } from '../../core/useMediaEngine';
 import { useKeyboardShortcuts } from '../../core/useKeyboardShortcuts';
@@ -48,8 +47,8 @@ const VideoPlayer = ({
   const touchLayerRef = useRef<TouchInactivityLayerHandle>(null);
   const lockLayerRef = useRef<TouchInactivityLayerHandle>(null);
 
-  const dispatch = useAppDispatch();
   const { user } = useAuth();
+  const [playback, setPlayback] = usePreference('playback');
 
   const {
     state: sourceState,
@@ -62,9 +61,16 @@ const VideoPlayer = ({
     video.captions
   );
 
+  const hasAppliedInitialVolumeRef = useRef(false);
   useEffect(() => {
-    dispatch(setVolumePreference(engine.volume));
-  }, [dispatch, engine.volume]);
+    if (hasAppliedInitialVolumeRef.current) return;
+    hasAppliedInitialVolumeRef.current = true;
+    if (playback.volume !== undefined) engine.setVolume(playback.volume);
+  }, [playback.volume, engine]);
+
+  useEffect(() => {
+    setPlayback({ volume: engine.volume });
+  }, [engine.volume, setPlayback]);
 
   usePictureInPictureSync(videoRef);
 

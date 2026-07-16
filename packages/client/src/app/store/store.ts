@@ -7,7 +7,8 @@ import { postApi } from '../../features/post/postApi';
 import { creatorApi } from '../../features/creator/creatorApi';
 import { uploadApi } from '../../features/upload/uploadApi';
 import { feedApi } from '../../features/feed/feedApi';
-import { userApi } from '../../features/user/userApi';
+import { preferencesApi } from '../../features/settings/preferencesApi';
+import { preferencesSyncMiddleware } from '../../features/settings/preferencesSyncMiddleware';
 import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
@@ -26,11 +27,12 @@ export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
         creatorApi.middleware,
         uploadApi.middleware,
         feedApi.middleware,
-        userApi.middleware,
+        preferencesApi.middleware,
         searchApi.middleware,
         historyApi.middleware,
         reportApi.middleware,
-        juryApi.middleware
+        juryApi.middleware,
+        preferencesSyncMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',
   });

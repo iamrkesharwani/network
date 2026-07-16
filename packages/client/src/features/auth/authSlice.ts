@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { authApi } from './authApi';
-import { userApi } from '../user/userApi';
 import type { IUser } from '@network/shared';
 
 interface AuthState {
@@ -68,15 +67,7 @@ const authSlice = createSlice({
         if (state.user) {
           state.user.isEmailVerified = true;
         }
-      })
-      .addMatcher(
-        userApi.endpoints.updatePreferences.matchFulfilled,
-        (state, action) => {
-          if (state.user) {
-            state.user.preferences = action.payload.data;
-          }
-        }
-      );
+      });
   },
 });
 

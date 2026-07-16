@@ -7,7 +7,7 @@ import {
   type TouchEvent as ReactTouchEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
-import { PLAYER_VOLUME_STEP, PLAYER_VOLUME_STORAGE_KEY } from '@network/shared';
+import { PLAYER_VOLUME_STEP } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 
 interface VolumeSliderProps {
@@ -37,20 +37,6 @@ const VolumeSlider = ({
   onVolumeChangeRef.current = onVolumeChange;
 
   const [isDragging, setIsDragging] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(PLAYER_VOLUME_STORAGE_KEY);
-    const parsed = stored !== null ? Number(stored) : NaN;
-    if (Number.isFinite(parsed) && parsed > 0 && parsed <= 1) {
-      onVolumeChangeRef.current(parsed);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (volume > 0) {
-      localStorage.setItem(PLAYER_VOLUME_STORAGE_KEY, String(volume));
-    }
-  }, [volume]);
 
   const displayedVolume = isMuted ? 0 : volume;
 

@@ -4,6 +4,7 @@ import videoReducer from '../../features/video/videoSlice';
 import shortReducer from '../../features/short/shortSlice';
 import uploadReducer from '../../features/upload/uploadSlice';
 import playerReducer from '../../features/player/store/playerSlice';
+import preferencesReducer from '../../features/settings/preferencesSlice';
 import { authApi } from '../../features/auth/authApi';
 import { videoApi } from '../../features/video/videoApi';
 import { shortApi } from '../../features/short/shortApi';
@@ -11,7 +12,7 @@ import { postApi } from '../../features/post/postApi';
 import { creatorApi } from '../../features/creator/creatorApi';
 import { uploadApi } from '../../features/upload/uploadApi';
 import { feedApi } from '../../features/feed/feedApi';
-import { userApi } from '../../features/user/userApi';
+import { preferencesApi } from '../../features/settings/preferencesApi';
 import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
   short: shortReducer,
   upload: uploadReducer,
   player: playerReducer,
+  preferences: preferencesReducer,
   [authApi.reducerPath]: authApi.reducer,
   [videoApi.reducerPath]: videoApi.reducer,
   [shortApi.reducerPath]: shortApi.reducer,
@@ -30,7 +32,7 @@ const rootReducer = combineReducers({
   [creatorApi.reducerPath]: creatorApi.reducer,
   [uploadApi.reducerPath]: uploadApi.reducer,
   [feedApi.reducerPath]: feedApi.reducer,
-  [userApi.reducerPath]: userApi.reducer,
+  [preferencesApi.reducerPath]: preferencesApi.reducer,
   [searchApi.reducerPath]: searchApi.reducer,
   [historyApi.reducerPath]: historyApi.reducer,
   [reportApi.reducerPath]: reportApi.reducer,
