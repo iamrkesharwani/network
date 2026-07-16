@@ -72,6 +72,19 @@ const VideoPlayer = ({
     setPlayback({ volume: engine.volume });
   }, [engine.volume, setPlayback]);
 
+  const hasAppliedInitialPlaybackRateRef = useRef(false);
+  useEffect(() => {
+    if (hasAppliedInitialPlaybackRateRef.current) return;
+    hasAppliedInitialPlaybackRateRef.current = true;
+    if (playback.playbackRate !== undefined) {
+      engine.setPlaybackRate(playback.playbackRate);
+    }
+  }, [playback.playbackRate, engine]);
+
+  useEffect(() => {
+    setPlayback({ playbackRate: engine.playbackRate });
+  }, [engine.playbackRate, setPlayback]);
+
   usePictureInPictureSync(videoRef);
 
   useTelemetry({
