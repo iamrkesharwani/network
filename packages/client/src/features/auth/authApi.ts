@@ -7,6 +7,8 @@ import type {
   CompleteResetPasswordInput,
   UserRegistrationInput,
   ChangePasswordInput,
+  ChangeEmailInput,
+  ConfirmEmailChangeInput,
   IUser,
   ApiResponse,
 } from '@network/shared';
@@ -81,6 +83,23 @@ export const authApi = createApi({
         data,
       }),
     }),
+    requestEmailChange: builder.mutation<ApiResponse<null>, ChangeEmailInput>({
+      query: (data) => ({
+        url: '/change-email/request',
+        method: 'POST',
+        data,
+      }),
+    }),
+    confirmEmailChange: builder.mutation<
+      ApiResponse<IUser>,
+      ConfirmEmailChangeInput
+    >({
+      query: (data) => ({
+        url: '/change-email/confirm',
+        method: 'POST',
+        data,
+      }),
+    }),
   }),
 });
 
@@ -93,4 +112,6 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useChangePasswordMutation,
+  useRequestEmailChangeMutation,
+  useConfirmEmailChangeMutation,
 } = authApi;

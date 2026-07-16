@@ -7,10 +7,13 @@ import {
   personalDetailsSchema,
   contactLinksSchema,
 } from '../schemas/user.schema.js';
+import { captureLocationSchema } from '../schemas/location.schema.js';
 import { AUTH_PROVIDERS } from '../constants/auth.constants.js';
 import {
   USER_ROLES,
   type GenderOption,
+  type RelationshipStatus,
+  type SocialPlatform,
   type UserStatus,
 } from '../constants/user.constants.js';
 
@@ -20,10 +23,22 @@ export type UsernameParam = z.infer<typeof usernameParamSchema>;
 export type BasicProfileInput = z.infer<typeof basicProfileSchema>;
 export type PersonalDetailsInput = z.infer<typeof personalDetailsSchema>;
 export type ContactLinksInput = z.infer<typeof contactLinksSchema>;
+export type CaptureLocationInput = z.infer<typeof captureLocationSchema>;
 
 export interface IUserSocialLink {
-  platform: string;
+  platform: SocialPlatform;
   url: string;
+}
+
+export interface IUserPhone {
+  dialCode: string;
+  number: string;
+}
+
+export interface IUserLocationEntry {
+  lat: number;
+  lng: number;
+  capturedAt: Date;
 }
 
 export interface IUser {
@@ -41,10 +56,11 @@ export interface IUser {
   gender?: GenderOption;
   genderSelfDescribe?: string;
   pronouns?: string;
-  location?: string;
+  relationshipStatus?: RelationshipStatus;
+  location?: IUserLocationEntry[];
   website?: string;
   socialLinks?: IUserSocialLink[];
-  phone?: string;
+  phone?: IUserPhone;
   isMinor?: boolean;
   status: UserStatus;
   deactivatedAt?: Date | null;

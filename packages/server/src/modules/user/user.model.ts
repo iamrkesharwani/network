@@ -3,8 +3,11 @@ import {
   USER_ROLES,
   AUTH_PROVIDERS,
   GENDER_OPTIONS,
+  RELATIONSHIP_STATUSES,
   USER_STATUSES,
   DEFAULT_USER_STATUS,
+  SOCIAL_PLATFORMS,
+  LOCATION_TRAIL_MAX_ENTRIES,
   EMAIL_MAX_LENGTH,
   NAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
@@ -12,11 +15,9 @@ import {
   BIO_MAX_LENGTH,
   GENDER_SELF_DESCRIBE_MAX_LENGTH,
   PRONOUNS_MAX_LENGTH,
-  LOCATION_MAX_LENGTH,
   WEBSITE_MAX_LENGTH,
-  PHONE_MAX_LENGTH,
+  PHONE_NUMBER_MAX_LENGTH,
   SOCIAL_LINKS_MAX,
-  SOCIAL_LINK_PLATFORM_MAX_LENGTH,
   type IUser,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
@@ -29,8 +30,25 @@ export interface IUserDocument extends IUser, Document {
 
 const socialLinkSchema = new Schema(
   {
-    platform: { type: String, maxlength: SOCIAL_LINK_PLATFORM_MAX_LENGTH },
+    platform: { type: String, enum: SOCIAL_PLATFORMS },
     url: { type: String },
+  },
+  { _id: false }
+);
+
+const phoneSchema = new Schema(
+  {
+    dialCode: { type: String },
+    number: { type: String, maxlength: PHONE_NUMBER_MAX_LENGTH },
+  },
+  { _id: false }
+);
+
+const locationEntrySchema = new Schema(
+  {
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true },
+    capturedAt: { type: Date, required: true },
   },
   { _id: false }
 );
@@ -115,10 +133,18 @@ const userSchema = new Schema<IUserDocument>(
       trim: true,
       maxlength: PRONOUNS_MAX_LENGTH,
     },
-    location: {
+    relationshipStatus: {
       type: String,
-      trim: true,
-      maxlength: LOCATION_MAX_LENGTH,
+      enum: RELATIONSHIP_STATUSES,
+    },
+    location: {
+      type: [locationEntrySchema],
+      default: undefined,
+      validate: {
+        validator: (entries: unknown[]) =>
+          entries.length <= LOCATION_TRAIL_MAX_ENTRIES,
+        message: `Cannot exceed ${LOCATION_TRAIL_MAX_ENTRIES} location entries.`,
+      },
     },
     website: {
       type: String,
@@ -134,9 +160,8 @@ const userSchema = new Schema<IUserDocument>(
       },
     },
     phone: {
-      type: String,
-      trim: true,
-      maxlength: PHONE_MAX_LENGTH,
+      type: phoneSchema,
+      default: undefined,
     },
     status: {
       type: String,

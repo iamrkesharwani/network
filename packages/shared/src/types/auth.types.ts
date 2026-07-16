@@ -6,6 +6,7 @@ import {
   completeResetPasswordSchema,
   changePasswordSchema,
   changeEmailSchema,
+  confirmEmailChangeSchema,
   refreshSchema,
 } from '../schemas/auth.schema.js';
 import { AUTH_PROVIDERS } from '../constants/auth.constants.js'; 
@@ -20,6 +21,7 @@ export type CompleteResetPasswordInput = z.infer<
 >;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type ChangeEmailInput = z.infer<typeof changeEmailSchema>;
+export type ConfirmEmailChangeInput = z.infer<typeof confirmEmailChangeSchema>;
 export type RefreshInput = z.infer<typeof refreshSchema>;
 
 export type OAuthProvider = Exclude<(typeof AUTH_PROVIDERS)[number], 'local'>;

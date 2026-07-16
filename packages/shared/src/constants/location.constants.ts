@@ -1,0 +1,1 @@
+export const LOCATION_TRAIL_MAX_ENTRIES = 20;

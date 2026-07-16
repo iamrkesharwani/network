@@ -1,16 +1,27 @@
-import { useFieldArray } from 'react-hook-form';
+import { Controller, useFieldArray } from 'react-hook-form';
+import { motion } from 'framer-motion';
 import { X, Plus } from 'lucide-react';
 import {
   contactLinksSchema,
   SOCIAL_LINKS_MAX,
+  SOCIAL_PLATFORMS,
   type ContactLinksInput,
 } from '@network/shared';
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchContactLinksMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
 import FloatingInput from '../../../upload/components/FloatingInput';
+import Select from '../../../../shared/ui/primitives/Select';
 import Button from '../../../../shared/ui/primitives/Button';
 import MyInfoFormHeader from './MyInfoFormHeader';
+import LocationSection from './LocationSection';
+import { socialPlatformMeta } from '../../utils/socialPlatformMeta';
+
+const socialPlatformOptions = SOCIAL_PLATFORMS.map((platform) => ({
+  value: platform,
+  label: socialPlatformMeta[platform].label,
+  icon: socialPlatformMeta[platform].icon,
+}));
 
 const ContactLinksCard = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -25,10 +36,8 @@ const ContactLinksCard = () => {
   } = useMediaEditForm<ContactLinksInput, ContactLinksInput>({
     schema: contactLinksSchema,
     defaultValues: {
-      location: user?.location ?? '',
       website: user?.website ?? '',
       socialLinks: user?.socialLinks ?? [],
-      phone: user?.phone ?? '',
     },
     completenessRules: [],
   });
@@ -45,26 +54,24 @@ const ContactLinksCard = () => {
   if (!user) return null;
 
   return (
-    <form onSubmit={onSubmit} className="max-w-lg">
+    <motion.form
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      onSubmit={onSubmit}
+      className="max-w-2xl"
+    >
       <MyInfoFormHeader title="Contact & Links" />
 
-      <FloatingInput
-        label="Location"
-        {...register('location')}
-        error={errors.location?.message}
-      />
+      <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+        <LocationSection />
 
-      <FloatingInput
-        label="Website"
-        {...register('website')}
-        error={errors.website?.message}
-      />
-
-      <FloatingInput
-        label="Phone"
-        {...register('phone')}
-        error={errors.phone?.message}
-      />
+        <FloatingInput
+          label="Website"
+          {...register('website')}
+          error={errors.website?.message}
+        />
+      </div>
 
       <div className="mb-6">
         <p className="mb-2.5 text-sm font-medium text-text-secondary">
@@ -73,11 +80,18 @@ const ContactLinksCard = () => {
 
         {fields.map((field, index) => (
           <div key={field.id} className="mb-3 flex items-start gap-2">
-            <FloatingInput
-              label="Platform"
-              containerClassName="mb-0 w-32 shrink-0"
-              {...register(`socialLinks.${index}.platform`)}
-              error={errors.socialLinks?.[index]?.platform?.message}
+            <Controller
+              control={control}
+              name={`socialLinks.${index}.platform`}
+              render={({ field: platformField }) => (
+                <Select
+                  value={platformField.value}
+                  onChange={platformField.onChange}
+                  options={socialPlatformOptions}
+                  containerClassName="mb-0 w-40 shrink-0"
+                  error={errors.socialLinks?.[index]?.platform?.message}
+                />
+              )}
             />
             <FloatingInput
               label="URL"
@@ -99,7 +113,7 @@ const ContactLinksCard = () => {
         {fields.length < SOCIAL_LINKS_MAX && (
           <button
             type="button"
-            onClick={() => append({ platform: '', url: '' })}
+            onClick={() => append({ platform: 'x', url: '' })}
             className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover"
           >
             <Plus className="h-4 w-4" />
@@ -117,7 +131,7 @@ const ContactLinksCard = () => {
       <Button type="submit" isLoading={isLoading}>
         Save
       </Button>
-    </form>
+    </motion.form>
   );
 };
 

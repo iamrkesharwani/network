@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { basicProfileSchema, type BasicProfileInput } from '@network/shared';
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchBasicProfileMutation } from '../../settingsApi';
@@ -8,6 +9,8 @@ import Button from '../../../../shared/ui/primitives/Button';
 import AvatarEditor from '../AvatarEditor';
 import UsernameField from '../UsernameField';
 import MyInfoFormHeader from './MyInfoFormHeader';
+import EmailChangeField from './EmailChangeField';
+import PhoneField from './PhoneField';
 
 const BasicInfoCard = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -15,6 +18,7 @@ const BasicInfoCard = () => {
 
   const {
     register,
+    control,
     watch,
     formState: { errors },
     submitError,
@@ -25,6 +29,7 @@ const BasicInfoCard = () => {
       name: user?.name ?? '',
       username: user?.username ?? '',
       bio: user?.bio ?? '',
+      phone: user?.phone,
     },
     completenessRules: [],
   });
@@ -32,32 +37,46 @@ const BasicInfoCard = () => {
   const bio = watch('bio') ?? '';
 
   const onSubmit = submit(async (data) => {
-    await patchBasicProfile({
-      name: data.name,
-      username: data.username,
-      bio: data.bio,
-    }).unwrap();
+    await patchBasicProfile(data).unwrap();
   });
 
   if (!user) return null;
 
   return (
-    <form onSubmit={onSubmit} className="max-w-lg">
-      <MyInfoFormHeader title="Basic" />
+    <motion.form
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      onSubmit={onSubmit}
+      className="max-w-2xl"
+    >
+      <MyInfoFormHeader title="Basic info" />
 
-      <AvatarEditor currentAvatarUrl={user.avatarUrl} name={user.name} />
+      <div className="mb-6 flex justify-center">
+        <AvatarEditor currentAvatarUrl={user.avatarUrl} name={user.name} />
+      </div>
 
-      <FloatingInput
-        label="Name"
-        {...register('name')}
-        error={errors.name?.message}
-      />
+      <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+        <FloatingInput
+          label="Name"
+          {...register('name')}
+          error={errors.name?.message}
+        />
 
-      <UsernameField
-        registration={register('username')}
-        error={errors.username?.message}
-        usernameChangedAt={user.usernameChangedAt}
-      />
+        <UsernameField
+          registration={register('username')}
+          error={errors.username?.message}
+          usernameChangedAt={user.usernameChangedAt}
+        />
+
+        <EmailChangeField />
+
+        <PhoneField
+          control={control}
+          errors={errors}
+          hasExistingPhone={Boolean(user.phone?.number)}
+        />
+      </div>
 
       <FloatingTextarea
         label="Bio"
@@ -76,7 +95,7 @@ const BasicInfoCard = () => {
       <Button type="submit" isLoading={isLoading}>
         Save
       </Button>
-    </form>
+    </motion.form>
   );
 };
 

@@ -18,13 +18,15 @@ export const loginSchema = z.object({
   password: currentPasswordValidation,
 });
 
+export const otpCodeSchema = z
+  .string()
+  .min(1, 'OTP is required.')
+  .length(6, 'OTP must be exactly 6 digits.')
+  .regex(/^\d+$/, 'OTP must contain only numbers.');
+
 export const verifyEmailSchema = z.object({
   email: emailValidation,
-  otp: z
-    .string()
-    .min(1, 'OTP is required.')
-    .length(6, 'OTP must be exactly 6 digits.')
-    .regex(/^\d+$/, 'OTP must contain only numbers.'),
+  otp: otpCodeSchema,
 });
 
 export const requestResetPasswordSchema = z.object({
@@ -33,11 +35,7 @@ export const requestResetPasswordSchema = z.object({
 
 export const completeResetPasswordSchema = z.object({
   email: emailValidation,
-  otp: z
-    .string()
-    .min(1, 'OTP is required.')
-    .length(6, 'OTP must be exactly 6 digits.')
-    .regex(/^\d+$/, 'OTP must contain only numbers.'),
+  otp: otpCodeSchema,
   newPassword: passwordValidation,
 });
 
@@ -54,6 +52,11 @@ export const changePasswordSchema = z
 export const changeEmailSchema = z.object({
   newEmail: emailValidation,
   password: currentPasswordValidation,
+});
+
+export const confirmEmailChangeSchema = z.object({
+  oldEmailOtp: otpCodeSchema,
+  newEmailOtp: otpCodeSchema,
 });
 
 export const refreshSchema = z.object({

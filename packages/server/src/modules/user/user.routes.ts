@@ -7,8 +7,10 @@ import {
   basicProfileSchema,
   personalDetailsSchema,
   contactLinksSchema,
+  captureLocationSchema,
 } from '@network/shared';
 import * as profileController from './controllers/profile.controller.js';
+import * as locationController from './controllers/location.controller.js';
 
 const router = Router();
 
@@ -39,6 +41,13 @@ router.post(
   uploadLimiter,
   uploadAvatarMiddleware,
   profileController.uploadAvatar
+);
+
+router.post(
+  '/location/capture',
+  requireAuth,
+  validate({ body: captureLocationSchema }),
+  locationController.captureLocation
 );
 
 export default router;

@@ -6,6 +6,7 @@ import type {
   BasicProfileInput,
   PersonalDetailsInput,
   ContactLinksInput,
+  CaptureLocationInput,
 } from '@network/shared';
 
 export const settingsApi = createApi({
@@ -32,6 +33,9 @@ export const settingsApi = createApi({
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
     }),
+    captureLocation: builder.mutation<ApiResponse<IUser>, CaptureLocationInput>({
+      query: (data) => ({ url: '/location/capture', method: 'POST', data }),
+    }),
   }),
 });
 
@@ -40,4 +44,5 @@ export const {
   usePatchPersonalDetailsMutation,
   usePatchContactLinksMutation,
   useUploadAvatarMutation,
+  useCaptureLocationMutation,
 } = settingsApi;

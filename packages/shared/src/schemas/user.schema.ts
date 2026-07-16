@@ -10,13 +10,13 @@ import {
   NAME_MIN_LENGTH,
   MIN_AGE_YEARS,
   GENDER_OPTIONS,
+  RELATIONSHIP_STATUSES,
   GENDER_SELF_DESCRIBE_MAX_LENGTH,
   PRONOUNS_MAX_LENGTH,
-  LOCATION_MAX_LENGTH,
   WEBSITE_MAX_LENGTH,
-  PHONE_MAX_LENGTH,
+  PHONE_NUMBER_MAX_LENGTH,
   SOCIAL_LINKS_MAX,
-  SOCIAL_LINK_PLATFORM_MAX_LENGTH,
+  SOCIAL_PLATFORMS,
 } from '../constants/user.constants.js';
 
 export const userRegistrationSchema = z.object({
@@ -104,8 +104,21 @@ export const userProfileUpdateSchema = z.object({
     .optional(),
 });
 
+export const phoneSchema = z.object({
+  dialCode: z.string().trim().min(1, 'Country code is required.'),
+  number: z
+    .string()
+    .trim()
+    .max(
+      PHONE_NUMBER_MAX_LENGTH,
+      `Cannot exceed ${PHONE_NUMBER_MAX_LENGTH} digits.`
+    )
+    .regex(/^\d*$/, 'Phone number can only contain digits.'),
+});
+
 export const basicProfileSchema = userProfileUpdateSchema.extend({
   username: userRegistrationSchema.shape.username,
+  phone: phoneSchema.optional(),
 });
 
 const latestAllowedBirthDate = () => {
@@ -137,10 +150,11 @@ export const personalDetailsSchema = z
       .trim()
       .max(PRONOUNS_MAX_LENGTH, `Cannot exceed ${PRONOUNS_MAX_LENGTH} characters.`)
       .optional(),
+    relationshipStatus: z.enum(RELATIONSHIP_STATUSES).optional(),
   })
   .refine(
     (data) =>
-      data.gender !== 'self-describe' ||
+      data.gender !== 'others' ||
       (data.genderSelfDescribe && data.genderSelfDescribe.length > 0),
     {
       message: 'Please describe your gender.',
@@ -149,31 +163,14 @@ export const personalDetailsSchema = z
   );
 
 const socialLinkSchema = z.object({
-  platform: z
-    .string()
-    .trim()
-    .min(1, 'Platform is required.')
-    .max(
-      SOCIAL_LINK_PLATFORM_MAX_LENGTH,
-      `Cannot exceed ${SOCIAL_LINK_PLATFORM_MAX_LENGTH} characters.`
-    ),
+  platform: z.enum(SOCIAL_PLATFORMS),
   url: z.url('Enter a valid URL.'),
 });
 
 export const contactLinksSchema = z.object({
-  location: z
-    .string()
-    .trim()
-    .max(LOCATION_MAX_LENGTH, `Cannot exceed ${LOCATION_MAX_LENGTH} characters.`)
-    .optional(),
   website: z
     .url('Enter a valid URL.')
     .max(WEBSITE_MAX_LENGTH, `Cannot exceed ${WEBSITE_MAX_LENGTH} characters.`)
     .optional(),
   socialLinks: z.array(socialLinkSchema).max(SOCIAL_LINKS_MAX).optional(),
-  phone: z
-    .string()
-    .trim()
-    .max(PHONE_MAX_LENGTH, `Cannot exceed ${PHONE_MAX_LENGTH} characters.`)
-    .optional(),
 });

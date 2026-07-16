@@ -10,6 +10,8 @@ import {
   userRegistrationSchema,
   verifyEmailSchema,
   changePasswordSchema,
+  changeEmailSchema,
+  confirmEmailChangeSchema,
   requestResetPasswordSchema,
   completeResetPasswordSchema,
 } from '@network/shared';
@@ -17,6 +19,7 @@ import {
 import * as authCoreController from './controllers/auth.core.controller.js';
 import * as authPasswordController from './controllers/auth.password.controller.js';
 import * as authVerifyController from './controllers/auth.verify.controller.js';
+import * as authEmailChangeController from './controllers/auth.emailChange.controller.js';
 import {
   googleCallback,
   googleRedirect,
@@ -60,6 +63,22 @@ router.post(
   requireAuth,
   validate({ body: changePasswordSchema }),
   authPasswordController.changePassword
+);
+
+router.post(
+  '/change-email/request',
+  requireAuth,
+  authLimiter,
+  validate({ body: changeEmailSchema }),
+  authEmailChangeController.requestEmailChange
+);
+
+router.post(
+  '/change-email/confirm',
+  requireAuth,
+  authLimiter,
+  validate({ body: confirmEmailChangeSchema }),
+  authEmailChangeController.confirmEmailChange
 );
 
 router.post(

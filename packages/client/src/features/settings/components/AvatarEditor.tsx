@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { ImagePlus, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Camera, Loader2 } from 'lucide-react';
 import { ALLOWED_AVATAR_MIME_TYPES, MAX_AVATAR_SIZE_BYTES } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import { useUploadAvatarMutation } from '../settingsApi';
@@ -41,7 +42,7 @@ const AvatarEditor = ({ currentAvatarUrl, name }: AvatarEditorProps) => {
   };
 
   return (
-    <div className="mb-6 flex items-center gap-4">
+    <div className="flex flex-col items-center">
       <input
         ref={inputRef}
         type="file"
@@ -53,35 +54,40 @@ const AvatarEditor = ({ currentAvatarUrl, name }: AvatarEditorProps) => {
         }}
       />
 
-      <button
+      <motion.button
         type="button"
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
         onClick={() => !isLoading && inputRef.current?.click()}
-        className="relative shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+        className="group relative h-24 w-24 shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface"
         aria-label="Change avatar"
       >
-        <Avatar src={currentAvatarUrl} fallback={name} size="lg" />
+        <Avatar
+          src={currentAvatarUrl}
+          fallback={name}
+          className="h-24 w-24 text-2xl"
+        />
+
+        <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
+          <Camera className="h-6 w-6 text-white" strokeWidth={1.75} />
+        </div>
+
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
-            <Loader2 className="h-5 w-5 animate-spin text-white" />
+            <Loader2 className="h-6 w-6 animate-spin text-white" />
           </div>
         )}
-      </button>
 
-      <div>
-        <button
-          type="button"
-          onClick={() => !isLoading && inputRef.current?.click()}
-          className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover"
-        >
-          <ImagePlus className="h-4 w-4" />
-          Change photo
-        </button>
-        {error && (
-          <p role="alert" className="mt-1 text-[0.72rem] text-error">
-            {error}
-          </p>
-        )}
-      </div>
+        <span className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-surface bg-primary text-white">
+          <Camera className="h-3.5 w-3.5" strokeWidth={2} />
+        </span>
+      </motion.button>
+
+      {error && (
+        <p role="alert" className="mt-2 text-[0.72rem] text-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

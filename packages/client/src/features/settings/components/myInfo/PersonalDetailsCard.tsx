@@ -1,36 +1,42 @@
+import { Controller } from 'react-hook-form';
+import { motion } from 'framer-motion';
 import type { z } from 'zod';
 import {
   personalDetailsSchema,
   GENDER_OPTIONS,
+  RELATIONSHIP_STATUSES,
+  MIN_AGE_YEARS,
   type PersonalDetailsInput,
 } from '@network/shared';
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchPersonalDetailsMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
 import FloatingInput from '../../../upload/components/FloatingInput';
+import Select from '../../../../shared/ui/primitives/Select';
+import DatePicker from '../../../../shared/ui/calendar/DatePicker';
 import Button from '../../../../shared/ui/primitives/Button';
 import MyInfoFormHeader from './MyInfoFormHeader';
 
 const genderLabels: Record<(typeof GENDER_OPTIONS)[number], string> = {
   male: 'Male',
   female: 'Female',
-  nonbinary: 'Non-binary',
-  'self-describe': 'Prefer to self-describe',
+  others: 'Others',
   'prefer-not-to-say': 'Prefer not to say',
 };
 
-const toDateInputValue = (value: Date | string | undefined): string => {
-  if (!value) return '';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10);
+const relationshipLabels: Record<(typeof RELATIONSHIP_STATUSES)[number], string> = {
+  single: 'Single',
+  'in-a-relationship': 'In a relationship',
+  engaged: 'Engaged',
+  married: 'Married',
+  'prefer-not-to-say': 'Prefer not to say',
 };
 
-type PersonalDetailsFormValues = {
-  dateOfBirth?: string;
-  gender?: PersonalDetailsInput['gender'];
-  genderSelfDescribe?: string;
-  pronouns?: string;
-};
+const maxBirthDate = (() => {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - MIN_AGE_YEARS);
+  return date;
+})();
 
 const PersonalDetailsCard = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -39,19 +45,22 @@ const PersonalDetailsCard = () => {
 
   const {
     register,
+    control,
     watch,
     formState: { errors },
     submitError,
     submit,
-  } = useMediaEditForm<PersonalDetailsFormValues, PersonalDetailsInput>({
+  } = useMediaEditForm<PersonalDetailsInput, PersonalDetailsInput>({
     schema: personalDetailsSchema as unknown as z.ZodType<
       PersonalDetailsInput,
-      PersonalDetailsFormValues
+      PersonalDetailsInput
     >,
     defaultValues: {
+      dateOfBirth: user?.dateOfBirth,
       gender: user?.gender,
       genderSelfDescribe: user?.genderSelfDescribe ?? '',
       pronouns: user?.pronouns ?? '',
+      relationshipStatus: user?.relationshipStatus,
     },
     completenessRules: [],
   });
@@ -65,49 +74,80 @@ const PersonalDetailsCard = () => {
   if (!user) return null;
 
   return (
-    <form onSubmit={onSubmit} className="max-w-lg">
+    <motion.form
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      onSubmit={onSubmit}
+      className="max-w-2xl"
+    >
       <MyInfoFormHeader title="Personal" />
 
-      <FloatingInput
-        label="Date of birth"
-        type="date"
-        defaultValue={toDateInputValue(user.dateOfBirth)}
-        {...register('dateOfBirth')}
-        error={errors.dateOfBirth?.message}
-      />
+      <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+        <Controller
+          control={control}
+          name="dateOfBirth"
+          render={({ field }) => (
+            <DatePicker
+              label="Date of birth"
+              value={field.value}
+              onChange={field.onChange}
+              maxDate={maxBirthDate}
+              error={errors.dateOfBirth?.message}
+            />
+          )}
+        />
 
-      <div className="relative mb-6 text-left field-root">
-        <select
-          {...register('gender')}
-          className="field-input w-full border-0 border-b border-white/9 bg-transparent px-[0.1rem] py-[0.55rem] pb-[0.65rem] text-base font-medium text-text-primary outline-none transition-colors duration-300"
-        >
-          <option value="">Prefer not to say</option>
-          {GENDER_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {genderLabels[option]}
-            </option>
-          ))}
-        </select>
-        {errors.gender?.message && (
-          <p role="alert" className="mt-1.5 text-[0.72rem] text-error">
-            {errors.gender.message}
-          </p>
-        )}
+        <Controller
+          control={control}
+          name="gender"
+          render={({ field }) => (
+            <Select
+              label="Gender"
+              value={field.value}
+              onChange={field.onChange}
+              options={GENDER_OPTIONS.map((option) => ({
+                value: option,
+                label: genderLabels[option],
+              }))}
+              placeholder="Prefer not to say"
+              error={errors.gender?.message}
+            />
+          )}
+        />
+
+        <FloatingInput
+          label="Pronouns"
+          {...register('pronouns')}
+          error={errors.pronouns?.message}
+        />
+
+        <Controller
+          control={control}
+          name="relationshipStatus"
+          render={({ field }) => (
+            <Select
+              label="Relationship status"
+              value={field.value}
+              onChange={field.onChange}
+              options={RELATIONSHIP_STATUSES.map((option) => ({
+                value: option,
+                label: relationshipLabels[option],
+              }))}
+              placeholder="Prefer not to say"
+              error={errors.relationshipStatus?.message}
+            />
+          )}
+        />
       </div>
 
-      {gender === 'self-describe' && (
+      {gender === 'others' && (
         <FloatingInput
           label="Describe your gender"
           {...register('genderSelfDescribe')}
           error={errors.genderSelfDescribe?.message}
         />
       )}
-
-      <FloatingInput
-        label="Pronouns"
-        {...register('pronouns')}
-        error={errors.pronouns?.message}
-      />
 
       {submitError && (
         <p className="mb-3 text-sm text-error" role="alert">
@@ -118,7 +158,7 @@ const PersonalDetailsCard = () => {
       <Button type="submit" isLoading={isLoading}>
         Save
       </Button>
-    </form>
+    </motion.form>
   );
 };
 

@@ -3,7 +3,9 @@ import type {
   BasicProfileInput,
   PersonalDetailsInput,
   ContactLinksInput,
+  IUserLocationEntry,
 } from '@network/shared';
+import { LOCATION_TRAIL_MAX_ENTRIES } from '@network/shared';
 import { User, type IUserDocument } from './user.model.js';
 import { hybridSearchPaginate } from '../../core/utils/hybridSearchPaginate.js';
 
@@ -31,6 +33,7 @@ export const updateBasicProfile = (
   if (data.bio !== undefined) set['bio'] = data.bio;
   if (data.avatarUrl !== undefined) set['avatarUrl'] = data.avatarUrl;
   if (data.username !== undefined) set['username'] = data.username;
+  if (data.phone !== undefined) set['phone'] = data.phone;
   if (data.usernameChangedAt !== undefined) {
     set['usernameChangedAt'] = data.usernameChangedAt;
   }
@@ -53,6 +56,9 @@ export const updatePersonalDetails = (
     set['genderSelfDescribe'] = data.genderSelfDescribe;
   }
   if (data.pronouns !== undefined) set['pronouns'] = data.pronouns;
+  if (data.relationshipStatus !== undefined) {
+    set['relationshipStatus'] = data.relationshipStatus;
+  }
 
   return User.findByIdAndUpdate(
     userId,
@@ -66,10 +72,8 @@ export const updateContactLinks = (
   data: ContactLinksInput
 ): Promise<IUserDocument | null> => {
   const set: Record<string, unknown> = {};
-  if (data.location !== undefined) set['location'] = data.location;
   if (data.website !== undefined) set['website'] = data.website;
   if (data.socialLinks !== undefined) set['socialLinks'] = data.socialLinks;
-  if (data.phone !== undefined) set['phone'] = data.phone;
 
   return User.findByIdAndUpdate(
     userId,
@@ -86,4 +90,21 @@ export const updateAvatarUrl = (
     userId,
     { $set: { avatarUrl } },
     { returnDocument: 'after', runValidators: true }
+  ).exec();
+
+export const appendLocationEntry = (
+  userId: string,
+  entry: IUserLocationEntry
+): Promise<IUserDocument | null> =>
+  User.findByIdAndUpdate(
+    userId,
+    {
+      $push: {
+        location: {
+          $each: [entry],
+          $slice: -LOCATION_TRAIL_MAX_ENTRIES,
+        },
+      },
+    },
+    { returnDocument: 'after' }
   ).exec();

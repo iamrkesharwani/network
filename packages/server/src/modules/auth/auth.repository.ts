@@ -93,3 +93,11 @@ export const updatePassword = async (
   user.password = hashedPassword;
   return user.save();
 };
+
+export const updateEmail = async (
+  user: IUserDocument,
+  newEmail: string
+): Promise<IUserDocument> => {
+  user.email = newEmail;
+  return user.save();
+};
