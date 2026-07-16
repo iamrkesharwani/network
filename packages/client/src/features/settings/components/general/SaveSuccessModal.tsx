@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { CheckCircle2, X } from 'lucide-react';
 import { AUTO_DISMISS_MS } from '@network/shared';
-import Modal from '../../../shared/ui/overlay/Modal';
+import Modal from '../../../../shared/ui/overlay/Modal';
 
 export interface SaveSuccessModalProps {
   isOpen: boolean;

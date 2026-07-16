@@ -1,6 +1,6 @@
-import { useAppSelector } from '../../../shared/hooks/useAppSelector';
-import Button from '../../../shared/ui/primitives/Button';
-import { useReactivateAccountMutation } from '../accountApi';
+import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
+import Button from '../../../../shared/ui/primitives/Button';
+import { useReactivateAccountMutation } from '../../accountApi';
 
 const DeactivatedAccountBanner = () => {
   const status = useAppSelector((state) => state.auth.user?.status);

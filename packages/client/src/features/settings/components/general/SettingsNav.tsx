@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { cn } from '../../../shared/utils/cn';
-import { useAppSelector } from '../../../shared/hooks/useAppSelector';
-import { buildProfilePath } from '../../profile/utils/buildProfilePath';
-import { SETTINGS_TABS, type SettingsTab } from '../utils/settingsTabs';
+import { cn } from '../../../../shared/utils/cn';
+import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
+import { buildProfilePath } from '../../../profile/utils/buildProfilePath';
+import { SETTINGS_TABS, type SettingsTab } from '../../utils/settingsTabs';
 
 interface SettingsNavProps {
   activeTab: SettingsTab;

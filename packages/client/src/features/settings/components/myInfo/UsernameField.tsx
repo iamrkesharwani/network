@@ -1,8 +1,8 @@
 import { AtSign } from 'lucide-react';
 import type { UseFormRegisterReturn } from 'react-hook-form';
-import BorderedInput from './BorderedInput';
-import LockedFieldNotice from './LockedFieldNotice';
-import { useUsernameCooldown } from '../hooks/useUsernameCooldown';
+import BorderedInput from '../general/BorderedInput';
+import LockedFieldNotice from '../general/LockedFieldNotice';
+import { useUsernameCooldown } from '../../hooks/useUsernameCooldown';
 
 interface UsernameFieldProps {
   registration: UseFormRegisterReturn;

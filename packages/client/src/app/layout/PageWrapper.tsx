@@ -4,7 +4,7 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { useMediaStatusSocket } from '../../shared/hooks/useMediaStatusSocket';
 import { usePreference } from '../../features/settings/hooks/usePreference';
-import DeactivatedAccountBanner from '../../features/settings/components/DeactivatedAccountBanner';
+import DeactivatedAccountBanner from '../../features/settings/components/account/DeactivatedAccountBanner';
 
 const PageWrapper = () => {
   useMediaStatusSocket();

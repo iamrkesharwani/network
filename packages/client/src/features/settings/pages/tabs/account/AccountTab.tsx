@@ -4,8 +4,8 @@ import { CLIENT_ROUTES } from '@network/shared';
 import { useAppSelector } from '../../../../../shared/hooks/useAppSelector';
 import { useAppDispatch } from '../../../../../shared/hooks/useAppDispatch';
 import Button from '../../../../../shared/ui/primitives/Button';
-import DeactivateAccountDialog from '../../../components/DeactivateAccountDialog';
-import DeleteAccountDialog from '../../../components/DeleteAccountDialog';
+import DeactivateAccountDialog from '../../../components/account/DeactivateAccountDialog';
+import DeleteAccountDialog from '../../../components/account/DeleteAccountDialog';
 import ChangePasswordSection from './ChangePasswordSection';
 import AddPasswordSection from './AddPasswordSection';
 import { useLogoutMutation } from '../../../../auth/authApi';
@@ -87,8 +87,8 @@ const AccountTab = () => {
 
         <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
           <p className="text-sm text-text-secondary sm:max-w-md">
-            Permanently delete your account and everything you own. Logging
-            back in within the grace period cancels this.
+            Permanently delete your account and everything you own. Logging back
+            in within the grace period cancels this.
           </p>
           <Button
             variant="danger"

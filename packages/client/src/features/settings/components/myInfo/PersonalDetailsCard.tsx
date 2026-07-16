@@ -13,13 +13,13 @@ import {
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchPersonalDetailsMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
-import BorderedInput from '../BorderedInput';
+import BorderedInput from '../general/BorderedInput';
 import Select from '../../../../shared/ui/primitives/Select';
 import DatePicker from '../../../../shared/ui/calendar/DatePicker';
 import Button from '../../../../shared/ui/primitives/Button';
 import MyInfoFormHeader from './MyInfoFormHeader';
 import PronounsInput from './PronounsInput';
-import SaveSuccessModal from '../SaveSuccessModal';
+import SaveSuccessModal from '../general/SaveSuccessModal';
 
 const genderLabels: Record<(typeof GENDER_OPTIONS)[number], string> = {
   male: 'Male',

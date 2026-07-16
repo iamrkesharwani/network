@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CLIENT_ROUTES, DEACTIVATION_MIN_DAYS, DEACTIVATION_MAX_DAYS } from '@network/shared';
-import Modal from '../../../shared/ui/overlay/Modal';
-import Button from '../../../shared/ui/primitives/Button';
-import { useDeactivateAccountMutation } from '../accountApi';
+import {
+  CLIENT_ROUTES,
+  DEACTIVATION_MIN_DAYS,
+  DEACTIVATION_MAX_DAYS,
+} from '@network/shared';
+import Modal from '../../../../shared/ui/overlay/Modal';
+import Button from '../../../../shared/ui/primitives/Button';
+import { useDeactivateAccountMutation } from '../../accountApi';
 
 interface DeactivateAccountDialogProps {
   isOpen: boolean;
@@ -30,8 +34,8 @@ const DeactivateAccountDialog = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Deactivate account">
       <p className="mb-4 text-sm text-text-secondary">
         Your profile and content will be hidden until you log back in. If you
-        don't log back in within the window you choose, your account
-        reactivates on its own — nothing is deleted.
+        don't log back in within the window you choose, your account reactivates
+        on its own — nothing is deleted.
       </p>
 
       <label className="mb-1.5 block text-xs font-medium text-text-secondary">
@@ -53,7 +57,12 @@ const DeactivateAccountDialog = ({
       )}
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          disabled={isLoading}
+        >
           Cancel
         </Button>
         <Button

@@ -1,5 +1,5 @@
 import { PLAYER_PLAYBACK_RATES } from '@network/shared';
-import Select from '../../../shared/ui/primitives/Select';
+import Select from '../../../../shared/ui/primitives/Select';
 
 interface PlaybackSpeedControlProps {
   value: number;
@@ -11,7 +11,10 @@ const RATE_OPTIONS = PLAYER_PLAYBACK_RATES.map((rate) => ({
   label: `${rate}x`,
 }));
 
-const PlaybackSpeedControl = ({ value, onChange }: PlaybackSpeedControlProps) => (
+const PlaybackSpeedControl = ({
+  value,
+  onChange,
+}: PlaybackSpeedControlProps) => (
   <Select
     value={String(value)}
     onChange={(next) => onChange(Number(next))}

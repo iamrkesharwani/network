@@ -10,11 +10,11 @@ import {
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchContactLinksMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
-import BorderedInput from '../BorderedInput';
+import BorderedInput from '../general/BorderedInput';
 import Button from '../../../../shared/ui/primitives/Button';
 import MyInfoFormHeader from './MyInfoFormHeader';
 import LocationSection from './LocationSection';
-import SaveSuccessModal from '../SaveSuccessModal';
+import SaveSuccessModal from '../general/SaveSuccessModal';
 import SocialLinkRow from './SocialLinkRow';
 
 const LinksCard = () => {

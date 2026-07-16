@@ -5,15 +5,15 @@ import { basicProfileSchema, type BasicProfileInput } from '@network/shared';
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchBasicProfileMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
-import BorderedInput from '../BorderedInput';
-import BorderedTextarea from '../BorderedTextarea';
+import BorderedInput from '../general/BorderedInput';
+import BorderedTextarea from '../general/BorderedTextarea';
 import Button from '../../../../shared/ui/primitives/Button';
-import AvatarEditor from '../AvatarEditor';
-import UsernameField from '../UsernameField';
+import AvatarEditor from './AvatarEditor';
+import UsernameField from './UsernameField';
 import MyInfoFormHeader from './MyInfoFormHeader';
 import EmailChangeField from './EmailChangeField';
 import PhoneField from './PhoneField';
-import SaveSuccessModal from '../SaveSuccessModal';
+import SaveSuccessModal from '../general/SaveSuccessModal';
 
 const BasicInfoCard = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -105,7 +105,10 @@ const BasicInfoCard = () => {
         Save
       </Button>
 
-      <SaveSuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} />
+      <SaveSuccessModal
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+      />
     </motion.form>
   );
 };

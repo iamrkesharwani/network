@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CLIENT_ROUTES, CONTENT_RETENTION_DAYS } from '@network/shared';
-import Modal from '../../../shared/ui/overlay/Modal';
-import Button from '../../../shared/ui/primitives/Button';
-import { useDeleteAccountMutation } from '../accountApi';
+import Modal from '../../../../shared/ui/overlay/Modal';
+import Button from '../../../../shared/ui/primitives/Button';
+import { useDeleteAccountMutation } from '../../accountApi';
 
 interface DeleteAccountDialogProps {
   isOpen: boolean;

@@ -1,8 +1,8 @@
 import { PREFERENCES_DEFAULT_PLAYBACK_RATE } from '@network/shared';
 import { usePreference } from '../../hooks/usePreference';
-import PreferenceOptionCard from '../../components/PreferenceOptionCard';
-import PreferenceSwitch from '../../components/PreferenceSwitch';
-import PlaybackSpeedControl from '../../components/PlaybackSpeedControl';
+import PreferenceOptionCard from '../../components/preferences/PreferenceOptionCard';
+import PreferenceSwitch from '../../components/preferences/PreferenceSwitch';
+import PlaybackSpeedControl from '../../components/preferences/PlaybackSpeedControl';
 
 const PreferencesTab = () => {
   const [appearance, setAppearance] = usePreference('appearance');

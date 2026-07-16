@@ -5,7 +5,7 @@ import {
 } from '../../../../auth/authApi';
 import Button from '../../../../../shared/ui/primitives/Button';
 import OtpInput from '../../../../auth/components/OtpInput';
-import BorderedInput from '../../../components/BorderedInput';
+import BorderedInput from '../../../components/general/BorderedInput';
 
 const AddPasswordSection = () => {
   const [step, setStep] = useState<'intro' | 'confirm'>('intro');

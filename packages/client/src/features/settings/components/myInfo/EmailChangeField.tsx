@@ -6,11 +6,11 @@ import {
   useRequestEmailChangeMutation,
   useConfirmEmailChangeMutation,
 } from '../../../auth/authApi';
-import BorderedInput from '../BorderedInput';
+import BorderedInput from '../general/BorderedInput';
 import Button from '../../../../shared/ui/primitives/Button';
 import ConfirmModal from '../../../../shared/ui/overlay/ConfirmModal';
 import MaskedFieldRow from './MaskedFieldRow';
-import LockedFieldNotice from '../LockedFieldNotice';
+import LockedFieldNotice from '../general/LockedFieldNotice';
 import OtpInput from '../../../auth/components/OtpInput';
 
 type Step = 'masked' | 'new-email' | 'otp';
@@ -165,8 +165,16 @@ const EmailChangeField = () => {
         Enter the codes sent to both your current and new email addresses
       </p>
 
-      <OtpInput label="Code sent to current email" value={oldOtp} onChange={setOldOtp} />
-      <OtpInput label="Code sent to new email" value={newOtp} onChange={setNewOtp} />
+      <OtpInput
+        label="Code sent to current email"
+        value={oldOtp}
+        onChange={setOldOtp}
+      />
+      <OtpInput
+        label="Code sent to new email"
+        value={newOtp}
+        onChange={setNewOtp}
+      />
 
       {error && (
         <p role="alert" className="mb-3 text-sm text-error">

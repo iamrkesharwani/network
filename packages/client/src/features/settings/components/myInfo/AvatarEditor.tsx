@@ -1,9 +1,12 @@
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, Loader2 } from 'lucide-react';
-import { ALLOWED_AVATAR_MIME_TYPES, MAX_AVATAR_SIZE_BYTES } from '@network/shared';
-import Avatar from '../../../shared/ui/primitives/Avatar';
-import { useUploadAvatarMutation } from '../settingsApi';
+import {
+  ALLOWED_AVATAR_MIME_TYPES,
+  MAX_AVATAR_SIZE_BYTES,
+} from '@network/shared';
+import Avatar from '../../../../shared/ui/primitives/Avatar';
+import { useUploadAvatarMutation } from '../../settingsApi';
 
 interface AvatarEditorProps {
   currentAvatarUrl?: string;

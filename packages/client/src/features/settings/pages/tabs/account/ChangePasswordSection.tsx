@@ -4,7 +4,7 @@ import {
 } from '@network/shared';
 import Button from '../../../../../shared/ui/primitives/Button';
 import { useMediaEditForm } from '../../../../upload/hooks/useMediaEditForm';
-import BorderedInput from '../../../components/BorderedInput';
+import BorderedInput from '../../../components/general/BorderedInput';
 import { useChangePasswordMutation } from '../../../../auth/authApi';
 import { useState } from 'react';
 
@@ -66,7 +66,11 @@ const ChangePasswordSection = () => {
           </p>
         )}
 
-        <Button type="submit" isLoading={isLoading} className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          isLoading={isLoading}
+          className="w-full sm:w-auto"
+        >
           Update password
         </Button>
       </form>
