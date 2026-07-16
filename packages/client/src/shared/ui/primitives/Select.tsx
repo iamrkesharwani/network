@@ -56,7 +56,10 @@ function Select<T extends string>({
   const selected = options.find((option) => option.value === value);
 
   return (
-    <div className={cn('relative mb-6', containerClassName)} ref={rootRef}>
+    <div
+      className={cn('relative mb-6 min-w-0', containerClassName)}
+      ref={rootRef}
+    >
       {label && (
         <p className="mb-2.5 flex items-center gap-1.5 text-sm font-medium text-text-secondary">
           {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
@@ -103,7 +106,7 @@ function Select<T extends string>({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute z-20 mt-1.5 max-h-56 w-full overflow-y-auto rounded-lg border border-border bg-surface-raised py-1.5 shadow-xl shadow-black/20"
+            className="absolute z-20 mt-1.5 max-h-56 w-max min-w-full overflow-y-auto rounded-lg border border-border bg-surface-raised py-1.5 shadow-xl shadow-black/20"
           >
             {options.map((option) => {
               const isSelected = option.value === value;
@@ -128,7 +131,7 @@ function Select<T extends string>({
                     {option.icon && (
                       <option.icon className="h-4 w-4 shrink-0" />
                     )}
-                    <span className="truncate">{option.label}</span>
+                    <span className="whitespace-nowrap">{option.label}</span>
                   </span>
                   {isSelected && <Check className="h-3.5 w-3.5 shrink-0" />}
                 </button>

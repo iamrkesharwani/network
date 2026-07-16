@@ -1,13 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarDays } from 'lucide-react';
-import { format, addMonths, subMonths, setMonth, setYear } from 'date-fns';
+import {
+  format,
+  addMonths,
+  subMonths,
+  setMonth,
+  setYear,
+  isValid,
+} from 'date-fns';
 import { cn } from '../../utils/cn';
 import CalendarMonthHeader from './CalendarMonthHeader';
 import CalendarMonthGrid from './CalendarMonthGrid';
 
 interface DatePickerProps {
   label?: string;
+  icon?: ComponentType<{ className?: string }>;
   value: Date | undefined;
   onChange: (date: Date) => void;
   minDate?: Date;
@@ -16,8 +24,15 @@ interface DatePickerProps {
   error?: string;
 }
 
+const toValidDate = (input: unknown): Date | undefined => {
+  if (!input) return undefined;
+  const date = input instanceof Date ? input : new Date(input as string);
+  return isValid(date) ? date : undefined;
+};
+
 const DatePicker = ({
   label,
+  icon: Icon,
   value,
   onChange,
   minDate,
@@ -25,9 +40,12 @@ const DatePicker = ({
   placeholder = 'Select a date',
   error,
 }: DatePickerProps) => {
+  const normalizedValue = toValidDate(value);
   const [isOpen, setIsOpen] = useState(false);
   const [direction, setDirection] = useState<1 | -1>(1);
-  const [monthAnchor, setMonthAnchor] = useState(value ?? maxDate ?? new Date());
+  const [monthAnchor, setMonthAnchor] = useState(
+    normalizedValue ?? maxDate ?? new Date()
+  );
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,7 +76,8 @@ const DatePicker = ({
   return (
     <div className={cn('relative mb-6', label ? '' : '')} ref={rootRef}>
       {label && (
-        <p className="mb-2.5 text-sm font-medium text-text-secondary">
+        <p className="mb-2.5 flex items-center gap-1.5 text-sm font-medium text-text-secondary">
+          {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
           {label}
         </p>
       )}
@@ -66,7 +85,7 @@ const DatePicker = ({
       <button
         type="button"
         onClick={() => {
-          setMonthAnchor(value ?? maxDate ?? new Date());
+          setMonthAnchor(normalizedValue ?? maxDate ?? new Date());
           setIsOpen((open) => !open);
         }}
         aria-expanded={isOpen}
@@ -83,10 +102,14 @@ const DatePicker = ({
         <span
           className={cn(
             'truncate',
-            value ? 'font-medium text-text-primary' : 'text-text-muted'
+            normalizedValue
+              ? 'font-medium text-text-primary'
+              : 'text-text-muted'
           )}
         >
-          {value ? format(value, 'MMMM d, yyyy') : placeholder}
+          {normalizedValue
+            ? format(normalizedValue, 'MMMM d, yyyy')
+            : placeholder}
         </span>
         <CalendarDays className="h-4 w-4 shrink-0 text-text-muted" />
       </button>
@@ -124,7 +147,7 @@ const DatePicker = ({
             <CalendarMonthGrid
               monthAnchor={monthAnchor}
               direction={direction}
-              selectedDate={value}
+              selectedDate={normalizedValue}
               minDate={minDate}
               maxDate={maxDate}
               onSelectDate={handleSelectDate}

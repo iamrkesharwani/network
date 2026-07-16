@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { HeartHandshake, MessageCircle, Users2 } from 'lucide-react';
+import { Cake, HeartHandshake, MessageCircle, Users2 } from 'lucide-react';
 import type { z } from 'zod';
 import {
   personalDetailsSchema,
@@ -28,7 +28,10 @@ const genderLabels: Record<(typeof GENDER_OPTIONS)[number], string> = {
   'prefer-not-to-say': 'Prefer not to say',
 };
 
-const relationshipLabels: Record<(typeof RELATIONSHIP_STATUSES)[number], string> = {
+const relationshipLabels: Record<
+  (typeof RELATIONSHIP_STATUSES)[number],
+  string
+> = {
   single: 'Single',
   'in-a-relationship': 'In a relationship',
   engaged: 'Engaged',
@@ -96,6 +99,7 @@ const PersonalDetailsCard = () => {
           render={({ field }) => (
             <DatePicker
               label="Date of birth"
+              icon={Cake}
               value={field.value}
               onChange={field.onChange}
               maxDate={maxBirthDate}
@@ -175,7 +179,10 @@ const PersonalDetailsCard = () => {
         Save
       </Button>
 
-      <SaveSuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} />
+      <SaveSuccessModal
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+      />
     </motion.form>
   );
 };
