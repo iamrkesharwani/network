@@ -28,26 +28,26 @@ const SettingsPage = () => {
   const requestedTab = getActiveSettingsTab(location.pathname);
   const isMyInfoSegment = getActiveMyInfoSegment(location.pathname) !== null;
   const username = useAppSelector((state) => state.auth.user?.username);
-  const hidePageHeader = isMyInfoSegment || (isMobile && requestedTab !== null);
+  const showMobileMenuHeader = isMobile && requestedTab === null;
 
   return (
-    <div className="md:pt-0 pt-3">
-      {!hidePageHeader && (
-        <>
+    <div className="md:pt-0 pt-5">
+      {showMobileMenuHeader && (
+        <div className="max-w-4xl">
           {username && (
             <Link
               to={buildProfilePath(username)}
-              className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+              className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to profile
             </Link>
           )}
 
-          <h1 className="mb-4 font-display text-2xl font-bold text-text-primary sm:text-3xl">
+          <h1 className="mb-6 font-display text-2xl font-bold text-text-primary sm:text-3xl">
             Settings
           </h1>
-        </>
+        </div>
       )}
 
       {isMobile ? (
