@@ -46,5 +46,5 @@ export const updatePreferences = (
   User.findByIdAndUpdate(
     userId,
     { $set: buildPreferencesSet(data) },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).exec();
