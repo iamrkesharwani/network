@@ -1,8 +1,13 @@
 import { useSearchParams } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
+import { cn } from '../../../shared/utils/cn';
 import { useSearchNavigation } from '../hooks/useSearchNavigation';
 
-const MobileSearchBar = () => {
+interface MobileSearchBarProps {
+  className?: string;
+}
+
+const MobileSearchBar = ({ className }: MobileSearchBarProps) => {
   const [searchParams] = useSearchParams();
   const hasInitialQuery = !!searchParams.get('q')?.trim();
 
@@ -16,8 +21,11 @@ const MobileSearchBar = () => {
   } = useSearchNavigation(!hasInitialQuery);
 
   return (
-    <form onSubmit={handleSearchSubmit} className="relative md:hidden pt-2">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-icon pointer-events-none" />
+    <form
+      onSubmit={handleSearchSubmit}
+      className={cn('relative md:hidden', className)}
+    >
+      <Search className="absolute left-3 bottom-1 -translate-y-1/2 w-4 h-4 text-icon pointer-events-none" />
       <input
         ref={searchInputRef}
         type="text"

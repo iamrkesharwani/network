@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Search, X, Bell, Sun, Moon, UploadCloud } from 'lucide-react';
-import { useTheme } from '../../shared/hooks/useTheme';
+import { Menu, Search, X, Bell, UploadCloud } from 'lucide-react';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import Avatar from '../../shared/ui/primitives/Avatar';
 import {
@@ -18,7 +17,6 @@ export interface NavbarProps {
 }
 
 const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
-  const { isDark, toggle } = useTheme();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const {
     searchInput,
@@ -97,14 +95,6 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
       </Link>
 
       <div className="hidden md:flex items-center gap-1 ml-auto shrink-0">
-        <button
-          onClick={toggle}
-          aria-label="Toggle theme"
-          className="p-2 rounded-lg text-icon hover:text-icon-hover hover:bg-surface-raised transition-colors focus:outline-none"
-        >
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
-
         {isAuthenticated ? (
           <>
             <button className="relative p-2 rounded-lg text-icon hover:text-icon-hover hover:bg-surface-raised transition-colors focus:outline-none">
