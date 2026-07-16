@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Globe, Plus, Share2 } from 'lucide-react';
-import { contactLinksSchema, SOCIAL_LINKS_MAX, type ContactLinksInput } from '@network/shared';
+import {
+  contactLinksSchema,
+  SOCIAL_LINKS_MAX,
+  type ContactLinksInput,
+} from '@network/shared';
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchContactLinksMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
@@ -33,7 +37,7 @@ const LinksCard = () => {
     completenessRules: [],
   });
 
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'socialLinks',
   });
@@ -77,8 +81,8 @@ const LinksCard = () => {
           {fields.map((field, index) => (
             <SocialLinkRow
               key={field.id}
-              value={field}
-              onChange={(next) => update(index, next)}
+              control={control}
+              index={index}
               onRemove={() => remove(index)}
               urlError={errors.socialLinks?.[index]?.url?.message}
               platformError={errors.socialLinks?.[index]?.customLabel?.message}
@@ -92,7 +96,9 @@ const LinksCard = () => {
             variant="outline"
             size="sm"
             className="mt-3"
-            onClick={() => append({ platform: 'other', url: '', customLabel: '' })}
+            onClick={() =>
+              append({ platform: 'other', url: '', customLabel: '' })
+            }
           >
             <Plus className="mr-1.5 h-3.5 w-3.5" />
             Add another
@@ -110,7 +116,10 @@ const LinksCard = () => {
         Save
       </Button>
 
-      <SaveSuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} />
+      <SaveSuccessModal
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+      />
     </motion.form>
   );
 };
