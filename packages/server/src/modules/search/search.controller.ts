@@ -3,6 +3,7 @@ import type {
   SearchAllQuery,
   SearchByTypeQuery,
   SearchCreatorsQuery,
+  SearchSuggestionsQuery,
   SearchTypeParam,
 } from '@network/shared';
 import { asyncHandler } from '../../core/utils/asyncHandler.js';
@@ -65,5 +66,16 @@ export const getSearchCreators = asyncHandler(
           'Creators fetched successfully'
         )
       );
+  }
+);
+
+export const getSearchSuggestions = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { q } = req.query as unknown as SearchSuggestionsQuery;
+    const result = await searchService.searchSuggestions(q);
+
+    res
+      .status(200)
+      .json(new ApiResponse(result, 'Search suggestions fetched successfully'));
   }
 );

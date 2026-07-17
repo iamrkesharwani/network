@@ -67,6 +67,17 @@ export const findPublicFeed = async (
   return result;
 };
 
+export const findByIds = (ids: string[]): Promise<IPostDocument[]> =>
+  PostModel.find({
+    _id: { $in: ids },
+    status: 'READY',
+    visibility: 'public',
+    deletedAt: null,
+    moderationStatus: { $nin: ['jury_removed', 'admin_removed'] },
+  })
+    .populate('userId', 'username avatarUrl')
+    .exec();
+
 export const searchPublic = async (
   q: string,
   cursor: string | null,
@@ -182,5 +193,8 @@ export const setModerationStatus = async (
   id: string,
   status: ModerationStatus
 ): Promise<void> => {
-  await PostModel.updateOne({ _id: id }, { $set: { moderationStatus: status } }).exec();
+  await PostModel.updateOne(
+    { _id: id },
+    { $set: { moderationStatus: status } }
+  ).exec();
 };

@@ -76,6 +76,11 @@ export const searchPublic = async (
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 
+export const findByIds = async (ids: string[]): Promise<IPostResponse[]> => {
+  const docs = await postRepository.findByIds(ids);
+  return docs.map(toResponse);
+};
+
 export const getMyPosts = async (
   userId: string,
   cursor: string | null,

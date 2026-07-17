@@ -5,6 +5,7 @@ import {
   searchAllQuerySchema,
   searchByTypeQuerySchema,
   searchCreatorsQuerySchema,
+  searchSuggestionsQuerySchema,
   searchTypeParamSchema,
 } from '@network/shared';
 import * as searchController from './search.controller.js';
@@ -23,6 +24,12 @@ router.get(
   '/creators',
   validate({ query: searchCreatorsQuerySchema }),
   searchController.getSearchCreators
+);
+
+router.get(
+  '/suggestions',
+  validate({ query: searchSuggestionsQuerySchema }),
+  searchController.getSearchSuggestions
 );
 
 router.get(

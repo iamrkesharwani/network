@@ -7,9 +7,11 @@ import {
   VIDEO_DESCRIPTION_MAX_LENGTH,
   CAPTION_LABEL_MAX_LENGTH,
   MODERATION_STATUS,
+  TYPESENSE_COLLECTIONS,
   type IVideo,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
+import { attachTypesenseSyncHooks } from '../../core/utils/attachTypesenseSyncHooks.js';
 
 const captionSchema = new Schema(
   {
@@ -255,5 +257,19 @@ videoSchema.index({ title: 'text', description: 'text', tags: 'text' });
 videoSchema.index({ searchTokens: 1 });
 
 attachSearchTokenHooks(videoSchema, ['title', 'description', 'tags']);
+
+attachTypesenseSyncHooks(videoSchema, {
+  collection: TYPESENSE_COLLECTIONS.VIDEO,
+  isIndexable: (doc) =>
+    doc.status === 'READY' &&
+    doc.visibility === 'public' &&
+    !doc.deletedAt &&
+    !['jury_removed', 'admin_removed'].includes(doc.moderationStatus),
+  toDocument: (doc) => ({
+    title: doc.title,
+    description: doc.description ?? '',
+    tags: doc.tags ?? [],
+  }),
+});
 
 export const VideoModel = mongoose.model<IVideoDocument>('Video', videoSchema);

@@ -10,6 +10,7 @@ import {
   subClient,
 } from './core/config/redis.js';
 import { initSocket } from './core/config/socket.js';
+import { initTypesense } from './core/config/typesense.js';
 import { logger } from './core/utils/logger.js';
 import { env } from './core/env/env.js';
 import { startEmailWorker } from './modules/email/email.js';
@@ -48,6 +49,7 @@ const startWeb = async () => {
   try {
     await connectDb();
     await initRedis();
+    await initTypesense();
     initSocket(httpServer);
     startEmailWorker();
     startUploadReaperWorker();

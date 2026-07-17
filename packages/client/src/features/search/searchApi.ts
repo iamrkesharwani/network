@@ -5,6 +5,7 @@ import type {
   IMixedFeedBatch,
   IPostResponse,
   IPublicProfile,
+  ISearchSuggestions,
   IShortResponse,
   IVideoResponse,
   PaginatedResponse,
@@ -30,6 +31,10 @@ export interface SearchCreatorsQueryArgs {
   q: string;
   cursor?: string;
   limit: number;
+}
+
+export interface SearchSuggestionsQueryArgs {
+  q: string;
 }
 
 type SearchByTypeItem = IVideoResponse | IShortResponse | IPostResponse;
@@ -99,6 +104,16 @@ export const searchApi = createApi({
       forceRefetch: ({ currentArg, previousArg }) =>
         currentArg?.cursor !== previousArg?.cursor,
     }),
+    searchSuggestions: builder.query<
+      ApiResponse<ISearchSuggestions>,
+      SearchSuggestionsQueryArgs
+    >({
+      query: (params) => ({
+        url: '/suggestions',
+        method: 'GET',
+        params,
+      }),
+    }),
   }),
 });
 
@@ -106,4 +121,5 @@ export const {
   useLazySearchAllQuery,
   useSearchByTypeQuery,
   useSearchCreatorsQuery,
+  useSearchSuggestionsQuery,
 } = searchApi;

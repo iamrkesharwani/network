@@ -57,6 +57,17 @@ export const findPublicFeed = async (
   return result;
 };
 
+export const findByIds = (ids: string[]): Promise<IShortDocument[]> =>
+  ShortModel.find({
+    _id: { $in: ids },
+    status: 'READY',
+    visibility: 'public',
+    deletedAt: null,
+    moderationStatus: { $nin: ['jury_removed', 'admin_removed'] },
+  })
+    .populate('userId', 'username avatarUrl')
+    .exec();
+
 export const searchPublic = async (
   q: string,
   cursor: string | null,

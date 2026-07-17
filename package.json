@@ -20,7 +20,10 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "i:client": "npm install --workspace=@network/client",
     "i:server": "npm install --workspace=@network/server",
-    "i:shared": "npm install --workspace=@network/shared"
+    "i:shared": "npm install --workspace=@network/shared",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:status": "docker compose ps"
   },
   "engines": {
     "node": ">=20.0.0",

@@ -11,6 +11,7 @@ import {
 import LogoIcon from '../../public/Logo.svg?react';
 import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
 import { useSearchNavigation } from '../../features/search/hooks/useSearchNavigation';
+import SearchSuggestionsDropdown from '../../features/search/components/SearchSuggestionsDropdown';
 
 export interface NavbarProps {
   onMobileMenuClick: () => void;
@@ -25,6 +26,14 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
     handleSearchSubmit,
     handleSearchKeyDown,
     handleClearSearch,
+    handleSearchFocus,
+    handleSearchBlur,
+    isOpen,
+    items,
+    highlightedIndex,
+    setHighlightedIndex,
+    goToItem,
+    removeRecent,
   } = useSearchNavigation();
 
   useEffect(() => {
@@ -70,6 +79,8 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={handleSearchKeyDown}
+            onFocus={handleSearchFocus}
+            onBlur={handleSearchBlur}
             placeholder="Search videos, creators..."
             className="w-full h-9 pl-9 pr-9 rounded-lg bg-surface-raised border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:bg-surface transition-all"
           />
@@ -83,6 +94,14 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
               <X className="w-3.5 h-3.5" />
             </button>
           )}
+          <SearchSuggestionsDropdown
+            isOpen={isOpen}
+            items={items}
+            highlightedIndex={highlightedIndex}
+            onHighlight={setHighlightedIndex}
+            onSelect={goToItem}
+            onRemoveRecent={removeRecent}
+          />
         </form>
       </div>
 

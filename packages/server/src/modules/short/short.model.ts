@@ -5,9 +5,11 @@ import {
   SHORT_TITLE_MAX_LENGTH,
   SHORT_DESCRIPTION_MAX_LENGTH,
   MODERATION_STATUS,
+  TYPESENSE_COLLECTIONS,
   type IShort,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
+import { attachTypesenseSyncHooks } from '../../core/utils/attachTypesenseSyncHooks.js';
 
 export interface IShortDocument
   extends
@@ -179,5 +181,19 @@ shortSchema.index({ title: 'text', description: 'text', tags: 'text' });
 shortSchema.index({ searchTokens: 1 });
 
 attachSearchTokenHooks(shortSchema, ['title', 'description', 'tags']);
+
+attachTypesenseSyncHooks(shortSchema, {
+  collection: TYPESENSE_COLLECTIONS.SHORT,
+  isIndexable: (doc) =>
+    doc.status === 'READY' &&
+    doc.visibility === 'public' &&
+    !doc.deletedAt &&
+    !['jury_removed', 'admin_removed'].includes(doc.moderationStatus),
+  toDocument: (doc) => ({
+    title: doc.title,
+    description: doc.description ?? '',
+    tags: doc.tags ?? [],
+  }),
+});
 
 export const ShortModel = mongoose.model<IShortDocument>('Short', shortSchema);

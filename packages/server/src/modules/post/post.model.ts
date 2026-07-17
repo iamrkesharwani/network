@@ -6,9 +6,11 @@ import {
   POST_TEXT_MAX_LENGTH,
   MAX_POST_IMAGES,
   MODERATION_STATUS,
+  TYPESENSE_COLLECTIONS,
   type IPost,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
+import { attachTypesenseSyncHooks } from '../../core/utils/attachTypesenseSyncHooks.js';
 
 export interface IPostDocument
   extends
@@ -158,9 +160,7 @@ postSchema.pre('validate', function () {
 });
 
 postSchema.index({ status: 1, visibility: 1, _id: -1 });
-
 postSchema.index({ userId: 1, status: 1, _id: -1 });
-
 postSchema.index({ deletedAt: 1 });
 postSchema.index({ visibility: 1, unlistedAt: 1 });
 postSchema.index({ moderationStatus: 1 });
@@ -168,5 +168,18 @@ postSchema.index({ text: 'text', tags: 'text' });
 postSchema.index({ searchTokens: 1 });
 
 attachSearchTokenHooks(postSchema, ['text', 'tags']);
+
+attachTypesenseSyncHooks(postSchema, {
+  collection: TYPESENSE_COLLECTIONS.POST,
+  isIndexable: (doc) =>
+    doc.status === 'READY' &&
+    doc.visibility === 'public' &&
+    !doc.deletedAt &&
+    !['jury_removed', 'admin_removed'].includes(doc.moderationStatus),
+  toDocument: (doc) => ({
+    text: doc.text ?? '',
+    tags: doc.tags ?? [],
+  }),
+});
 
 export const PostModel = mongoose.model<IPostDocument>('Post', postSchema);

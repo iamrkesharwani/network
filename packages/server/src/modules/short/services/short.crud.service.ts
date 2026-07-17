@@ -77,6 +77,11 @@ export const searchPublic = async (
   return { ...result, data: result.data.map(toResponseFromLean) };
 };
 
+export const findByIds = async (ids: string[]): Promise<IShortResponse[]> => {
+  const docs = await shortRepository.findByIds(ids);
+  return docs.map(toResponse);
+};
+
 export const getRelatedShorts = async (
   tags: string[],
   cursor: string | null,

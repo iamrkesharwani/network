@@ -43,28 +43,12 @@ const SearchResultsPage = () => {
     setSearchParams(next, { replace: true });
   };
 
-  if (!q) {
-    return (
-      <div className="flex flex-col gap-6">
-        <MobileSearchBar className="pt-2" />
-        <div className="flex flex-col items-center justify-center py-24 text-center gap-2">
-          <p className="text-lg font-medium text-text-primary">
-            Search for videos, shorts, posts, and creators
-          </p>
-          <p className="text-sm text-text-muted">
-            Use the search bar above to get started.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-2 pt-2">
         <MobileSearchBar className="min-w-0 flex-1" />
 
-        {isMobile && (
+        {isMobile && q && (
           <button
             type="button"
             onClick={() => setIsFilterModalOpen(true)}
@@ -76,63 +60,76 @@ const SearchResultsPage = () => {
         )}
       </div>
 
-      <Modal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        title="Filter results"
-      >
-        <div className="flex flex-col gap-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => {
-                handleTabChange(tab);
-                setIsFilterModalOpen(false);
-              }}
-              className={cn(
-                'flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                activeTab === tab
-                  ? 'bg-primary-subtle text-primary'
-                  : 'text-text-secondary hover:bg-surface-raised hover:text-text-primary'
-              )}
-            >
-              {TAB_LABELS[tab]}
-              {activeTab === tab && <Check className="h-4 w-4" />}
-            </button>
-          ))}
+      {!q ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center gap-2">
+          <p className="text-lg font-medium text-text-primary">
+            Search for videos, shorts, posts, and creators
+          </p>
+          <p className="text-sm text-text-muted">
+            Use the search bar above to get started.
+          </p>
         </div>
-      </Modal>
+      ) : (
+        <>
+          <Modal
+            isOpen={isFilterModalOpen}
+            onClose={() => setIsFilterModalOpen(false)}
+            title="Filter results"
+          >
+            <div className="flex flex-col gap-1">
+              {TABS.map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => {
+                    handleTabChange(tab);
+                    setIsFilterModalOpen(false);
+                  }}
+                  className={cn(
+                    'flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    activeTab === tab
+                      ? 'bg-primary-subtle text-primary'
+                      : 'text-text-secondary hover:bg-surface-raised hover:text-text-primary'
+                  )}
+                >
+                  {TAB_LABELS[tab]}
+                  {activeTab === tab && <Check className="h-4 w-4" />}
+                </button>
+              ))}
+            </div>
+          </Modal>
 
-      {!isMobile && (
-        <div className="flex items-center gap-1 border-b border-border overflow-x-auto">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => handleTabChange(tab)}
-              className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
-                activeTab === tab
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              {TAB_LABELS[tab]}
-            </button>
-          ))}
-        </div>
-      )}
+          {!isMobile && (
+            <div className="flex items-center gap-1 border-b border-border overflow-x-auto">
+              {TABS.map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => handleTabChange(tab)}
+                  className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
+                    activeTab === tab
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  {TAB_LABELS[tab]}
+                </button>
+              ))}
+            </div>
+          )}
 
-      {activeTab === 'all' && (
-        <FeedRenderer
-          source={{ mode: 'search', q }}
-          emptyMessage={`No results for "${q}"`}
-          emptySubMessage="Try a different search term."
-        />
-      )}
-      {activeTab === 'creator' && <SearchCreatorResults q={q} />}
-      {activeTab !== 'all' && activeTab !== 'creator' && (
-        <SearchTypeResults q={q} type={activeTab} />
+          {activeTab === 'all' && (
+            <FeedRenderer
+              source={{ mode: 'search', q }}
+              emptyMessage={`No results for "${q}"`}
+              emptySubMessage="Try a different search term."
+            />
+          )}
+          {activeTab === 'creator' && <SearchCreatorResults q={q} />}
+          {activeTab !== 'all' && activeTab !== 'creator' && (
+            <SearchTypeResults q={q} type={activeTab} />
+          )}
+        </>
       )}
     </div>
   );

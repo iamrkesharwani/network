@@ -20,9 +20,11 @@ import {
   PHONE_NUMBER_MAX_LENGTH,
   SOCIAL_LINKS_MAX,
   SOCIAL_LINK_PLATFORM_MAX_LENGTH,
+  TYPESENSE_COLLECTIONS,
   type IUser,
 } from '@network/shared';
 import { attachSearchTokenHooks } from '../../core/utils/attachSearchTokenHooks.js';
+import { attachTypesenseSyncHooks } from '../../core/utils/attachTypesenseSyncHooks.js';
 
 export interface IUserDocument extends IUser, Document {
   password?: string | undefined;
@@ -221,5 +223,13 @@ userSchema.index({ name: 'text', username: 'text' });
 userSchema.index({ searchTokens: 1 });
 
 attachSearchTokenHooks(userSchema, ['name', 'username']);
+
+attachTypesenseSyncHooks(userSchema, {
+  collection: TYPESENSE_COLLECTIONS.USER,
+  toDocument: (doc) => ({
+    username: doc.username,
+    name: doc.name,
+  }),
+});
 
 export const User = mongoose.model<IUserDocument>('User', userSchema);

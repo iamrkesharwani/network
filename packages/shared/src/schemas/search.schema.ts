@@ -51,3 +51,7 @@ export const searchCreatorsQuerySchema = z.object({
     .max(MAX_PAGE_LIMIT)
     .default(DEFAULT_PAGE_LIMIT),
 });
+
+export const searchSuggestionsQuerySchema = z.object({
+  q: searchQueryString,
+});

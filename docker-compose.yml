@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+
+  typesense:
+    image: typesense/typesense:27.1
+    ports:
+      - '8108:8108'
+    volumes:
+      - typesense-data:/data
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+
+volumes:
+  redis-data:
+  typesense-data:
