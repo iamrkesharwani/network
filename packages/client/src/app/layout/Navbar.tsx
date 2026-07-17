@@ -2,16 +2,15 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Search, X, Bell, UploadCloud } from 'lucide-react';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
-import Avatar from '../../shared/ui/primitives/Avatar';
 import {
   SITE_NAME,
   CLIENT_ROUTES,
   SEARCH_FOCUS_SHORTCUT_KEY,
 } from '@network/shared';
 import LogoIcon from '../../public/Logo.svg?react';
-import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
 import { useSearchNavigation } from '../../features/search/hooks/useSearchNavigation';
 import SearchSuggestionsDropdown from '../../features/search/components/SearchSuggestionsDropdown';
+import NavbarAvatar from './NavbarAvatar';
 
 export interface NavbarProps {
   onMobileMenuClick: () => void;
@@ -81,7 +80,7 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
             onKeyDown={handleSearchKeyDown}
             onFocus={handleSearchFocus}
             onBlur={handleSearchBlur}
-            placeholder="Search videos, creators, posts..."
+            placeholder="Search something..."
             className="w-full h-9 pl-9 pr-9 rounded-lg bg-surface-raised border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:bg-surface transition-all"
           />
           {searchInput && (
@@ -124,36 +123,11 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
               </span>
             </button>
 
-            <Link
-              to={
-                user?.username
-                  ? buildProfilePath(user.username)
-                  : CLIENT_ROUTES.LOGIN
-              }
-              className="ml-1 rounded-full ring-2 ring-transparent hover:ring-primary transition-all focus:outline-none"
-            >
-              <Avatar
-                size="sm"
-                src={user?.avatarUrl}
-                alt={user?.username}
-                fallback={user?.username}
-              />
-            </Link>
+            <NavbarAvatar user={user} />
           </>
         ) : (
           <div className="flex items-center gap-2 ml-2">
-            <Link
-              to={CLIENT_ROUTES.LOGIN}
-              className="px-3 py-2 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              to={CLIENT_ROUTES.REGISTER}
-              className="inline-flex items-center justify-center rounded-lg font-medium transition-colors bg-primary text-white hover:bg-primary-hover h-9 px-3 text-sm"
-            >
-              Sign up
-            </Link>
+            <NavbarAvatar user={user} />
           </div>
         )}
       </div>
