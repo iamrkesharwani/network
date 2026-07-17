@@ -6,6 +6,7 @@ import { useAppDispatch } from '../../../../../shared/hooks/useAppDispatch';
 import Button from '../../../../../shared/ui/primitives/Button';
 import DeactivateAccountDialog from '../../../components/account/DeactivateAccountDialog';
 import DeleteAccountDialog from '../../../components/account/DeleteAccountDialog';
+import SignOutOtherDevicesDialog from '../../../components/account/SignOutOtherDevicesDialog';
 import ChangePasswordSection from './ChangePasswordSection';
 import AddPasswordSection from './AddPasswordSection';
 import { useLogoutMutation } from '../../../../auth/authApi';
@@ -18,6 +19,7 @@ const AccountTab = () => {
   const user = useAppSelector((state) => state.auth.user);
   const [isDeactivateOpen, setIsDeactivateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isSignOutOthersOpen, setIsSignOutOthersOpen] = useState(false);
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   const handleLogout = async () => {
@@ -68,6 +70,26 @@ const AccountTab = () => {
         </div>
       </div>
 
+      <div className="mb-8 border-b border-border pb-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-text-primary">
+              Sign out of all other devices
+            </h3>
+            <p className="text-sm text-text-secondary sm:max-w-md">
+              Sign out everywhere except this device.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setIsSignOutOthersOpen(true)}
+            className="w-full shrink-0 sm:w-auto"
+          >
+            Sign out other devices
+          </Button>
+        </div>
+      </div>
+
       <div>
         <h3 className="mb-4 text-sm font-semibold text-error">Danger zone</h3>
 
@@ -107,6 +129,10 @@ const AccountTab = () => {
       <DeleteAccountDialog
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
+      />
+      <SignOutOtherDevicesDialog
+        isOpen={isSignOutOthersOpen}
+        onClose={() => setIsSignOutOthersOpen(false)}
       />
     </div>
   );

@@ -98,3 +98,23 @@ export const revokeAllRefreshTokensForUser = async (
     }
   }
 };
+
+export const revokeAllRefreshTokensForUserExcept = async (
+  userId: string,
+  tokenToKeep: string
+): Promise<void> => {
+  const parsed = parseRefreshToken(tokenToKeep);
+  const keyToKeep = parsed
+    ? buildRefreshTokenKey(parsed.userId, parsed.secret)
+    : null;
+
+  const pattern = `refresh_token:${userId}:*`;
+  const stream = redisClient.scanStream({ match: pattern, count: 100 });
+
+  for await (const keys of stream as AsyncIterable<string[]>) {
+    const keysToDelete = keys.filter((key) => key !== keyToKeep);
+    if (keysToDelete.length > 0) {
+      await redisClient.del(...keysToDelete);
+    }
+  }
+};

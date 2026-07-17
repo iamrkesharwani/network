@@ -80,3 +80,22 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json(new ApiResponse(null, 'Logged out successfully'));
 });
+
+export const logoutOtherDevices = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user)
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+
+    const incomingToken = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
+
+    if (!incomingToken) {
+      throw new ApiError(401, 'UNAUTHORIZED', 'No refresh token provided');
+    }
+
+    await authCoreService.logoutOtherDevices(req.user.id, incomingToken);
+
+    res
+      .status(200)
+      .json(new ApiResponse(null, 'Signed out of all other devices'));
+  }
+);

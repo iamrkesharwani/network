@@ -16,6 +16,7 @@ import {
   validateAndConsumeRefreshToken,
   revokeRefreshToken,
   revokeAllRefreshTokensForUser,
+  revokeAllRefreshTokensForUserExcept,
 } from '../../../core/utils/token.js';
 import { redisClient } from '../../../core/config/redis.js';
 import { sendVerificationEmail } from './auth.verify.service.js';
@@ -133,4 +134,8 @@ export const logoutUser = async (token: string) => {
   if (token) {
     await revokeRefreshToken(token);
   }
+};
+
+export const logoutOtherDevices = async (userId: string, token: string) => {
+  await revokeAllRefreshTokensForUserExcept(userId, token);
 };

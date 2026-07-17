@@ -43,6 +43,12 @@ export const authApi = createApi({
         method: 'POST',
       }),
     }),
+    logoutOtherDevices: builder.mutation<ApiResponse<null>, void>({
+      query: () => ({
+        url: '/logout-others',
+        method: 'POST',
+      }),
+    }),
     sendVerification: builder.mutation<ApiResponse<null>, { email: string }>({
       query: (data) => ({
         url: '/send-verification',
@@ -127,6 +133,7 @@ export const {
   useRegisterMutation,
   useLoginMutation,
   useLogoutMutation,
+  useLogoutOtherDevicesMutation,
   useSendVerificationMutation,
   useVerifyEmailMutation,
   useForgotPasswordMutation,

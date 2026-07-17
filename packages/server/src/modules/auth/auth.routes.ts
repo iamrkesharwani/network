@@ -47,6 +47,13 @@ router.post('/refresh', authLimiter, authCoreController.refreshTokens);
 router.post('/logout', authLimiter, authCoreController.logout);
 
 router.post(
+  '/logout-others',
+  authLimiter,
+  requireAuth,
+  authCoreController.logoutOtherDevices
+);
+
+router.post(
   '/send-verification',
   otpLimiter,
   authVerifyController.requestEmailVerification
