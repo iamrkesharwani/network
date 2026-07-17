@@ -20,11 +20,6 @@ export const getProfile = async (userId: string): Promise<ICreatorProfile> => {
       unlockedAt: m.unlockedAt.toISOString(),
     })),
 
-    creatorMilestones: doc.creatorMilestones.map((m) => ({
-      id: m.id,
-      unlockedAt: m.unlockedAt.toISOString(),
-    })),
-
     unlockedFeatures: doc.unlockedFeatures,
 
     uploadActivity: doc.uploadActivity.map((d) => d.toISOString()),

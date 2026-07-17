@@ -6,9 +6,8 @@ import {
   type IMediaStatusEvent,
 } from '@network/shared';
 import type { RootState } from '../../app/store/store';
-import { useAppSelector } from './useAppSelector';
 import { useAppDispatch } from './useAppDispatch';
-import { useSocket } from './useSocket';
+import type { useSocket } from './useSocket';
 import { useToast } from './useToast';
 import { videoApi } from '../../features/video/videoApi';
 import { shortApi } from '../../features/short/shortApi';
@@ -36,13 +35,13 @@ const buildMediaPatch = (event: IMediaStatusEvent): MediaCachePatch => ({
   }),
 });
 
-export const useMediaStatusSocket = (): void => {
-  const { accessToken } = useAppSelector((state) => state.auth);
+export const useMediaStatusSocket = (
+  socketRef: ReturnType<typeof useSocket>
+): void => {
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const socketRef = useSocket(accessToken);
 
   useEffect(() => {
     const socket = socketRef.current;
@@ -130,5 +129,5 @@ export const useMediaStatusSocket = (): void => {
     return () => {
       socket.off(MEDIA_STATUS_SOCKET_EVENT, handleMediaStatus);
     };
-  }, [accessToken, dispatch, addToast, navigate, socketRef, store]);
+  }, [dispatch, addToast, navigate, socketRef, store]);
 };

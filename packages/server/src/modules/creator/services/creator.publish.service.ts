@@ -1,7 +1,7 @@
 import {
   BADGE_CATALOG,
   CONSISTENT_CREATOR_DISTINCT_DAYS,
-  TRUST_POINTS,
+  TRUST_SIGNAL_CATALOG,
   type ICreatorEvent,
 } from '@network/shared';
 import * as creatorRepository from '../creator.repository.js';
@@ -12,7 +12,10 @@ export const recordPublish = async (
   contentType: 'video' | 'short' | 'post'
 ): Promise<ICreatorEvent> => {
   await creatorRepository.pushActivity(userId, new Date());
-  await creatorRepository.incrementTrustScore(userId, TRUST_POINTS.PUBLISH);
+  await creatorRepository.incrementTrustScore(
+    userId,
+    TRUST_SIGNAL_CATALOG.PUBLISH.points
+  );
 
   if (contentType === 'video') {
     await creatorRepository.incrementVideoPublishCount(userId);
@@ -34,7 +37,7 @@ export const recordPublish = async (
       newBadgeIds.push('FIRST_UPLOAD');
       await creatorRepository.incrementTrustScore(
         userId,
-        TRUST_POINTS.FIRST_UPLOAD_BADGE
+        BADGE_CATALOG.FIRST_UPLOAD.points
       );
     }
   }
@@ -48,7 +51,7 @@ export const recordPublish = async (
       newBadgeIds.push('TENTH_UPLOAD');
       await creatorRepository.incrementTrustScore(
         userId,
-        TRUST_POINTS.TENTH_UPLOAD_BADGE
+        BADGE_CATALOG.TENTH_UPLOAD.points
       );
     }
   }
@@ -64,7 +67,7 @@ export const recordPublish = async (
       newBadgeIds.push('CONSISTENT_CREATOR');
       await creatorRepository.incrementTrustScore(
         userId,
-        TRUST_POINTS.CONSISTENT_CREATOR_BADGE
+        BADGE_CATALOG.CONSISTENT_CREATOR.points
       );
     }
   }
@@ -75,9 +78,9 @@ export const recordPublish = async (
     newBadges: newBadgeIds.map((id) => ({
       id,
       unlockedAt: new Date().toISOString(),
-      ...BADGE_CATALOG[id],
+      label: BADGE_CATALOG[id].label,
+      description: BADGE_CATALOG[id].description,
     })),
     newVideoMilestones: [],
-    newCreatorMilestones: [],
   };
 };

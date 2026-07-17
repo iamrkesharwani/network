@@ -2,12 +2,20 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import { useSocket } from '../../shared/hooks/useSocket';
+import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import { useMediaStatusSocket } from '../../shared/hooks/useMediaStatusSocket';
+import { useCreatorEventSocket } from '../../features/creator/hooks/useCreatorEventSocket';
+import BadgeToast from '../../features/creator/components/BadgeToast';
 import { usePreference } from '../../features/settings/hooks/usePreference';
 import DeactivatedAccountBanner from '../../features/settings/components/account/DeactivatedAccountBanner';
 
 const PageWrapper = () => {
-  useMediaStatusSocket();
+  const { accessToken } = useAppSelector((state) => state.auth);
+  const socketRef = useSocket(accessToken);
+  useMediaStatusSocket(socketRef);
+  const { current: creatorCelebration, dismiss: dismissCreatorCelebration } =
+    useCreatorEventSocket(socketRef);
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [appearance, setAppearance] = usePreference('appearance');
@@ -17,6 +25,10 @@ const PageWrapper = () => {
     <div className="h-screen bg-surface-alt flex flex-col overflow-hidden">
       <Navbar onMobileMenuClick={() => setIsMobileSidebarOpen(true)} />
       <DeactivatedAccountBanner />
+      <BadgeToast
+        item={creatorCelebration}
+        onDismiss={dismissCreatorCelebration}
+      />
 
       <div className="flex flex-1 w-full min-h-0">
         <Sidebar

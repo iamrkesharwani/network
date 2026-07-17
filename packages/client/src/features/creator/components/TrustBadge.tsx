@@ -1,7 +1,7 @@
 import { useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, ChevronRight, HelpCircle } from 'lucide-react';
-import { TRUST_TIER_LABELS } from '@network/shared';
+import { TRUST_TIERS } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { buildProfileTabPath } from '../../profile/utils/buildProfilePath';
 import { useGetMyProfileQuery } from '../creatorApi';
@@ -24,7 +24,7 @@ const TrustBadge = ({
   if (isLoading || !data) return null;
 
   const { score, tier } = data.data.trust;
-  const tierLabel = TRUST_TIER_LABELS[tier];
+  const tierLabel = TRUST_TIERS.find((t) => t.id === tier)!.label;
   const statsPath = buildProfileTabPath(username, 'stats');
 
   const openInfo = (e: MouseEvent) => {

@@ -2,11 +2,9 @@ import mongoose, { Schema, type Document } from 'mongoose';
 import {
   BADGE_IDS,
   VIDEO_MILESTONE_IDS,
-  CREATOR_MILESTONE_IDS,
   TRUST_FEATURE_IDS,
   type BadgeId,
   type VideoMilestoneId,
-  type CreatorMilestoneId,
 } from '@network/shared';
 
 export interface IBadgeSubdoc {
@@ -17,11 +15,6 @@ export interface IBadgeSubdoc {
 export interface IVideoMilestoneSubdoc {
   videoId: mongoose.Types.ObjectId;
   id: VideoMilestoneId;
-  unlockedAt: Date;
-}
-
-export interface ICreatorMilestoneSubdoc {
-  id: CreatorMilestoneId;
   unlockedAt: Date;
 }
 
@@ -36,7 +29,6 @@ export interface ICreatorDocument extends Document {
   unlockedFeatures: string[];
   badges: IBadgeSubdoc[];
   videoMilestones: IVideoMilestoneSubdoc[];
-  creatorMilestones: ICreatorMilestoneSubdoc[];
   uploadActivity: Date[];
 }
 
@@ -52,14 +44,6 @@ const videoMilestoneSchema = new Schema<IVideoMilestoneSubdoc>(
   {
     videoId: { type: Schema.Types.ObjectId, ref: 'Video', required: true },
     id: { type: String, enum: VIDEO_MILESTONE_IDS, required: true },
-    unlockedAt: { type: Date, required: true, default: () => new Date() },
-  },
-  { _id: false }
-);
-
-const creatorMilestoneSchema = new Schema<ICreatorMilestoneSubdoc>(
-  {
-    id: { type: String, enum: CREATOR_MILESTONE_IDS, required: true },
     unlockedAt: { type: Date, required: true, default: () => new Date() },
   },
   { _id: false }
@@ -86,7 +70,6 @@ const creatorSchema = new Schema<ICreatorDocument>(
     },
     badges: { type: [badgeSchema], default: [] },
     videoMilestones: { type: [videoMilestoneSchema], default: [] },
-    creatorMilestones: { type: [creatorMilestoneSchema], default: [] },
     uploadActivity: { type: [Date], default: [] },
   },
   {

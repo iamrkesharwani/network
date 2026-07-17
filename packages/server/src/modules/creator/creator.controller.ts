@@ -1,9 +1,5 @@
 import type { Request, Response } from 'express';
-import {
-  BADGE_CATALOG,
-  VIDEO_MILESTONE_CATALOG,
-  CREATOR_MILESTONE_CATALOG,
-} from '@network/shared';
+import { BADGE_CATALOG, VIDEO_MILESTONE_CATALOG } from '@network/shared';
 import { asyncHandler } from '../../core/utils/asyncHandler.js';
 import { ApiResponse } from '../../core/utils/ApiResponse.js';
 import { ApiError } from '../../core/utils/ApiError.js';
@@ -42,7 +38,6 @@ export const getCatalog = asyncHandler(async (_req: Request, res: Response) => {
       {
         badges: BADGE_CATALOG,
         videoMilestones: VIDEO_MILESTONE_CATALOG,
-        creatorMilestones: CREATOR_MILESTONE_CATALOG,
       },
       'Creator catalog fetched successfully'
     )

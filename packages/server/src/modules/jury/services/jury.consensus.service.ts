@@ -44,16 +44,37 @@ const applyVerdictSideEffects = async (
     return;
   }
 
-  if (verdict === 'uphold_removal' && !options.isTimeout) {
+  if (verdict === 'uphold_removal') {
     const adapter = getModerationContentAdapter(juryCase.contentType);
     await adapter?.setModerationStatus(contentId, 'jury_removed');
-
-    const reporterIds = await reportRepository.findReporterIdsForContent(
+    await reportRepository.markResolvedForContent(
       juryCase.contentType,
       contentId
     );
-    for (const reporterId of reporterIds) {
-      await applyTrustSignal(reporterId, 'VALID_REPORT_FILED');
+
+    if (!options.isTimeout) {
+      const reporterIds = await reportRepository.findReporterIdsForContent(
+        juryCase.contentType,
+        contentId
+      );
+      for (const reporterId of reporterIds) {
+        await applyTrustSignal(reporterId, 'VALID_REPORT_FILED');
+      }
+    }
+  } else {
+    await reportRepository.markDismissedForContent(
+      juryCase.contentType,
+      contentId
+    );
+
+    if (!options.isTimeout) {
+      const reporterIds = await reportRepository.findReporterIdsForContent(
+        juryCase.contentType,
+        contentId
+      );
+      for (const reporterId of reporterIds) {
+        await applyTrustSignal(reporterId, 'FALSE_REPORT_FILED');
+      }
     }
   }
 };

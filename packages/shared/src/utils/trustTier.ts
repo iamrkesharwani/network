@@ -1,7 +1,5 @@
-import {
-  TRUST_TIERS,
-  type TrustTierDefinition,
-} from '../modules/creator/creator.constants.js';
+import { TRUST_TIERS } from '../modules/creator/creator.constants.js';
+import type { TrustTierDefinition } from '../modules/creator/creator.types.js';
 
 export const getTrustTier = (score: number): TrustTierDefinition => {
   const sorted = [...TRUST_TIERS].sort((a, b) => a.minScore - b.minScore);

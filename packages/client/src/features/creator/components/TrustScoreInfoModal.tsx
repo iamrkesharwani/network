@@ -16,11 +16,12 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
-  TRUST_POINTS,
-  TRUST_SIGNAL_LABELS,
+  TRUST_SIGNAL_CATALOG,
   TRUST_TIERS,
-  TRUST_TIER_LABELS,
-  TRUST_FEATURE_LABELS,
+  TRUST_FEATURE_CATALOG,
+  BADGE_CATALOG,
+  VIDEO_MILESTONE_LIST,
+  CREATOR_VIEW_MILESTONE_LIST,
   type TrustSignalType,
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
@@ -32,37 +33,75 @@ export interface TrustScoreInfoModalProps {
   onClose: () => void;
 }
 
+interface PointEntry {
+  key: string;
+  label: string;
+  points: number;
+  icon: LucideIcon;
+}
+
+const ACHIEVEMENT_BADGE_ICONS = {
+  FIRST_UPLOAD: Rocket,
+  TENTH_UPLOAD: Target,
+  CONSISTENT_CREATOR: CalendarCheck,
+} as const;
+
 const SIGNAL_ICONS: Record<TrustSignalType, LucideIcon> = {
   PUBLISH: Upload,
-  VIDEO_MILESTONE: Eye,
-  CREATOR_MILESTONE: Sparkles,
-  FIRST_UPLOAD_BADGE: Rocket,
-  TENTH_UPLOAD_BADGE: Target,
-  CONSISTENT_CREATOR_BADGE: CalendarCheck,
   JURY_VOTE_MAJORITY: Scale,
   JURY_VOTE_MINORITY: Scale,
   VALID_REPORT_FILED: Flag,
   FALSE_REPORT_FILED: AlertTriangle,
 };
 
-const signalEntries = Object.entries(TRUST_POINTS) as Array<
-  [TrustSignalType, number]
->;
-const gains = signalEntries.filter(([, points]) => points > 0);
-const losses = signalEntries.filter(([, points]) => points < 0);
+const pointEntries: PointEntry[] = [
+  ...(
+    Object.entries(TRUST_SIGNAL_CATALOG) as Array<
+      [TrustSignalType, { label: string; points: number }]
+    >
+  ).map(([signal, def]) => ({
+    key: signal,
+    label: def.label,
+    points: def.points,
+    icon: SIGNAL_ICONS[signal],
+  })),
+  ...(
+    Object.keys(ACHIEVEMENT_BADGE_ICONS) as Array<
+      keyof typeof ACHIEVEMENT_BADGE_ICONS
+    >
+  ).map((id) => ({
+    key: id,
+    label: BADGE_CATALOG[id].label,
+    points: BADGE_CATALOG[id].points,
+    icon: ACHIEVEMENT_BADGE_ICONS[id],
+  })),
+  {
+    key: 'VIDEO_MILESTONE',
+    label: 'Video Milestone',
+    points: VIDEO_MILESTONE_LIST[0]?.points ?? 0,
+    icon: Eye,
+  },
+  {
+    key: 'CREATOR_MILESTONE',
+    label: 'Total Views Milestone',
+    points: CREATOR_VIEW_MILESTONE_LIST[0]?.points ?? 0,
+    icon: Sparkles,
+  },
+];
+
+const gains = pointEntries.filter((entry) => entry.points > 0);
+const losses = pointEntries.filter((entry) => entry.points < 0);
 
 const SignalCard = ({
-  signal,
-  points,
+  entry,
   tone,
   index,
 }: {
-  signal: TrustSignalType;
-  points: number;
+  entry: PointEntry;
   tone: 'gain' | 'loss';
   index: number;
 }) => {
-  const Icon = SIGNAL_ICONS[signal];
+  const Icon = entry.icon;
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -90,7 +129,7 @@ const SignalCard = ({
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium text-text-primary leading-snug">
-          {TRUST_SIGNAL_LABELS[signal]}
+          {entry.label}
         </p>
         <p
           className={cn(
@@ -99,7 +138,7 @@ const SignalCard = ({
           )}
         >
           {tone === 'gain' ? '+' : ''}
-          {points} pts
+          {entry.points} pts
         </p>
       </div>
     </motion.div>
@@ -137,7 +176,7 @@ const TrustScoreInfoModal = ({ isOpen, onClose }: TrustScoreInfoModalProps) => {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-text-primary">
-                    {TRUST_TIER_LABELS[trust.tier]}
+                    {TRUST_TIERS.find((t) => t.id === trust.tier)!.label}
                   </p>
                   <p className="text-xs text-text-muted">{trust.score} pts</p>
                 </div>
@@ -145,7 +184,7 @@ const TrustScoreInfoModal = ({ isOpen, onClose }: TrustScoreInfoModalProps) => {
               {trust.nextTier && (
                 <p className="text-xs text-text-muted text-right max-w-36">
                   {trust.nextTier.pointsToNext} pts to{' '}
-                  {TRUST_TIER_LABELS[trust.nextTier.id]}
+                  {TRUST_TIERS.find((t) => t.id === trust.nextTier!.id)!.label}
                 </p>
               )}
             </div>
@@ -164,14 +203,8 @@ const TrustScoreInfoModal = ({ isOpen, onClose }: TrustScoreInfoModalProps) => {
             Ways to earn points
           </p>
           <div className="grid grid-cols-2 gap-2">
-            {gains.map(([signal, points], i) => (
-              <SignalCard
-                key={signal}
-                signal={signal}
-                points={points}
-                tone="gain"
-                index={i}
-              />
+            {gains.map((entry, i) => (
+              <SignalCard key={entry.key} entry={entry} tone="gain" index={i} />
             ))}
           </div>
         </div>
@@ -183,11 +216,10 @@ const TrustScoreInfoModal = ({ isOpen, onClose }: TrustScoreInfoModalProps) => {
               Avoid these
             </p>
             <div className="grid grid-cols-2 gap-2">
-              {losses.map(([signal, points], i) => (
+              {losses.map((entry, i) => (
                 <SignalCard
-                  key={signal}
-                  signal={signal}
-                  points={points}
+                  key={entry.key}
+                  entry={entry}
                   tone="loss"
                   index={i}
                 />
@@ -224,7 +256,7 @@ const TrustScoreInfoModal = ({ isOpen, onClose }: TrustScoreInfoModalProps) => {
                         isCurrent ? 'text-primary' : 'text-text-primary'
                       )}
                     >
-                      {TRUST_TIER_LABELS[tier.id]}
+                      {tier.label}
                       {isCurrent && (
                         <span className="ml-1.5 rounded-full bg-primary-muted px-1.5 py-0.5 text-[10px] font-semibold text-primary align-middle">
                           You
@@ -238,7 +270,7 @@ const TrustScoreInfoModal = ({ isOpen, onClose }: TrustScoreInfoModalProps) => {
                   {tier.unlocks.length > 0 && (
                     <p className="mt-0.5 text-xs text-text-muted">
                       {tier.unlocks
-                        .map((f) => TRUST_FEATURE_LABELS[f])
+                        .map((f) => TRUST_FEATURE_CATALOG[f].label)
                         .join(', ')}
                     </p>
                   )}

@@ -5,7 +5,7 @@ import { creatorApi } from '../creatorApi';
 
 export interface CelebrationItem {
   key: string;
-  kind: 'badge' | 'videoMilestone' | 'creatorMilestone';
+  kind: 'badge' | 'videoMilestone';
   label: string;
   description?: string;
 }
@@ -30,11 +30,6 @@ export const useCreatorCelebration = () => {
         ...event.newVideoMilestones.map((m) => ({
           key: `video-milestone:${m.id}`,
           kind: 'videoMilestone' as const,
-          label: m.label,
-        })),
-        ...event.newCreatorMilestones.map((m) => ({
-          key: `creator-milestone:${m.id}`,
-          kind: 'creatorMilestone' as const,
           label: m.label,
         })),
       ];

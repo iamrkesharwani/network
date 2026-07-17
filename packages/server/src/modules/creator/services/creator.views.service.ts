@@ -1,10 +1,12 @@
 import {
   VIDEO_MILESTONE_LIST,
-  CREATOR_MILESTONE_LIST,
-  TRUST_POINTS,
+  CREATOR_VIEW_MILESTONE_LIST,
+  CREATOR_EVENT_SOCKET_EVENT,
+  type ICreatorEvent,
 } from '@network/shared';
 import * as creatorRepository from '../creator.repository.js';
 import { evaluateTrustTiers } from './creator.trust.service.js';
+import { emitToUser } from '../../../core/config/socket.js';
 
 export const recordViewIncrement = async (
   userId: string,
@@ -12,7 +14,9 @@ export const recordViewIncrement = async (
   newContentViews: number
 ): Promise<void> => {
   const newTotalViews = await creatorRepository.incrementTotalViews(userId, 1);
+  const unlockedAt = new Date().toISOString();
 
+  const newVideoMilestones: ICreatorEvent['newVideoMilestones'] = [];
   for (const milestone of VIDEO_MILESTONE_LIST) {
     if (newContentViews >= milestone.threshold) {
       const unlocked = await creatorRepository.unlockVideoMilestone(
@@ -21,28 +25,45 @@ export const recordViewIncrement = async (
         milestone.id
       );
       if (unlocked) {
+        newVideoMilestones.push({
+          id: milestone.id,
+          label: milestone.label,
+          unlockedAt,
+        });
         await creatorRepository.incrementTrustScore(
           userId,
-          TRUST_POINTS.VIDEO_MILESTONE
+          milestone.points
         );
       }
     }
   }
 
-  for (const milestone of CREATOR_MILESTONE_LIST) {
+  const newBadges: ICreatorEvent['newBadges'] = [];
+  for (const milestone of CREATOR_VIEW_MILESTONE_LIST) {
     if (newTotalViews >= milestone.threshold) {
-      const unlocked = await creatorRepository.unlockCreatorMilestone(
+      const unlocked = await creatorRepository.unlockBadge(
         userId,
         milestone.id
       );
       if (unlocked) {
+        newBadges.push({
+          id: milestone.id,
+          label: milestone.label,
+          description: milestone.description,
+          unlockedAt,
+        });
         await creatorRepository.incrementTrustScore(
           userId,
-          TRUST_POINTS.CREATOR_MILESTONE
+          milestone.points
         );
       }
     }
   }
 
   await evaluateTrustTiers(userId);
+
+  if (newVideoMilestones.length > 0 || newBadges.length > 0) {
+    const event: ICreatorEvent = { newBadges, newVideoMilestones };
+    emitToUser(userId, CREATOR_EVENT_SOCKET_EVENT, event);
+  }
 };

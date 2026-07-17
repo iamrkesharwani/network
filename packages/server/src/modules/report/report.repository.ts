@@ -82,6 +82,34 @@ export const markInReviewForContent = async (
   ).exec();
 };
 
+export const markResolvedForContent = async (
+  contentType: ReportableContentType,
+  contentId: string
+): Promise<void> => {
+  await ReportModel.updateMany(
+    {
+      contentType,
+      contentId: new mongoose.Types.ObjectId(contentId),
+      status: 'in_review',
+    },
+    { $set: { status: 'resolved' } }
+  ).exec();
+};
+
+export const markDismissedForContent = async (
+  contentType: ReportableContentType,
+  contentId: string
+): Promise<void> => {
+  await ReportModel.updateMany(
+    {
+      contentType,
+      contentId: new mongoose.Types.ObjectId(contentId),
+      status: 'in_review',
+    },
+    { $set: { status: 'dismissed' } }
+  ).exec();
+};
+
 export const findLatestForContent = (
   contentType: ReportableContentType,
   contentId: string

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ShieldCheck, Lock, CheckCircle2 } from 'lucide-react';
 import {
-  TRUST_TIER_LABELS,
-  TRUST_FEATURE_LABELS,
+  TRUST_TIERS,
+  TRUST_FEATURE_CATALOG,
   TRUST_FEATURE_IDS,
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
@@ -16,7 +16,7 @@ const TrustPanel = () => {
   if (isLoading || !data) return null;
 
   const { score, tier, nextTier, unlockedFeatures } = data.data.trust;
-  const tierLabel = TRUST_TIER_LABELS[tier];
+  const tierLabel = TRUST_TIERS.find((t) => t.id === tier)!.label;
   const unlockedSet = new Set(unlockedFeatures);
 
   const progressPct = nextTier
@@ -49,7 +49,7 @@ const TrustPanel = () => {
 
       <p className="mt-2 text-xs text-text-muted">
         {nextTier
-          ? `${nextTier.pointsToNext} pts to ${TRUST_TIER_LABELS[nextTier.id]}`
+          ? `${nextTier.pointsToNext} pts to ${TRUST_TIERS.find((t) => t.id === nextTier.id)!.label}`
           : "You've reached the highest trust tier"}
       </p>
 
@@ -71,7 +71,7 @@ const TrustPanel = () => {
               ) : (
                 <Lock className="w-3 h-3" />
               )}
-              {TRUST_FEATURE_LABELS[featureId]}
+              {TRUST_FEATURE_CATALOG[featureId].label}
             </div>
           );
         })}

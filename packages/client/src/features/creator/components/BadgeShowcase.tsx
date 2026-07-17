@@ -27,37 +27,26 @@ const BadgeShowcase = () => {
   const { data: profileData } = useGetMyProfileQuery();
 
   const badgeCatalog = catalogData?.data.badges ?? {};
-  const creatorMilestoneCatalog = catalogData?.data.creatorMilestones ?? {};
 
   const unlockedBadgeIds = new Set(
     (profileData?.data.badges ?? []).map((b) => b.id)
   );
-  const unlockedCreatorMilestoneIds = new Set(
-    (profileData?.data.creatorMilestones ?? []).map((m) => m.id)
-  );
 
-  const entries = [
-    ...Object.entries(badgeCatalog).map(([id, def]) => {
-      const badge = def as { label: string; description: string };
-      return {
-        id,
-        ...badge,
-        icon: ICON_MAP[id] || Award,
-        unlocked: unlockedBadgeIds.has(id as never),
-      };
-    }),
-    ...Object.entries(creatorMilestoneCatalog).map(([id, def]) => {
-      const milestone = def as { label: string };
-      const shortLabel = milestone.label.split(' ')[0];
-      return {
-        id,
-        label: shortLabel,
-        description: 'Total Views',
-        icon: ICON_MAP[id] || Trophy,
-        unlocked: unlockedCreatorMilestoneIds.has(id as never),
-      };
-    }),
-  ];
+  const entries = Object.entries(badgeCatalog).map(([id, def]) => {
+    const badge = def as {
+      label: string;
+      description?: string;
+      threshold?: number;
+    };
+    const isViewMilestone = 'threshold' in badge;
+    return {
+      id,
+      label: isViewMilestone ? (badge.label.split(' ')[0] as string) : badge.label,
+      description: isViewMilestone ? 'Total Views' : badge.description,
+      icon: ICON_MAP[id] || (isViewMilestone ? Trophy : Award),
+      unlocked: unlockedBadgeIds.has(id as never),
+    };
+  });
 
   if (entries.length === 0) return null;
 

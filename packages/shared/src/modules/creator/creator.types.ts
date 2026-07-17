@@ -1,13 +1,19 @@
 import type {
-  BadgeId,
-  VideoMilestoneId,
-  CreatorMilestoneId,
-  TrustTierId,
-  TrustFeatureId,
+  BADGE_IDS,
+  VIDEO_MILESTONE_IDS,
+  TRUST_FEATURE_IDS,
+  TRUST_SIGNAL_CATALOG,
+  TRUST_TIERS,
   BADGE_CATALOG,
   VIDEO_MILESTONE_CATALOG,
-  CREATOR_MILESTONE_CATALOG,
 } from './creator.constants.js';
+
+export type BadgeId = (typeof BADGE_IDS)[number];
+export type VideoMilestoneId = (typeof VIDEO_MILESTONE_IDS)[number];
+export type TrustFeatureId = (typeof TRUST_FEATURE_IDS)[number];
+export type TrustSignalType = keyof typeof TRUST_SIGNAL_CATALOG;
+export type TrustTierDefinition = (typeof TRUST_TIERS)[number];
+export type TrustTierId = TrustTierDefinition['id'];
 
 export interface ICreatorEvent {
   newBadges: Array<{
@@ -18,11 +24,6 @@ export interface ICreatorEvent {
   }>;
   newVideoMilestones: Array<{
     id: VideoMilestoneId;
-    label: string;
-    unlockedAt: string;
-  }>;
-  newCreatorMilestones: Array<{
-    id: CreatorMilestoneId;
     label: string;
     unlockedAt: string;
   }>;
@@ -45,7 +46,6 @@ export interface ICreatorProfile {
     id: VideoMilestoneId;
     unlockedAt: string;
   }>;
-  creatorMilestones: Array<{ id: CreatorMilestoneId; unlockedAt: string }>;
   unlockedFeatures: string[];
   uploadActivity: string[];
   videoPublishCount: number;
@@ -57,11 +57,17 @@ export interface ICreatorProfile {
 export interface ICreatorCatalog {
   badges: typeof BADGE_CATALOG;
   videoMilestones: typeof VIDEO_MILESTONE_CATALOG;
-  creatorMilestones: typeof CREATOR_MILESTONE_CATALOG;
 }
 
 export interface IVisibilityCounts {
   all: number;
   public: number;
   unlisted: number;
+}
+
+export interface TrustTier {
+  id: string;
+  label: string;
+  minScore: number;
+  unlocks: ReadonlyArray<(typeof TRUST_FEATURE_IDS)[number]>;
 }

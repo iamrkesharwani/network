@@ -1,5 +1,5 @@
 import {
-  TRUST_POINTS,
+  TRUST_SIGNAL_CATALOG,
   TRUST_SIGNAL_WINDOW_MS,
   TRUST_SIGNAL_DIMINISHING_MULTIPLIERS,
   TRUST_SIGNAL_DIMINISHING_FLOOR,
@@ -20,7 +20,7 @@ export const applyTrustSignal = async (
 ): Promise<void> => {
   await creatorCoreRepository.getOrCreate(userId);
 
-  const rawWeight = TRUST_POINTS[signalType];
+  const rawWeight = TRUST_SIGNAL_CATALOG[signalType].points;
   const windowStart = new Date(Date.now() - TRUST_SIGNAL_WINDOW_MS);
 
   let multiplier = 1;
