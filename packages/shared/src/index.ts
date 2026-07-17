@@ -1,75 +1,91 @@
-export * from './schemas/account.schema.js';
-export * from './schemas/auth.schema.js';
-export * from './schemas/caption.schema.js';
-export * from './schemas/feed.schema.js';
-export * from './schemas/history.schema.js';
-export * from './schemas/jury.schema.js';
-export * from './schemas/location.schema.js';
-export * from './schemas/post.schema.js';
-export * from './schemas/preferences.schema.js';
-export * from './schemas/report.schema.js';
-export * from './schemas/related.schema.js';
-export * from './schemas/search.schema.js';
-export * from './schemas/short.schema.js';
-export * from './schemas/upload.schema.js';
-export * from './schemas/user.schema.js';
-export * from './schemas/video.schema.js';
+export * from './modules/account/account.schema.js';
+export * from './modules/account/account.types.js';
+export * from './modules/account/account.constants.js';
 
-export * from './types/account.types.js';
-export * from './types/api.types.js';
-export * from './types/auth.types.js';
-export * from './types/caption.types.js';
-export * from './types/creator.types.js';
-export * from './types/feed.types.js';
-export * from './types/history.types.js';
-export * from './types/jury.types.js';
-export * from './types/post.types.js';
-export * from './types/preferences.types.js';
-export * from './types/related.types.js';
-export * from './types/report.types.js';
-export * from './types/search.types.js';
-export * from './types/short.types.js';
-export * from './types/upload.types.js';
-export * from './types/user.types.js';
-export * from './types/video.types.js';
-export * from './types/socket.types.js';
+export * from './modules/auth/auth.schema.js';
+export * from './modules/auth/auth.types.js';
+export * from './modules/auth/auth.constants.js';
 
-export * from './constants/account.constants.js';
-export * from './constants/api.constants.js';
-export * from './constants/auth.constants.js';
+export * from './modules/caption/caption.schema.js';
+export * from './modules/caption/caption.types.js';
+export * from './modules/caption/caption.constants.js';
+
+export * from './modules/creator/creator.types.js';
+export * from './modules/creator/creator.constants.js';
+
+export * from './modules/feed/feed.schema.js';
+export * from './modules/feed/feed.types.js';
+export * from './modules/feed/feed.constants.js';
+
+export * from './modules/history/history.schema.js';
+export * from './modules/history/history.types.js';
+export * from './modules/history/history.constants.js';
+
+export * from './modules/jury/jury.schema.js';
+export * from './modules/jury/jury.types.js';
+export * from './modules/jury/jury.constants.js';
+
+export * from './modules/location/location.schema.js';
+export * from './modules/location/location.constants.js';
+
+export * from './modules/post/post.schema.js';
+export * from './modules/post/post.types.js';
+export * from './modules/post/post.constants.js';
+
+export * from './modules/preferences/preferences.schema.js';
+export * from './modules/preferences/preferences.types.js';
+export * from './modules/preferences/preferences.constants.js';
+
+export * from './modules/related/related.schema.js';
+export * from './modules/related/related.types.js';
+export * from './modules/related/related.constants.js';
+
+export * from './modules/report/report.schema.js';
+export * from './modules/report/report.types.js';
+export * from './modules/report/report.constants.js';
+
+export * from './modules/search/search.schema.js';
+export * from './modules/search/search.types.js';
+export * from './modules/search/search.constants.js';
+
+export * from './modules/short/short.schema.js';
+export * from './modules/short/short.types.js';
+export * from './modules/short/short.constants.js';
+
+export * from './modules/upload/upload.schema.js';
+export * from './modules/upload/upload.types.js';
+export * from './modules/upload/upload.constants.js';
+
+export * from './modules/user/user.schema.js';
+export * from './modules/user/user.types.js';
+export * from './modules/user/user.constants.js';
+
+export * from './modules/video/video.schema.js';
+export * from './modules/video/video.types.js';
+export * from './modules/video/video.constants.js';
+
+export * from './core/api/api.types.js';
+export * from './core/api/api.constants.js';
+export * from './core/socket/socket.types.js';
+
 export * from './constants/breakpoints.constants.js';
-export * from './constants/caption.constants.js';
 export * from './constants/countries.constants.js';
-export * from './constants/creator.constants.js';
 export * from './constants/error.constants.js';
 export * from './constants/general.constants.js';
-export * from './constants/history.constants.js';
-export * from './constants/jury.constants.js';
-export * from './constants/location.constants.js';
 export * from './constants/media.constants.js';
 export * from './constants/moderation.constants.js';
 export * from './constants/player.constants.js';
-export * from './constants/post.constants.js';
-export * from './constants/preferences.constants.js';
 export * from './constants/progressRing.constants.js';
 export * from './constants/provider.constants.js';
 export * from './constants/redis.constants.js';
-export * from './constants/related.constants.js';
-export * from './constants/report.constants.js';
 export * from './constants/retention.constants.js';
 export * from './constants/routes.constants.js';
-export * from './constants/search.constants.js';
-export * from './constants/short.constants.js';
 export * from './constants/socialPlatformCatalog.constants.js';
 export * from './constants/storage.constants.js';
 export * from './constants/tag.constants.js';
 export * from './constants/time.constants.js';
 export * from './constants/trust.constants.js';
-export * from './constants/upload.constants.js';
-export * from './constants/user.constants.js';
-export * from './constants/video.constants.js';
 export * from './constants/visibility.constants.js';
-export * from './constants/feed.constants.js';
 
 export * from './utils/formatCount.js';
 export * from './utils/formatDate.js';

@@ -1,4 +1,4 @@
-import type { SocialPlatform } from './user.constants.js';
+import type { SocialPlatform } from '../modules/user/user.constants.js';
 
 export interface KnownSocialPlatform {
   key: string;
