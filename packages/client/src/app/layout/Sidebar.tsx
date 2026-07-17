@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import {
   Home,
-  User,
   LogIn,
   UserPlus,
   X,
@@ -13,7 +12,6 @@ import {
 } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
-import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
 
 export interface SidebarProps {
   isMobileOpen: boolean;
@@ -36,14 +34,7 @@ const Sidebar = ({
     { name: 'Posts', path: CLIENT_ROUTES.POSTS, icon: FileText },
     { name: 'Upload', path: CLIENT_ROUTES.UPLOAD, icon: UploadCloud },
     ...(isAuthenticated && authUser?.username
-      ? [
-          {
-            name: 'Profile',
-            path: buildProfilePath(authUser.username),
-            icon: User,
-          },
-          { name: 'Jury', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel },
-        ]
+      ? [{ name: 'Jury', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel }]
       : []),
   ];
 

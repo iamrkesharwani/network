@@ -1,67 +1,54 @@
-import { useCallback, useState } from 'react';
-import {
-  RECENT_SEARCHES_MAX,
-  RECENT_SEARCHES_STORAGE_KEY,
-} from '@network/shared';
-
-const readStored = (): string[] => {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = window.localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed)
-      ? parsed.filter((value): value is string => typeof value === 'string')
-      : [];
-  } catch {
-    return [];
-  }
-};
+import { useCallback } from 'react';
+import { useAppSelector } from '../../../shared/hooks/useAppSelector';
+import { searchApi } from '../searchApi';
+import { useLocalRecentSearches } from './useLocalRecentSearches';
 
 export const useRecentSearches = () => {
-  const [recent, setRecent] = useState<string[]>(readStored);
+  const isAuthenticated = useAppSelector(
+    (state) => state.auth.isAuthenticated
+  );
+  const local = useLocalRecentSearches();
 
-  const persist = useCallback((next: string[]) => {
-    setRecent(next);
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(
-      RECENT_SEARCHES_STORAGE_KEY,
-      JSON.stringify(next)
-    );
-  }, []);
+  const remoteQuery = searchApi.useGetRecentSearchesQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  const [addRecentMutation] = searchApi.useAddRecentSearchMutation();
+  const [removeRecentMutation] = searchApi.useRemoveRecentSearchMutation();
+  const [clearRecentMutation] = searchApi.useClearRecentSearchesMutation();
 
-  const addRecent = useCallback((query: string) => {
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    setRecent((current) => {
-      const next = [
-        trimmed,
-        ...current.filter((q) => q.toLowerCase() !== trimmed.toLowerCase()),
-      ].slice(0, RECENT_SEARCHES_MAX);
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(
-          RECENT_SEARCHES_STORAGE_KEY,
-          JSON.stringify(next)
-        );
+  const recent = isAuthenticated
+    ? (remoteQuery.data?.data.recent ?? [])
+    : local.recent;
+
+  const addRecent = useCallback(
+    (query: string) => {
+      if (isAuthenticated) {
+        void addRecentMutation({ q: query });
+      } else {
+        local.addRecent(query);
       }
-      return next;
-    });
-  }, []);
+    },
+    [isAuthenticated, addRecentMutation, local]
+  );
 
-  const removeRecent = useCallback((query: string) => {
-    setRecent((current) => {
-      const next = current.filter((q) => q !== query);
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(
-          RECENT_SEARCHES_STORAGE_KEY,
-          JSON.stringify(next)
-        );
+  const removeRecent = useCallback(
+    (query: string) => {
+      if (isAuthenticated) {
+        void removeRecentMutation({ q: query });
+      } else {
+        local.removeRecent(query);
       }
-      return next;
-    });
-  }, []);
+    },
+    [isAuthenticated, removeRecentMutation, local]
+  );
 
-  const clearRecent = useCallback(() => persist([]), [persist]);
+  const clearRecent = useCallback(() => {
+    if (isAuthenticated) {
+      void clearRecentMutation();
+    } else {
+      local.clearRecent();
+    }
+  }, [isAuthenticated, clearRecentMutation, local]);
 
   return { recent, addRecent, removeRecent, clearRecent };
 };

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { validate } from '../../core/middleware/validate.middleware.js';
+import { requireAuth } from '../../core/middleware/auth.middleware.js';
 import { searchLimiter } from '../../core/middleware/rateLimit.middleware.js';
 import {
   searchAllQuerySchema,
@@ -7,6 +8,8 @@ import {
   searchCreatorsQuerySchema,
   searchSuggestionsQuerySchema,
   searchTypeParamSchema,
+  recentSearchAddSchema,
+  recentSearchRemoveQuerySchema,
 } from '@network/shared';
 import * as searchController from './search.controller.js';
 
@@ -30,6 +33,22 @@ router.get(
   '/suggestions',
   validate({ query: searchSuggestionsQuerySchema }),
   searchController.getSearchSuggestions
+);
+
+router.get('/recent', requireAuth, searchController.getRecentSearches);
+
+router.post(
+  '/recent',
+  requireAuth,
+  validate({ body: recentSearchAddSchema }),
+  searchController.addRecentSearch
+);
+
+router.delete(
+  '/recent',
+  requireAuth,
+  validate({ query: recentSearchRemoveQuerySchema }),
+  searchController.removeRecentSearch
 );
 
 router.get(

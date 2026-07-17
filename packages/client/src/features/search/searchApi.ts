@@ -5,6 +5,7 @@ import type {
   IMixedFeedBatch,
   IPostResponse,
   IPublicProfile,
+  IRecentSearchesResponse,
   ISearchSuggestions,
   IShortResponse,
   IVideoResponse,
@@ -42,6 +43,7 @@ type SearchByTypeItem = IVideoResponse | IShortResponse | IPostResponse;
 export const searchApi = createApi({
   reducerPath: 'searchApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/search' }),
+  tagTypes: ['RecentSearches'],
   endpoints: (builder) => ({
     searchAll: builder.query<ApiResponse<IMixedFeedBatch>, SearchAllQueryArgs>({
       query: (params) => ({
@@ -114,6 +116,31 @@ export const searchApi = createApi({
         params,
       }),
     }),
+    getRecentSearches: builder.query<ApiResponse<IRecentSearchesResponse>, void>({
+      query: () => ({ url: '/recent', method: 'GET' }),
+      providesTags: ['RecentSearches'],
+    }),
+    addRecentSearch: builder.mutation<
+      ApiResponse<IRecentSearchesResponse>,
+      { q: string }
+    >({
+      query: (data) => ({ url: '/recent', method: 'POST', data }),
+      invalidatesTags: ['RecentSearches'],
+    }),
+    removeRecentSearch: builder.mutation<
+      ApiResponse<IRecentSearchesResponse>,
+      { q: string }
+    >({
+      query: (params) => ({ url: '/recent', method: 'DELETE', params }),
+      invalidatesTags: ['RecentSearches'],
+    }),
+    clearRecentSearches: builder.mutation<
+      ApiResponse<IRecentSearchesResponse>,
+      void
+    >({
+      query: () => ({ url: '/recent', method: 'DELETE' }),
+      invalidatesTags: ['RecentSearches'],
+    }),
   }),
 });
 
@@ -122,4 +149,8 @@ export const {
   useSearchByTypeQuery,
   useSearchCreatorsQuery,
   useSearchSuggestionsQuery,
+  useGetRecentSearchesQuery,
+  useAddRecentSearchMutation,
+  useRemoveRecentSearchMutation,
+  useClearRecentSearchesMutation,
 } = searchApi;

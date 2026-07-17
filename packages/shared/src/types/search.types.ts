@@ -5,6 +5,8 @@ import {
   searchCreatorsQuerySchema,
   searchSuggestionsQuerySchema,
   searchTypeParamSchema,
+  recentSearchAddSchema,
+  recentSearchRemoveQuerySchema,
 } from '../schemas/search.schema.js';
 import type { IMixedFeedBatch } from './feed.types.js';
 import type { IPublicProfile } from './user.types.js';
@@ -19,6 +21,10 @@ export type SearchSuggestionsQuery = z.infer<
   typeof searchSuggestionsQuerySchema
 >;
 export type SearchTypeParam = z.infer<typeof searchTypeParamSchema>;
+export type RecentSearchAddInput = z.infer<typeof recentSearchAddSchema>;
+export type RecentSearchRemoveQuery = z.infer<
+  typeof recentSearchRemoveQuerySchema
+>;
 
 export type ISearchAllResult = IMixedFeedBatch;
 
@@ -27,4 +33,8 @@ export interface ISearchSuggestions {
   videos: IVideoResponse[];
   shorts: IShortResponse[];
   posts: IPostResponse[];
+}
+
+export interface IRecentSearchesResponse {
+  recent: string[];
 }

@@ -24,9 +24,6 @@ const CreatorResultCard = ({ creator }: CreatorResultCardProps) => (
       </p>
       <p className="text-xs text-text-muted truncate">@{creator.username}</p>
     </div>
-    {creator.bio && (
-      <p className="text-xs text-text-secondary line-clamp-2">{creator.bio}</p>
-    )}
   </Link>
 );
 

@@ -55,3 +55,11 @@ export const searchCreatorsQuerySchema = z.object({
 export const searchSuggestionsQuerySchema = z.object({
   q: searchQueryString,
 });
+
+export const recentSearchAddSchema = z.object({
+  q: searchQueryString,
+});
+
+export const recentSearchRemoveQuerySchema = z.object({
+  q: z.string().trim().min(1, 'Query cannot be empty.').optional(),
+});
