@@ -20,6 +20,14 @@ export interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
+const EASE: [number, number, number, number] = [0.4, 0, 0.2, 1];
+const LAYOUT_TRANSITION = {
+  type: 'tween' as const,
+  duration: 0.38,
+  ease: EASE,
+};
+const LABEL_TRANSITION = { type: 'tween' as const, duration: 0.3, ease: EASE };
+
 const Sidebar = ({
   isMobileOpen,
   onMobileClose,
@@ -44,7 +52,7 @@ const Sidebar = ({
   const sidebarClasses = [
     'fixed inset-y-0 left-0 z-50 flex flex-col',
     'bg-surface border-r border-border',
-    'transform transition-all duration-300 ease-in-out',
+    'transform transition-all duration-[380ms] ease-in-out',
     'md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:translate-x-0',
     'w-56',
     isMobileOpen ? 'translate-x-0' : '-translate-x-full',
@@ -98,10 +106,11 @@ const Sidebar = ({
               title={!showLabels ? item.name : undefined}
               className={({ isActive }) =>
                 [
-                  'group flex items-center overflow-hidden rounded-lg text-sm font-medium transition-all duration-200',
+                  'group relative flex items-center justify-center overflow-hidden rounded-lg text-sm font-medium',
+                  'transition-colors duration-300',
                   !showLabels
-                    ? 'flex-col justify-center gap-1.5 px-1 py-2.5 w-12 mx-auto'
-                    : 'gap-3 px-3 py-2.5',
+                    ? 'w-12 mx-auto py-2.5 px-1'
+                    : 'w-full py-2.5 px-3',
                   isActive
                     ? 'bg-primary-muted text-primary'
                     : 'text-text-secondary hover:text-text-primary hover:bg-surface-raised',
@@ -109,42 +118,55 @@ const Sidebar = ({
               }
             >
               {({ isActive }) => (
-                <>
-                  <item.icon
-                    className={[
-                      'shrink-0 transition-all duration-200',
-                      !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
-                      isActive
-                        ? 'text-icon-active'
-                        : 'text-icon group-hover:text-icon-hover',
-                    ].join(' ')}
-                    strokeWidth={isActive ? 2.5 : 1.75}
-                  />
-                  <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  layout
+                  transition={LAYOUT_TRANSITION}
+                  className={
+                    !showLabels
+                      ? 'flex flex-col items-center justify-center gap-1.5'
+                      : 'flex items-center gap-3 w-full'
+                  }
+                >
+                  <motion.div layout="position" transition={LAYOUT_TRANSITION}>
+                    <item.icon
+                      className={[
+                        'shrink-0 transition-all duration-300',
+                        !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
+                        isActive
+                          ? 'text-icon-active'
+                          : 'text-icon group-hover:text-icon-hover',
+                      ].join(' ')}
+                      strokeWidth={isActive ? 2.5 : 1.75}
+                    />
+                  </motion.div>
+
+                  <AnimatePresence mode="popLayout" initial={false}>
                     {showLabels ? (
                       <motion.span
                         key="expanded"
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 8 }}
-                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        layout
+                        initial={{ opacity: 0, y: -12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -12 }}
+                        transition={LABEL_TRANSITION}
                       >
                         {item.name}
                       </motion.span>
                     ) : (
                       <motion.span
                         key="collapsed"
-                        initial={{ opacity: 0, y: 6 }}
+                        layout
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        exit={{ opacity: 0, y: 12 }}
+                        transition={LABEL_TRANSITION}
                         className="text-[9px] leading-none font-medium tracking-tight"
                       >
                         {item.name}
                       </motion.span>
                     )}
                   </AnimatePresence>
-                </>
+                </motion.div>
               )}
             </NavLink>
           ))}
