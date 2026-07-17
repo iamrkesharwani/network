@@ -1,8 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import {
   Home,
-  LogIn,
-  UserPlus,
   X,
   ChevronRight,
   ChevronLeft,
@@ -125,52 +123,6 @@ const Sidebar = ({
             </NavLink>
           ))}
         </nav>
-
-        {!isAuthenticated && (
-          <div className="px-2 py-4 border-t border-border shrink-0 space-y-1">
-            <NavLink
-              to={CLIENT_ROUTES.LOGIN}
-              onClick={onMobileClose}
-              title={!showLabels ? 'Log in' : undefined}
-              className={[
-                'group flex items-center rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-all focus:outline-none w-full',
-                !showLabels
-                  ? 'justify-center px-0 py-2.5 w-10 mx-auto'
-                  : 'gap-3 px-3 py-2.5',
-              ].join(' ')}
-            >
-              <LogIn
-                className={[
-                  'shrink-0 text-icon group-hover:text-icon-hover transition-colors',
-                  !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
-                ].join(' ')}
-                strokeWidth={1.75}
-              />
-              {showLabels && <span>Log in</span>}
-            </NavLink>
-
-            <NavLink
-              to={CLIENT_ROUTES.REGISTER}
-              onClick={onMobileClose}
-              title={!showLabels ? 'Sign up' : undefined}
-              className={[
-                'group flex items-center rounded-lg text-sm font-medium text-primary hover:bg-primary-muted transition-all focus:outline-none w-full',
-                !showLabels
-                  ? 'justify-center px-0 py-2.5 w-10 mx-auto'
-                  : 'gap-3 px-3 py-2.5',
-              ].join(' ')}
-            >
-              <UserPlus
-                className={[
-                  'shrink-0',
-                  !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
-                ].join(' ')}
-                strokeWidth={1.75}
-              />
-              {showLabels && <span>Sign up</span>}
-            </NavLink>
-          </div>
-        )}
       </aside>
     </>
   );
