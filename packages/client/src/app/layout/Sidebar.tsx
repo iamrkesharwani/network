@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Home,
   X,
@@ -47,7 +48,7 @@ const Sidebar = ({
     'md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:translate-x-0',
     'w-56',
     isMobileOpen ? 'translate-x-0' : '-translate-x-full',
-    isCollapsed ? 'md:w-14' : 'md:w-56',
+    isCollapsed ? 'md:w-16' : 'md:w-56',
   ].join(' ');
 
   return (
@@ -87,7 +88,7 @@ const Sidebar = ({
           </button>
         </div>
 
-        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden">
+        <nav className="flex-1 px-2 py-4 space-y-2 overflow-y-auto overflow-x-hidden">
           {navItems.map((item) => (
             <NavLink
               key={item.name}
@@ -97,9 +98,9 @@ const Sidebar = ({
               title={!showLabels ? item.name : undefined}
               className={({ isActive }) =>
                 [
-                  'group flex items-center rounded-lg text-sm font-medium transition-all duration-150',
+                  'group flex items-center overflow-hidden rounded-lg text-sm font-medium transition-all duration-200',
                   !showLabels
-                    ? 'justify-center px-0 py-2.5 w-10 mx-auto'
+                    ? 'flex-col justify-center gap-1.5 px-1 py-2.5 w-12 mx-auto'
                     : 'gap-3 px-3 py-2.5',
                   isActive
                     ? 'bg-primary-muted text-primary'
@@ -111,7 +112,7 @@ const Sidebar = ({
                 <>
                   <item.icon
                     className={[
-                      'shrink-0 transition-colors',
+                      'shrink-0 transition-all duration-200',
                       !showLabels ? 'w-5 h-5' : 'w-4.5 h-4.5',
                       isActive
                         ? 'text-icon-active'
@@ -119,7 +120,30 @@ const Sidebar = ({
                     ].join(' ')}
                     strokeWidth={isActive ? 2.5 : 1.75}
                   />
-                  {showLabels && item.name}
+                  <AnimatePresence mode="wait" initial={false}>
+                    {showLabels ? (
+                      <motion.span
+                        key="expanded"
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 8 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                      >
+                        {item.name}
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="collapsed"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        className="text-[9px] leading-none font-medium tracking-tight"
+                      >
+                        {item.name}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </>
               )}
             </NavLink>
