@@ -1,10 +1,8 @@
 import { z } from 'zod';
 import { THEMES, VIEW_MODES } from '../../constants/general.constants.js';
 import { CAPTION_LANGUAGE_CODES } from '../caption/caption.constants.js';
-import {
-  PREFERENCES_NOTIFICATION_CATEGORIES,
-  type PreferencesNotificationCategory,
-} from './preferences.constants.js';
+import { PREFERENCES_NOTIFICATION_CATEGORIES } from './preferences.constants.js';
+import { PreferencesNotificationCategory } from './preferences.types.js';
 
 const appearancePatchSchema = z.object({
   theme: z.enum(THEMES).optional(),

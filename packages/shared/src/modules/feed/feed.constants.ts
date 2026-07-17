@@ -8,18 +8,6 @@ export const LOW_WATER_MARK = 4;
 export const CHAT_RAIL_WIDTH_PX = 320;
 export const SHORT_THEATER_WIDTH_PX = 384;
 
-export const FEED_MIX_RATIO = {
-  video: 0.5,
-  short: 0.3,
-  post: 0.2,
-} as const;
-
-export const FEED_MIN_FETCH_QUOTA = {
-  video: 6,
-  short: 5,
-  post: 4,
-} as const;
-
 export const FEED_VIDEO_ROWS_PER_BLOCK_FIRST_MOBILE_PORTRAIT = 2;
 export const FEED_VIDEO_ROWS_PER_BLOCK_MOBILE_PORTRAIT = 4;
 
@@ -41,3 +29,15 @@ export const FEED_POSTS_PER_BLOCK_MOBILE_PORTRAIT = 1;
 export const FEED_POSTS_PER_BLOCK_COMPACT = 3;
 export const FEED_POSTS_PER_BLOCK_TABLET_LANDSCAPE = 4;
 export const FEED_POSTS_PER_BLOCK_DESKTOP = 4;
+
+export const FEED_MIX_RATIO = {
+  video: 0.5,
+  short: 0.3,
+  post: 0.2,
+} as const;
+
+export const FEED_MIN_FETCH_QUOTA = {
+  video: 6,
+  short: 5,
+  post: 4,
+} as const;

@@ -4,6 +4,7 @@ export const TEXT_ENGINE_TAG = 't:';
 export const PREFIX_ENGINE_TAG = 'p:';
 export const WORD_PATTERN = /[a-z0-9]+/g;
 export const RECENT_SEARCHES_MAX = 6;
+export const SEARCH_TYPES = ['video', 'short', 'post'] as const;
 
 export const SEARCH_SUGGESTION_LIMITS = {
   creator: 3,

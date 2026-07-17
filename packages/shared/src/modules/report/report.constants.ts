@@ -1,3 +1,9 @@
+import { ReportReasonCode } from './report.types.js';
+
+export const REPORT_NOTE_MAX_LENGTH = 500;
+export const REPORT_JURY_CASE_TRIGGER_COUNT = 3;
+export const REPORT_REASON_CODES_BYPASSING_JURY: ReportReasonCode[] = ['CSAM'];
+
 export const REPORTABLE_CONTENT_TYPES = [
   'video',
   'short',
@@ -18,9 +24,6 @@ export const REPORT_REASON_CATALOG = {
 export const REPORT_REASON_CODES = Object.keys(
   REPORT_REASON_CATALOG
 ) as (keyof typeof REPORT_REASON_CATALOG)[];
-export type ReportReasonCode = (typeof REPORT_REASON_CODES)[number];
-
-export const REPORT_REASON_CODES_BYPASSING_JURY: ReportReasonCode[] = ['CSAM'];
 
 export const REPORT_STATUS = [
   'pending',
@@ -28,8 +31,3 @@ export const REPORT_STATUS = [
   'resolved',
   'dismissed',
 ] as const;
-export type ReportStatus = (typeof REPORT_STATUS)[number];
-
-export const REPORT_NOTE_MAX_LENGTH = 500;
-
-export const REPORT_JURY_CASE_TRIGGER_COUNT = 3;

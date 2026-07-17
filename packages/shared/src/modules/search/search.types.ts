@@ -13,6 +13,7 @@ import type { IPublicProfile } from '../user/user.types.js';
 import type { IVideoResponse } from '../video/video.types.js';
 import type { IShortResponse } from '../short/short.types.js';
 import type { IPostResponse } from '../post/post.types.js';
+import { SEARCH_TYPES } from './search.constants.js';
 
 export type SearchAllQuery = z.infer<typeof searchAllQuerySchema>;
 export type SearchByTypeQuery = z.infer<typeof searchByTypeQuerySchema>;
@@ -20,6 +21,7 @@ export type SearchCreatorsQuery = z.infer<typeof searchCreatorsQuerySchema>;
 export type SearchSuggestionsQuery = z.infer<
   typeof searchSuggestionsQuerySchema
 >;
+export type SearchType = (typeof SEARCH_TYPES)[number];
 export type SearchTypeParam = z.infer<typeof searchTypeParamSchema>;
 export type RecentSearchAddInput = z.infer<typeof recentSearchAddSchema>;
 export type RecentSearchRemoveQuery = z.infer<

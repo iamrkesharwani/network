@@ -26,7 +26,9 @@ const socialLinkHostnameMatches = (url: string, domains: string[]): boolean => {
   if (domains.length === 0) return true;
   try {
     const hostname = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
-    return domains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+    return domains.some(
+      (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
+    );
   } catch {
     return false;
   }
@@ -98,8 +100,14 @@ export const usernameParamSchema = z.object({
     .string()
     .trim()
     .toLowerCase()
-    .min(USERNAME_MIN_LENGTH, `Username must be at least ${USERNAME_MIN_LENGTH} characters.`)
-    .max(USERNAME_MAX_LENGTH, `Username cannot exceed ${USERNAME_MAX_LENGTH} characters.`),
+    .min(
+      USERNAME_MIN_LENGTH,
+      `Username must be at least ${USERNAME_MIN_LENGTH} characters.`
+    )
+    .max(
+      USERNAME_MAX_LENGTH,
+      `Username cannot exceed ${USERNAME_MAX_LENGTH} characters.`
+    ),
 });
 
 export const userProfileUpdateSchema = z.object({
@@ -165,9 +173,15 @@ export const personalDetailsSchema = z
           .string()
           .trim()
           .min(1)
-          .max(PRONOUN_MAX_LENGTH, `Cannot exceed ${PRONOUN_MAX_LENGTH} characters.`)
+          .max(
+            PRONOUN_MAX_LENGTH,
+            `Cannot exceed ${PRONOUN_MAX_LENGTH} characters.`
+          )
       )
-      .max(PRONOUNS_MAX_COUNT, `Cannot add more than ${PRONOUNS_MAX_COUNT} pronouns.`)
+      .max(
+        PRONOUNS_MAX_COUNT,
+        `Cannot add more than ${PRONOUNS_MAX_COUNT} pronouns.`
+      )
       .optional(),
     relationshipStatus: z.enum(RELATIONSHIP_STATUSES).optional(),
   })
@@ -223,7 +237,10 @@ export const contactLinksSchema = z.object({
       z.literal(''),
       z
         .url('Enter a valid URL.')
-        .max(WEBSITE_MAX_LENGTH, `Cannot exceed ${WEBSITE_MAX_LENGTH} characters.`),
+        .max(
+          WEBSITE_MAX_LENGTH,
+          `Cannot exceed ${WEBSITE_MAX_LENGTH} characters.`
+        ),
     ])
     .optional(),
   socialLinks: z.array(socialLinkSchema).max(SOCIAL_LINKS_MAX).optional(),

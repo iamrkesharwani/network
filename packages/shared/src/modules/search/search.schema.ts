@@ -4,14 +4,12 @@ import {
   DEFAULT_PAGE_LIMIT,
   MAX_PAGE_LIMIT,
 } from '../../core/api/api.constants.js';
+import { SEARCH_TYPES } from './search.constants.js';
 
 const searchQueryString = z
   .string()
   .trim()
   .min(1, 'Search query cannot be empty.');
-
-export const SEARCH_TYPES = ['video', 'short', 'post'] as const;
-export type SearchType = (typeof SEARCH_TYPES)[number];
 
 export const searchAllQuerySchema = z.object({
   q: searchQueryString,

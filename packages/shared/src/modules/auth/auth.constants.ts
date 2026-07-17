@@ -26,6 +26,8 @@ export const AUTH_PUBLIC_PATHS = [
   '/auth/send-verification',
   '/auth/forgot-password',
 ];
+export const DUMMY_PASSWORD_HASH =
+  '$argon2id$v=19$m=19456,t=2,p=1$dQJHQO0aS3S1x8CGldfxgQ$YsxGqXSBd8KbVo/RONXSR2+JTIma/z2XpBpq3SuYcwA';
 
 export const AUTH_ICONS = {
   GOOGLE: {
@@ -39,7 +41,3 @@ export const AUTH_ICONS = {
     VIEWBOX: '0 0 24 24',
   },
 } as const;
-
-export const DUMMY_PASSWORD_HASH =
-  '$argon2id$v=19$m=19456,t=2,p=1$dQJHQO0aS3S1x8CGldfxgQ$YsxGqXSBd8KbVo/RONXSR2+JTIma/z2XpBpq3SuYcwA';
-export type AuthProvider = (typeof AUTH_PROVIDERS)[number];

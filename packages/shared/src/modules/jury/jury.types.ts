@@ -7,10 +7,10 @@ import {
   juryContentParamSchema,
 } from './jury.schema.js';
 import type {
-  JuryCaseStatus,
-  JuryVerdict,
-  JuryVoteChoice,
-  AppealStatus,
+  APPEAL_STATUS,
+  JURY_CASE_STATUS,
+  JURY_VERDICT,
+  JURY_VOTE_CHOICES,
 } from './jury.constants.js';
 import type { ReportableContentType } from '../report/report.types.js';
 
@@ -19,6 +19,10 @@ export type JuryAppealCreateInput = z.infer<typeof juryAppealCreateSchema>;
 export type JuryAppealResolveInput = z.infer<typeof juryAppealResolveSchema>;
 export type JuryMineQuery = z.infer<typeof juryMineQuerySchema>;
 export type JuryContentParam = z.infer<typeof juryContentParamSchema>;
+export type JuryCaseStatus = (typeof JURY_CASE_STATUS)[number];
+export type JuryVerdict = (typeof JURY_VERDICT)[number];
+export type JuryVoteChoice = (typeof JURY_VOTE_CHOICES)[number];
+export type AppealStatus = (typeof APPEAL_STATUS)[number];
 
 export interface IJuryCaseResponse {
   id: string;

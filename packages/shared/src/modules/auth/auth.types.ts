@@ -10,7 +10,7 @@ import {
   confirmAddPasswordSchema,
   refreshSchema,
 } from './auth.schema.js';
-import { AUTH_PROVIDERS } from './auth.constants.js'; 
+import { AUTH_PROVIDERS } from './auth.constants.js';
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
@@ -25,7 +25,7 @@ export type ChangeEmailInput = z.infer<typeof changeEmailSchema>;
 export type ConfirmEmailChangeInput = z.infer<typeof confirmEmailChangeSchema>;
 export type ConfirmAddPasswordInput = z.infer<typeof confirmAddPasswordSchema>;
 export type RefreshInput = z.infer<typeof refreshSchema>;
-
+export type AuthProvider = (typeof AUTH_PROVIDERS)[number];
 export type OAuthProvider = Exclude<(typeof AUTH_PROVIDERS)[number], 'local'>;
 
 export interface IOAuthAccount {

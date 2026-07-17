@@ -7,8 +7,7 @@ export const PREFERENCES_NOTIFICATION_CATEGORIES = [
   'newsletter',
 ] as const;
 
-export type PreferencesNotificationCategory =
-  (typeof PREFERENCES_NOTIFICATION_CATEGORIES)[number];
+
 
 export const PREFERENCES_DEFAULT_VOLUME = 1;
 export const PREFERENCES_DEFAULT_PLAYBACK_RATE = 1;

@@ -1,3 +1,5 @@
+import { FIFTEEN_MINUTES_MS } from '../../constants/time.constants.js';
+
 export type UploadStage =
   | 'idle'
   | 'validating'
@@ -25,10 +27,7 @@ export interface UploadState {
   storageKey: string | null;
 }
 
-import { FIFTEEN_MINUTES_MS } from '../../constants/time.constants.js';
-
 export const MULTIPART_MEDIA_TYPES = ['video', 'short'] as const;
-
 export const UPLOAD_REAPER_QUEUE_NAME = 'upload-session-reaper';
 export const UPLOAD_REAPER_JOB_ID = 'upload-session-reaper';
 export const UPLOAD_REAPER_INTERVAL_MS = FIFTEEN_MINUTES_MS;

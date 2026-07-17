@@ -12,7 +12,6 @@ import {
 import { MULTIPART_MEDIA_TYPES } from './upload.constants.js';
 
 export type MultipartMediaType = (typeof MULTIPART_MEDIA_TYPES)[number];
-
 export type InitiateMultipartUploadInput = z.infer<
   typeof initiateMultipartUploadSchema
 >;

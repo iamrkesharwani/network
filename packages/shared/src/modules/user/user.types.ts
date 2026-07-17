@@ -10,11 +10,12 @@ import {
 import { captureLocationSchema } from '../location/location.schema.js';
 import { AUTH_PROVIDERS } from '../auth/auth.constants.js';
 import {
+  GENDER_OPTIONS,
+  PROFILE_CONTENT_TYPES,
+  RELATIONSHIP_STATUSES,
+  SOCIAL_PLATFORMS,
   USER_ROLES,
-  type GenderOption,
-  type RelationshipStatus,
-  type SocialPlatform,
-  type UserStatus,
+  USER_STATUSES,
 } from './user.constants.js';
 
 export type UserRegistrationInput = z.infer<typeof userRegistrationSchema>;
@@ -24,6 +25,12 @@ export type BasicProfileInput = z.infer<typeof basicProfileSchema>;
 export type PersonalDetailsInput = z.infer<typeof personalDetailsSchema>;
 export type ContactLinksInput = z.infer<typeof contactLinksSchema>;
 export type CaptureLocationInput = z.infer<typeof captureLocationSchema>;
+export type ProfileContentType = (typeof PROFILE_CONTENT_TYPES)[number];
+export type UserStatus = (typeof USER_STATUSES)[number];
+export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
+export type RelationshipStatus = (typeof RELATIONSHIP_STATUSES)[number];
+export type GenderOption = (typeof GENDER_OPTIONS)[number];
+export type UserRole = (typeof USER_ROLES)[number];
 
 export interface IUserSocialLink {
   platform: SocialPlatform;

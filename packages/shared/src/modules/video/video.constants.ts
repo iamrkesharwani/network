@@ -35,7 +35,6 @@ export const VIDEO_STATUS = [
 ] as const;
 
 export const VIDEO_VISIBILITY = CONTENT_VISIBILITY;
-
 export const VIDEO_TITLE_MAX_LENGTH = 100;
 export const VIDEO_DESCRIPTION_MAX_LENGTH = 5000;
 export const MAX_VIDEO_SIZE_BYTES = 1 * 1024 * 1024 * 1024;
@@ -45,7 +44,6 @@ export const RAW_UPLOAD_KEY_PREFIX = 'raw-uploads';
 export const RAW_UPLOAD_PRESIGNED_URL_TTL_SECONDS = 60 * 60;
 export const RAW_UPLOAD_LIFECYCLE_DAYS = 1;
 export const UPLOAD_SESSION_TTL_SECONDS = 60 * 60 * 24;
-
 export const LOCAL_TRANSCODE_OUTPUT_CONTAINER = 'mp4';
 export const LOCAL_TRANSCODE_VIDEO_CODEC = 'libx264';
 export const LOCAL_TRANSCODE_AUDIO_CODEC = 'aac';

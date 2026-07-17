@@ -1,11 +1,7 @@
 export const ALLOWED_CAPTION_MIME_TYPES = ['text/vtt'] as const;
-
 export const MAX_CAPTION_SIZE_BYTES = 512 * 1024;
-
 export const CAPTION_KEY_PREFIX = 'captions';
-
 export const MAX_CAPTIONS_PER_VIDEO = 20;
-
 export const CAPTION_LABEL_MAX_LENGTH = 50;
 
 export const CAPTION_LANGUAGES = [

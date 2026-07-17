@@ -15,7 +15,6 @@ export const SHORT_STATUS = [
 ] as const;
 
 export const SHORT_VISIBILITY = CONTENT_VISIBILITY;
-
 export const SHORT_TITLE_MAX_LENGTH = 100;
 export const SHORT_DESCRIPTION_MAX_LENGTH = 500;
 export const MAX_SHORT_DURATION_SECONDS = 60;
