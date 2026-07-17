@@ -8,12 +8,12 @@ import {
   type FeedColumnCount,
 } from '../../feed/hooks/useFeedColumns';
 import { useLiveFeed } from '../../feed/hooks/useLiveFeed';
-import { COL_CLASS } from '../../video/utils/videoGrid';
+import { COL_CLASS, type ColCount } from '../../video/utils/videoGrid';
 import { useGetPostByIdQuery, postApi } from '../postApi';
 import PostGridTile from './PostGridTile';
 import PostEmptyState from '../components/PostEmptyState';
 import PostErrorState from '../components/PostErrorState';
-import { PostGridSkeleton } from '../skeleton/PostGridSkeleton';
+import { PostTileGridSkeleton } from '../skeleton/PostGridTileSkeleton';
 
 const PostsFeedPage = () => {
   const { postId } = useParams<{ postId?: string }>();
@@ -60,7 +60,12 @@ const PostsFeedPage = () => {
   }
 
   if (!pinnedPost && isLoading && items.length === 0) {
-    return <PostGridSkeleton count={postsPerBlock} />;
+    return (
+      <PostTileGridSkeleton
+        count={postsPerBlock}
+        cols={postsPerBlock as ColCount}
+      />
+    );
   }
 
   if (!pinnedPost && isError && items.length === 0) {

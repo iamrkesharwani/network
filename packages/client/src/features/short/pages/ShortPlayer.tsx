@@ -212,7 +212,7 @@ const ShortPlayer = ({
           <span className="text-[11px] text-white/70">Share</span>
         </button>
 
-        <div className="flex flex-col gap-2 mt-1">
+        <div className="hidden md:flex flex-col gap-2 mt-1">
           <button
             type="button"
             onClick={onPrev}
