@@ -1,4 +1,4 @@
-import { TEN_SECONDS_MS } from './time.constants.js';
+import { TEN_SECONDS_MS } from '../../general/time.constants.js';
 
 export const PLAYER_PLAYBACK_RATES = [
   0.25, 0.5, 0.75, 1, 1.25, 1.5, 2,

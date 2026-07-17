@@ -17,7 +17,9 @@ const toFlagEmoji = (iso2: string): string =>
   iso2
     .toUpperCase()
     .split('')
-    .map((char) => String.fromCodePoint(char.charCodeAt(0) + REGIONAL_INDICATOR_OFFSET))
+    .map((char) =>
+      String.fromCodePoint(char.charCodeAt(0) + REGIONAL_INDICATOR_OFFSET)
+    )
     .join('');
 
 const COUNTRY_DATA_INDIA_FIRST_THEN_ALPHABETICAL: CountryDialCodeBase[] = [
@@ -103,7 +105,7 @@ const COUNTRY_DATA_INDIA_FIRST_THEN_ALPHABETICAL: CountryDialCodeBase[] = [
   { iso2: 'IE', name: 'Ireland', dialCode: '+353' },
   { iso2: 'IL', name: 'Israel', dialCode: '+972' },
   { iso2: 'IT', name: 'Italy', dialCode: '+39' },
-  { iso2: 'CI', name: "Ivory Coast", dialCode: '+225' },
+  { iso2: 'CI', name: 'Ivory Coast', dialCode: '+225' },
   { iso2: 'JM', name: 'Jamaica', dialCode: '+1' },
   { iso2: 'JP', name: 'Japan', dialCode: '+81' },
   { iso2: 'JO', name: 'Jordan', dialCode: '+962' },
@@ -219,9 +221,10 @@ const COUNTRY_DATA_INDIA_FIRST_THEN_ALPHABETICAL: CountryDialCodeBase[] = [
   { iso2: 'ZW', name: 'Zimbabwe', dialCode: '+263' },
 ];
 
-export const COUNTRIES: CountryDialCode[] = COUNTRY_DATA_INDIA_FIRST_THEN_ALPHABETICAL.map((country) => ({
-  ...country,
-  flagEmoji: toFlagEmoji(country.iso2),
-}));
+export const COUNTRIES: CountryDialCode[] =
+  COUNTRY_DATA_INDIA_FIRST_THEN_ALPHABETICAL.map((country) => ({
+    ...country,
+    flagEmoji: toFlagEmoji(country.iso2),
+  }));
 
 export const DEFAULT_COUNTRY_ISO2 = 'IN';

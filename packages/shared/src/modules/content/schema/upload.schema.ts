@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { isValidObjectId } from '../../utils/validators.js';
-import { MULTIPART_MEDIA_TYPES } from './upload.constants.js';
+import { isValidObjectId } from '../../../utils/validators.js';
+import { MULTIPART_MEDIA_TYPES } from '../constants/upload.constants.js';
 
 const sessionIdSchema = z
   .string()

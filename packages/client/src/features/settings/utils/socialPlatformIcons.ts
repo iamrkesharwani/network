@@ -1,5 +1,11 @@
 import type { ComponentType } from 'react';
+import { FaLinkedin } from 'react-icons/fa6';
 import {
+  SiX,
+  SiInstagram,
+  SiYoutube,
+  SiGithub,
+  SiFacebook,
   SiThreads,
   SiSnapchat,
   SiPinterest,
@@ -48,7 +54,16 @@ import {
   SiTiktok,
 } from 'react-icons/si';
 
-export const KNOWN_SOCIAL_PLATFORM_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+export const SOCIAL_PLATFORM_ICONS: Record<
+  string,
+  ComponentType<{ className?: string }>
+> = {
+  x: SiX,
+  instagram: SiInstagram,
+  youtube: SiYoutube,
+  linkedin: FaLinkedin,
+  github: SiGithub,
+  facebook: SiFacebook,
   threads: SiThreads,
   snapchat: SiSnapchat,
   pinterest: SiPinterest,

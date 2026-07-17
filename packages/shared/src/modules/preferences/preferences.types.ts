@@ -1,8 +1,8 @@
 import type { z } from 'zod';
 import type { preferencesPatchSchema } from './preferences.schema.js';
-import type { Theme, ViewMode } from '../../constants/general.constants.js';
-import type { ProfileContentType } from '../user/user.constants.js';
+import type { ProfileContentType } from '../user/types/user.types.js';
 import type { PREFERENCES_NOTIFICATION_CATEGORIES } from './preferences.constants.js';
+import type { Theme, ViewMode } from '../general/general.types.js';
 
 export type PreferencesPatchInput = z.infer<typeof preferencesPatchSchema>;
 

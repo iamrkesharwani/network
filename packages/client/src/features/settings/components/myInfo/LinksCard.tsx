@@ -85,7 +85,7 @@ const LinksCard = () => {
               index={index}
               onRemove={() => remove(index)}
               urlError={errors.socialLinks?.[index]?.url?.message}
-              platformError={errors.socialLinks?.[index]?.customLabel?.message}
+              platformError={errors.socialLinks?.[index]?.platform?.message}
             />
           ))}
         </div>
@@ -96,9 +96,7 @@ const LinksCard = () => {
             variant="outline"
             size="sm"
             className="mt-3"
-            onClick={() =>
-              append({ platform: 'other', url: '', customLabel: '' })
-            }
+            onClick={() => append({ platform: '', url: '' })}
           >
             <Plus className="mr-1.5 h-3.5 w-3.5" />
             Add another

@@ -1,4 +1,4 @@
-import { FIFTEEN_MINUTES_SECONDS } from '../../constants/time.constants.js';
+import { FIFTEEN_MINUTES_SECONDS } from '../general/time.constants.js';
 
 export const OTP_MAX_ATTEMPTS = 5;
 export const OTP_REQUEST_COOLDOWN_SECONDS = 60;

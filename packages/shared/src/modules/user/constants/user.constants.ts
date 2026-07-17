@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from './user.types.js';
+import type { UserRole, UserStatus } from '../types/user.types.js';
 
 export const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
 export const USER_ROLES = ['user', 'moderator', 'admin'] as const;
@@ -45,18 +45,14 @@ export const RELATIONSHIP_STATUSES = [
   'prefer-not-to-say',
 ] as const;
 
-export const SOCIAL_PLATFORMS = [
-  'x',
-  'instagram',
-  'youtube',
-  'linkedin',
-  'github',
-  'facebook',
-  'other',
-] as const;
-
 export const USER_STATUSES = [
   'active',
   'deactivated',
   'pending_deletion',
+] as const;
+
+export const MODERATION_STATUS = [
+  'active',
+  'jury_removed',
+  'admin_removed',
 ] as const;

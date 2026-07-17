@@ -1,4 +1,4 @@
-import { CONTENT_VISIBILITY } from '../../constants/visibility.constants.js';
+import { CONTENT_VISIBILITY } from '../general/general.constants.js';
 
 export const POST_VISIBILITY = CONTENT_VISIBILITY;
 export const POST_STATUS = ['READY'] as const;

@@ -12,7 +12,7 @@ import {
   POST_MEDIA_TYPE,
 } from './post.constants.js';
 import type { ICreatorEvent } from '../creator/creator.types.js';
-import type { ModerationStatus } from '../../constants/moderation.constants.js';
+import type { ModerationStatus } from '../user/types/user.types.js';
 
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type PostUpdateInput = z.infer<typeof postUpdateSchema>;

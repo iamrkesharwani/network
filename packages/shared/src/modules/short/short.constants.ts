@@ -1,4 +1,4 @@
-import { CONTENT_VISIBILITY } from '../../constants/visibility.constants.js';
+import { CONTENT_VISIBILITY } from '../general/general.constants.js';
 
 export const ALLOWED_SHORT_MIME_TYPES = [
   'video/mp4',

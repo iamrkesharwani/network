@@ -13,8 +13,8 @@ import { Link2, X } from 'lucide-react';
 import type { ContactLinksInput } from '@network/shared';
 import { cn } from '../../../../shared/utils/cn';
 import {
-  findExactSocialPlatformSuggestion,
-  matchSocialPlatformSuggestions,
+  findExactSocialPlatform,
+  matchKnownSocialPlatforms,
   type SocialPlatformSuggestion,
 } from '../../utils/socialPlatformSuggestions';
 
@@ -37,23 +37,13 @@ const SocialLinkRow = ({
     control,
     name: `socialLinks.${index}.platform` as FieldPath<ContactLinksInput>,
   });
-  const { field: customLabelField } = useController({
-    control,
-    name: `socialLinks.${index}.customLabel` as FieldPath<ContactLinksInput>,
-  });
   const { field: urlField } = useController({
     control,
     name: `socialLinks.${index}.url` as FieldPath<ContactLinksInput>,
   });
 
-  const platformValue = platformField.value as string;
-  const customLabelValue = (customLabelField.value as string | undefined) ?? '';
+  const label = (platformField.value as string | undefined) ?? '';
   const urlValue = (urlField.value as string | undefined) ?? '';
-
-  const label =
-    platformValue === 'other'
-      ? customLabelValue
-      : customLabelValue || platformValue;
 
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -63,29 +53,19 @@ const SocialLinkRow = ({
   const platformInputRef = useRef<HTMLInputElement>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
 
-  const suggestions = useMemo(
-    () => matchSocialPlatformSuggestions(label),
-    [label]
-  );
+  const suggestions = useMemo(() => {
+    const matches = matchKnownSocialPlatforms(label);
+    const trimmed = label.trim();
+    const alreadyMatched = matches.some(
+      (suggestion) => suggestion.label.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (trimmed && !alreadyMatched) {
+      return [...matches, { label: trimmed, icon: Link2, isCustom: true }];
+    }
+    return matches;
+  }, [label]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setHighlightedIndex(-1);
-        if (label.trim().length > 0) {
-          setIsConfirmed(true);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, [isOpen, label]);
-
-  const preview = findExactSocialPlatformSuggestion(label);
+  const preview = findExactSocialPlatform(label);
   const PreviewIcon = preview?.icon ?? Link2;
 
   const focusUrlSoon = () => {
@@ -93,8 +73,7 @@ const SocialLinkRow = ({
   };
 
   const commitSuggestion = (suggestion: SocialPlatformSuggestion) => {
-    platformField.onChange(suggestion.platform);
-    customLabelField.onChange(suggestion.customLabel);
+    platformField.onChange(suggestion.label);
     setIsOpen(false);
     setHighlightedIndex(-1);
     setIsConfirmed(true);
@@ -104,13 +83,31 @@ const SocialLinkRow = ({
   const confirmManualEntry = () => {
     const trimmed = label.trim();
     if (!trimmed) return;
-    platformField.onChange('other');
-    customLabelField.onChange(trimmed);
+    const matches = matchKnownSocialPlatforms(trimmed);
+    const resolved = matches[0]?.label ?? trimmed;
+    platformField.onChange(resolved);
     setIsOpen(false);
     setHighlightedIndex(-1);
     setIsConfirmed(true);
     focusUrlSoon();
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setHighlightedIndex(-1);
+        if (label.trim().length > 0) {
+          confirmManualEntry();
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [isOpen, label, confirmManualEntry]);
 
   const editPlatform = () => {
     setIsConfirmed(false);
@@ -123,8 +120,7 @@ const SocialLinkRow = ({
   };
 
   const handlePlatformChange = (event: ChangeEvent<HTMLInputElement>) => {
-    platformField.onChange('other');
-    customLabelField.onChange(event.target.value);
+    platformField.onChange(event.target.value);
     setIsOpen(true);
     setHighlightedIndex(-1);
   };
@@ -172,7 +168,7 @@ const SocialLinkRow = ({
       setIsOpen(false);
       setHighlightedIndex(-1);
       if (label.trim().length > 0) {
-        setIsConfirmed(true);
+        confirmManualEntry();
       }
     }
   };
@@ -233,7 +229,7 @@ const SocialLinkRow = ({
                     const isHighlighted = suggestionIndex === highlightedIndex;
                     return (
                       <button
-                        key={`${suggestion.platform}-${suggestion.label}`}
+                        key={`${suggestion.label}-${suggestion.isCustom ? 'custom' : 'known'}`}
                         type="button"
                         role="option"
                         aria-selected={isHighlighted}

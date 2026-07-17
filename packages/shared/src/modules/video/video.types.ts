@@ -15,7 +15,7 @@ import {
 } from './video.constants.js';
 import type { ICreatorEvent } from '../creator/creator.types.js';
 import type { ICaptionTrack } from '../caption/caption.types.js';
-import type { ModerationStatus } from '../../constants/moderation.constants.js';
+import type { ModerationStatus } from '../user/types/user.types.js';
 
 export type VideoUploadInput = z.infer<typeof videoUploadSchema>;
 export type VideoUpdateInput = z.infer<typeof videoUpdateSchema>;

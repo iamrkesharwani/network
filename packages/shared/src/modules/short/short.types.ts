@@ -8,12 +8,9 @@ import {
   shortIdParamSchema,
   shortUserFeedQuerySchema,
 } from './short.schema.js';
-import {
-  SHORT_VISIBILITY,
-  SHORT_STATUS,
-} from './short.constants.js';
+import { SHORT_VISIBILITY, SHORT_STATUS } from './short.constants.js';
 import type { ICreatorEvent } from '../creator/creator.types.js';
-import type { ModerationStatus } from '../../constants/moderation.constants.js';
+import type { ModerationStatus } from '../user/types/user.types.js';
 
 export type ShortUploadInput = z.infer<typeof shortUploadSchema>;
 export type ShortUpdateInput = z.infer<typeof shortUpdateSchema>;

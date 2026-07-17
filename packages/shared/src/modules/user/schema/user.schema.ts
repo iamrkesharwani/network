@@ -17,22 +17,8 @@ import {
   WEBSITE_MAX_LENGTH,
   PHONE_NUMBER_MAX_LENGTH,
   SOCIAL_LINKS_MAX,
-  SOCIAL_PLATFORMS,
   SOCIAL_LINK_PLATFORM_MAX_LENGTH,
-} from './user.constants.js';
-import { SOCIAL_PLATFORM_DOMAINS } from '../../constants/socialPlatformCatalog.constants.js';
-
-const socialLinkHostnameMatches = (url: string, domains: string[]): boolean => {
-  if (domains.length === 0) return true;
-  try {
-    const hostname = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
-    return domains.some(
-      (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
-    );
-  } catch {
-    return false;
-  }
-};
+} from '../constants/user.constants.js';
 
 export const userRegistrationSchema = z.object({
   name: z
@@ -195,40 +181,17 @@ export const personalDetailsSchema = z
     }
   );
 
-const socialLinkSchema = z
-  .object({
-    platform: z.enum(SOCIAL_PLATFORMS),
-    url: z.url('Enter a valid URL.'),
-    customLabel: z
-      .string()
-      .trim()
-      .max(
-        SOCIAL_LINK_PLATFORM_MAX_LENGTH,
-        `Cannot exceed ${SOCIAL_LINK_PLATFORM_MAX_LENGTH} characters.`
-      )
-      .optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.platform === 'other') {
-      if (!data.customLabel) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Enter a platform name.',
-          path: ['customLabel'],
-        });
-      }
-      return;
-    }
-
-    const domains = SOCIAL_PLATFORM_DOMAINS[data.platform] ?? [];
-    if (!socialLinkHostnameMatches(data.url, domains)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `URL must be a ${data.platform} link.`,
-        path: ['url'],
-      });
-    }
-  });
+const socialLinkSchema = z.object({
+  platform: z
+    .string()
+    .trim()
+    .min(1, 'Enter a platform name.')
+    .max(
+      SOCIAL_LINK_PLATFORM_MAX_LENGTH,
+      `Cannot exceed ${SOCIAL_LINK_PLATFORM_MAX_LENGTH} characters.`
+    ),
+  url: z.url('Enter a valid URL.'),
+});
 
 export const contactLinksSchema = z.object({
   phone: phoneSchema.optional(),

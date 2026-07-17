@@ -1,7 +1,7 @@
 import {
   FIVE_MINUTES_MS,
   SEVEN_DAYS_SECONDS,
-} from '../../constants/time.constants.js';
+} from '../general/time.constants.js';
 
 export const HISTORY_CONTENT_TYPES = ['video', 'short'] as const;
 export const HISTORY_COMPLETED_THRESHOLD = 0.95;

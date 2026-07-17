@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { userRegistrationSchema } from '../user/user.schema.js';
-import { PASSWORD_MAX_LENGTH } from '../user/user.constants.js';
+import { userRegistrationSchema } from '../user/schema/user.schema.js';
+import { PASSWORD_MAX_LENGTH } from '../user/constants/user.constants.js';
 
 const passwordValidation = userRegistrationSchema.shape.password;
 const emailValidation = userRegistrationSchema.shape.email;

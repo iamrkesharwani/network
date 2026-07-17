@@ -1,4 +1,4 @@
-import { FIFTEEN_MINUTES_MS } from '../../constants/time.constants.js';
+import { FIFTEEN_MINUTES_MS } from '../../general/time.constants.js';
 
 export type UploadStage =
   | 'idle'

@@ -9,7 +9,7 @@ import {
   recentSearchRemoveQuerySchema,
 } from './search.schema.js';
 import type { IMixedFeedBatch } from '../feed/feed.types.js';
-import type { IPublicProfile } from '../user/user.types.js';
+import type { IPublicProfile } from '../user/types/user.types.js';
 import type { IVideoResponse } from '../video/video.types.js';
 import type { IShortResponse } from '../short/short.types.js';
 import type { IPostResponse } from '../post/post.types.js';

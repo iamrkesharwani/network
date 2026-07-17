@@ -8,8 +8,8 @@ import {
   abortMultipartUploadSchema,
   completePartSchema,
   mediaIdParamSchema,
-} from './upload.schema.js';
-import { MULTIPART_MEDIA_TYPES } from './upload.constants.js';
+} from '../schema/upload.schema.js';
+import { MULTIPART_MEDIA_TYPES } from '../constants/upload.constants.js';
 
 export type MultipartMediaType = (typeof MULTIPART_MEDIA_TYPES)[number];
 export type InitiateMultipartUploadInput = z.infer<

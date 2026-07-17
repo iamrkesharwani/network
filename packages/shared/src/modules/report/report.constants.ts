@@ -1,4 +1,4 @@
-import { ReportReasonCode } from './report.types.js';
+import type { ReportReasonCode } from './report.types.js';
 
 export const REPORT_NOTE_MAX_LENGTH = 500;
 export const REPORT_JURY_CASE_TRIGGER_COUNT = 3;

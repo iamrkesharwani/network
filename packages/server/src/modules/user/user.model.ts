@@ -6,7 +6,6 @@ import {
   RELATIONSHIP_STATUSES,
   USER_STATUSES,
   DEFAULT_USER_STATUS,
-  SOCIAL_PLATFORMS,
   LOCATION_TRAIL_MAX_ENTRIES,
   EMAIL_MAX_LENGTH,
   NAME_MAX_LENGTH,
@@ -34,9 +33,8 @@ export interface IUserDocument extends IUser, Document {
 
 const socialLinkSchema = new Schema(
   {
-    platform: { type: String, enum: SOCIAL_PLATFORMS },
+    platform: { type: String, maxlength: SOCIAL_LINK_PLATFORM_MAX_LENGTH },
     url: { type: String },
-    customLabel: { type: String, maxlength: SOCIAL_LINK_PLATFORM_MAX_LENGTH },
   },
   { _id: false }
 );

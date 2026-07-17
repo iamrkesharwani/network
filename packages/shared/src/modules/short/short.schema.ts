@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isValidObjectId } from '../../utils/validators.js';
+import { CONTENT_VISIBILITY } from '../general/general.constants.js';
 import {
   ALLOWED_SHORT_MIME_TYPES,
   MAX_SHORT_SIZE_BYTES,
@@ -8,7 +9,6 @@ import {
   SHORT_TITLE_MAX_LENGTH,
   SHORT_DESCRIPTION_MAX_LENGTH,
 } from './short.constants.js';
-import { CONTENT_VISIBILITY } from '../../constants/visibility.constants.js';
 import {
   DEFAULT_PAGE_LIMIT,
   MAX_PAGE_LIMIT,
