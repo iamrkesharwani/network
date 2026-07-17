@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   UploadCloud,
   FileText,
+  Film,
   Gavel,
 } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
@@ -29,6 +30,7 @@ const Sidebar = ({
 
   const navItems = [
     { name: 'Home', path: CLIENT_ROUTES.FEED, icon: Home },
+    { name: 'Shorts', path: CLIENT_ROUTES.SHORTS_FEED, icon: Film },
     { name: 'Posts', path: CLIENT_ROUTES.POSTS, icon: FileText },
     { name: 'Upload', path: CLIENT_ROUTES.UPLOAD, icon: UploadCloud },
     ...(isAuthenticated && authUser?.username

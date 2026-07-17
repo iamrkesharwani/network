@@ -15,6 +15,7 @@ import Feed from '../../features/feed/Feed';
 import VideoWatch from '../../features/video/pages/VideoWatch';
 import ShortsEntry from '../../features/short/pages/ShortsEntry';
 import ShortWatch from '../../features/short/pages/ShortWatch';
+import ShortsFeedPage from '../../features/short/pages/ShortsFeedPage';
 import MessagesPlaceholder from '../../features/message/pages/MessagesPlaceholder';
 import UploadHub from '../../features/upload/components/UploadHub';
 import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
@@ -57,6 +58,7 @@ export const routes: RouteObject[] = [
               { path: CLIENT_ROUTES.SEARCH, element: <SearchResultsPage /> },
               { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
               { path: CLIENT_ROUTES.POST_WATCH, element: <PostsFeedPage /> },
+              { path: CLIENT_ROUTES.SHORTS_FEED, element: <ShortsFeedPage /> },
               { path: CLIENT_ROUTES.PROFILE, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.PROFILE_VIDEOS, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.PROFILE_SHORTS, element: <ProfilePage /> },

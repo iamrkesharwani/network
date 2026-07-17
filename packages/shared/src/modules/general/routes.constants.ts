@@ -9,6 +9,7 @@ export const CLIENT_ROUTES = {
   VIDEO_WATCH: '/video/:videoId',
   SHORTS: '/shorts',
   SHORT_WATCH: '/shorts/:shortId',
+  SHORTS_FEED: '/shorts/all',
   SEARCH: '/search',
   MESSAGES: '/messages',
   POSTS: '/posts',

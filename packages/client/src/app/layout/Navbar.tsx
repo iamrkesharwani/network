@@ -81,7 +81,7 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
             onKeyDown={handleSearchKeyDown}
             onFocus={handleSearchFocus}
             onBlur={handleSearchBlur}
-            placeholder="Search videos, creators..."
+            placeholder="Search videos, creators, posts..."
             className="w-full h-9 pl-9 pr-9 rounded-lg bg-surface-raised border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:bg-surface transition-all"
           />
           {searchInput && (
