@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { MAX_POST_IMAGES } from '@network/shared';
+import PostImagePreviewModal from './PostImagePreviewModal';
 
 interface PostStepTwoProps {
   images: File[];
@@ -26,6 +28,8 @@ const PostStepTwo = ({
   onContinue,
   disabled,
 }: PostStepTwoProps) => {
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const hasImages = images.length > 0;
   const canAddMore = images.length < MAX_POST_IMAGES;
 
   return (
@@ -50,7 +54,44 @@ const PostStepTwo = ({
           }}
         />
 
-        {images.length === 0 ? (
+        {hasImages && (
+          <div
+            className="mb-3 flex gap-2 overflow-x-auto py-1 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            style={{
+              maskImage:
+                'linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)',
+              WebkitMaskImage:
+                'linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)',
+            }}
+          >
+            {previewUrls.map((url, index) => (
+              <div key={url} className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setPreviewIndex(index)}
+                  className="block h-16 w-16 overflow-hidden rounded-lg border border-border bg-surface-raised cursor-pointer"
+                >
+                  <img
+                    src={url}
+                    alt={`Attachment ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onRemoveImage(index)}
+                  disabled={disabled}
+                  aria-label="Remove image"
+                  className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white backdrop-blur-sm hover:bg-black/90 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!hasImages ? (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -61,40 +102,16 @@ const PostStepTwo = ({
             <span className="text-xs">JPEG, PNG, WebP</span>
           </button>
         ) : (
-          <div className="grid grid-cols-3 gap-2">
-            {previewUrls.map((url, index) => (
-              <div
-                key={url}
-                className="relative aspect-square rounded-xl overflow-hidden border border-border bg-surface-raised"
-              >
-                <img
-                  src={url}
-                  alt={`Attachment ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => onRemoveImage(index)}
-                  disabled={disabled}
-                  aria-label="Remove image"
-                  className="absolute top-1.5 right-1.5 flex items-center justify-center w-6 h-6 rounded-full bg-black/60 text-white backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-
-            {canAddMore && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="aspect-square rounded-xl border-2 border-dashed border-border bg-surface-raised flex items-center justify-center text-text-muted hover:border-primary/40 hover:text-text-secondary transition-colors cursor-pointer"
-                aria-label="Add more images"
-              >
-                <Plus className="w-5 h-5" strokeWidth={1.5} />
-              </button>
-            )}
-          </div>
+          canAddMore && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full rounded-xl border-2 border-dashed border-border bg-surface-raised py-3 flex items-center justify-center gap-2 text-text-muted hover:border-primary/40 hover:text-text-secondary transition-colors cursor-pointer"
+            >
+              <Plus className="w-4 h-4" strokeWidth={1.5} />
+              <span className="text-sm">Add more</span>
+            </button>
+          )
         )}
 
         {attachmentError && (
@@ -120,6 +137,12 @@ const PostStepTwo = ({
           Continue
         </button>
       </div>
+
+      <PostImagePreviewModal
+        isOpen={previewIndex !== null}
+        imageUrl={previewIndex !== null ? previewUrls[previewIndex] : null}
+        onClose={() => setPreviewIndex(null)}
+      />
     </div>
   );
 };
