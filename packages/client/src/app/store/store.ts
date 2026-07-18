@@ -15,6 +15,7 @@ import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
 import { juryApi } from '../../features/jury/juryApi';
+import { followApi } from '../../features/follow/followApi';
 
 export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
   configureStore({
@@ -36,6 +37,7 @@ export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
         historyApi.middleware,
         reportApi.middleware,
         juryApi.middleware,
+        followApi.middleware,
         preferencesSyncMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',

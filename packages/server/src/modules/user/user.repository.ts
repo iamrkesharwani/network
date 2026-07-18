@@ -103,6 +103,18 @@ export const updateAvatarUrl = (
     .select('+password')
     .exec();
 
+export const updateBannerUrl = (
+  userId: string,
+  bannerUrl: string
+): Promise<IUserDocument | null> =>
+  User.findByIdAndUpdate(
+    userId,
+    { $set: { bannerUrl } },
+    { returnDocument: 'after', runValidators: true }
+  )
+    .select('+password')
+    .exec();
+
 export const appendLocationEntry = (
   userId: string,
   entry: IUserLocationEntry

@@ -6,6 +6,7 @@ import {
   basicProfileSchema,
   personalDetailsSchema,
   contactLinksSchema,
+  bannerPresetSelectSchema,
 } from '../schema/user.schema.js';
 import { captureLocationSchema } from '../../location/location.schema.js';
 import { AUTH_PROVIDERS } from '../../auth/auth.constants.js';
@@ -24,6 +25,7 @@ export type UsernameParam = z.infer<typeof usernameParamSchema>;
 export type BasicProfileInput = z.infer<typeof basicProfileSchema>;
 export type PersonalDetailsInput = z.infer<typeof personalDetailsSchema>;
 export type ContactLinksInput = z.infer<typeof contactLinksSchema>;
+export type BannerPresetSelectInput = z.infer<typeof bannerPresetSelectSchema>;
 export type CaptureLocationInput = z.infer<typeof captureLocationSchema>;
 export type ProfileContentType = (typeof PROFILE_CONTENT_TYPES)[number];
 export type UserStatus = (typeof USER_STATUSES)[number];
@@ -56,6 +58,7 @@ export interface IUser {
   email: string;
   bio?: string;
   avatarUrl?: string;
+  bannerUrl?: string;
   role: (typeof USER_ROLES)[number];
   authProviders: (typeof AUTH_PROVIDERS)[number][];
   hasPassword: boolean;
@@ -86,4 +89,8 @@ export interface IPublicProfile {
   name: string;
   bio?: string;
   avatarUrl?: string;
+  bannerUrl?: string;
+  followerCount: number;
+  followingCount: number;
+  isFollowedByViewer?: boolean;
 }

@@ -17,3 +17,9 @@ export const buildProfileTabPath = (
   username: string,
   tab: ProfileTab
 ): string => TAB_ROUTES[tab].replace(':username', username);
+
+export const buildFollowersPath = (username: string): string =>
+  CLIENT_ROUTES.PROFILE_FOLLOWERS.replace(':username', username);
+
+export const buildFollowingPath = (username: string): string =>
+  CLIENT_ROUTES.PROFILE_FOLLOWING.replace(':username', username);

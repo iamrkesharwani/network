@@ -24,7 +24,7 @@ export const getMyProfile = asyncHandler(
 export const getPublicProfileByUsername = asyncHandler(
   async (req: Request, res: Response) => {
     const username = req.params['username'] as string;
-    const profile = await getPublicProfile(username);
+    const profile = await getPublicProfile(username, req.user?.id);
 
     res
       .status(200)

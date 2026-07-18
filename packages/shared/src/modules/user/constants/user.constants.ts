@@ -12,7 +12,6 @@ export const NAME_MIN_LENGTH = 3;
 export const USERNAME_MIN_LENGTH = 3;
 export const USERNAME_MAX_LENGTH = 20;
 export const BIO_MAX_LENGTH = 160;
-export const PROFILE_BIO_PREVIEW_MAX_LENGTH = 100;
 export const PROFILE_CONTENT_TYPES = ['video', 'short', 'post'] as const;
 export const USERNAME_CHANGE_COOLDOWN_DAYS = 30;
 export const GENDER_SELF_DESCRIBE_MAX_LENGTH = 50;
@@ -29,6 +28,16 @@ export const ALLOWED_AVATAR_MIME_TYPES = [
   'image/png',
   'image/webp',
 ];
+
+export const MAX_BANNER_SIZE_BYTES = 5 * 1024 * 1024;
+export const ALLOWED_BANNER_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+];
+export const BANNER_ASPECT_RATIO = 3;
+export const BANNER_WIDTH_PX = 1500;
+export const BANNER_HEIGHT_PX = 500;
 
 export const GENDER_OPTIONS = [
   'male',

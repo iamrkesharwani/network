@@ -4,6 +4,8 @@ import { ApiError } from '../utils/ApiError.js';
 import {
   ALLOWED_AVATAR_MIME_TYPES,
   MAX_AVATAR_SIZE_BYTES,
+  ALLOWED_BANNER_MIME_TYPES,
+  MAX_BANNER_SIZE_BYTES,
   ALLOWED_THUMBNAIL_MIME_TYPES,
   MAX_THUMBNAIL_SIZE_BYTES,
   ALLOWED_POST_IMAGE_MIME_TYPES,
@@ -57,6 +59,11 @@ export const uploadAvatar = createMemUploadMiddleware(
   ALLOWED_AVATAR_MIME_TYPES,
   MAX_AVATAR_SIZE_BYTES
 ).single('avatar');
+
+export const uploadBanner = createMemUploadMiddleware(
+  ALLOWED_BANNER_MIME_TYPES,
+  MAX_BANNER_SIZE_BYTES
+).single('banner');
 
 export const uploadThumbnail = createMemUploadMiddleware(
   ALLOWED_THUMBNAIL_MIME_TYPES,

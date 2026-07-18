@@ -7,6 +7,7 @@ import type {
   PersonalDetailsInput,
   ContactLinksInput,
   CaptureLocationInput,
+  BannerPresetSelectInput,
 } from '@network/shared';
 
 export const settingsApi = createApi({
@@ -33,6 +34,20 @@ export const settingsApi = createApi({
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
     }),
+    uploadBanner: builder.mutation<ApiResponse<IUser>, FormData>({
+      query: (data) => ({
+        url: '/profile/banner',
+        method: 'POST',
+        data,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+    }),
+    selectBannerPreset: builder.mutation<
+      ApiResponse<IUser>,
+      BannerPresetSelectInput
+    >({
+      query: (data) => ({ url: '/profile/banner/preset', method: 'PATCH', data }),
+    }),
     captureLocation: builder.mutation<ApiResponse<IUser>, CaptureLocationInput>(
       {
         query: (data) => ({ url: '/location/capture', method: 'POST', data }),
@@ -46,5 +61,7 @@ export const {
   usePatchPersonalDetailsMutation,
   usePatchContactLinksMutation,
   useUploadAvatarMutation,
+  useUploadBannerMutation,
+  useSelectBannerPresetMutation,
   useCaptureLocationMutation,
 } = settingsApi;

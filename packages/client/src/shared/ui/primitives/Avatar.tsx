@@ -25,6 +25,7 @@ const Avatar = ({
     md: 'w-10 h-10 text-sm',
     lg: 'w-12 h-12 text-base',
     xl: 'w-16 h-16 text-lg',
+    xxl: 'w-24 h-24 text-xl',
   };
 
   const iconSizes = {
@@ -32,6 +33,7 @@ const Avatar = ({
     md: 'w-5 h-5',
     lg: 'w-6 h-6',
     xl: 'w-8 h-8',
+    xxl: 'w-12 h-12',
   };
 
   const indicatorSizes = {
@@ -39,6 +41,7 @@ const Avatar = ({
     md: 'w-3 h-3',
     lg: 'w-3 h-3',
     xl: 'w-4 h-4',
+    xxl: 'w-5 h-5',
   };
 
   return (

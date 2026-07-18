@@ -1,6 +1,10 @@
+import sharp from 'sharp';
 import {
   USERNAME_CHANGE_COOLDOWN_DAYS,
   ONE_DAY_MS,
+  BANNER_WIDTH_PX,
+  BANNER_HEIGHT_PX,
+  BANNER_PRESET_CATALOG,
   type IPublicProfile,
   type IUser,
   type BasicProfileInput,
@@ -9,6 +13,7 @@ import {
 } from '@network/shared';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import * as userRepository from '../user.repository.js';
+import * as followRepository from '../../follow/follow.repository.js';
 import { imageProvider } from '../../../core/providers/provider.js';
 import type { IUserDocument } from '../user.model.js';
 import { toUserResponse as toBaseUserResponse } from '../../../core/utils/toUserResponse.js';
@@ -45,19 +50,64 @@ export const resolveProfileOwner = async (
   return { userId, isOwner: requesterId === userId };
 };
 
+const toPublicProfile = (
+  user: IUserDocument,
+  followerCount: number,
+  followingCount: number,
+  isFollowedByViewer?: boolean
+): IPublicProfile => ({
+  id: user._id.toString(),
+  username: user.username,
+  name: user.name,
+  ...(user.bio && { bio: user.bio }),
+  ...(user.avatarUrl && { avatarUrl: user.avatarUrl }),
+  ...(user.bannerUrl && { bannerUrl: user.bannerUrl }),
+  followerCount,
+  followingCount,
+  ...(isFollowedByViewer !== undefined && { isFollowedByViewer }),
+});
+
 export const getPublicProfile = async (
-  username: string
+  username: string,
+  viewerId?: string
 ): Promise<IPublicProfile> => {
   const user = await userRepository.findByUsername(username);
   if (!user) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
 
-  return {
-    id: user._id.toString(),
-    username: user.username,
-    name: user.name,
-    ...(user.bio && { bio: user.bio }),
-    ...(user.avatarUrl && { avatarUrl: user.avatarUrl }),
-  };
+  const userId = user._id.toString();
+  const [followerCount, followingCount, isFollowedByViewer] = await Promise.all([
+    followRepository.countByFollowee(userId),
+    followRepository.countByFollower(userId),
+    viewerId ? followRepository.exists(viewerId, userId) : Promise.resolve(undefined),
+  ]);
+
+  return toPublicProfile(user, followerCount, followingCount, isFollowedByViewer);
+};
+
+export const getPublicProfiles = async (
+  users: IUserDocument[],
+  viewerId?: string
+): Promise<IPublicProfile[]> => {
+  if (users.length === 0) return [];
+
+  const userIds = users.map((user) => user._id.toString());
+  const [followerCounts, followingCounts, followedSet] = await Promise.all([
+    followRepository.countByFolloweeMany(userIds),
+    followRepository.countByFollowerMany(userIds),
+    viewerId
+      ? followRepository.findFollowedSet(viewerId, userIds)
+      : Promise.resolve(undefined),
+  ]);
+
+  return users.map((user) => {
+    const userId = user._id.toString();
+    return toPublicProfile(
+      user,
+      followerCounts.get(userId) ?? 0,
+      followingCounts.get(userId) ?? 0,
+      followedSet ? followedSet.has(userId) : undefined
+    );
+  });
 };
 
 export const updateBasicProfile = async (
@@ -134,6 +184,67 @@ export const uploadAvatar = async (
   if (previousAvatarUrl) {
     await imageProvider.deleteImage(previousAvatarUrl);
   }
+
+  return toUserResponse(updated);
+};
+
+const isPresetBannerUrl = (url: string): boolean =>
+  BANNER_PRESET_CATALOG.some((preset) => preset.url === url);
+
+const deletePreviousBannerIfCustom = async (
+  previousBannerUrl: string | undefined
+): Promise<void> => {
+  if (previousBannerUrl && !isPresetBannerUrl(previousBannerUrl)) {
+    await imageProvider.deleteImage(previousBannerUrl);
+  }
+};
+
+export const uploadBanner = async (
+  userId: string,
+  buffer: Buffer,
+  mimeType: string
+): Promise<IUser> => {
+  const current = await userRepository.findById(userId);
+  if (!current) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
+
+  const { width, height } = await sharp(buffer).metadata();
+  if (width !== BANNER_WIDTH_PX || height !== BANNER_HEIGHT_PX) {
+    throw new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      `Banner image must be exactly ${BANNER_WIDTH_PX}x${BANNER_HEIGHT_PX}px.`
+    );
+  }
+
+  const bannerUrl = await imageProvider.uploadImage(buffer, mimeType);
+  const previousBannerUrl = current.bannerUrl;
+
+  const updated = await userRepository.updateBannerUrl(userId, bannerUrl);
+  if (!updated) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
+
+  await deletePreviousBannerIfCustom(previousBannerUrl);
+
+  return toUserResponse(updated);
+};
+
+export const selectBannerPreset = async (
+  userId: string,
+  presetId: string
+): Promise<IUser> => {
+  const preset = BANNER_PRESET_CATALOG.find((entry) => entry.id === presetId);
+  if (!preset) {
+    throw new ApiError(404, 'NOT_FOUND', 'Banner preset not found.');
+  }
+
+  const current = await userRepository.findById(userId);
+  if (!current) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
+
+  const previousBannerUrl = current.bannerUrl;
+
+  const updated = await userRepository.updateBannerUrl(userId, preset.url);
+  if (!updated) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
+
+  await deletePreviousBannerIfCustom(previousBannerUrl);
 
   return toUserResponse(updated);
 };

@@ -66,7 +66,12 @@ export const getSearchByType = asyncHandler(
 export const getSearchCreators = asyncHandler(
   async (req: Request, res: Response) => {
     const { q, cursor, limit } = req.query as unknown as SearchCreatorsQuery;
-    const result = await searchService.searchCreators(q, cursor ?? null, limit);
+    const result = await searchService.searchCreators(
+      q,
+      cursor ?? null,
+      limit,
+      req.user?.id
+    );
 
     res
       .status(200)
@@ -83,7 +88,7 @@ export const getSearchCreators = asyncHandler(
 export const getSearchSuggestions = asyncHandler(
   async (req: Request, res: Response) => {
     const { q } = req.query as unknown as SearchSuggestionsQuery;
-    const result = await searchService.searchSuggestions(q);
+    const result = await searchService.searchSuggestions(q, req.user?.id);
 
     res
       .status(200)

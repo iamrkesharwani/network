@@ -2,12 +2,16 @@ import { Router } from 'express';
 import { validate } from '../../core/middleware/validate.middleware.js';
 import { requireAuth } from '../../core/middleware/auth.middleware.js';
 import { uploadLimiter } from '../../core/middleware/rateLimit.middleware.js';
-import { uploadAvatar as uploadAvatarMiddleware } from '../../core/middleware/upload.middleware.js';
+import {
+  uploadAvatar as uploadAvatarMiddleware,
+  uploadBanner as uploadBannerMiddleware,
+} from '../../core/middleware/upload.middleware.js';
 import {
   basicProfileSchema,
   personalDetailsSchema,
   contactLinksSchema,
   captureLocationSchema,
+  bannerPresetSelectSchema,
 } from '@network/shared';
 import * as profileController from './controllers/profile.controller.js';
 import * as locationController from './controllers/location.controller.js';
@@ -41,6 +45,21 @@ router.post(
   uploadLimiter,
   uploadAvatarMiddleware,
   profileController.uploadAvatar
+);
+
+router.post(
+  '/profile/banner',
+  requireAuth,
+  uploadLimiter,
+  uploadBannerMiddleware,
+  profileController.uploadBanner
+);
+
+router.patch(
+  '/profile/banner/preset',
+  requireAuth,
+  validate({ body: bannerPresetSelectSchema }),
+  profileController.selectBannerPreset
 );
 
 router.post(

@@ -21,6 +21,9 @@ export * from './modules/feed/feed.schema.js';
 export * from './modules/feed/feed.types.js';
 export * from './modules/feed/feed.constants.js';
 
+export * from './modules/follow/follow.schema.js';
+export * from './modules/follow/follow.types.js';
+
 export * from './modules/history/history.schema.js';
 export * from './modules/history/history.types.js';
 export * from './modules/history/history.constants.js';
@@ -74,6 +77,7 @@ export * from './modules/user/constants/user.constants.js';
 export * from './modules/user/constants/countries.constants.js';
 export * from './modules/user/constants/socialPlatformCatalog.constants.js';
 export * from './modules/user/constants/trust.constants.js';
+export * from './modules/user/constants/bannerPresets.constants.js';
 
 export * from './modules/video/video.schema.js';
 export * from './modules/video/video.types.js';

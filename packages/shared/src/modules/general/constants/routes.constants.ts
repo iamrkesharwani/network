@@ -27,6 +27,8 @@ export const CLIENT_ROUTES = {
   PROFILE_POSTS: '/profile/:username/posts',
   PROFILE_STATS: '/profile/:username/stats',
   PROFILE_HISTORY: '/profile/:username/history',
+  PROFILE_FOLLOWERS: '/profile/:username/followers',
+  PROFILE_FOLLOWING: '/profile/:username/following',
   SETTINGS: '/settings',
   SETTINGS_MY_INFO: '/settings/my-info',
   SETTINGS_MY_INFO_BASIC: '/settings/my-info/basic',

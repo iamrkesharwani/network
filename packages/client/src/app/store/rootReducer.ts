@@ -19,6 +19,7 @@ import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
 import { juryApi } from '../../features/jury/juryApi';
+import { followApi } from '../../features/follow/followApi';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -41,6 +42,7 @@ const rootReducer = combineReducers({
   [historyApi.reducerPath]: historyApi.reducer,
   [reportApi.reducerPath]: reportApi.reducer,
   [juryApi.reducerPath]: juryApi.reducer,
+  [followApi.reducerPath]: followApi.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

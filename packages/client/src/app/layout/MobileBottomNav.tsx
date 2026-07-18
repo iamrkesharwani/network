@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Clapperboard, Search, MessageCircle, User } from 'lucide-react';
+import { Home, Search, MessageCircle, User, Film } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import { buildProfilePath } from '../../features/profile/utils/buildProfilePath';
@@ -35,7 +35,7 @@ const MobileBottomNav = () => {
         to={CLIENT_ROUTES.SHORTS}
         className={() => tabClasses({ isActive: isOnShorts })}
       >
-        <Clapperboard className="w-5.5 h-5.5" strokeWidth={1.75} />
+        <Film className="w-5.5 h-5.5" strokeWidth={1.75} />
         <span className="sr-only">Shorts</span>
       </NavLink>
 

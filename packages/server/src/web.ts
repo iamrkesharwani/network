@@ -41,6 +41,7 @@ import { startAccountDeletionWorker } from './modules/account/account.deletion.w
 import { videoDeletionAdapter } from './modules/video/services/video.deletion.service.js';
 import { shortDeletionAdapter } from './modules/short/services/short.deletion.service.js';
 import { postDeletionAdapter } from './modules/post/services/post.deletion.service.js';
+import { followDeletionAdapter } from './modules/follow/follow.deletion.adapter.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -81,6 +82,7 @@ const startWeb = async () => {
     registerAccountDeletionAdapter(videoDeletionAdapter);
     registerAccountDeletionAdapter(shortDeletionAdapter);
     registerAccountDeletionAdapter(postDeletionAdapter);
+    registerAccountDeletionAdapter(followDeletionAdapter);
     startAccountDeletionWorker();
 
     httpServer.listen(port, '0.0.0.0', () => {

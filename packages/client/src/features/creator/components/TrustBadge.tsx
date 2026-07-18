@@ -9,7 +9,7 @@ import TrustScoreInfoModal from './TrustScoreInfoModal';
 
 export interface TrustBadgeProps {
   username: string;
-  variant?: 'compact' | 'full';
+  variant?: 'compact' | 'full' | 'stacked';
   className?: string;
 }
 
@@ -65,6 +65,41 @@ const TrustBadge = ({
             </button>
             <ChevronRight className="w-4 h-4 text-text-muted" />
           </div>
+        </Link>
+        <TrustScoreInfoModal
+          isOpen={infoOpen}
+          onClose={() => setInfoOpen(false)}
+        />
+      </>
+    );
+  }
+
+  if (variant === 'stacked') {
+    return (
+      <>
+        <Link
+          to={statsPath}
+          title={`Trust score: ${score}`}
+          className={cn(
+            'flex flex-col items-center justify-center gap-0.5 rounded-lg py-2 text-center',
+            className
+          )}
+        >
+          <span className="flex items-center gap-1 text-base font-semibold text-text-primary">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            {score}
+          </span>
+          <span className="flex items-center gap-1 text-xs text-text-secondary">
+            {tierLabel}
+            <button
+              type="button"
+              onClick={openInfo}
+              title="How to increase trust score?"
+              className="text-text-muted transition-colors hover:text-text-primary"
+            >
+              <HelpCircle className="h-3 w-3" />
+            </button>
+          </span>
         </Link>
         <TrustScoreInfoModal
           isOpen={infoOpen}

@@ -9,6 +9,7 @@ import BorderedInput from '../general/BorderedInput';
 import BorderedTextarea from '../general/BorderedTextarea';
 import Button from '../../../../shared/ui/primitives/Button';
 import AvatarEditor from './AvatarEditor';
+import BannerEditor from './BannerEditor';
 import UsernameField from './UsernameField';
 import MyInfoFormHeader from './MyInfoFormHeader';
 import EmailChangeField from './EmailChangeField';
@@ -56,6 +57,10 @@ const BasicInfoCard = () => {
       className="max-w-2xl"
     >
       <MyInfoFormHeader title="Basic info" />
+
+      <div className="mb-4">
+        <BannerEditor currentBannerUrl={user.bannerUrl} />
+      </div>
 
       <div className="mb-6 flex justify-center">
         <AvatarEditor currentAvatarUrl={user.avatarUrl} name={user.name} />

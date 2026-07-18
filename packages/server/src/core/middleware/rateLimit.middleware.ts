@@ -83,3 +83,10 @@ export const reportLimiter = createLimiter(
   'Too many reports submitted. Please wait before reporting more content.',
   'rl:report:'
 );
+
+export const followLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  60,
+  'Too many follow/unfollow actions. Please slow down.',
+  'rl:follow:'
+);

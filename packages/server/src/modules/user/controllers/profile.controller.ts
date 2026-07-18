@@ -1,9 +1,11 @@
 import type { Request, Response } from 'express';
 import {
   ALLOWED_AVATAR_MIME_TYPES,
+  ALLOWED_BANNER_MIME_TYPES,
   type BasicProfileInput,
   type PersonalDetailsInput,
   type ContactLinksInput,
+  type BannerPresetSelectInput,
 } from '@network/shared';
 import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { ApiResponse } from '../../../core/utils/ApiResponse.js';
@@ -70,5 +72,40 @@ export const uploadAvatar = asyncHandler(
     );
 
     res.status(200).json(new ApiResponse(user, 'Avatar updated successfully'));
+  }
+);
+
+export const uploadBanner = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user)
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+
+    const file = req.file;
+    if (!file) throw new ApiError(400, 'VALIDATION_ERROR', 'No file uploaded.');
+
+    await verifyFileMagicBytes(file, ALLOWED_BANNER_MIME_TYPES);
+
+    const user = await userProfileService.uploadBanner(
+      req.user.id,
+      file.buffer,
+      file.mimetype
+    );
+
+    res.status(200).json(new ApiResponse(user, 'Banner updated successfully'));
+  }
+);
+
+export const selectBannerPreset = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user)
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+
+    const { presetId } = req.body as BannerPresetSelectInput;
+    const user = await userProfileService.selectBannerPreset(
+      req.user.id,
+      presetId
+    );
+
+    res.status(200).json(new ApiResponse(user, 'Banner updated successfully'));
   }
 );

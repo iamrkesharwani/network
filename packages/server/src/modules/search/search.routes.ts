@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { validate } from '../../core/middleware/validate.middleware.js';
-import { requireAuth } from '../../core/middleware/auth.middleware.js';
+import { requireAuth, optionalAuth } from '../../core/middleware/auth.middleware.js';
 import { searchLimiter } from '../../core/middleware/rateLimit.middleware.js';
 import {
   searchAllQuerySchema,
@@ -25,12 +25,14 @@ router.get(
 
 router.get(
   '/creators',
+  optionalAuth,
   validate({ query: searchCreatorsQuerySchema }),
   searchController.getSearchCreators
 );
 
 router.get(
   '/suggestions',
+  optionalAuth,
   validate({ query: searchSuggestionsQuerySchema }),
   searchController.getSearchSuggestions
 );

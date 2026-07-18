@@ -111,6 +111,10 @@ export const userProfileUpdateSchema = z.object({
     .optional(),
 });
 
+export const bannerPresetSelectSchema = z.object({
+  presetId: z.string().min(1, 'Preset ID is required.'),
+});
+
 export const phoneSchema = z.object({
   dialCode: z.string().trim().min(1, 'Country code is required.'),
   iso2: z.string().trim().length(2).optional(),

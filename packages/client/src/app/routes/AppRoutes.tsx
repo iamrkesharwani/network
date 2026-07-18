@@ -23,6 +23,7 @@ import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
 import PostComposer from '../../features/post/form/PostComposer';
 import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
 import ProfilePage from '../../features/profile/pages/ProfilePage';
+import FollowListPage from '../../features/follow/pages/FollowListPage';
 import SettingsPage from '../../features/settings/pages/SettingsPage';
 import SearchResultsPage from '../../features/search/pages/SearchResultsPage';
 import JuryQueuePage from '../../features/jury/pages/JuryQueuePage';
@@ -65,6 +66,14 @@ export const routes: RouteObject[] = [
               { path: CLIENT_ROUTES.PROFILE_POSTS, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.PROFILE_STATS, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.PROFILE_HISTORY, element: <ProfilePage /> },
+              {
+                path: CLIENT_ROUTES.PROFILE_FOLLOWERS,
+                element: <FollowListPage />,
+              },
+              {
+                path: CLIENT_ROUTES.PROFILE_FOLLOWING,
+                element: <FollowListPage />,
+              },
               {
                 element: <RequireAuth />,
                 children: [

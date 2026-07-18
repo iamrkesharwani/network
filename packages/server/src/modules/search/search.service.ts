@@ -19,7 +19,7 @@ import * as videoCrudService from '../video/services/video.crud.service.js';
 import * as shortCrudService from '../short/services/short.crud.service.js';
 import * as postCrudService from '../post/services/post.crud.service.js';
 import * as userRepository from '../user/user.repository.js';
-import type { IUserDocument } from '../user/user.model.js';
+import { getPublicProfiles } from '../user/services/user.profile.service.js';
 
 const requireQuery = (q: string): string => {
   const trimmed = q.trim();
@@ -28,14 +28,6 @@ const requireQuery = (q: string): string => {
   }
   return trimmed;
 };
-
-const toPublicProfile = (user: IUserDocument): IPublicProfile => ({
-  id: user._id.toString(),
-  username: user.username,
-  name: user.name,
-  ...(user.bio && { bio: user.bio }),
-  ...(user.avatarUrl && { avatarUrl: user.avatarUrl }),
-});
 
 const queryTypesenseIds = async (
   collection: string,
@@ -99,7 +91,8 @@ export const searchByType = (
 export const searchCreators = async (
   q: string,
   cursor: string | null,
-  limit: number
+  limit: number,
+  viewerId?: string
 ): Promise<Omit<PaginatedResponse<IPublicProfile>, 'success' | 'message'>> => {
   const result = await userRepository.searchUsers(
     requireQuery(q),
@@ -109,12 +102,13 @@ export const searchCreators = async (
 
   return {
     ...result,
-    data: result.data.map(toPublicProfile),
+    data: await getPublicProfiles(result.data, viewerId),
   };
 };
 
 export const searchSuggestions = async (
-  q: string
+  q: string,
+  viewerId?: string
 ): Promise<ISearchSuggestions> => {
   const query = requireQuery(q);
 
@@ -152,8 +146,10 @@ export const searchSuggestions = async (
     postCrudService.findByIds(postIds),
   ]);
 
+  const creatorProfiles = await getPublicProfiles(creators, viewerId);
+
   return {
-    creators: orderById(creators.map(toPublicProfile), creatorIds),
+    creators: orderById(creatorProfiles, creatorIds),
     videos: orderById(videos, videoIds),
     shorts: orderById(shorts, shortIds),
     posts: orderById(posts, postIds),

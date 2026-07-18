@@ -95,6 +95,10 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       default: '',
     },
+    bannerUrl: {
+      type: String,
+      default: '',
+    },
     role: {
       type: String,
       enum: USER_ROLES,
