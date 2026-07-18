@@ -1,13 +1,18 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText } from 'lucide-react';
 import { formatCount, formatDaysLeft } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
+import ConfirmSaveDiscardModal from '../../../shared/ui/overlay/ConfirmSaveDiscardModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import PostEditForm from '../form/PostEditForm';
 import type { IPostResponse } from '@network/shared';
+import {
+  useUnsavedChangesGuard,
+  type EditFormHandle,
+} from '../../../shared/hooks/useUnsavedChangesGuard';
 
 export interface PostListRowProps {
   post: IPostResponse;
@@ -29,6 +34,10 @@ const PostListRow = ({
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const editFormRef = useRef<EditFormHandle>(null);
+  const editGuard = useUnsavedChangesGuard(editFormRef, () =>
+    setEditModalOpen(false)
+  );
 
   const isUnlisted = post.visibility === 'unlisted';
   const daysLeft =
@@ -158,10 +167,11 @@ const PostListRow = ({
 
       <Modal
         isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
+        onClose={editGuard.requestClose}
         title="Edit post"
       >
         <PostEditForm
+          ref={editFormRef}
           postId={post.id}
           initialValues={{
             text: post.text,
@@ -171,6 +181,14 @@ const PostListRow = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ConfirmSaveDiscardModal
+        isOpen={editGuard.isConfirmOpen}
+        itemLabel="post"
+        onKeepEditing={editGuard.keepEditing}
+        onDiscard={editGuard.discard}
+        onSave={editGuard.save}
+      />
     </>
   );
 };

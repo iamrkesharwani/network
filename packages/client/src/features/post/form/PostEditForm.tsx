@@ -1,3 +1,4 @@
+import { forwardRef, useImperativeHandle } from 'react';
 import { Controller } from 'react-hook-form';
 import { Loader2, Save } from 'lucide-react';
 import type { z } from 'zod';
@@ -10,6 +11,7 @@ import {
 } from '@network/shared';
 import { useUpdatePostMutation } from '../postApi';
 import { useMediaEditForm } from '../../upload/hooks/useMediaEditForm';
+import type { EditFormHandle } from '../../../shared/hooks/useUnsavedChangesGuard';
 import FloatingTextarea from '../../upload/components/FloatingTextarea';
 import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
@@ -30,95 +32,101 @@ interface PostEditFormProps {
   onSuccess: (post: IPostResponse) => void;
 }
 
-const PostEditForm = ({
-  postId,
-  initialValues,
-  onSuccess,
-}: PostEditFormProps) => {
-  const [updatePost, { isLoading }] = useUpdatePostMutation();
+const PostEditForm = forwardRef<EditFormHandle, PostEditFormProps>(
+  ({ postId, initialValues, onSuccess }, ref) => {
+    const [updatePost, { isLoading }] = useUpdatePostMutation();
 
-  const {
-    register,
-    control,
-    watch,
-    formState: { errors },
-    submitError,
-    submit,
-  } = useMediaEditForm<PostFormValues, PostUpdateInput>({
-    schema: postUpdateSchema as unknown as z.ZodType<
-      PostUpdateInput,
-      PostFormValues
-    >,
-    defaultValues: {
-      text: initialValues.text ?? '',
-      tags: initialValues.tags,
-      visibility: initialValues.visibility,
-    },
-    completenessRules: [],
-  });
+    const {
+      register,
+      control,
+      watch,
+      formState: { errors, isDirty },
+      submitError,
+      submit,
+    } = useMediaEditForm<PostFormValues, PostUpdateInput>({
+      schema: postUpdateSchema as unknown as z.ZodType<
+        PostUpdateInput,
+        PostFormValues
+      >,
+      defaultValues: {
+        text: initialValues.text ?? '',
+        tags: initialValues.tags,
+        visibility: initialValues.visibility,
+      },
+      completenessRules: [],
+    });
 
-  const text = watch('text') ?? '';
+    const text = watch('text') ?? '';
 
-  const onSubmit = submit(async (data) => {
-    const result = await updatePost({ postId, ...data }).unwrap();
-    onSuccess(result.data);
-  });
+    const onSubmit = submit(async (data) => {
+      const result = await updatePost({ postId, ...data }).unwrap();
+      onSuccess(result.data);
+    });
 
-  return (
-    <form onSubmit={onSubmit} className="w-full max-w-lg mx-auto">
-      <FloatingTextarea
-        label="What's on your mind?"
-        {...register('text')}
-        maxLength={POST_TEXT_MAX_LENGTH}
-        counter={{ current: text.length, max: POST_TEXT_MAX_LENGTH }}
-        rows={4}
-        error={errors.text?.message}
-        disabled={isLoading}
-      />
+    useImperativeHandle(
+      ref,
+      () => ({ isDirty, submit: onSubmit }),
+      [isDirty, onSubmit]
+    );
 
-      <Controller
-        control={control}
-        name="tags"
-        render={({ field }) => (
-          <TagInput
-            value={field.value ?? []}
-            onChange={field.onChange}
-            error={errors.tags?.message as string | undefined}
-          />
+    return (
+      <form onSubmit={onSubmit} className="w-full max-w-lg mx-auto">
+        <FloatingTextarea
+          label="What's on your mind?"
+          {...register('text')}
+          maxLength={POST_TEXT_MAX_LENGTH}
+          counter={{ current: text.length, max: POST_TEXT_MAX_LENGTH }}
+          rows={4}
+          error={errors.text?.message}
+          disabled={isLoading}
+        />
+
+        <Controller
+          control={control}
+          name="tags"
+          render={({ field }) => (
+            <TagInput
+              value={field.value ?? []}
+              onChange={field.onChange}
+              error={errors.tags?.message as string | undefined}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="visibility"
+          render={({ field }) => (
+            <VisibilitySelector
+              value={(field.value as PostVisibility) ?? 'public'}
+              onChange={field.onChange}
+            />
+          )}
+        />
+
+        {submitError && (
+          <p className="mb-3 text-sm text-red-500" role="alert">
+            {submitError}
+          </p>
         )}
-      />
 
-      <Controller
-        control={control}
-        name="visibility"
-        render={({ field }) => (
-          <VisibilitySelector
-            value={(field.value as PostVisibility) ?? 'public'}
-            onChange={field.onChange}
-          />
-        )}
-      />
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="submit-btn relative w-full overflow-hidden rounded-lg border border-primary py-3 text-sm font-semibold text-primary disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
+        >
+          {isLoading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          Save changes
+        </button>
+      </form>
+    );
+  }
+);
 
-      {submitError && (
-        <p className="mb-3 text-sm text-red-500" role="alert">
-          {submitError}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="submit-btn relative w-full overflow-hidden rounded-lg border border-primary py-3 text-sm font-semibold text-primary disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
-      >
-        {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          <Save className="w-4 h-4" />
-        )}
-        Save changes
-      </button>
-    </form>
-  );
-};
+PostEditForm.displayName = 'PostEditForm';
 
 export default PostEditForm;

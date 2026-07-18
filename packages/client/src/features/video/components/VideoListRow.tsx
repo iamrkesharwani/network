@@ -1,16 +1,21 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import { formatCount, formatDuration, formatDaysLeft } from '@network/shared';
 import type { IVideoResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
+import ConfirmSaveDiscardModal from '../../../shared/ui/overlay/ConfirmSaveDiscardModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import VideoEditForm from '../form/VideoEditForm';
 import MediaProcessingBar from '../../../shared/ui/card/MediaProcessingBar';
 import { getMediaProcessingLabel } from '../../../../../shared/src/utils/mediaProcessingLabel';
 import { cn } from '../../../shared/utils/cn';
+import {
+  useUnsavedChangesGuard,
+  type EditFormHandle,
+} from '../../../shared/hooks/useUnsavedChangesGuard';
 
 export interface VideoListRowProps {
   video: IVideoResponse;
@@ -32,6 +37,10 @@ const VideoListRow = ({
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const editFormRef = useRef<EditFormHandle>(null);
+  const editGuard = useUnsavedChangesGuard(editFormRef, () =>
+    setEditModalOpen(false)
+  );
 
   const isUnlisted = video.visibility === 'unlisted';
   const isReady = video.status === 'READY';
@@ -194,10 +203,11 @@ const VideoListRow = ({
 
       <Modal
         isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
+        onClose={editGuard.requestClose}
         title="Edit video"
       >
         <VideoEditForm
+          ref={editFormRef}
           mode="edit"
           videoId={video.id}
           thumbnailUrl={video.thumbnailUrl}
@@ -213,6 +223,14 @@ const VideoListRow = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ConfirmSaveDiscardModal
+        isOpen={editGuard.isConfirmOpen}
+        itemLabel="video"
+        onKeepEditing={editGuard.keepEditing}
+        onDiscard={editGuard.discard}
+        onSave={editGuard.save}
+      />
     </>
   );
 };

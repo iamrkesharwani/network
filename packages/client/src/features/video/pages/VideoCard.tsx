@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import VideoCardThumbnail from '../components/VideoCardThumbnail';
 import VideoCardFooter from '../components/VideoCardFooter';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
+import ConfirmSaveDiscardModal from '../../../shared/ui/overlay/ConfirmSaveDiscardModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import VideoEditForm from '../form/VideoEditForm';
@@ -10,6 +11,10 @@ import ReportModal from '../../report/components/ReportModal';
 import RemovedContentBanner from '../../jury/components/RemovedContentBanner';
 import AppealModal from '../../jury/components/AppealModal';
 import { formatDaysLeft, type IVideoResponse } from '@network/shared';
+import {
+  useUnsavedChangesGuard,
+  type EditFormHandle,
+} from '../../../shared/hooks/useUnsavedChangesGuard';
 
 export interface VideoCardProps {
   video: IVideoResponse;
@@ -32,6 +37,10 @@ const VideoCard = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [appealOpen, setAppealOpen] = useState(false);
+  const editFormRef = useRef<EditFormHandle>(null);
+  const editGuard = useUnsavedChangesGuard(editFormRef, () =>
+    setEditModalOpen(false)
+  );
 
   const isRemoved = isOwner && video.moderationStatus === 'jury_removed';
   const isReady = video.status === 'READY';
@@ -159,10 +168,11 @@ const VideoCard = ({
 
       <Modal
         isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
+        onClose={editGuard.requestClose}
         title="Edit video"
       >
         <VideoEditForm
+          ref={editFormRef}
           mode="edit"
           videoId={video.id}
           thumbnailUrl={video.thumbnailUrl}
@@ -178,6 +188,14 @@ const VideoCard = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ConfirmSaveDiscardModal
+        isOpen={editGuard.isConfirmOpen}
+        itemLabel="video"
+        onKeepEditing={editGuard.keepEditing}
+        onDiscard={editGuard.discard}
+        onSave={editGuard.save}
+      />
 
       <ReportModal
         contentType="video"

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import ShortCardThumbnail from '../components/ShortCardThumbnail';
 import ShortCardFooter from '../components/ShortCardFooter';
 import CardShell from '../../../shared/ui/card/CardShell';
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
+import ConfirmSaveDiscardModal from '../../../shared/ui/overlay/ConfirmSaveDiscardModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import ShortEditForm from '../form/ShortEditForm';
@@ -12,6 +13,10 @@ import ReportModal from '../../report/components/ReportModal';
 import RemovedContentBanner from '../../jury/components/RemovedContentBanner';
 import AppealModal from '../../jury/components/AppealModal';
 import { formatDaysLeft, type IShortResponse } from '@network/shared';
+import {
+  useUnsavedChangesGuard,
+  type EditFormHandle,
+} from '../../../shared/hooks/useUnsavedChangesGuard';
 
 export interface ShortCardProps {
   short: IShortResponse;
@@ -38,6 +43,10 @@ const ShortCard = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [appealOpen, setAppealOpen] = useState(false);
+  const editFormRef = useRef<EditFormHandle>(null);
+  const editGuard = useUnsavedChangesGuard(editFormRef, () =>
+    setEditModalOpen(false)
+  );
 
   const isRemoved = isOwner && short.moderationStatus === 'jury_removed';
   const isReady = short.status === 'READY';
@@ -167,10 +176,11 @@ const ShortCard = ({
 
       <Modal
         isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
+        onClose={editGuard.requestClose}
         title="Edit short"
       >
         <ShortEditForm
+          ref={editFormRef}
           mode="edit"
           shortId={short.id}
           thumbnailUrl={short.thumbnailUrl}
@@ -184,6 +194,14 @@ const ShortCard = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ConfirmSaveDiscardModal
+        isOpen={editGuard.isConfirmOpen}
+        itemLabel="short"
+        onKeepEditing={editGuard.keepEditing}
+        onDiscard={editGuard.discard}
+        onSave={editGuard.save}
+      />
 
       <ReportModal
         contentType="short"

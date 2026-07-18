@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import { getMediaProcessingLabel } from '../../../../../shared/src/utils/mediaProcessingLabel';
@@ -6,6 +6,7 @@ import { cn } from '../../../shared/utils/cn';
 import type { IShortResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
+import ConfirmSaveDiscardModal from '../../../shared/ui/overlay/ConfirmSaveDiscardModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import ShortEditForm from '../form/ShortEditForm';
@@ -16,6 +17,10 @@ import {
   formatDuration,
   formatDaysLeft,
 } from '@network/shared';
+import {
+  useUnsavedChangesGuard,
+  type EditFormHandle,
+} from '../../../shared/hooks/useUnsavedChangesGuard';
 
 export interface ShortListRowProps {
   short: IShortResponse;
@@ -37,6 +42,10 @@ const ShortListRow = ({
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const editFormRef = useRef<EditFormHandle>(null);
+  const editGuard = useUnsavedChangesGuard(editFormRef, () =>
+    setEditModalOpen(false)
+  );
 
   const isUnlisted = short.visibility === 'unlisted';
   const isReady = short.status === 'READY';
@@ -199,10 +208,11 @@ const ShortListRow = ({
 
       <Modal
         isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
+        onClose={editGuard.requestClose}
         title="Edit short"
       >
         <ShortEditForm
+          ref={editFormRef}
           mode="edit"
           shortId={short.id}
           thumbnailUrl={short.thumbnailUrl}
@@ -216,6 +226,14 @@ const ShortListRow = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ConfirmSaveDiscardModal
+        isOpen={editGuard.isConfirmOpen}
+        itemLabel="short"
+        onKeepEditing={editGuard.keepEditing}
+        onDiscard={editGuard.discard}
+        onSave={editGuard.save}
+      />
     </>
   );
 };

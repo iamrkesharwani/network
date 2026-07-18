@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Images } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../../shared/utils/cn';
 import Modal from '../../../shared/ui/overlay/Modal';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
+import ConfirmSaveDiscardModal from '../../../shared/ui/overlay/ConfirmSaveDiscardModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
@@ -15,6 +16,10 @@ import {
   POST_TILE_QUOTE_THRESHOLD_CHARS,
   POST_TILE_HEIGHT_PX,
 } from '@network/shared';
+import {
+  useUnsavedChangesGuard,
+  type EditFormHandle,
+} from '../../../shared/hooks/useUnsavedChangesGuard';
 
 export interface PostGridTileProps {
   post: IPostResponse;
@@ -41,6 +46,10 @@ const PostGridTile = ({
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const editFormRef = useRef<EditFormHandle>(null);
+  const editGuard = useUnsavedChangesGuard(editFormRef, () =>
+    setEditModalOpen(false)
+  );
 
   const text = post.text ?? '';
   const images = post.imageUrls ?? [];
@@ -221,10 +230,11 @@ const PostGridTile = ({
 
       <Modal
         isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
+        onClose={editGuard.requestClose}
         title="Edit post"
       >
         <PostEditForm
+          ref={editFormRef}
           postId={post.id}
           initialValues={{
             text: post.text,
@@ -234,6 +244,14 @@ const PostGridTile = ({
           onSuccess={() => setEditModalOpen(false)}
         />
       </Modal>
+
+      <ConfirmSaveDiscardModal
+        isOpen={editGuard.isConfirmOpen}
+        itemLabel="post"
+        onKeepEditing={editGuard.keepEditing}
+        onDiscard={editGuard.discard}
+        onSave={editGuard.save}
+      />
     </>
   );
 };
