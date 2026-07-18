@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { WizardStep } from '../UploadSteps';
+import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
+import { useAppSelector } from '../../../shared/hooks/useAppSelector';
+import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
+import { createThumbnailUploader } from './useMediaEditForm';
+import { useUploadResumePointer } from './useUploadResumePointer';
 import type {
   ApiResponse,
   ICreatorEvent,
@@ -8,16 +13,11 @@ import type {
   MultipartMediaType,
   UploadState,
 } from '@network/shared';
-import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
-import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import {
   resetWizardState,
   selectWizardState,
   setWizardState,
 } from '../uploadSlice';
-import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
-import { createThumbnailUploader } from './useMediaEditForm';
-import { useUploadResumePointer } from './useUploadResumePointer';
 
 export interface BaseMediaResponse {
   id: string;

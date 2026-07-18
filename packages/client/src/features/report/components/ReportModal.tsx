@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { CheckCircle2, ShieldOff } from 'lucide-react';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useAppSelector } from '../../../shared/hooks/useAppSelector';
+import { cn } from '../../../shared/utils/cn';
+import { useCreateReportMutation } from '../reportApi';
+import Modal from '../../../shared/ui/overlay/Modal';
+import Button from '../../../shared/ui/primitives/Button';
 import {
   REPORT_REASON_CATALOG,
   REPORT_NOTE_MAX_LENGTH,
   type ReportableContentType,
   type ReportReasonCode,
 } from '@network/shared';
-import Modal from '../../../shared/ui/overlay/Modal';
-import Button from '../../../shared/ui/primitives/Button';
-import { useToast } from '../../../shared/hooks/useToast';
-import { useAppSelector } from '../../../shared/hooks/useAppSelector';
-import { cn } from '../../../shared/utils/cn';
-import { useCreateReportMutation } from '../reportApi';
 
 export interface ReportModalProps {
   contentType: ReportableContentType;
@@ -162,7 +162,7 @@ const ReportModal = ({
             Cancel
           </Button>
           <Button
-            variant='primary'
+            variant="primary"
             size="sm"
             onClick={handleSubmit}
             isLoading={isLoading}

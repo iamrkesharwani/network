@@ -2,9 +2,9 @@ import { useCallback, useMemo } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
-import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useLiveShortsFeed } from '../../feed/hooks/useLiveShortsFeed';
 import { useGetShortByIdQuery } from '../shortApi';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 import ShortFeed from '../../player/variants/short/ShortFeed';
 
 const ShortWatch = () => {

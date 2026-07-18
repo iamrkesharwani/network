@@ -1,5 +1,5 @@
-import { CONTENT_VISIBILITY } from '../general/general.constants.js';
-import { ONE_HOUR_SECONDS } from '../general/time.constants.js';
+import { CONTENT_VISIBILITY } from '../general/constants/general.constants.js';
+import { ONE_HOUR_SECONDS } from '../general/constants/time.constants.js';
 
 export const ALLOWED_VIDEO_MIME_TYPES = [
   'video/mp4',

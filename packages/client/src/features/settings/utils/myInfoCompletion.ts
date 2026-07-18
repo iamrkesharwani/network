@@ -15,7 +15,10 @@ export const PERSONAL_FIELDS: MyInfoFieldCheck[] = [
   { label: 'Date of birth', isFilled: (user) => !!user.dateOfBirth },
   { label: 'Gender', isFilled: (user) => !!user.gender },
   { label: 'Pronouns', isFilled: (user) => !!user.pronouns?.length },
-  { label: 'Relationship status', isFilled: (user) => !!user.relationshipStatus },
+  {
+    label: 'Relationship status',
+    isFilled: (user) => !!user.relationshipStatus,
+  },
 ];
 
 export const LINKS_FIELDS: MyInfoFieldCheck[] = [

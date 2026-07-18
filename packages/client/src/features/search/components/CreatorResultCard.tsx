@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
 import type { IPublicProfile } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
+import { Link } from 'react-router-dom';
 import { buildProfilePath } from '../../profile/utils/buildProfilePath';
 
 interface CreatorResultCardProps {

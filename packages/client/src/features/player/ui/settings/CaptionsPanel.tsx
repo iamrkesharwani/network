@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
-import PanelHeader from './PanelHeader';
 import type { ICaptionTrack } from '@network/shared';
+import PanelHeader from './PanelHeader';
 
 function CaptionsPanel({
   captionTracks,

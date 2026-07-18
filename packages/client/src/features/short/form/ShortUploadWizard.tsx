@@ -1,9 +1,4 @@
 import { CLIENT_ROUTES, type IShortResponse } from '@network/shared';
-import {
-  useDeleteShortMutation,
-  useGetShortByIdQuery,
-  useUploadThumbnailMutation,
-} from '../shortApi';
 import { useRawShortUpload } from '../hooks/useShortUpload';
 import { useMediaUploadWizard } from '../../upload/hooks/useMediaUploadWizard';
 import BadgeToast from '../../creator/components/BadgeToast';
@@ -13,10 +8,17 @@ import { ShortUploadSteps } from '../../upload/UploadSteps';
 import { AnimatePresence, motion } from 'framer-motion';
 import MediaDropzone from '../../upload/components/MediaDropzone';
 import UploadThumbnailStep from '../../upload/components/UploadThumbnailStep';
-import ShortDetailsWizard, { type ShortDetailsStep } from './ShortDetailsWizard';
 import UploadConfirmation from '../../upload/components/UploadConfirmation';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import { SPRINGS } from '../../../shared/motion/springs';
+import {
+  useDeleteShortMutation,
+  useGetShortByIdQuery,
+  useUploadThumbnailMutation,
+} from '../shortApi';
+import ShortDetailsWizard, {
+  type ShortDetailsStep,
+} from './ShortDetailsWizard';
 
 const stepVariants = {
   initial: { opacity: 0, x: 24 },

@@ -41,7 +41,9 @@ const BadgeShowcase = () => {
     const isViewMilestone = 'threshold' in badge;
     return {
       id,
-      label: isViewMilestone ? (badge.label.split(' ')[0] as string) : badge.label,
+      label: isViewMilestone
+        ? (badge.label.split(' ')[0] as string)
+        : badge.label,
       description: isViewMilestone ? 'Total Views' : badge.description,
       icon: ICON_MAP[id] || (isViewMilestone ? Trophy : Award),
       unlocked: unlockedBadgeIds.has(id as never),

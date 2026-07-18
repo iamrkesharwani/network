@@ -1,8 +1,11 @@
 import type { Middleware, UnknownAction } from '@reduxjs/toolkit';
 import { PREFERENCES_PATCH_DEBOUNCE_MS } from '@network/shared';
-import { setPreferenceSection, type PreferencesState } from './preferencesSlice';
 import { preferencesApi } from './preferencesApi';
 import { writeStoredPreferences } from './lib/preferencesStorage';
+import {
+  setPreferenceSection,
+  type PreferencesState,
+} from './preferencesSlice';
 
 interface PreferencesMiddlewareState {
   preferences: PreferencesState;
@@ -16,34 +19,34 @@ export const preferencesSyncMiddleware: Middleware<
   object,
   PreferencesMiddlewareState
 > = (store) => (next) => (action) => {
-    const result = next(action);
-    const typedAction = action as UnknownAction;
+  const result = next(action);
+  const typedAction = action as UnknownAction;
 
-    if (setPreferenceSection.match(typedAction)) {
-      writeStoredPreferences(store.getState().preferences);
+  if (setPreferenceSection.match(typedAction)) {
+    writeStoredPreferences(store.getState().preferences);
 
-      const { section, patch } = typedAction.payload;
-      pendingPatch = {
-        ...pendingPatch,
-        [section]: {
-          ...(pendingPatch[section] as object | undefined),
-          ...patch,
-        },
-      };
+    const { section, patch } = typedAction.payload;
+    pendingPatch = {
+      ...pendingPatch,
+      [section]: {
+        ...(pendingPatch[section] as object | undefined),
+        ...patch,
+      },
+    };
 
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        if (store.getState().auth.isAuthenticated) {
-          store.dispatch(
-            preferencesApi.endpoints.patchPreferences.initiate(
-              pendingPatch
-            ) as unknown as UnknownAction
-          );
-        }
-        pendingPatch = {};
-        debounceTimer = null;
-      }, PREFERENCES_PATCH_DEBOUNCE_MS);
-    }
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      if (store.getState().auth.isAuthenticated) {
+        store.dispatch(
+          preferencesApi.endpoints.patchPreferences.initiate(
+            pendingPatch
+          ) as unknown as UnknownAction
+        );
+      }
+      pendingPatch = {};
+      debounceTimer = null;
+    }, PREFERENCES_PATCH_DEBOUNCE_MS);
+  }
 
-    return result;
-  };
+  return result;
+};

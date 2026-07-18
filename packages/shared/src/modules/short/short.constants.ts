@@ -1,4 +1,4 @@
-import { CONTENT_VISIBILITY } from '../general/general.constants.js';
+import { CONTENT_VISIBILITY } from '../general/constants/general.constants.js';
 
 export const ALLOWED_SHORT_MIME_TYPES = [
   'video/mp4',
@@ -24,3 +24,4 @@ export const RAW_SHORT_UPLOAD_KEY_PREFIX = 'raw-short-uploads';
 export const RAW_SHORT_UPLOAD_PRESIGNED_URL_TTL_SECONDS = 60 * 60;
 export const RAW_SHORT_UPLOAD_LIFECYCLE_DAYS = 1;
 export const SHORT_UPLOAD_SESSION_TTL_SECONDS = 60 * 60 * 24;
+export const SHORT_RAIL_ASPECT_CLASS = 'aspect-3/4';

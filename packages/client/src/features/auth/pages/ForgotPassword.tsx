@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AuthLayout from '../components/AuthLayout';
 import Field from '../components/Field';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
+import SiteLogo from '../../../public/Logo.svg?react';
+import { useToast } from '../../../shared/hooks/useToast';
 import {
   requestResetPasswordSchema,
   SITE_NAME,
@@ -11,9 +14,6 @@ import {
   type ApiErrorResponse,
   type RequestResetPasswordInput,
 } from '@network/shared';
-import usePageTitle from '../../../shared/hooks/usePageTitle';
-import SiteLogo from '../../../public/Logo.svg?react';
-import { useToast } from '../../../shared/hooks/useToast';
 
 const ForgotPassword = () => {
   usePageTitle('Forgot Password');

@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { SHORTS_PREFETCH_THRESHOLD, type IShortResponse } from '@network/shared';
+import {
+  SHORTS_PREFETCH_THRESHOLD,
+  type IShortResponse,
+} from '@network/shared';
 import { cn } from '../../../../shared/utils/cn';
 import ShortPlayer from '../../../short/pages/ShortPlayer';
 
@@ -26,12 +29,15 @@ const ShortFeed = ({
 
   const [activeIndex, setActiveIndex] = useState(initialIndex);
 
-  const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior) => {
-    const container = scrollRef.current;
-    const slide = slideRefs.current[index];
-    if (!container || !slide) return;
-    container.scrollTo({ top: slide.offsetTop, behavior });
-  }, []);
+  const scrollToIndex = useCallback(
+    (index: number, behavior: ScrollBehavior) => {
+      const container = scrollRef.current;
+      const slide = slideRefs.current[index];
+      if (!container || !slide) return;
+      container.scrollTo({ top: slide.offsetTop, behavior });
+    },
+    []
+  );
 
   useEffect(() => {
     if (hasScrolledToInitialRef.current || shorts.length === 0) return;
@@ -53,7 +59,10 @@ const ShortFeed = ({
           setActiveIndex(index);
           onIndexChange?.(index);
 
-          if (hasNextPage && index >= shorts.length - SHORTS_PREFETCH_THRESHOLD) {
+          if (
+            hasNextPage &&
+            index >= shorts.length - SHORTS_PREFETCH_THRESHOLD
+          ) {
             onLoadMore?.();
           }
         });
@@ -79,7 +88,10 @@ const ShortFeed = ({
   return (
     <div
       ref={scrollRef}
-      className={cn('h-dvh w-full snap-y snap-mandatory overflow-y-scroll', className)}
+      className={cn(
+        'h-dvh w-full snap-y snap-mandatory overflow-y-scroll',
+        className
+      )}
     >
       {shorts.map((short, index) => {
         const withinWindow = Math.abs(index - activeIndex) <= 1;

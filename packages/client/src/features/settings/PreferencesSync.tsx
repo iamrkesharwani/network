@@ -9,9 +9,7 @@ import { readStoredPreferences } from './lib/preferencesStorage';
 const PreferencesSync = () => {
   const dispatch = useAppDispatch();
   const isInitialized = useAppSelector((state) => state.auth.isInitialized);
-  const isAuthenticated = useAppSelector(
-    (state) => state.auth.isAuthenticated
-  );
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const localVersion = useAppSelector((state) => state.preferences.version);
   const [fetchPreferences] = useLazyGetPreferencesQuery();
 
@@ -37,7 +35,13 @@ const PreferencesSync = () => {
         );
       })
       .catch(() => {});
-  }, [isInitialized, isAuthenticated, dispatch, fetchPreferences, localVersion]);
+  }, [
+    isInitialized,
+    isAuthenticated,
+    dispatch,
+    fetchPreferences,
+    localVersion,
+  ]);
 
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {

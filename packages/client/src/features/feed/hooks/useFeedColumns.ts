@@ -18,11 +18,10 @@ import {
   FEED_VIDEO_ROWS_PER_BLOCK_DESKTOP,
   FEED_SHORTS_PER_BLOCK_DESKTOP,
   FEED_POSTS_PER_BLOCK_DESKTOP,
+  type FeedColumnCount,
+  type FeedWidthMode,
 } from '@network/shared';
 import type { ShortColCount } from '../../short/utils/shortGrid';
-
-export type FeedColumnCount = 1 | 2 | 3 | 4;
-export type FeedWidthMode = 'full' | 'edge';
 
 export interface FeedColumnsResult {
   columns: FeedColumnCount;

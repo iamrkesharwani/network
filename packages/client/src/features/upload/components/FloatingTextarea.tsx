@@ -1,4 +1,9 @@
-import React, { forwardRef, useId, type ComponentType, type ReactNode } from 'react';
+import React, {
+  forwardRef,
+  useId,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import { cn } from '../../../shared/utils/cn';
 
 interface BaseProps {
@@ -15,7 +20,16 @@ const FloatingTextarea = forwardRef<
   BaseProps & React.TextareaHTMLAttributes<HTMLTextAreaElement>
 >(
   (
-    { label, icon: Icon, error, hint, containerClassName, counter, className, ...props },
+    {
+      label,
+      icon: Icon,
+      error,
+      hint,
+      containerClassName,
+      counter,
+      className,
+      ...props
+    },
     ref
   ) => {
     const id = useId();

@@ -108,7 +108,10 @@ const ShortDetailsWizard = ({
     ...(tags.length > 0
       ? [{ label: 'Tags', value: tags.map((tag) => `#${tag}`).join(' ') }]
       : []),
-    { label: 'Visibility', value: <span className="capitalize">{visibility}</span> },
+    {
+      label: 'Visibility',
+      value: <span className="capitalize">{visibility}</span>,
+    },
     ...(description.trim()
       ? [
           {

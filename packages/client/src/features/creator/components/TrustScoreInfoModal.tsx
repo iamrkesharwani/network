@@ -1,7 +1,6 @@
 import {
-  ShieldCheck,
-  TrendingUp,
-  TrendingDown,
+  ArrowUp,
+  ArrowDown,
   Upload,
   Eye,
   Sparkles,
@@ -11,14 +10,11 @@ import {
   Scale,
   Flag,
   AlertTriangle,
-  Check,
   type LucideIcon,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
   TRUST_SIGNAL_CATALOG,
-  TRUST_TIERS,
-  TRUST_FEATURE_CATALOG,
   BADGE_CATALOG,
   VIDEO_MILESTONE_LIST,
   CREATOR_VIEW_MILESTONE_LIST,
@@ -26,7 +22,6 @@ import {
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import Modal from '../../../shared/ui/overlay/Modal';
-import { useGetMyProfileQuery } from '../creatorApi';
 
 export interface TrustScoreInfoModalProps {
   isOpen: boolean;
@@ -92,7 +87,29 @@ const pointEntries: PointEntry[] = [
 const gains = pointEntries.filter((entry) => entry.points > 0);
 const losses = pointEntries.filter((entry) => entry.points < 0);
 
-const SignalCard = ({
+const SectionHeader = ({
+  icon: Icon,
+  tone,
+  label,
+}: {
+  icon: LucideIcon;
+  tone: 'gain' | 'loss';
+  label: string;
+}) => (
+  <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-text-secondary">
+    <span
+      className={cn(
+        'flex h-5 w-5 items-center justify-center rounded-full',
+        tone === 'gain' ? 'bg-success/15 text-success' : 'bg-error/15 text-error'
+      )}
+    >
+      <Icon className="w-3 h-3" strokeWidth={2.5} />
+    </span>
+    {label}
+  </p>
+);
+
+const SignalRow = ({
   entry,
   tone,
   index,
@@ -104,181 +121,69 @@ const SignalCard = ({
   const Icon = entry.icon;
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.03, duration: 0.2 }}
-      className={cn(
-        'flex items-start gap-2.5 rounded-lg border p-2.5',
-        tone === 'gain'
-          ? 'border-border bg-surface-overlay'
-          : 'border-error-subtle bg-error-subtle'
-      )}
+      className="flex items-center gap-3 px-3.5 py-3 transition-colors hover:bg-surface-raised"
     >
       <div
         className={cn(
-          'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
-          tone === 'gain' ? 'bg-primary-muted' : 'bg-surface-overlay'
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+          tone === 'gain' ? 'bg-primary-muted' : 'bg-error-subtle'
         )}
       >
         <Icon
-          className={cn(
-            'w-3.5 h-3.5',
-            tone === 'gain' ? 'text-primary' : 'text-error'
-          )}
+          className={cn('w-4 h-4', tone === 'gain' ? 'text-primary' : 'text-error')}
         />
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-text-primary leading-snug">
-          {entry.label}
-        </p>
-        <p
-          className={cn(
-            'mt-0.5 text-xs font-semibold',
-            tone === 'gain' ? 'text-success' : 'text-error'
-          )}
-        >
-          {tone === 'gain' ? '+' : ''}
-          {entry.points} pts
-        </p>
-      </div>
+      <p className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary">
+        {entry.label}
+      </p>
+      <span
+        className={cn(
+          'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
+          tone === 'gain' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'
+        )}
+      >
+        {tone === 'gain' ? '+' : ''}
+        {entry.points}
+      </span>
     </motion.div>
   );
 };
 
 const TrustScoreInfoModal = ({ isOpen, onClose }: TrustScoreInfoModalProps) => {
-  const { data } = useGetMyProfileQuery(undefined, { skip: !isOpen });
-  const trust = data?.data.trust;
-  const currentTierId = trust ? trust.tier : null;
-
-  const progressPct = trust?.nextTier
-    ? Math.max(
-        4,
-        Math.min(
-          100,
-          (trust.score / (trust.score + trust.nextTier.pointsToNext)) * 100
-        )
-      )
-    : 100;
-
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="How to increase trust score"
     >
-      <div className="space-y-7">
-        {trust && (
-          <div className="rounded-xl border border-primary/25 bg-primary-subtle p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-muted">
-                  <ShieldCheck className="w-4.5 h-4.5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-text-primary">
-                    {TRUST_TIERS.find((t) => t.id === trust.tier)!.label}
-                  </p>
-                  <p className="text-xs text-text-muted">{trust.score} pts</p>
-                </div>
-              </div>
-              {trust.nextTier && (
-                <p className="text-xs text-text-muted text-right max-w-36">
-                  {trust.nextTier.pointsToNext} pts to{' '}
-                  {TRUST_TIERS.find((t) => t.id === trust.nextTier!.id)!.label}
-                </p>
-              )}
-            </div>
-            <div className="mt-3 h-1.5 w-full rounded-full bg-surface-raised overflow-hidden">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-          </div>
-        )}
+      <div className="space-y-6">
+        <p className="text-xs leading-relaxed text-text-muted">
+          Points rise when you publish quality content and vote fairly, and
+          drop when you break platform rules.
+        </p>
 
         <div>
-          <p className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wide">
-            <TrendingUp className="w-3.5 h-3.5 text-success" />
-            Ways to earn points
-          </p>
-          <div className="grid grid-cols-2 gap-2">
+          <SectionHeader icon={ArrowUp} tone="gain" label="Ways to earn points" />
+          <div className="mt-3 overflow-hidden rounded-xl border border-border bg-surface-overlay divide-y divide-border">
             {gains.map((entry, i) => (
-              <SignalCard key={entry.key} entry={entry} tone="gain" index={i} />
+              <SignalRow key={entry.key} entry={entry} tone="gain" index={i} />
             ))}
           </div>
         </div>
 
         {losses.length > 0 && (
           <div>
-            <p className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-text-secondary uppercase tracking-wide">
-              <TrendingDown className="w-3.5 h-3.5 text-error" />
-              Avoid these
-            </p>
-            <div className="grid grid-cols-2 gap-2">
+            <SectionHeader icon={ArrowDown} tone="loss" label="Avoid these" />
+            <div className="mt-3 overflow-hidden rounded-xl border border-border bg-surface-overlay divide-y divide-border">
               {losses.map((entry, i) => (
-                <SignalCard
-                  key={entry.key}
-                  entry={entry}
-                  tone="loss"
-                  index={i}
-                />
+                <SignalRow key={entry.key} entry={entry} tone="loss" index={i} />
               ))}
             </div>
           </div>
         )}
-
-        <div>
-          <p className="mb-3 text-xs font-semibold text-text-secondary uppercase tracking-wide">
-            Tiers &amp; unlocks
-          </p>
-          <div className="relative pl-5">
-            <div className="absolute left-1.75 top-1.5 bottom-1.5 w-px bg-border" />
-            {TRUST_TIERS.map((tier) => {
-              const achieved = trust ? trust.score >= tier.minScore : false;
-              const isCurrent = tier.id === currentTierId;
-              return (
-                <div key={tier.id} className="relative pb-4 last:pb-0">
-                  <div
-                    className={cn(
-                      'absolute -left-5 top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2',
-                      isCurrent
-                        ? 'border-primary bg-primary'
-                        : 'border-border bg-surface'
-                    )}
-                  >
-                    {achieved && <Check className="w-2 h-2 text-white" />}
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span
-                      className={cn(
-                        'text-sm font-medium',
-                        isCurrent ? 'text-primary' : 'text-text-primary'
-                      )}
-                    >
-                      {tier.label}
-                      {isCurrent && (
-                        <span className="ml-1.5 rounded-full bg-primary-muted px-1.5 py-0.5 text-[10px] font-semibold text-primary align-middle">
-                          You
-                        </span>
-                      )}
-                    </span>
-                    <span className="text-xs text-text-muted shrink-0">
-                      {tier.minScore}+ pts
-                    </span>
-                  </div>
-                  {tier.unlocks.length > 0 && (
-                    <p className="mt-0.5 text-xs text-text-muted">
-                      {tier.unlocks
-                        .map((f) => TRUST_FEATURE_CATALOG[f].label)
-                        .join(', ')}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
     </Modal>
   );

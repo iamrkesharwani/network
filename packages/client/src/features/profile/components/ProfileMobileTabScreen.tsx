@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { buildProfilePath } from '../utils/buildProfilePath';
-import { PROFILE_TABS, type ProfileTab } from '../utils/profileTabs';
+import { PROFILE_TABS } from '../utils/profileTabs';
+import type { ProfileTab } from '@network/shared';
 
 export interface ProfileMobileTabScreenProps {
   username: string;

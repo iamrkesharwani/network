@@ -105,8 +105,8 @@ const LocationSection = () => {
           className="text-sm text-text-secondary"
         >
           <p className="mb-3">
-            Your browser is blocking location access for this site. To add
-            your location:
+            Your browser is blocking location access for this site. To add your
+            location:
           </p>
           <ol className="mb-4 list-decimal space-y-1.5 pl-5">
             <li>Click the lock/site-info icon in your browser's address bar</li>

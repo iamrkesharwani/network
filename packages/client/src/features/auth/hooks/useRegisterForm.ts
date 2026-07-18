@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRegisterMutation } from '../authApi';
+import { useToast } from '../../../shared/hooks/useToast';
 import {
   userRegistrationSchema,
   type UserRegistrationInput,
   type ApiErrorResponse,
 } from '@network/shared';
-import { useRegisterMutation } from '../authApi';
-import { useToast } from '../../../shared/hooks/useToast';
 
 export const useRegisterForm = () => {
   const navigate = useNavigate();

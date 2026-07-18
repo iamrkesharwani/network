@@ -86,7 +86,8 @@ const ProgressBar = ({
       container.innerHTML = '';
       ranges.forEach((range) => {
         const segment = document.createElement('div');
-        segment.className = 'absolute inset-y-0 rounded-full bg-text-primary/40';
+        segment.className =
+          'absolute inset-y-0 rounded-full bg-text-primary/40';
         segment.style.left = `${(ratioOf(range.start, duration) * 100).toFixed(2)}%`;
         segment.style.width = `${(ratioOf(range.end - range.start, duration) * 100).toFixed(2)}%`;
         container.appendChild(segment);

@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { cn } from '../../utils/cn';
+import type { ToastAction } from '../../hooks/useToast';
+import type { ToastType } from '@network/shared';
 import {
   CheckCircle2,
   XCircle,
@@ -7,10 +10,6 @@ import {
   X,
   ChevronRight,
 } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import type { ToastAction } from '../../hooks/useToast';
-
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 export interface ToastProps {
   id: string;

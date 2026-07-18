@@ -7,13 +7,13 @@ import { hydrateRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { createAppStore } from './store/store';
-import App from './App';
-import '../index.css';
 import { routes } from './routes/AppRoutes';
 import SessionResolver from '../shared/lib/sessionResolver';
 import PreferencesSync from '../features/settings/PreferencesSync';
 import { preferencesInitialState } from '../features/settings/preferencesSlice';
 import { readStoredPreferences } from '../features/settings/lib/preferencesStorage';
+import App from './App';
+import '../index.css';
 
 const store = createAppStore({
   auth: {

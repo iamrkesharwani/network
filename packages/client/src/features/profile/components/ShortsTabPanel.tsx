@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CLIENT_ROUTES, type IShortResponse } from '@network/shared';
+import {
+  CLIENT_ROUTES,
+  type IShortResponse,
+  type VisibilityFilterValue,
+} from '@network/shared';
+import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
+import { useProfileViewMode } from '../hooks/useProfileViewMode';
+import ShortGrid from '../../short/pages/ShortGrid';
+import ShortList from '../../short/pages/ShortList';
+import ShortTheaterModal from '../../short/components/ShortTheaterModal';
+import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
+import VisibilityFilter from './VisibilityFilter';
 import {
   useGetUserShortsQuery,
   useDeleteShortMutation,
   useUpdateShortMutation,
   useGetUserVisibilityCountsQuery,
 } from '../../short/shortApi';
-import ShortGrid from '../../short/pages/ShortGrid';
-import ShortList from '../../short/pages/ShortList';
-import ShortTheaterModal from '../../short/components/ShortTheaterModal';
-import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
-import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
-import VisibilityFilter, {
-  type VisibilityFilterValue,
-} from './VisibilityFilter';
-import { useProfileViewMode } from '../hooks/useProfileViewMode';
 
 export interface ShortsTabPanelProps {
   username: string;
@@ -88,7 +90,9 @@ const ShortsTabPanel = ({ username, isOwner }: ShortsTabPanelProps) => {
   };
 
   const handleTheaterPrev = () => {
-    setTheaterIndex((index) => (index === null ? index : Math.max(index - 1, 0)));
+    setTheaterIndex((index) =>
+      index === null ? index : Math.max(index - 1, 0)
+    );
   };
 
   return (

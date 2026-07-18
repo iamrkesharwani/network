@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Images } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '../../../shared/utils/cn';
+import Modal from '../../../shared/ui/overlay/Modal';
+import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
+import PostCard from './PostCard';
 import type { IPostResponse } from '@network/shared';
 import {
   CLIENT_ROUTES,
   POST_TILE_QUOTE_THRESHOLD_CHARS,
   POST_TILE_HEIGHT_PX,
 } from '@network/shared';
-import { cn } from '../../../shared/utils/cn';
-import Modal from '../../../shared/ui/overlay/Modal';
-import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
-import PostCard from './PostCard';
 
 export interface PostGridTileProps {
   post: IPostResponse;

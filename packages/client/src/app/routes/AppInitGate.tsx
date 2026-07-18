@@ -6,14 +6,14 @@ import ExploreSkeleton from '../../shared/ui/skeleton/ExploreSkeleton';
 import ProfileSkeleton from '../../features/creator/skeleton/ProfileSkeleton';
 import SettingsSkeleton from '../../features/settings/skeleton/SettingsSkeleton';
 import FeedSkeleton from '../../shared/ui/skeleton/FeedSkeleton';
-import DefaultPageSkeleton from '../../shared/ui/skeleton/DefaultPageSkeleton';
+import Spinner from '../../shared/ui/primitives/Spinner';
 
 const renderSkeletonForPath = (pathname: string) => {
   if (pathname.startsWith('/explore')) return <ExploreSkeleton />;
   if (pathname.startsWith('/profile/')) return <ProfileSkeleton />;
   if (pathname.startsWith(CLIENT_ROUTES.SETTINGS)) return <SettingsSkeleton />;
   if (pathname === CLIENT_ROUTES.FEED) return <FeedSkeleton />;
-  return <DefaultPageSkeleton />;
+  return <Spinner />;
 };
 
 const AppInitGate = () => {

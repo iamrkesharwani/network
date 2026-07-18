@@ -14,7 +14,6 @@ const initialState: UploadState = {
   speedBytesPerSec: 0,
   etaSeconds: null,
   error: null,
-  // Multipart-only fields — unused by this single-PUT flow.
   sessionId: null,
   fingerprint: null,
   uploadedParts: [],

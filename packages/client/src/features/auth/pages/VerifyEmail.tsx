@@ -1,10 +1,14 @@
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useToast } from '../../../shared/hooks/useToast';
+import React, { useState, useEffect, useRef } from 'react';
+import AuthLayout from '../components/AuthLayout';
+import OtpInput from '../components/OtpInput';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
+import SiteLogo from '../../../public/Logo.svg?react';
 import {
   useVerifyEmailMutation,
   useSendVerificationMutation,
 } from '../authApi';
-import React, { useState, useEffect, useRef } from 'react';
-import AuthLayout from '../components/AuthLayout';
 import {
   maskEmail,
   RESEND_COOLDOWN,
@@ -12,10 +16,6 @@ import {
   CLIENT_ROUTES,
   type ApiErrorResponse,
 } from '@network/shared';
-import OtpInput from '../components/OtpInput';
-import usePageTitle from '../../../shared/hooks/usePageTitle';
-import SiteLogo from '../../../public/Logo.svg?react';
-import { useToast } from '../../../shared/hooks/useToast';
 
 const VerifyEmail = () => {
   usePageTitle('Verify Email');

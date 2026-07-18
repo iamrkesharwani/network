@@ -1,12 +1,6 @@
-import type { IShortResponse } from '@network/shared';
-import {
-  estimateShortRowHeight,
-  type ShortColCount,
-} from '../utils/shortGrid';
+import { estimateShortRowHeight, type ShortColCount } from '../utils/shortGrid';
 import { useVirtualGrid } from '../../../shared/hooks/useVirtualGrid';
-
-export type SentinelRow = 'skeleton' | 'end';
-export type VirtualShortRow = IShortResponse[] | SentinelRow;
+import type { VirtualShortRow } from '@network/shared';
 
 interface UseShortVirtualizerOptions {
   rows: VirtualShortRow[];

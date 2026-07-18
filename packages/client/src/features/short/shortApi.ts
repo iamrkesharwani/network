@@ -132,7 +132,10 @@ export const shortApi = createApi({
       providesTags: ['UserShorts'],
     }),
 
-    getUserVisibilityCounts: builder.query<ApiResponse<IVisibilityCounts>, string>({
+    getUserVisibilityCounts: builder.query<
+      ApiResponse<IVisibilityCounts>,
+      string
+    >({
       query: (username) => ({
         url: `/user/${username}/visibility-counts`,
         method: 'GET',
@@ -167,7 +170,10 @@ export const shortApi = createApi({
         'UserShorts',
         'UserShortVisibilityCounts',
       ],
-      async onQueryStarted({ shortId }, { dispatch, getState, queryFulfilled }) {
+      async onQueryStarted(
+        { shortId },
+        { dispatch, getState, queryFulfilled }
+      ) {
         const { data: result } = await queryFulfilled.catch(() => ({
           data: undefined,
         }));

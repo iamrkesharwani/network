@@ -1,8 +1,11 @@
 import { useEffect, type RefObject } from 'react';
-import { PLAYER_TELEMETRY_INTERVAL_MS, type HistoryContentType } from '@network/shared';
 import { axiosInstance } from '../../../shared/lib/http/axiosClient';
 import { getAccessToken } from '../../../shared/lib/http/authToken';
 import { getCsrfTokenFromCookie } from '../../../shared/lib/http/csrf';
+import {
+  PLAYER_TELEMETRY_INTERVAL_MS,
+  type HistoryContentType,
+} from '@network/shared';
 
 interface UseTelemetryOptions {
   contentType: HistoryContentType;

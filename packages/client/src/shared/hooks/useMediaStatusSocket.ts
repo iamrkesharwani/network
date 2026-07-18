@@ -1,17 +1,17 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import {
-  MEDIA_STATUS_SOCKET_EVENT,
-  type IMediaStatusEvent,
-} from '@network/shared';
-import type { RootState } from '../../app/store/store';
 import { useAppDispatch } from './useAppDispatch';
-import type { useSocket } from './useSocket';
 import { useToast } from './useToast';
 import { videoApi } from '../../features/video/videoApi';
 import { shortApi } from '../../features/short/shortApi';
 import { postApi } from '../../features/post/postApi';
+import type { RootState } from '../../app/store/store';
+import type { useSocket } from './useSocket';
+import {
+  MEDIA_STATUS_SOCKET_EVENT,
+  type IMediaStatusEvent,
+} from '@network/shared';
 
 interface MediaCachePatch {
   status: IMediaStatusEvent['status'];
@@ -24,15 +24,11 @@ interface MediaCachePatch {
 
 const buildMediaPatch = (event: IMediaStatusEvent): MediaCachePatch => ({
   status: event.status,
-  progress: event.status === 'PROCESSING' ? event.progress : undefined,
+  ...(event.status === 'PROCESSING' && { progress: event.progress }),
   ...(event.duration !== undefined && { duration: event.duration }),
   ...(event.playbackUrl !== undefined && { playbackUrl: event.playbackUrl }),
-  ...(event.thumbnailUrl !== undefined && {
-    thumbnailUrl: event.thumbnailUrl,
-  }),
-  ...(event.errorMessage !== undefined && {
-    errorMessage: event.errorMessage,
-  }),
+  ...(event.thumbnailUrl !== undefined && { thumbnailUrl: event.thumbnailUrl }),
+  ...(event.errorMessage !== undefined && { errorMessage: event.errorMessage }),
 });
 
 export const useMediaStatusSocket = (

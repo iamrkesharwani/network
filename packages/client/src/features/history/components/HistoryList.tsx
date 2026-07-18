@@ -1,8 +1,8 @@
 import { Loader2 } from 'lucide-react';
-import type { IHistoryResponse } from '@network/shared';
 import HistoryCard from './HistoryCard';
 import HistoryEmptyState from './HistoryEmptyState';
 import HistoryErrorState from './HistoryErrorState';
+import type { IHistoryResponse } from '@network/shared';
 
 export interface HistoryListProps {
   entries: IHistoryResponse[];

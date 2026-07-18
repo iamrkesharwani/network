@@ -4,9 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { PartyPopper } from 'lucide-react';
 import { buildProfileTabPath } from '../../profile/utils/buildProfilePath';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
-
-const FULL_MOTION_DELAY_MS = 1800;
-const REDUCED_MOTION_DELAY_MS = 600;
+import { FULL_MOTION_DELAY_MS, REDUCED_MOTION_DELAY_MS } from '@network/shared';
 
 interface UploadConfirmationProps {
   mediaLabel: string;

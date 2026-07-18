@@ -1,11 +1,11 @@
 import { useRef, useState, type DragEvent } from 'react';
 import { motion } from 'framer-motion';
 import { ImagePlus, X, Loader2, RefreshCw } from 'lucide-react';
+import { cn } from '../../../shared/utils/cn';
 import {
   ALLOWED_THUMBNAIL_MIME_TYPES,
   MAX_THUMBNAIL_SIZE_BYTES,
 } from '@network/shared';
-import { cn } from '../../../shared/utils/cn';
 
 interface ThumbnailPickerProps {
   value: string | undefined;

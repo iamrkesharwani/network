@@ -9,9 +9,7 @@ import FeedRenderer from '../../feed/components/FeedRenderer';
 import SearchTypeResults from '../components/SearchTypeResults';
 import SearchCreatorResults from '../components/SearchCreatorResults';
 import MobileSearchBar from '../components/MobileSearchBar';
-import { SEARCH_TYPES, type SearchType } from '@network/shared';
-
-type SearchTab = SearchType | 'all' | 'creator';
+import { SEARCH_TYPES, type SearchTab } from '@network/shared';
 
 const TABS: SearchTab[] = ['all', ...SEARCH_TYPES, 'creator'];
 

@@ -1,4 +1,7 @@
-import { THIRTY_DAYS_MS, SIXTY_DAYS_MS } from '../../general/time.constants.js';
+import {
+  THIRTY_DAYS_MS,
+  SIXTY_DAYS_MS,
+} from '../../general/constants/time.constants.js';
 
 export const TRUST_SIGNAL_WINDOW_MS = THIRTY_DAYS_MS;
 export const TRUST_SIGNAL_DIMINISHING_MULTIPLIERS = [1, 0.7, 0.5, 0.3] as const;

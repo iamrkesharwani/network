@@ -1,6 +1,13 @@
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useResetPasswordMutation } from '../authApi';
+import { useToast } from '../../../shared/hooks/useToast';
+import AuthLayout from '../components/AuthLayout';
+import Field from '../components/Field';
+import OtpInput from '../components/OtpInput';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
+import SiteLogo from '../../../public/Logo.svg?react';
 import {
   completeResetPasswordSchema,
   maskEmail,
@@ -9,13 +16,6 @@ import {
   type ApiErrorResponse,
   type CompleteResetPasswordInput,
 } from '@network/shared';
-import { useResetPasswordMutation } from '../authApi';
-import AuthLayout from '../components/AuthLayout';
-import Field from '../components/Field';
-import OtpInput from '../components/OtpInput';
-import usePageTitle from '../../../shared/hooks/usePageTitle';
-import SiteLogo from '../../../public/Logo.svg?react';
-import { useToast } from '../../../shared/hooks/useToast';
 
 const ResetPassword = () => {
   usePageTitle('Reset Password');

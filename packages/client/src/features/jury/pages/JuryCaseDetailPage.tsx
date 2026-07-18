@@ -1,10 +1,10 @@
 import { useParams } from 'react-router-dom';
-import type { JuryVoteChoice } from '@network/shared';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useGetCaseQuery, useCastVoteMutation } from '../juryApi';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import Spinner from '../../../shared/ui/primitives/Spinner';
 import Button from '../../../shared/ui/primitives/Button';
-import { useToast } from '../../../shared/hooks/useToast';
-import { useGetCaseQuery, useCastVoteMutation } from '../juryApi';
+import type { JuryVoteChoice } from '@network/shared';
 
 const JuryCaseDetailPage = () => {
   const { caseId = '' } = useParams<{ caseId: string }>();
@@ -57,7 +57,8 @@ const JuryCaseDetailPage = () => {
         <p className="text-sm text-text-secondary">
           {juryCase.votesCast}/{juryCase.poolSize} votes cast · Status:{' '}
           {juryCase.status}
-          {juryCase.verdict && ` · Verdict: ${juryCase.verdict.replace('_', ' ')}`}
+          {juryCase.verdict &&
+            ` · Verdict: ${juryCase.verdict.replace('_', ' ')}`}
         </p>
       </div>
 

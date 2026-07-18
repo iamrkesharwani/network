@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Award, TrendingUp } from 'lucide-react';
 import { useEffect } from 'react';
-import type { CelebrationItem } from '../hooks/useCreatorCelebration';
 import { AUTO_DISMISS_MS } from '@network/shared';
+import type { CelebrationItem } from '../hooks/useCreatorCelebration';
 
 interface BadgeToastProps {
   item: CelebrationItem | null;

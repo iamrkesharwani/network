@@ -23,6 +23,8 @@ export type ShortIdParam = z.infer<typeof shortIdParamSchema>;
 export type ShortUserFeedQuery = z.infer<typeof shortUserFeedQuerySchema>;
 export type ShortVisibility = (typeof SHORT_VISIBILITY)[number];
 export type ShortStatus = (typeof SHORT_STATUS)[number];
+export type SentinelRow = 'skeleton' | 'end';
+export type VirtualShortRow = IShortResponse[] | SentinelRow;
 
 export interface IInitiateShortUploadResult {
   shortId: string;

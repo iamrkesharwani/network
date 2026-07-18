@@ -1,8 +1,10 @@
-import type { ProfileContentType, ViewMode } from '@network/shared';
+import {
+  DEFAULT_VIEW_MODE,
+  type ProfileContentType,
+  type ViewMode,
+} from '@network/shared';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { usePreference } from '../../settings/hooks/usePreference';
-
-const DEFAULT_VIEW_MODE: ViewMode = 'grid';
 
 export const useProfileViewMode = (
   contentType: ProfileContentType

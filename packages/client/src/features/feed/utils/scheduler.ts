@@ -1,6 +1,4 @@
-import { FEED_MIX_RATIO } from '@network/shared';
-
-export type FeedBlockType = 'video' | 'short' | 'post';
+import { FEED_MIX_RATIO, type FeedBlockType } from '@network/shared';
 
 const WEIGHTS: Record<FeedBlockType, number> = {
   video: FEED_MIX_RATIO.video,

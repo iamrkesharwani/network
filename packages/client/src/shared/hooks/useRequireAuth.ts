@@ -6,9 +6,7 @@ import { useAppSelector } from './useAppSelector';
 export const useRequireAuth = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isAuthenticated = useAppSelector(
-    (state) => state.auth.isAuthenticated
-  );
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   return useCallback(() => {
     if (isAuthenticated) return true;

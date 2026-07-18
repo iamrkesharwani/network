@@ -1,4 +1,4 @@
-import type { MediaProcessingStatus } from '@network/shared';
+import type { MediaProcessingStatus } from '../modules/content/types/media.types.js';
 
 export interface MediaProcessingLabel {
   text: string;

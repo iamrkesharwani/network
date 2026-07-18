@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Select from '../primitives/Select';
-import { MONTH_LABELS, MONTH_SHORT_LABELS } from './utils/dateGrid';
+import { MONTH_LABELS, MONTH_SHORT_LABELS } from '@network/shared';
 
 interface CalendarMonthHeaderProps {
   monthAnchor: Date;

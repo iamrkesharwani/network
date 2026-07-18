@@ -35,7 +35,7 @@ const PostStepTwo = ({
       <button
         type="button"
         onClick={onReview}
-        className="flex-[2] rounded-lg border border-primary py-3 text-sm font-semibold text-primary cursor-pointer"
+        className="flex-2 rounded-lg border border-primary py-3 text-sm font-semibold text-primary cursor-pointer"
       >
         Review
       </button>

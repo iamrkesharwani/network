@@ -1,12 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { DEFAULT_PAGE_LIMIT } from '@network/shared';
+import { DEFAULT_PAGE_LIMIT, type FeedColumnCount } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import InfiniteScroll from '../../../shared/ui/list/InfiniteScroll';
-import {
-  useFeedColumns,
-  type FeedColumnCount,
-} from '../../feed/hooks/useFeedColumns';
 import { useLiveFeed } from '../../feed/hooks/useLiveFeed';
 import { COL_CLASS, type ColCount } from '../../video/utils/videoGrid';
 import { useGetPostByIdQuery, postApi } from '../postApi';
@@ -14,6 +10,7 @@ import PostGridTile from './PostGridTile';
 import PostEmptyState from '../components/PostEmptyState';
 import PostErrorState from '../components/PostErrorState';
 import { PostTileGridSkeleton } from '../skeleton/PostGridTileSkeleton';
+import { useFeedColumns } from '../../feed/hooks/useFeedColumns';
 
 const PostsFeedPage = () => {
   const { postId } = useParams<{ postId?: string }>();

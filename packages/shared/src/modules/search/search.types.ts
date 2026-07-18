@@ -27,7 +27,7 @@ export type RecentSearchAddInput = z.infer<typeof recentSearchAddSchema>;
 export type RecentSearchRemoveQuery = z.infer<
   typeof recentSearchRemoveQuerySchema
 >;
-
+export type SearchTab = SearchType | 'all' | 'creator';
 export type ISearchAllResult = IMixedFeedBatch;
 
 export interface ISearchSuggestions {

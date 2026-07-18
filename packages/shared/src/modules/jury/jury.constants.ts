@@ -1,7 +1,7 @@
 import {
   SEVENTY_TWO_HOURS_MS,
   ONE_HOUR_SECONDS,
-} from '../general/time.constants.js';
+} from '../general/constants/time.constants.js';
 
 export const JURY_QUEUE_NAME = 'jury-assignment';
 export const JURY_JOB_ID_PREFIX = 'jury-case';

@@ -1,7 +1,5 @@
-import type { IShortResponse } from '@network/shared';
+import { SHORT_RAIL_ASPECT_CLASS, type IShortResponse } from '@network/shared';
 import ShortCardThumbnail from './ShortCardThumbnail';
-
-const SHORT_RAIL_ASPECT_CLASS = 'aspect-3/4';
 
 interface ShortRailCardProps {
   short: IShortResponse;

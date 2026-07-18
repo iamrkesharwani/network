@@ -9,7 +9,7 @@ import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmD
 import Modal from '../../../shared/ui/overlay/Modal';
 import VideoEditForm from '../form/VideoEditForm';
 import MediaProcessingBar from '../../../shared/ui/card/MediaProcessingBar';
-import { getMediaProcessingLabel } from '../../../shared/utils/mediaProcessingLabel';
+import { getMediaProcessingLabel } from '../../../../../shared/src/utils/mediaProcessingLabel';
 import { cn } from '../../../shared/utils/cn';
 
 export interface VideoListRowProps {
@@ -123,7 +123,8 @@ const VideoListRow = ({
           </Link>
           {isReady ? (
             <p className="mt-1 text-xs text-text-muted">
-              {formatCount(video.views)} views · {formatCount(video.likes)} likes
+              {formatCount(video.views)} views · {formatCount(video.likes)}{' '}
+              likes
               {isUnlisted && ' · Unlisted'}
               {daysLeft !== null &&
                 ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}

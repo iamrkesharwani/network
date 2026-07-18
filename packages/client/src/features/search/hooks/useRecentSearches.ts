@@ -4,9 +4,7 @@ import { searchApi } from '../searchApi';
 import { useLocalRecentSearches } from './useLocalRecentSearches';
 
 export const useRecentSearches = () => {
-  const isAuthenticated = useAppSelector(
-    (state) => state.auth.isAuthenticated
-  );
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const local = useLocalRecentSearches();
 
   const remoteQuery = searchApi.useGetRecentSearchesQuery(undefined, {

@@ -1,25 +1,30 @@
 import { useState } from 'react';
 import { Phone } from 'lucide-react';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
+import CountrySelect from './CountrySelect';
+import MaskedFieldRow from './MaskedFieldRow';
 import {
   COUNTRIES,
   DEFAULT_COUNTRY_ISO2,
   maskPhoneNumber,
   type BasicProfileInput,
 } from '@network/shared';
-import CountrySelect from './CountrySelect';
-import MaskedFieldRow from './MaskedFieldRow';
 
 const findCountryByDialCode = (dialCode: string | undefined) =>
   COUNTRIES.find((country) => country.dialCode === dialCode) ?? COUNTRIES[0];
 
-const resolveSelectedCountry = (phone: { dialCode?: string; iso2?: string } | undefined) => {
+const resolveSelectedCountry = (
+  phone: { dialCode?: string; iso2?: string } | undefined
+) => {
   if (phone?.iso2) {
     const byIso2 = COUNTRIES.find((country) => country.iso2 === phone.iso2);
     if (byIso2) return byIso2;
   }
   if (phone?.dialCode) return findCountryByDialCode(phone.dialCode);
-  return COUNTRIES.find((country) => country.iso2 === DEFAULT_COUNTRY_ISO2) ?? COUNTRIES[0];
+  return (
+    COUNTRIES.find((country) => country.iso2 === DEFAULT_COUNTRY_ISO2) ??
+    COUNTRIES[0]
+  );
 };
 
 interface PhoneFieldProps {
@@ -62,7 +67,11 @@ const PhoneField = ({ control, errors, hasExistingPhone }: PhoneFieldProps) => {
                   onChange={(iso2) => {
                     const country = COUNTRIES.find((c) => c.iso2 === iso2);
                     if (country) {
-                      field.onChange({ dialCode: country.dialCode, iso2: country.iso2, number });
+                      field.onChange({
+                        dialCode: country.dialCode,
+                        iso2: country.iso2,
+                        number,
+                      });
                     }
                   }}
                 />
@@ -81,7 +90,10 @@ const PhoneField = ({ control, errors, hasExistingPhone }: PhoneFieldProps) => {
                     className="w-full rounded-lg border border-border bg-surface-raised px-3.5 py-2.5 text-sm font-medium text-text-primary outline-none transition-colors focus:border-primary"
                   />
                   {errors.phone?.number?.message && (
-                    <p role="alert" className="mt-1.5 text-[0.72rem] text-error">
+                    <p
+                      role="alert"
+                      className="mt-1.5 text-[0.72rem] text-error"
+                    >
                       {errors.phone.number.message}
                     </p>
                   )}

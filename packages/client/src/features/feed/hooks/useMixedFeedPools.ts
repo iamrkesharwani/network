@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { LOW_WATER_MARK, UNIFIED_FEED_PAGE_SIZE } from '@network/shared';
+import { useLazyGetFeedQuery } from '../feedApi';
+import { useLazySearchAllQuery } from '../../search/searchApi';
 import type {
+  FeedBlockType,
   IPostResponse,
   IShortResponse,
   IVideoResponse,
 } from '@network/shared';
-import { LOW_WATER_MARK, UNIFIED_FEED_PAGE_SIZE } from '@network/shared';
-import { useLazyGetFeedQuery } from '../feedApi';
-import { useLazySearchAllQuery } from '../../search/searchApi';
-import type { FeedBlockType } from '../utils/scheduler';
 
 export type MixedFeedSource =
   | { mode: 'global' }

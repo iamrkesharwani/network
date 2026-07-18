@@ -1,5 +1,7 @@
 import { useState, type DragEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { cn } from '../../../shared/utils/cn';
+import { SPRINGS } from '../../../shared/motion/springs';
 import {
   AlertTriangle,
   FileVideo,
@@ -18,8 +20,6 @@ import {
   type IPersistedUploadPointer,
   type UploadState,
 } from '@network/shared';
-import { cn } from '../../../shared/utils/cn';
-import { SPRINGS } from '../../../shared/motion/springs';
 
 interface MediaDropzoneProps {
   state: UploadState;
@@ -67,7 +67,8 @@ const MediaDropzone = ({
     'uploading',
     'confirming',
   ].includes(state.stage);
-  const isPreUpload = state.stage === 'validating' || state.stage === 'requesting';
+  const isPreUpload =
+    state.stage === 'validating' || state.stage === 'requesting';
   const isResuming = !!resumePointer && state.stage === 'idle';
   const isPlainIdle = !isActive && !isResuming;
 
@@ -125,7 +126,10 @@ const MediaDropzone = ({
 
         {isActive && (
           <>
-            <div className="relative" style={{ width: RING_SIZE, height: RING_SIZE }}>
+            <div
+              className="relative"
+              style={{ width: RING_SIZE, height: RING_SIZE }}
+            >
               <svg width={RING_SIZE} height={RING_SIZE} className="-rotate-90">
                 <circle
                   cx={RING_SIZE / 2}
@@ -148,7 +152,9 @@ const MediaDropzone = ({
                   strokeDasharray={RING_CIRCUMFERENCE}
                   animate={{ strokeDashoffset: dashOffset }}
                   transition={
-                    isPreUpload ? SPRINGS.snappy : { duration: 0.3, ease: 'easeOut' }
+                    isPreUpload
+                      ? SPRINGS.snappy
+                      : { duration: 0.3, ease: 'easeOut' }
                   }
                 />
               </svg>
@@ -170,7 +176,7 @@ const MediaDropzone = ({
               </div>
             </div>
 
-            <div className="max-w-[15rem]">
+            <div className="max-w-60">
               {state.stage === 'uploading' && (
                 <p className="text-[0.7rem] text-text-muted tabular-nums">
                   {formatBytes(state.uploadedBytes)} /{' '}

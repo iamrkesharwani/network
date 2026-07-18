@@ -10,7 +10,7 @@ interface UseKeyboardShortcutsOptions {
   toggleMute: () => void;
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
-  toggleFullscreen: () => void;
+  toggleFullscreen?: () => void;
   onNavigatePrev?: () => void;
   onNavigateNext?: () => void;
   onToggleCaptions?: () => void;
@@ -59,7 +59,7 @@ export function useKeyboardShortcuts({
         case 'f':
         case 'F':
           event.preventDefault();
-          toggleFullscreen();
+          if (toggleFullscreen) toggleFullscreen();
           return;
         case 'm':
         case 'M':

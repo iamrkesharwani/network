@@ -1,13 +1,12 @@
-import { POST_TILE_HEIGHT_PX } from '@network/shared';
-import type { FeedColumnCount } from '../hooks/useFeedColumns';
+import { POST_TILE_HEIGHT_PX, type FeedColumnCount } from '@network/shared';
 import { COL_CLASS } from '../../video/utils/videoGrid';
+import VideoCardSkeleton from '../../video/skeleton/VideoCardSkeleton';
+import ShortCardSkeleton from '../../short/skeleton/ShortCardSkeleton';
+import Skeleton from '../../../shared/ui/skeleton/Skeleton';
 import {
   SHORT_COL_CLASS,
   type ShortColCount,
 } from '../../short/utils/shortGrid';
-import VideoCardSkeleton from '../../video/skeleton/VideoCardSkeleton';
-import ShortCardSkeleton from '../../short/skeleton/ShortCardSkeleton';
-import Skeleton from '../../../shared/ui/skeleton/Skeleton';
 
 interface FeedSkeletonProps {
   columns?: FeedColumnCount;

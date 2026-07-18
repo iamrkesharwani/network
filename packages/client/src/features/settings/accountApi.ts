@@ -11,7 +11,10 @@ export const accountApi = createApi({
   reducerPath: 'accountApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/account' }),
   endpoints: (builder) => ({
-    deactivateAccount: builder.mutation<ApiResponse<IUser>, DeactivateAccountInput>({
+    deactivateAccount: builder.mutation<
+      ApiResponse<IUser>,
+      DeactivateAccountInput
+    >({
       query: (data) => ({ url: '/deactivate', method: 'POST', data }),
     }),
     reactivateAccount: builder.mutation<ApiResponse<IUser>, void>({

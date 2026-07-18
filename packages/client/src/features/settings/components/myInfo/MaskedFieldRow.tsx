@@ -27,7 +27,9 @@ const MaskedFieldRow = ({
         {label}
       </p>
       <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-raised px-3.5 py-2.5">
-        <span className="text-sm font-medium text-text-primary">{maskedValue}</span>
+        <span className="text-sm font-medium text-text-primary">
+          {maskedValue}
+        </span>
         <button
           type="button"
           onClick={onEdit}

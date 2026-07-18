@@ -1,9 +1,10 @@
 import { useState, type ImgHTMLAttributes } from 'react';
 import { User } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import type { AvatarSize } from '@network/shared';
 
 export interface AvatarProps extends ImgHTMLAttributes<HTMLImageElement> {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: AvatarSize;
   fallback?: string;
   isOnline?: boolean;
 }

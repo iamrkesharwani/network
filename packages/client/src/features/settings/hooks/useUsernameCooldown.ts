@@ -1,4 +1,8 @@
-import { USERNAME_CHANGE_COOLDOWN_DAYS, ONE_DAY_MS, ONE_HOUR_MS } from '@network/shared';
+import {
+  USERNAME_CHANGE_COOLDOWN_DAYS,
+  ONE_DAY_MS,
+  ONE_HOUR_MS,
+} from '@network/shared';
 
 export interface UsernameCooldownStatus {
   isInCooldown: boolean;

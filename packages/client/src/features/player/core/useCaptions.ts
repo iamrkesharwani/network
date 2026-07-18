@@ -25,7 +25,10 @@ export function useCaptions(
   }, [captions]);
 
   const trackSignature = useMemo(
-    () => captions.map((caption) => `${caption.language}:${caption.isDefault}`).join(','),
+    () =>
+      captions
+        .map((caption) => `${caption.language}:${caption.isDefault}`)
+        .join(','),
     [captions]
   );
 
@@ -69,7 +72,6 @@ export function useCaptions(
       activeTrack!.removeEventListener('cuechange', handleCueChange);
       activeTrack!.mode = 'disabled';
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- trackSignature is a deliberate proxy for `captions`, so this effect only re-runs on real language/default changes, not on every new array reference
   }, [videoRef, trackSignature, activeLanguage]);
 
   return {

@@ -45,7 +45,12 @@ const SignOutOtherDevicesDialog = ({
         >
           Cancel
         </Button>
-        <Button variant="danger" size="sm" onClick={handleConfirm} isLoading={isLoading}>
+        <Button
+          variant="danger"
+          size="sm"
+          onClick={handleConfirm}
+          isLoading={isLoading}
+        >
           Sign out other devices
         </Button>
       </div>

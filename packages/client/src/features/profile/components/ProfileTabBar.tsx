@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { cn } from '../../../shared/utils/cn';
-import { PROFILE_TABS, type ProfileTab } from '../utils/profileTabs';
+import { PROFILE_TABS } from '../utils/profileTabs';
 import { buildProfileTabPath } from '../utils/buildProfilePath';
+import type { ProfileTab } from '@network/shared';
 
 export interface ProfileTabBarProps {
   username: string;
@@ -9,7 +10,11 @@ export interface ProfileTabBarProps {
   isOwner: boolean;
 }
 
-const ProfileTabBar = ({ username, activeTab, isOwner }: ProfileTabBarProps) => {
+const ProfileTabBar = ({
+  username,
+  activeTab,
+  isOwner,
+}: ProfileTabBarProps) => {
   const visibleTabs = PROFILE_TABS.filter((tab) => !tab.ownerOnly || isOwner);
 
   return (

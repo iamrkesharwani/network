@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CLIENT_ROUTES, SEARCH_DEBOUNCE_MS } from '@network/shared';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
+import { buildProfilePath } from '../../profile/utils/buildProfilePath';
+import { searchApi } from '../searchApi';
+import { useRecentSearches } from './useRecentSearches';
 import type {
   IPostResponse,
   IPublicProfile,
   IShortResponse,
   IVideoResponse,
 } from '@network/shared';
-import { useDebounce } from '../../../shared/hooks/useDebounce';
-import { buildProfilePath } from '../../profile/utils/buildProfilePath';
-import { searchApi } from '../searchApi';
-import { useRecentSearches } from './useRecentSearches';
 
 export type SuggestionListItem =
   | { kind: 'recent'; query: string }

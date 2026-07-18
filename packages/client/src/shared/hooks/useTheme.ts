@@ -1,8 +1,6 @@
 import { useCallback } from 'react';
-import type { Theme } from '@network/shared';
 import { usePreference } from '../../features/settings/hooks/usePreference';
-
-const DEFAULT_THEME: Theme = 'dark';
+import { DEFAULT_THEME, type Theme } from '@network/shared';
 
 export const useTheme = () => {
   const [appearance, setAppearance] = usePreference('appearance');

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CLIENT_ROUTES, type IShortResponse } from '@network/shared';
-import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { useLiveShortsFeed } from '../../feed/hooks/useLiveShortsFeed';
 import ShortGrid from './ShortGrid';
 import ShortTheaterModal from '../components/ShortTheaterModal';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 
 const ShortsFeedPage = () => {
   usePageTitle('Shorts');

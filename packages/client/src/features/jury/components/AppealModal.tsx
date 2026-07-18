@@ -24,8 +24,7 @@ const AppealModal = ({
     { contentType, contentId },
     { skip: !isOpen }
   );
-  const [createAppeal, { isLoading: isSubmitting }] =
-    useCreateAppealMutation();
+  const [createAppeal, { isLoading: isSubmitting }] = useCreateAppealMutation();
   const { addToast } = useToast();
 
   const juryCase = data?.data ?? null;
@@ -75,19 +74,17 @@ const AppealModal = ({
         {!isLoading && juryCase && !canAppeal && (
           <p className="text-sm text-text-muted">
             This case ({juryCase.status}
-            {juryCase.verdict
-              ? `, ${juryCase.verdict.replace('_', ' ')}`
-              : ''}
-            ) isn't eligible for an appeal.
+            {juryCase.verdict ? `, ${juryCase.verdict.replace('_', ' ')}` : ''})
+            isn't eligible for an appeal.
           </p>
         )}
 
         {!isLoading && canAppeal && (
           <>
             <p className="text-sm text-text-secondary">
-              This was removed by the community jury. Explain why you think
-              the decision should be reconsidered — a senior jury panel will
-              review it.
+              This was removed by the community jury. Explain why you think the
+              decision should be reconsidered — a senior jury panel will review
+              it.
             </p>
             <textarea
               value={reason}

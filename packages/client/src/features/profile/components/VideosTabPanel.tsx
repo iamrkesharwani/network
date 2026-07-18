@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
-import type { IVideoResponse } from '@network/shared';
+import type { IVideoResponse, VisibilityFilterValue } from '@network/shared';
+import VideoGrid from '../../video/pages/VideoGrid';
+import VideoList from '../../video/pages/VideoList';
+import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
+import { useProfileViewMode } from '../hooks/useProfileViewMode';
+import VisibilityFilter from './VisibilityFilter';
 import {
   useGetUserVideosQuery,
   useDeleteVideoMutation,
   useUpdateVideoMutation,
   useGetUserVisibilityCountsQuery,
 } from '../../video/videoApi';
-import VideoGrid from '../../video/pages/VideoGrid';
-import VideoList from '../../video/pages/VideoList';
-import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
-import VisibilityFilter, {
-  type VisibilityFilterValue,
-} from './VisibilityFilter';
-import { useProfileViewMode } from '../hooks/useProfileViewMode';
 
 export interface VideosTabPanelProps {
   username: string;

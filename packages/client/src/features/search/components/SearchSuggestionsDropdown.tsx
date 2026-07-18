@@ -1,7 +1,7 @@
 import { Clapperboard, FileText, History, Search, X, Zap } from 'lucide-react';
-import Avatar from '../../../shared/ui/primitives/Avatar';
 import { cn } from '../../../shared/utils/cn';
 import type { SuggestionListItem } from '../hooks/useSearchNavigation';
+import Avatar from '../../../shared/ui/primitives/Avatar';
 
 interface SearchSuggestionsDropdownProps {
   isOpen: boolean;

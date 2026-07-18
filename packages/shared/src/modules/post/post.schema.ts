@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { isValidObjectId } from '../../utils/validators.js';
 import { POST_TEXT_MAX_LENGTH, POST_VISIBILITY } from './post.constants.js';
-import { CONTENT_VISIBILITY } from '../general/general.constants.js';
+import { CONTENT_VISIBILITY } from '../general/constants/general.constants.js';
 import {
   DEFAULT_PAGE_LIMIT,
   MAX_PAGE_LIMIT,

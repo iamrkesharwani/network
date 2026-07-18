@@ -4,11 +4,11 @@ import type {
   IVideoResponse,
   SearchType,
 } from '@network/shared';
-import { DEFAULT_PAGE_LIMIT } from '@network/shared';
 import {
   useLiveFeed,
   type UseLiveFeedResult,
 } from '../../feed/hooks/useLiveFeed';
+import { DEFAULT_PAGE_LIMIT } from '@network/shared';
 import { searchApi } from '../searchApi';
 
 export type SearchByTypeItem = IVideoResponse | IShortResponse | IPostResponse;

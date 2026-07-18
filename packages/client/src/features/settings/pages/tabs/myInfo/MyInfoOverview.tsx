@@ -67,7 +67,11 @@ const MyInfoOverview = () => {
           const Icon = tile.icon;
 
           return (
-            <Link key={tile.id} to={tile.path} className="group block h-full outline-none">
+            <Link
+              key={tile.id}
+              to={tile.path}
+              className="group block h-full outline-none"
+            >
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}

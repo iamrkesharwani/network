@@ -6,7 +6,7 @@ import MediaDurationBadge from '../../../shared/ui/card/MediaDurationBadge';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBadge';
 import MediaProcessingBar from '../../../shared/ui/card/MediaProcessingBar';
-import { getMediaProcessingLabel } from '../../../shared/utils/mediaProcessingLabel';
+import { getMediaProcessingLabel } from '../../../../../shared/src/utils/mediaProcessingLabel';
 import { cn } from '../../../shared/utils/cn';
 
 interface ShortCardThumbnailProps {

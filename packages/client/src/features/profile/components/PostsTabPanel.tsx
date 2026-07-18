@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
-import type { IPostResponse } from '@network/shared';
+import { useProfileViewMode } from '../hooks/useProfileViewMode';
+import PostGrid from '../../post/pages/PostGrid';
+import PostList from '../../post/pages/PostList';
+import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
+import type { IPostResponse, VisibilityFilterValue } from '@network/shared';
+import VisibilityFilter from './VisibilityFilter';
 import {
   useGetUserPostsQuery,
   useDeletePostMutation,
   useUpdatePostMutation,
   useGetUserVisibilityCountsQuery,
 } from '../../post/postApi';
-import PostGrid from '../../post/pages/PostGrid';
-import PostList from '../../post/pages/PostList';
-import ViewModeToggle from '../../../shared/ui/misc/ViewModeToggle';
-import VisibilityFilter, {
-  type VisibilityFilterValue,
-} from './VisibilityFilter';
-import { useProfileViewMode } from '../hooks/useProfileViewMode';
 
 export interface PostsTabPanelProps {
   username: string;

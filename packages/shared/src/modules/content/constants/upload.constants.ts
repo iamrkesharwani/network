@@ -1,4 +1,4 @@
-import { FIFTEEN_MINUTES_MS } from '../../general/time.constants.js';
+import { FIFTEEN_MINUTES_MS } from '../../general/constants/time.constants.js';
 
 export type UploadStage =
   | 'idle'
@@ -38,3 +38,5 @@ export const MULTIPART_SESSION_REAP_GRACE_SECONDS = 60 * 60;
 export const MULTIPART_MAX_RETRY_ATTEMPTS_PER_PART = 3;
 export const PERSISTED_UPLOAD_POINTER_TTL_MS = 24 * 60 * 60 * 1000;
 export const MULTIPART_UPLOAD_CONCURRENCY_LIMIT = 4;
+export const FULL_MOTION_DELAY_MS = 1800;
+export const REDUCED_MOTION_DELAY_MS = 600;

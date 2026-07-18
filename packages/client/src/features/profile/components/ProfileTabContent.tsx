@@ -1,9 +1,9 @@
-import type { ProfileTab } from '../utils/profileTabs';
 import VideosTabPanel from './VideosTabPanel';
 import ShortsTabPanel from './ShortsTabPanel';
 import PostsTabPanel from './PostsTabPanel';
 import StatsTabPanel from './StatsTabPanel';
 import HistoryTabPanel from './HistoryTabPanel';
+import type { ProfileTab } from '@network/shared';
 
 export interface ProfileTabContentProps {
   tab: ProfileTab;

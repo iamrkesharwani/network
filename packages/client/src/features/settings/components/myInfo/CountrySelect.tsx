@@ -1,4 +1,9 @@
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { COUNTRIES, type CountryDialCode } from '@network/shared';
@@ -13,7 +18,11 @@ interface CountrySelectProps {
 
 const FlagIcon = ({ iso2 }: { iso2: string }) => (
   <span
-    className={cn('fi', `fi-${iso2.toLowerCase()}`, 'inline-block h-3.5 w-5 shrink-0 rounded-[2px]')}
+    className={cn(
+      'fi',
+      `fi-${iso2.toLowerCase()}`,
+      'inline-block h-3.5 w-5 shrink-0 rounded-xs'
+    )}
     aria-hidden="true"
   />
 );
@@ -28,7 +37,12 @@ const matchesQuery = (country: CountryDialCode, query: string) => {
   );
 };
 
-const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySelectProps) => {
+const CountrySelect = ({
+  value,
+  onChange,
+  containerClassName,
+  error,
+}: CountrySelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -68,7 +82,8 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
     optionRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' });
   }, [highlightedIndex]);
 
-  const selected = COUNTRIES.find((country) => country.iso2 === value) ?? COUNTRIES[0];
+  const selected =
+    COUNTRIES.find((country) => country.iso2 === value) ?? COUNTRIES[0];
 
   const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'ArrowDown') {
@@ -99,7 +114,11 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
         aria-haspopup="listbox"
         className={cn(
           'flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border bg-surface-raised px-3.5 py-2.5 text-left text-sm transition-colors',
-          error ? 'border-error' : isOpen ? 'border-primary' : 'border-border hover:border-primary/40'
+          error
+            ? 'border-error'
+            : isOpen
+              ? 'border-primary'
+              : 'border-border hover:border-primary/40'
         )}
       >
         <span className="flex min-w-0 items-center gap-2 font-medium text-text-primary">
@@ -107,7 +126,10 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
           <span className="truncate">{selected?.dialCode}</span>
         </span>
         <ChevronDown
-          className={cn('h-4 w-4 shrink-0 text-text-muted transition-transform', isOpen && 'rotate-180')}
+          className={cn(
+            'h-4 w-4 shrink-0 text-text-muted transition-transform',
+            isOpen && 'rotate-180'
+          )}
         />
       </button>
 
@@ -134,7 +156,9 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
 
             <div className="max-h-56 overflow-y-auto py-1.5">
               {filtered.length === 0 && (
-                <p className="px-3.5 py-2 text-sm text-text-muted">No countries found.</p>
+                <p className="px-3.5 py-2 text-sm text-text-muted">
+                  No countries found.
+                </p>
               )}
               {filtered.map((country, index) => {
                 const isSelected = country.iso2 === value;
@@ -163,7 +187,9 @@ const CountrySelect = ({ value, onChange, containerClassName, error }: CountrySe
                     )}
                   >
                     <FlagIcon iso2={country.iso2} />
-                    <span className="w-14 shrink-0 text-text-muted">{country.dialCode}</span>
+                    <span className="w-14 shrink-0 text-text-muted">
+                      {country.dialCode}
+                    </span>
                     <span className="truncate">{country.name}</span>
                   </button>
                 );

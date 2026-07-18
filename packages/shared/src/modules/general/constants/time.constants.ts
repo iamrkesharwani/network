@@ -16,6 +16,7 @@ export const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 export const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
 export const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60;
 export const AUTO_DISMISS_MS = 4200;
+export const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 export const DAYS_OF_WEEK = [
   'Sundays',
   'Mondays',
@@ -24,4 +25,32 @@ export const DAYS_OF_WEEK = [
   'Thursdays',
   'Fridays',
   'Saturdays',
+];
+export const MONTH_LABELS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+export const MONTH_SHORT_LABELS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];

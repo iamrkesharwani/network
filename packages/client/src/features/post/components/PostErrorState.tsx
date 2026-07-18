@@ -17,7 +17,7 @@ const PostErrorState = ({ onRetry }: PostErrorStateProps) => (
         Something went wrong on our end.
       </p>
     </div>
-    
+
     {onRetry && (
       <button
         type="button"

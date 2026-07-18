@@ -1,6 +1,6 @@
 import { Captions, Gauge, Lock } from 'lucide-react';
-import { cn } from '../../../../shared/utils/cn';
 import { rateLabel, type SettingsView } from './SettingsMenu';
+import { cn } from '../../../../shared/utils/cn';
 import PanelHeader from './PanelHeader';
 
 function RootPanel({

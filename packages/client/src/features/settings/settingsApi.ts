@@ -33,9 +33,11 @@ export const settingsApi = createApi({
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
     }),
-    captureLocation: builder.mutation<ApiResponse<IUser>, CaptureLocationInput>({
-      query: (data) => ({ url: '/location/capture', method: 'POST', data }),
-    }),
+    captureLocation: builder.mutation<ApiResponse<IUser>, CaptureLocationInput>(
+      {
+        query: (data) => ({ url: '/location/capture', method: 'POST', data }),
+      }
+    ),
   }),
 });
 

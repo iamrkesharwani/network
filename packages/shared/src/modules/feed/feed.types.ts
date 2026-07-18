@@ -4,6 +4,9 @@ import type { CursorPaginationMeta } from '../../core/api/api.types.js';
 import type { IVideoResponse } from '../video/video.types.js';
 import type { IShortResponse } from '../short/short.types.js';
 import type { IPostResponse } from '../post/post.types.js';
+export type FeedColumnCount = 1 | 2 | 3 | 4;
+export type FeedWidthMode = 'full' | 'edge';
+export type FeedBlockType = 'video' | 'short' | 'post';
 
 export type UnifiedFeedQuery = z.infer<typeof unifiedFeedQuerySchema>;
 

@@ -11,7 +11,12 @@ interface PronounsInputProps {
   error?: string;
 }
 
-const PronounsInput = ({ value, onChange, icon: Icon, error }: PronounsInputProps) => {
+const PronounsInput = ({
+  value,
+  onChange,
+  icon: Icon,
+  error,
+}: PronounsInputProps) => {
   const [draft, setDraft] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -29,7 +34,9 @@ const PronounsInput = ({ value, onChange, icon: Icon, error }: PronounsInputProp
       return;
     }
 
-    if (value.some((existing) => existing.toLowerCase() === pronoun.toLowerCase())) {
+    if (
+      value.some((existing) => existing.toLowerCase() === pronoun.toLowerCase())
+    ) {
       setLocalError('You already added that pronoun.');
       return;
     }

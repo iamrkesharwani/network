@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import HistoryList from '../../history/components/HistoryList';
+import Button from '../../../shared/ui/primitives/Button';
+import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import type { IHistoryResponse } from '@network/shared';
 import {
   useGetHistoryQuery,
   useRemoveHistoryEntryMutation,
   useClearHistoryMutation,
 } from '../../history/historyApi';
-import HistoryList from '../../history/components/HistoryList';
-import Button from '../../../shared/ui/primitives/Button';
-import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 
 const HistoryTabPanel = () => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
@@ -16,12 +16,10 @@ const HistoryTabPanel = () => {
 
   const isFirstPage = cursor === undefined;
 
-  const { data, isLoading, isFetching, isError, refetch } = useGetHistoryQuery(
-    {
-      limit: 20,
-      ...(cursor !== undefined && { cursor }),
-    }
-  );
+  const { data, isLoading, isFetching, isError, refetch } = useGetHistoryQuery({
+    limit: 20,
+    ...(cursor !== undefined && { cursor }),
+  });
 
   const [removeHistoryEntry] = useRemoveHistoryEntryMutation();
   const [clearHistory, { isLoading: isClearing }] = useClearHistoryMutation();

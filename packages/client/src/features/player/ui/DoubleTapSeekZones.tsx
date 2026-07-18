@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
+import { cn } from '../../../shared/utils/cn';
 import {
   PLAYER_DOUBLE_TAP_SEEK_SECONDS,
   PLAYER_DOUBLE_TAP_WINDOW_MS,
 } from '@network/shared';
-import { cn } from '../../../shared/utils/cn';
 
 interface DoubleTapSeekZonesProps {
   currentTimeRef: RefObject<number>;

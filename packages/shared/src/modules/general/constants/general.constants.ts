@@ -1,3 +1,4 @@
+import type { Theme } from '../types/general.types.js';
 import { ONE_YEAR_SECONDS } from './time.constants.js';
 
 export const SITE_NAME = 'Network';
@@ -8,3 +9,4 @@ export const VIEW_MODES = ['grid', 'list'] as const;
 export const THEMES = ['light', 'dark'] as const;
 export const PROCESS_ROLES = ['web', 'worker'] as const;
 export const CONTENT_VISIBILITY = ['public', 'unlisted'] as const;
+export const DEFAULT_THEME: Theme = 'dark';

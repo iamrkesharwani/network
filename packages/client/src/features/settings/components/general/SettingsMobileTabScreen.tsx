@@ -7,7 +7,9 @@ export interface SettingsMobileTabScreenProps {
   children: ReactNode;
 }
 
-const SettingsMobileTabScreen = ({ children }: SettingsMobileTabScreenProps) => (
+const SettingsMobileTabScreen = ({
+  children,
+}: SettingsMobileTabScreenProps) => (
   <div>
     <Link
       to={CLIENT_ROUTES.SETTINGS}

@@ -1,8 +1,9 @@
 import { useState, useCallback, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import Toast, { type ToastType } from './Toast';
+import Toast from './Toast';
 import { useIsMounted } from '../../hooks/useIsMounted';
 import { ToastContext, type ToastAction } from '../../hooks/useToast';
+import type { ToastType } from '@network/shared';
 
 interface ToastMessage {
   id: string;
@@ -39,7 +40,7 @@ const ToastProvider = ({ children }: { children: ReactNode }) => {
       {isMounted &&
         createPortal(
           <div
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 w-full max-w-80 px-4 pointer-events-none"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-100 flex flex-col items-center gap-2 w-full max-w-80 px-4 pointer-events-none"
             aria-live="assertive"
             aria-atomic="false"
           >

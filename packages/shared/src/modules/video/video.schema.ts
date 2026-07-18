@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { isValidObjectId } from '../../utils/validators.js';
-import { CONTENT_VISIBILITY } from '../general/general.constants.js';
+import { CONTENT_VISIBILITY } from '../general/constants/general.constants.js';
 import {
   ALLOWED_VIDEO_MIME_TYPES,
   MAX_VIDEO_SIZE_BYTES,

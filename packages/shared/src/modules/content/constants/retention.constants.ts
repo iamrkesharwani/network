@@ -1,4 +1,4 @@
-import { ONE_DAY_MS } from '../../general/time.constants.js';
+import { ONE_DAY_MS } from '../../general/constants/time.constants.js';
 
 export const CONTENT_RETENTION_DAYS = 30;
 export const UNLISTED_CONTENT_TTL_DAYS = 7;

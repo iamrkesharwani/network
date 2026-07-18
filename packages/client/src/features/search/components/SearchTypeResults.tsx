@@ -1,14 +1,18 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   CLIENT_ROUTES,
+  type FeedColumnCount,
   type IPostResponse,
   type IShortResponse,
   type IVideoResponse,
   type SearchType,
 } from '@network/shared';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { COL_CLASS } from '../../video/utils/videoGrid';
 import { SHORT_COL_CLASS } from '../../short/utils/shortGrid';
+import { useFeedColumns } from '../../feed/hooks/useFeedColumns';
+import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
+import { useLiveSearchByType } from '../hooks/useLiveSearchByType';
 import VideoCard from '../../video/pages/VideoCard';
 import ShortRailCard from '../../short/components/ShortRailCard';
 import ShortTheaterModal from '../../short/components/ShortTheaterModal';
@@ -18,12 +22,6 @@ import ShortCardSkeleton from '../../short/skeleton/ShortCardSkeleton';
 import VideoErrorState from '../../video/components/VideoErrorState';
 import VideoEmptyState from '../../video/components/VideoEmptyState';
 import InfiniteScroll from '../../../shared/ui/list/InfiniteScroll';
-import {
-  useFeedColumns,
-  type FeedColumnCount,
-} from '../../feed/hooks/useFeedColumns';
-import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
-import { useLiveSearchByType } from '../hooks/useLiveSearchByType';
 
 interface SearchTypeResultsProps {
   q: string;

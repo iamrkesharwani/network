@@ -1,8 +1,9 @@
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type { SpinnerSize } from '@network/shared';
 
 export interface SpinnerProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: SpinnerSize;
   className?: string;
   messages?: string[];
   intervalMs?: number;

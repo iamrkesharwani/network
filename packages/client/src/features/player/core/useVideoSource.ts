@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, type RefObject } from 'react';
-
-export type VideoSourceState = 'idle' | 'loading' | 'ready' | 'buffering' | 'error';
+import type { VideoSourceState } from '@network/shared';
 
 export interface VideoSourceError {
   code: number;
@@ -13,20 +12,34 @@ interface UseVideoSourceResult {
   retry: () => void;
 }
 
-function describeMediaError(mediaError: MediaError | null): VideoSourceError | null {
+function describeMediaError(
+  mediaError: MediaError | null
+): VideoSourceError | null {
   if (!mediaError) return null;
 
   switch (mediaError.code) {
     case MediaError.MEDIA_ERR_ABORTED:
       return { code: mediaError.code, message: 'Playback was aborted.' };
     case MediaError.MEDIA_ERR_NETWORK:
-      return { code: mediaError.code, message: 'A network error interrupted playback.' };
+      return {
+        code: mediaError.code,
+        message: 'A network error interrupted playback.',
+      };
     case MediaError.MEDIA_ERR_DECODE:
-      return { code: mediaError.code, message: 'The video could not be decoded.' };
+      return {
+        code: mediaError.code,
+        message: 'The video could not be decoded.',
+      };
     case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-      return { code: mediaError.code, message: 'This video format is not supported.' };
+      return {
+        code: mediaError.code,
+        message: 'This video format is not supported.',
+      };
     default:
-      return { code: mediaError.code, message: 'An unknown playback error occurred.' };
+      return {
+        code: mediaError.code,
+        message: 'An unknown playback error occurred.',
+      };
   }
 }
 

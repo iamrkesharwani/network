@@ -32,9 +32,7 @@ export const usePostComposer = ({
   }, []);
 
   const addImages = useCallback((files: File[]) => {
-    setImages((current) =>
-      [...current, ...files].slice(0, MAX_POST_IMAGES)
-    );
+    setImages((current) => [...current, ...files].slice(0, MAX_POST_IMAGES));
   }, []);
 
   const removeImage = useCallback((index: number) => {

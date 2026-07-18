@@ -71,3 +71,5 @@ export interface TrustTier {
   minScore: number;
   unlocks: ReadonlyArray<(typeof TRUST_FEATURE_IDS)[number]>;
 }
+
+

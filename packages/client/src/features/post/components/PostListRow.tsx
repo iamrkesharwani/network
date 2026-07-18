@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText } from 'lucide-react';
 import { formatCount, formatDaysLeft } from '@network/shared';
-import type { IPostResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmDelete';
 import Modal from '../../../shared/ui/overlay/Modal';
 import PostEditForm from '../form/PostEditForm';
+import type { IPostResponse } from '@network/shared';
 
 export interface PostListRowProps {
   post: IPostResponse;

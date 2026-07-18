@@ -1,8 +1,5 @@
 import type { IShortResponse } from '@network/shared';
-import {
-  SHORT_COL_CLASS,
-  type ShortColCount,
-} from '../utils/shortGrid';
+import { SHORT_COL_CLASS, type ShortColCount } from '../utils/shortGrid';
 import { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import ShortCard from '../pages/ShortCard';

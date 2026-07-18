@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { ToastType } from '../ui/overlay/Toast';
+import type { ToastType } from '@network/shared';
 
 export interface ToastAction {
   label: string;

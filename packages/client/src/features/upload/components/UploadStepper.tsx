@@ -45,10 +45,7 @@ function UploadStepper<TStep extends string>({
           const isCurrent = i === currentIndex && !stepForceComplete;
 
           return (
-            <div
-              key={step.key}
-              className="flex flex-col items-center gap-1.5"
-            >
+            <div key={step.key} className="flex flex-col items-center gap-1.5">
               <motion.div
                 animate={isCurrent ? { scale: [1, 1.12, 1] } : {}}
                 transition={{ duration: 0.5 }}

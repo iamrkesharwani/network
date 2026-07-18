@@ -1,13 +1,4 @@
 import { useEffect, useRef } from 'react';
-import {
-  ChevronUp,
-  ChevronDown,
-  Heart,
-  MessageCircle,
-  Share2,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
 import { formatCount } from '@network/shared';
 import type { IShortResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
@@ -20,6 +11,15 @@ import { useTelemetry } from '../../player/core/useTelemetry';
 import { useResumePlayback } from '../../player/core/useResumePlayback';
 import Overlay from '../../player/ui/Overlay';
 import DoubleTapSeekZones from '../../player/ui/DoubleTapSeekZones';
+import {
+  ChevronUp,
+  ChevronDown,
+  Heart,
+  MessageCircle,
+  Share2,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 
 interface ShortPlayerProps {
   short: IShortResponse | null;
@@ -31,8 +31,6 @@ interface ShortPlayerProps {
   onLike?: () => void;
   className?: string;
 }
-
-const noop = () => {};
 
 const ShortPlayer = ({
   short,
@@ -87,7 +85,6 @@ const ShortPlayer = ({
     toggleMute: engine.toggleMute,
     seek: engine.seek,
     setVolume: engine.setVolume,
-    toggleFullscreen: noop,
     onNavigatePrev: onPrev,
     onNavigateNext: onNext,
   });

@@ -1,3 +1,4 @@
+import type { ProfileTab } from '@network/shared';
 import {
   Video,
   Film,
@@ -7,15 +8,6 @@ import {
   Gavel,
   Settings,
 } from 'lucide-react';
-
-export type ProfileTab =
-  | 'videos'
-  | 'shorts'
-  | 'posts'
-  | 'stats'
-  | 'history'
-  | 'jury'
-  | 'settings';
 
 export interface ProfileTabDef {
   id: ProfileTab;

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { THEMES, VIEW_MODES } from '../general/general.constants.js';
+import { THEMES, VIEW_MODES } from '../general/constants/general.constants.js';
 import { CAPTION_LANGUAGE_CODES } from '../caption/caption.constants.js';
 import { PREFERENCES_NOTIFICATION_CATEGORIES } from './preferences.constants.js';
 import type { PreferencesNotificationCategory } from './preferences.types.js';

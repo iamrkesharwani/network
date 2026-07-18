@@ -22,9 +22,7 @@ const MediaDurationBadge = ({
         className
       )}
     >
-      {isShort && (
-        <Play className="w-2.5 h-2.5 fill-white" strokeWidth={0} />
-      )}
+      {isShort && <Play className="w-2.5 h-2.5 fill-white" strokeWidth={0} />}
       {formatDuration(durationSeconds)}
     </span>
   );

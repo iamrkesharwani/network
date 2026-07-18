@@ -1,30 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  ALLOWED_POST_IMAGE_MIME_TYPES,
-  MAX_POST_IMAGE_SIZE_BYTES,
-  MAX_POST_IMAGES,
-} from '@network/shared';
-import BadgeToast from '../../creator/components/BadgeToast';
 import { useCreatorCelebration } from '../../creator/hooks/useCreatorCelebration';
 import { useToast } from '../../../shared/hooks/useToast';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import { buildProfileTabPath } from '../../profile/utils/buildProfilePath';
 import { SPRINGS } from '../../../shared/motion/springs';
+import { usePostComposer } from '../hooks/usePostComposer';
+import BadgeToast from '../../creator/components/BadgeToast';
 import UploadStepper from '../../upload/components/UploadStepper';
+import PostStepOne from './PostStepOne';
+import PostStepTwo from './PostStepTwo';
+import {
+  ACCEPTED_ATTACHMENT_MIME,
+  ALLOWED_POST_IMAGE_MIME_TYPES,
+  MAX_POST_IMAGE_SIZE_BYTES,
+  MAX_POST_IMAGES,
+  TEXT_PREVIEW_LENGTH,
+  type PostComposerStep,
+} from '@network/shared';
 import PublishReviewModal, {
   type ReviewField,
 } from '../../upload/components/PublishReviewModal';
-import { usePostComposer } from '../hooks/usePostComposer';
-import PostStepOne from './PostStepOne';
-import PostStepTwo from './PostStepTwo';
-
-const TEXT_PREVIEW_LENGTH = 80;
-
-const ACCEPTED_ATTACHMENT_MIME = ALLOWED_POST_IMAGE_MIME_TYPES.join(',');
-
-type PostComposerStep = 'compose' | 'details';
 
 const POST_STEPS: { key: PostComposerStep; label: string }[] = [
   { key: 'compose', label: 'Compose' },
@@ -151,7 +148,10 @@ const PostComposer = () => {
     ...(tags.length > 0
       ? [{ label: 'Tags', value: tags.map((tag) => `#${tag}`).join(' ') }]
       : []),
-    { label: 'Visibility', value: <span className="capitalize">{visibility}</span> },
+    {
+      label: 'Visibility',
+      value: <span className="capitalize">{visibility}</span>,
+    },
   ];
 
   return (

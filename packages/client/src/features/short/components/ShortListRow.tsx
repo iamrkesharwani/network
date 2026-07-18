@@ -1,12 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import {
-  CLIENT_ROUTES,
-  formatCount,
-  formatDuration,
-  formatDaysLeft,
-} from '@network/shared';
+import { getMediaProcessingLabel } from '../../../../../shared/src/utils/mediaProcessingLabel';
+import { cn } from '../../../shared/utils/cn';
 import type { IShortResponse } from '@network/shared';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
@@ -14,8 +10,12 @@ import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmD
 import Modal from '../../../shared/ui/overlay/Modal';
 import ShortEditForm from '../form/ShortEditForm';
 import MediaProcessingBar from '../../../shared/ui/card/MediaProcessingBar';
-import { getMediaProcessingLabel } from '../../../shared/utils/mediaProcessingLabel';
-import { cn } from '../../../shared/utils/cn';
+import {
+  CLIENT_ROUTES,
+  formatCount,
+  formatDuration,
+  formatDaysLeft,
+} from '@network/shared';
 
 export interface ShortListRowProps {
   short: IShortResponse;
@@ -128,7 +128,8 @@ const ShortListRow = ({
           </Link>
           {isReady ? (
             <p className="mt-1 text-xs text-text-muted">
-              {formatCount(short.views)} views · {formatCount(short.likes)} likes
+              {formatCount(short.views)} views · {formatCount(short.likes)}{' '}
+              likes
               {isUnlisted && ' · Unlisted'}
               {daysLeft !== null &&
                 ` · ${daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}`}

@@ -3,13 +3,6 @@ import { Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Cake, HeartHandshake, MessageCircle, Users2 } from 'lucide-react';
 import type { z } from 'zod';
-import {
-  personalDetailsSchema,
-  GENDER_OPTIONS,
-  RELATIONSHIP_STATUSES,
-  MIN_AGE_YEARS,
-  type PersonalDetailsInput,
-} from '@network/shared';
 import { useAppSelector } from '../../../../shared/hooks/useAppSelector';
 import { usePatchPersonalDetailsMutation } from '../../settingsApi';
 import { useMediaEditForm } from '../../../upload/hooks/useMediaEditForm';
@@ -20,6 +13,13 @@ import Button from '../../../../shared/ui/primitives/Button';
 import MyInfoFormHeader from './MyInfoFormHeader';
 import PronounsInput from './PronounsInput';
 import SaveSuccessModal from '../general/SaveSuccessModal';
+import {
+  personalDetailsSchema,
+  GENDER_OPTIONS,
+  RELATIONSHIP_STATUSES,
+  MIN_AGE_YEARS,
+  type PersonalDetailsInput,
+} from '@network/shared';
 
 const genderLabels: Record<(typeof GENDER_OPTIONS)[number], string> = {
   male: 'Male',

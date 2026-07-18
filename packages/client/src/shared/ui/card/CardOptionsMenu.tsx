@@ -129,7 +129,10 @@ const CardOptionsMenu = ({
                     onClick={handleEdit}
                     className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
                   >
-                    <Edit2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                    <Edit2
+                      className="w-3.5 h-3.5 shrink-0"
+                      strokeWidth={1.75}
+                    />
                     Edit
                   </button>
                   {visibilityAction && (
@@ -139,9 +142,15 @@ const CardOptionsMenu = ({
                       className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
                     >
                       {visibilityAction.toPublic ? (
-                        <Eye className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                        <Eye
+                          className="w-3.5 h-3.5 shrink-0"
+                          strokeWidth={1.75}
+                        />
                       ) : (
-                        <EyeOff className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                        <EyeOff
+                          className="w-3.5 h-3.5 shrink-0"
+                          strokeWidth={1.75}
+                        />
                       )}
                       {visibilityAction.label}
                     </button>
@@ -151,7 +160,10 @@ const CardOptionsMenu = ({
                     onClick={handleDelete}
                     className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-error hover:bg-error-subtle transition-colors"
                   >
-                    <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                    <Trash2
+                      className="w-3.5 h-3.5 shrink-0"
+                      strokeWidth={1.75}
+                    />
                     Delete
                   </button>
                 </>

@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type {
-  IPostResponse,
-  IShortResponse,
-  IVideoResponse,
-} from '@network/shared';
 import { CLIENT_ROUTES, SKIP_GUARD } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { COL_CLASS } from '../../video/utils/videoGrid';
 import { SHORT_COL_CLASS } from '../../short/utils/shortGrid';
+import { useFeedColumns } from '../hooks/useFeedColumns';
+import { createScheduler } from '../utils/scheduler';
 import VideoCard from '../../video/pages/VideoCard';
 import ShortRailCard from '../../short/components/ShortRailCard';
 import ShortTheaterModal from '../../short/components/ShortTheaterModal';
@@ -18,14 +15,17 @@ import VideoEmptyState from '../../video/components/VideoEmptyState';
 import PostGridTile from '../../post/pages/PostGridTile';
 import InfiniteScroll from '../../../shared/ui/list/InfiniteScroll';
 import FeedSkeleton from '../skeleton/FeedSkeleton';
-import { useFeedColumns, type FeedColumnCount } from '../hooks/useFeedColumns';
 import {
   useMixedFeedPools,
   type MixedFeedSource,
 } from '../hooks/useMixedFeedPools';
-import { createScheduler, type FeedBlockType } from '../utils/scheduler';
-
-export type { MixedFeedSource };
+import type {
+  FeedBlockType,
+  FeedColumnCount,
+  IPostResponse,
+  IShortResponse,
+  IVideoResponse,
+} from '@network/shared';
 
 type FeedRenderBlock =
   | { type: 'video'; items: IVideoResponse[] }

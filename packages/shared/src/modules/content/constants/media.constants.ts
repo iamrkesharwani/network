@@ -3,7 +3,7 @@ import {
   FIVE_MINUTES_SECONDS,
   FIVE_MINUTES_MS,
   ONE_DAY_SECONDS,
-} from '../../general/time.constants.js';
+} from '../../general/constants/time.constants.js';
 
 export const PROVIDER_MEDIA_INDEX_TTL_SECONDS = 30 * 24 * 60 * 60;
 export const MEDIA_STATUS_SOCKET_EVENT = 'media:status';

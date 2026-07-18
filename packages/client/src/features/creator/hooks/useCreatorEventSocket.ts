@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
-import { CREATOR_EVENT_SOCKET_EVENT, type ICreatorEvent } from '@network/shared';
-import type { useSocket } from '../../../shared/hooks/useSocket';
 import { useCreatorCelebration } from './useCreatorCelebration';
+import type { useSocket } from '../../../shared/hooks/useSocket';
+import {
+  CREATOR_EVENT_SOCKET_EVENT,
+  type ICreatorEvent,
+} from '@network/shared';
 
 export const useCreatorEventSocket = (
   socketRef: ReturnType<typeof useSocket>

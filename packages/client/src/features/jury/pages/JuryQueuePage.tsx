@@ -9,7 +9,7 @@ import { buildProfilePath } from '../../profile/utils/buildProfilePath';
 import { useGetAssignedCasesQuery } from '../juryApi';
 
 const JuryQueuePage = () => {
-  usePageTitle('Jury Duty');
+  usePageTitle('Jury');
   const navigate = useNavigate();
   const username = useAppSelector((state) => state.auth.user?.username);
   const { data, isLoading, isError } = useGetAssignedCasesQuery();

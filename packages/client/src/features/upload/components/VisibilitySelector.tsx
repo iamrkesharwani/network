@@ -18,7 +18,8 @@ const OPTIONS: {
   {
     value: 'unlisted',
     label: 'Unlisted',
-    description: 'Only you can see this. Automatically deleted after 7 days unless you make it public.',
+    description:
+      'Only you can see this. Automatically deleted after 7 days unless you make it public.',
     icon: Link2,
   },
 ];

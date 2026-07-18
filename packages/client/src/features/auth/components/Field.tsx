@@ -1,3 +1,5 @@
+import { Eye, EyeOff } from 'lucide-react';
+import { cn } from '../../../shared/utils/cn';
 import {
   forwardRef,
   useState,
@@ -5,8 +7,6 @@ import {
   type InputHTMLAttributes,
   type ReactNode,
 } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
-import { cn } from '../../../shared/utils/cn';
 
 export interface FieldProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,

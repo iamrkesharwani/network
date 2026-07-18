@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { IPostResponse } from '@network/shared';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBadge';
+import type { IPostResponse } from '@network/shared';
 
 interface PostMediaProps {
   post: IPostResponse;

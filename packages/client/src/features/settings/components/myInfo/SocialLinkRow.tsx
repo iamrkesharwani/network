@@ -10,8 +10,8 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { useController, type Control, type FieldPath } from 'react-hook-form';
 import { Link2, X } from 'lucide-react';
-import type { ContactLinksInput } from '@network/shared';
 import { cn } from '../../../../shared/utils/cn';
+import type { ContactLinksInput } from '@network/shared';
 import {
   findExactSocialPlatform,
   matchKnownSocialPlatforms,

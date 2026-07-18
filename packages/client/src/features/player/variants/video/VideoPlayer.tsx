@@ -5,8 +5,11 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { Lock } from 'lucide-react';
+import TouchInactivityLayer, {
+  type TouchInactivityLayerHandle,
+} from '../../ui/TouchInactivityLayer';
 import type { IVideoResponse } from '@network/shared';
+import { Lock } from 'lucide-react';
 import { cn } from '../../../../shared/utils/cn';
 import { useAuth } from '../../../auth/useAuth';
 import { usePreference } from '../../../settings/hooks/usePreference';
@@ -24,9 +27,6 @@ import TopControls from '../../ui/TopControls';
 import SettingsMenu from '../../ui/settings/SettingsMenu';
 import Overlay from '../../ui/Overlay';
 import CaptionOverlay from '../../ui/CaptionOverlay';
-import TouchInactivityLayer, {
-  type TouchInactivityLayerHandle,
-} from '../../ui/TouchInactivityLayer';
 import DoubleTapSeekZones from '../../ui/DoubleTapSeekZones';
 
 interface VideoPlayerProps {

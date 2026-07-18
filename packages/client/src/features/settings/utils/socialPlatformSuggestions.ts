@@ -9,12 +9,11 @@ export interface SocialPlatformSuggestion {
   isCustom?: boolean;
 }
 
-const CATALOG_SUGGESTIONS: SocialPlatformSuggestion[] = SOCIAL_PLATFORM_CATALOG.map(
-  (entry) => ({
+const CATALOG_SUGGESTIONS: SocialPlatformSuggestion[] =
+  SOCIAL_PLATFORM_CATALOG.map((entry) => ({
     label: entry.name,
     icon: SOCIAL_PLATFORM_ICONS[entry.key] ?? Link2,
-  })
-);
+  }));
 
 const editDistance = (a: string, b: string): number => {
   const dp: number[][] = Array.from({ length: a.length + 1 }, () =>

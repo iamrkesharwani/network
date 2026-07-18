@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom';
-import React from 'react';
-import Field from '../components/Field';
 import { SITE_NAME, CLIENT_ROUTES } from '@network/shared';
-import AuthLayout from '../components/AuthLayout';
 import { EmailIcon, GoogleIcon } from '../components/AuthIcons';
-import usePageTitle from '../../../shared/hooks/usePageTitle';
-import SiteLogo from '../../../public/Logo.svg?react';
 import { useOAuthRedirect } from '../hooks/useOAuthRedirect';
 import { useEntryDisclosure } from '../hooks/useEntryDisclosure';
 import { useRegisterForm } from '../hooks/useRegisterForm';
+import React from 'react';
+import Field from '../components/Field';
+import AuthLayout from '../components/AuthLayout';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
+import SiteLogo from '../../../public/Logo.svg?react';
 
 const Register = () => {
   usePageTitle('Register');

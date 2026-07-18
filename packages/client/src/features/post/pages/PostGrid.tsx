@@ -1,25 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
-import { POST_TILE_HEIGHT_PX, type IPostResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { useVirtualGrid } from '../../../shared/hooks/useVirtualGrid';
 import { useGridCols } from '../../video/hooks/useGridCols';
-import {
-  COL_CLASS,
-  chunkIntoRows,
-  type ColCount,
-} from '../../video/utils/videoGrid';
 import PostGridTile from './PostGridTile';
 import PostEmptyState from '../components/PostEmptyState';
 import PostErrorState from '../components/PostErrorState';
 import PostEndDivider from '../components/PostEndDivider';
 import {
+  POST_TILE_HEIGHT_PX,
+  ROW_GAP_PX,
+  type IPostResponse,
+  type PostRow,
+} from '@network/shared';
+import {
+  COL_CLASS,
+  chunkIntoRows,
+  type ColCount,
+} from '../../video/utils/videoGrid';
+import {
   PostTileGridSkeleton,
   PostTileRowSkeleton,
 } from '../skeleton/PostGridTileSkeleton';
-
-type PostRow = IPostResponse[] | 'skeleton' | 'end';
-
-const ROW_GAP_PX = 16;
 
 export interface PostGridProps {
   posts: IPostResponse[];

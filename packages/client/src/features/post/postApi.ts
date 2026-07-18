@@ -89,7 +89,10 @@ export const postApi = createApi({
       providesTags: ['UserPosts'],
     }),
 
-    getUserVisibilityCounts: builder.query<ApiResponse<IVisibilityCounts>, string>({
+    getUserVisibilityCounts: builder.query<
+      ApiResponse<IVisibilityCounts>,
+      string
+    >({
       query: (username) => ({
         url: `/user/${username}/visibility-counts`,
         method: 'GET',

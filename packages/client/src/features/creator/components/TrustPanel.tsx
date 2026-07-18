@@ -53,37 +53,39 @@ const TrustPanel = () => {
           : "You've reached the highest trust tier"}
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {TRUST_FEATURE_IDS.map((featureId) => {
-          const unlocked = unlockedSet.has(featureId);
-          return (
-            <div
-              key={featureId}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium',
-                unlocked
-                  ? 'border-primary/30 bg-primary-muted text-text-primary'
-                  : 'border-border text-text-muted opacity-60'
-              )}
-            >
-              {unlocked ? (
-                <CheckCircle2 className="w-3 h-3 text-primary" />
-              ) : (
-                <Lock className="w-3 h-3" />
-              )}
-              {TRUST_FEATURE_CATALOG[featureId].label}
-            </div>
-          );
-        })}
-      </div>
+      <div className="mt-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center">
+          {TRUST_FEATURE_IDS.map((featureId) => {
+            const unlocked = unlockedSet.has(featureId);
+            return (
+              <div
+                key={featureId}
+                className={cn(
+                  'flex items-center justify-center gap-1.5 rounded-full border px-2.5 py-2 text-[11px] font-medium md:inline-flex md:justify-start md:py-1',
+                  unlocked
+                    ? 'border-primary/30 bg-primary-muted text-text-primary'
+                    : 'border text-text-muted opacity-60'
+                )}
+              >
+                {unlocked ? (
+                  <CheckCircle2 className="w-3 h-3 text-primary" />
+                ) : (
+                  <Lock className="w-3 h-3" />
+                )}
+                {TRUST_FEATURE_CATALOG[featureId].label}
+              </div>
+            );
+          })}
+        </div>
 
-      <button
-        type="button"
-        onClick={() => setInfoOpen(true)}
-        className="mt-4 text-xs font-medium text-primary hover:underline"
-      >
-        How to increase trust score?
-      </button>
+        <button
+          type="button"
+          onClick={() => setInfoOpen(true)}
+          className="shrink-0 text-xs font-medium text-primary hover:underline"
+        >
+          How to increase trust score?
+        </button>
+      </div>
 
       <TrustScoreInfoModal
         isOpen={infoOpen}

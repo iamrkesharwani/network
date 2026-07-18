@@ -1,11 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { format, isSameDay } from 'date-fns';
 import { cn } from '../../utils/cn';
-import {
-  buildMonthGrid,
-  chunkIntoWeeks,
-  WEEKDAY_LABELS,
-} from './utils/dateGrid';
+import { buildMonthGrid, chunkIntoWeeks } from './utils/dateGrid';
+import { WEEKDAY_LABELS } from '@network/shared';
 
 interface CalendarMonthGridProps {
   monthAnchor: Date;
@@ -73,7 +70,9 @@ const CalendarMonthGrid = ({
                       isDisabled && 'cursor-not-allowed opacity-30',
                       !isDisabled && !isSelected && 'hover:bg-surface-overlay',
                       isSelected && 'bg-primary font-semibold text-white',
-                      !isSelected && day.isToday && 'ring-1 ring-inset ring-primary/50'
+                      !isSelected &&
+                        day.isToday &&
+                        'ring-1 ring-inset ring-primary/50'
                     )}
                   >
                     {format(day.date, 'd')}
