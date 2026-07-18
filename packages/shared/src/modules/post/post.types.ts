@@ -22,7 +22,7 @@ export type PostUserFeedQuery = z.infer<typeof postUserFeedQuerySchema>;
 export type PostVisibility = (typeof POST_VISIBILITY)[number];
 export type PostStatus = (typeof POST_STATUS)[number];
 export type PostMediaType = (typeof POST_MEDIA_TYPE)[number];
-export type PostComposerStep = 'compose' | 'details';
+export type PostComposerStep = 'text' | 'photos' | 'details';
 export type PostRow = IPostResponse[] | 'skeleton' | 'end';
 
 export interface IPost {

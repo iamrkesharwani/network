@@ -1,15 +1,24 @@
-import { useState } from 'react';
+import { Controller } from 'react-hook-form';
 import { Loader2, Save } from 'lucide-react';
+import type { z } from 'zod';
 import {
   POST_TEXT_MAX_LENGTH,
+  postUpdateSchema,
   type IPostResponse,
+  type PostUpdateInput,
   type PostVisibility,
 } from '@network/shared';
 import { useUpdatePostMutation } from '../postApi';
-import { extractErrorMessage } from '../../upload/hooks/useMediaEditForm';
+import { useMediaEditForm } from '../../upload/hooks/useMediaEditForm';
 import FloatingTextarea from '../../upload/components/FloatingTextarea';
 import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
+
+type PostFormValues = {
+  text?: string;
+  tags?: string[];
+  visibility?: PostVisibility;
+};
 
 interface PostEditFormProps {
   postId: string;
@@ -27,45 +36,68 @@ const PostEditForm = ({
   onSuccess,
 }: PostEditFormProps) => {
   const [updatePost, { isLoading }] = useUpdatePostMutation();
-  const [text, setText] = useState(initialValues.text ?? '');
-  const [tags, setTags] = useState<string[]>(initialValues.tags);
-  const [visibility, setVisibility] = useState<PostVisibility>(
-    initialValues.visibility
-  );
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitError(null);
+  const {
+    register,
+    control,
+    watch,
+    formState: { errors },
+    submitError,
+    submit,
+  } = useMediaEditForm<PostFormValues, PostUpdateInput>({
+    schema: postUpdateSchema as unknown as z.ZodType<
+      PostUpdateInput,
+      PostFormValues
+    >,
+    defaultValues: {
+      text: initialValues.text ?? '',
+      tags: initialValues.tags,
+      visibility: initialValues.visibility,
+    },
+    completenessRules: [],
+  });
 
-    try {
-      const result = await updatePost({
-        postId,
-        text: text.trim(),
-        tags,
-        visibility,
-      }).unwrap();
-      onSuccess(result.data);
-    } catch (err) {
-      setSubmitError(extractErrorMessage(err));
-    }
-  };
+  const text = watch('text') ?? '';
+
+  const onSubmit = submit(async (data) => {
+    const result = await updatePost({ postId, ...data }).unwrap();
+    onSuccess(result.data);
+  });
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-lg mx-auto">
+    <form onSubmit={onSubmit} className="w-full max-w-lg mx-auto">
       <FloatingTextarea
         label="What's on your mind?"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
+        {...register('text')}
         maxLength={POST_TEXT_MAX_LENGTH}
         counter={{ current: text.length, max: POST_TEXT_MAX_LENGTH }}
         rows={4}
+        error={errors.text?.message}
         disabled={isLoading}
       />
 
-      <TagInput value={tags} onChange={setTags} />
+      <Controller
+        control={control}
+        name="tags"
+        render={({ field }) => (
+          <TagInput
+            value={field.value ?? []}
+            onChange={field.onChange}
+            error={errors.tags?.message as string | undefined}
+          />
+        )}
+      />
 
-      <VisibilitySelector value={visibility} onChange={setVisibility} />
+      <Controller
+        control={control}
+        name="visibility"
+        render={({ field }) => (
+          <VisibilitySelector
+            value={(field.value as PostVisibility) ?? 'public'}
+            onChange={field.onChange}
+          />
+        )}
+      />
 
       {submitError && (
         <p className="mb-3 text-sm text-red-500" role="alert">

@@ -11,6 +11,7 @@ import BadgeToast from '../../creator/components/BadgeToast';
 import UploadStepper from '../../upload/components/UploadStepper';
 import PostStepOne from './PostStepOne';
 import PostStepTwo from './PostStepTwo';
+import PostStepThree from './PostStepThree';
 import {
   ACCEPTED_ATTACHMENT_MIME,
   ALLOWED_POST_IMAGE_MIME_TYPES,
@@ -24,7 +25,8 @@ import PublishReviewModal, {
 } from '../../upload/components/PublishReviewModal';
 
 const POST_STEPS: { key: PostComposerStep; label: string }[] = [
-  { key: 'compose', label: 'Compose' },
+  { key: 'text', label: 'Write' },
+  { key: 'photos', label: 'Photos' },
   { key: 'details', label: 'Details' },
 ];
 
@@ -56,29 +58,30 @@ const PostComposer = () => {
   const username = useAppSelector((state) => state.auth.user?.username);
   const { addToast } = useToast();
   const { current: celebration, celebrate, dismiss } = useCreatorCelebration();
-  const [step, setStep] = useState<PostComposerStep>('compose');
+  const [step, setStep] = useState<PostComposerStep>('text');
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
+    register,
+    control,
+    errors,
+    trigger,
     text,
-    setText,
     tags,
-    setTags,
     visibility,
-    setVisibility,
     images,
     addImages,
     removeImage,
     canSubmit,
-    submit,
-    error,
+    publish,
+    submitError,
     isSubmitting,
   } = usePostComposer({
     onPublished: (creatorEvent) => {
       setShowReviewModal(false);
-      setStep('compose');
+      setStep('text');
       addToast('Your post is live', 'success');
       celebrate(creatorEvent);
       if (username) navigate(buildProfileTabPath(username, 'posts'));
@@ -121,7 +124,12 @@ const PostComposer = () => {
     [addImages, images.length]
   );
 
-  const handleContinue = () => {
+  const goToPhotos = async () => {
+    if (!(await trigger('text'))) return;
+    setStep('photos');
+  };
+
+  const goToDetails = () => {
     if (!canSubmit) {
       setAttachmentError('Write something or attach an image first.');
       return;
@@ -178,10 +186,18 @@ const PostComposer = () => {
             exit="exit"
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
-            {step === 'compose' && (
+            {step === 'text' && (
               <PostStepOne
+                register={register}
+                errors={errors}
                 text={text}
-                setText={setText}
+                onContinue={goToPhotos}
+                disabled={isSubmitting}
+              />
+            )}
+
+            {step === 'photos' && (
+              <PostStepTwo
                 images={images}
                 previewUrls={previewUrls}
                 attachmentError={attachmentError}
@@ -189,18 +205,17 @@ const PostComposer = () => {
                 acceptedMime={ACCEPTED_ATTACHMENT_MIME}
                 onFilesSelected={handleFilesSelected}
                 onRemoveImage={removeImage}
-                onContinue={handleContinue}
+                onBack={() => setStep('text')}
+                onContinue={goToDetails}
                 disabled={isSubmitting}
               />
             )}
 
             {step === 'details' && (
-              <PostStepTwo
-                tags={tags}
-                setTags={setTags}
-                visibility={visibility}
-                setVisibility={setVisibility}
-                onBack={() => setStep('compose')}
+              <PostStepThree
+                control={control}
+                errors={errors}
+                onBack={() => setStep('photos')}
                 onReview={() => setShowReviewModal(true)}
               />
             )}
@@ -211,10 +226,10 @@ const PostComposer = () => {
       <PublishReviewModal
         isOpen={showReviewModal}
         onClose={() => setShowReviewModal(false)}
-        onConfirm={submit}
+        onConfirm={publish}
         fields={reviewFields}
         isPublishing={isSubmitting}
-        error={error}
+        error={submitError}
         confirmLabel="Confirm & post"
       />
     </div>
