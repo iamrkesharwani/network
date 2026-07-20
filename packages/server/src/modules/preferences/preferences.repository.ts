@@ -27,6 +27,10 @@ const buildPreferencesSet = (
     }
   }
 
+  if (data.layout?.shortsCommentsOpen !== undefined) {
+    set['layout.shortsCommentsOpen'] = data.layout.shortsCommentsOpen;
+  }
+
   if (data.playback) {
     for (const [key, value] of Object.entries(data.playback)) {
       if (value !== undefined) set[`playback.${key}`] = value;

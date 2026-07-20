@@ -18,6 +18,7 @@ export interface IPreferencesDocument extends Document {
   };
   layout: {
     profileViewMode?: Record<string, string>;
+    shortsCommentsOpen?: boolean;
   };
   playback: {
     volume: number;
@@ -56,6 +57,7 @@ const appearanceSchema = new Schema(
 const layoutSchema = new Schema(
   {
     profileViewMode: { type: profileViewModeSchema, default: undefined },
+    shortsCommentsOpen: { type: Boolean },
   },
   { _id: false }
 );

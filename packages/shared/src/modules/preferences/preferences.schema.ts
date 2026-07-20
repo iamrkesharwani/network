@@ -17,6 +17,7 @@ const profileViewModePatchSchema = z.object({
 
 const layoutPatchSchema = z.object({
   profileViewMode: profileViewModePatchSchema.optional(),
+  shortsCommentsOpen: z.boolean().optional(),
 });
 
 const playbackPatchSchema = z.object({

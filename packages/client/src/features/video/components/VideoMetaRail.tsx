@@ -21,15 +21,15 @@ const VideoMetaRail = ({
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:rounded-lg lg:border lg:border-border lg:p-3">
       <button
         type="button"
         onClick={onToggleDescription}
         aria-expanded={descriptionOpen}
         disabled={!video.description}
-        className="flex items-start gap-1.5 text-left focus:outline-none lg:rounded-lg lg:border lg:border-border lg:p-3 disabled:cursor-default"
+        className="flex items-start gap-1.5 text-left focus:outline-none disabled:cursor-default lg:order-2 lg:min-w-0"
       >
-        <h1 className="text-lg font-semibold text-text-primary">
+        <h1 className="text-lg font-semibold text-text-primary lg:truncate">
           {video.title}
         </h1>
         {video.description && (
@@ -43,7 +43,7 @@ const VideoMetaRail = ({
         )}
       </button>
 
-      <div className="flex items-center gap-3 lg:rounded-lg lg:border lg:border-border lg:p-3">
+      <div className="flex items-center gap-3 lg:order-1 lg:shrink-0">
         <Link to={profileHref}>
           <Avatar
             src={video.author.avatarUrl}

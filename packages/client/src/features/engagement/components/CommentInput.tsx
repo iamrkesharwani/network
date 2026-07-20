@@ -77,7 +77,7 @@ const CommentInput = ({
           disabled={!text.trim() || isSubmitting}
           whileTap={reduce ? undefined : { scale: 0.95 }}
           transition={SPRINGS.snappy}
-          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="mr-0 md:mr-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
           {SUBMIT_LABEL[mode]}
         </motion.button>

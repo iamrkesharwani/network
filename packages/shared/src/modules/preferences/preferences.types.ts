@@ -16,6 +16,7 @@ export interface IPreferencesAppearance {
 
 export interface IPreferencesLayout {
   profileViewMode?: Partial<Record<ProfileContentType, ViewMode>>;
+  shortsCommentsOpen?: boolean;
 }
 
 export interface IPreferencesPlayback {

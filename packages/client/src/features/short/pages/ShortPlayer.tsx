@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { SHORT_THEATER_WIDTH_PX, formatCount } from '@network/shared';
+import { formatCount } from '@network/shared';
 import type { IShortResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { useAuth } from '../../auth/useAuth';
@@ -15,6 +15,7 @@ import DoubleTapSeekZones from '../../player/ui/DoubleTapSeekZones';
 import Modal from '../../../shared/ui/overlay/Modal';
 import CommentSection from '../../engagement/components/CommentSection';
 import { useLikeToggle } from '../../engagement/hooks/useLikeToggle';
+import AnimatedHeartIcon from '../../engagement/components/AnimatedHeartIcon';
 import { useContentRoom } from '../../engagement/hooks/useContentRoom';
 import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
 import { useCreateShareMutation } from '../../engagement/shareApi';
@@ -26,12 +27,10 @@ import {
   ChevronDown,
   ArrowLeft,
   Eye,
-  Heart,
   MessageCircle,
   Share2,
   Volume2,
   VolumeX,
-  X,
 } from 'lucide-react';
 
 interface ShortPlayerProps {
@@ -42,7 +41,6 @@ interface ShortPlayerProps {
   onPrev: () => void;
   isActive?: boolean;
   className?: string;
-  variant?: 'immersive' | 'page';
 }
 
 const ShortPlayer = ({
@@ -53,7 +51,6 @@ const ShortPlayer = ({
   onPrev,
   isActive = true,
   className,
-  variant = 'immersive',
 }: ShortPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -150,7 +147,6 @@ const ShortPlayer = ({
 
   const isBuffering = sourceState === 'buffering' || engine.isBuffering;
   const overlayError = sourceError ?? engine.error;
-  const showSidePanel = variant === 'page' && commentsOpen;
 
   if (!short) {
     return (
@@ -165,7 +161,7 @@ const ShortPlayer = ({
     );
   }
 
-  const playerBox = (
+  return (
     <div
       ref={containerRef}
       tabIndex={-1}
@@ -228,86 +224,94 @@ const ShortPlayer = ({
         )}
       </button>
 
-      {!showSidePanel && (
-        <div className="absolute right-3 bottom-20 md:bottom-4 flex flex-col items-center gap-5">
-          <div className="flex flex-col items-center gap-1 text-white/70">
-            <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10">
-              <Eye className="w-5 h-5" strokeWidth={1.75} />
-            </div>
-            <span className="text-[11px] tabular-nums">
-              {formatCount(short.views)}
-            </span>
+      <div className="absolute right-3 bottom-20 md:bottom-4 flex flex-col items-center gap-5">
+        <div className="flex flex-col items-center gap-1 text-white/70">
+          <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10">
+            <Eye className="w-5 h-5" strokeWidth={1.75} />
           </div>
-
-          <button
-            type="button"
-            onClick={toggleLike}
-            aria-pressed={liked}
-            aria-label={liked ? 'Unlike' : 'Like'}
-            className="flex flex-col items-center gap-1 focus:outline-none group"
-          >
-            <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">
-              <Heart
-                className={cn(
-                  'w-5 h-5',
-                  liked ? 'fill-error text-error' : 'text-white'
-                )}
-                strokeWidth={1.75}
-              />
-            </div>
-            <span className="text-[11px] text-white/70 tabular-nums">
-              {formatCount(likesCount)}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setCommentsOpen(true)}
-            aria-label="Comments"
-            className="flex flex-col items-center gap-1 focus:outline-none group"
-          >
-            <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">
-              <MessageCircle className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <span className="text-[11px] text-white/70 tabular-nums">
-              {formatCount(short.commentsCount)}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleShare}
-            aria-label="Share"
-            className="flex flex-col items-center gap-1 focus:outline-none group"
-          >
-            <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">
-              <Share2 className="w-5 h-5 text-white" strokeWidth={1.75} />
-            </div>
-            <span className="text-[11px] text-white/70">Share</span>
-          </button>
-
-          <div className="hidden md:flex flex-col gap-2 mt-1">
-            <button
-              type="button"
-              onClick={onPrev}
-              disabled={activeIndex === 0}
-              aria-label="Previous short"
-              className="w-11 h-11 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 text-white hover:bg-black/70 disabled:opacity-30 disabled:cursor-not-allowed transition-all focus:outline-none"
-            >
-              <ChevronUp className="w-5 h-5" strokeWidth={2.5} />
-            </button>
-            <button
-              type="button"
-              onClick={onNext}
-              disabled={activeIndex >= total - 1}
-              aria-label="Next short"
-              className="w-11 h-11 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 text-white hover:bg-black/70 disabled:opacity-30 disabled:cursor-not-allowed transition-all focus:outline-none"
-            >
-              <ChevronDown className="w-5 h-5" strokeWidth={2.5} />
-            </button>
-          </div>
+          <span className="text-[11px] tabular-nums">
+            {formatCount(short.views)}
+          </span>
         </div>
-      )}
+
+        <button
+          type="button"
+          onClick={toggleLike}
+          aria-pressed={liked}
+          aria-label={liked ? 'Unlike' : 'Like'}
+          className="flex flex-col items-center gap-1 focus:outline-none group"
+        >
+          <motion.div
+            whileTap={reduce ? undefined : { scale: 0.85 }}
+            transition={SPRINGS.snappy}
+            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors"
+          >
+            <AnimatedHeartIcon
+              liked={liked}
+              className={cn('w-5 h-5', liked ? 'fill-error text-error' : 'text-white')}
+            />
+          </motion.div>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={likesCount}
+              initial={reduce ? false : { y: -6, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 6, opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              className="text-[11px] text-white/70 tabular-nums"
+            >
+              {formatCount(likesCount)}
+            </motion.span>
+          </AnimatePresence>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setCommentsOpen(true)}
+          aria-label="Comments"
+          className="flex flex-col items-center gap-1 focus:outline-none group"
+        >
+          <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">
+            <MessageCircle className="w-5 h-5 text-white" strokeWidth={1.75} />
+          </div>
+          <span className="text-[11px] text-white/70 tabular-nums">
+            {formatCount(short.commentsCount)}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleShare}
+          aria-label="Share"
+          className="flex flex-col items-center gap-1 focus:outline-none group"
+        >
+          <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">
+            <Share2 className="w-5 h-5 text-white" strokeWidth={1.75} />
+          </div>
+          <span className="text-[11px] text-white/70">Share</span>
+        </button>
+
+        <div className="hidden md:flex flex-col gap-2 mt-1">
+          <button
+            type="button"
+            onClick={onPrev}
+            disabled={activeIndex === 0}
+            aria-label="Previous short"
+            className="w-11 h-11 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 text-white hover:bg-black/70 disabled:opacity-30 disabled:cursor-not-allowed transition-all focus:outline-none"
+          >
+            <ChevronUp className="w-5 h-5" strokeWidth={2.5} />
+          </button>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={activeIndex >= total - 1}
+            aria-label="Next short"
+            className="w-11 h-11 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 text-white hover:bg-black/70 disabled:opacity-30 disabled:cursor-not-allowed transition-all focus:outline-none"
+          >
+            <ChevronDown className="w-5 h-5" strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
 
       <div className="absolute bottom-16 md:bottom-4 left-4 right-16">
         {short.description ? (
@@ -377,94 +381,13 @@ const ShortPlayer = ({
         )}
       </AnimatePresence>
 
-      {variant === 'immersive' && (
-        <Modal
-          isOpen={commentsOpen}
-          onClose={() => setCommentsOpen(false)}
-          title="Comments"
-        >
-          <CommentSection contentType="short" contentId={short.id} />
-        </Modal>
-      )}
-    </div>
-  );
-
-  if (variant !== 'page') return playerBox;
-
-  return (
-    <div className="flex h-full items-stretch gap-4">
-      <div className="h-full shrink-0" style={{ width: SHORT_THEATER_WIDTH_PX }}>
-        {playerBox}
-      </div>
-
-      <AnimatePresence>
-        {showSidePanel && (
-          <motion.div
-            initial={reduce ? false : { width: 0, opacity: 0 }}
-            animate={{ width: SHORT_THEATER_WIDTH_PX, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            transition={SPRINGS.smooth}
-            className="hidden lg:flex shrink-0 flex-col rounded-2xl border border-border bg-surface overflow-hidden"
-          >
-            <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border px-4 py-3">
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center gap-0.5 text-text-muted">
-                  <Eye className="w-4.5 h-4.5" strokeWidth={1.75} />
-                  <span className="text-[11px] tabular-nums">
-                    {formatCount(short.views)}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={toggleLike}
-                  aria-pressed={liked}
-                  aria-label={liked ? 'Unlike' : 'Like'}
-                  className="flex flex-col items-center gap-0.5 focus:outline-none"
-                >
-                  <Heart
-                    className={cn(
-                      'w-4.5 h-4.5',
-                      liked ? 'fill-error text-error' : 'text-text-muted'
-                    )}
-                    strokeWidth={1.75}
-                  />
-                  <span className="text-[11px] tabular-nums text-text-muted">
-                    {formatCount(likesCount)}
-                  </span>
-                </button>
-                <div className="flex flex-col items-center gap-0.5 text-primary">
-                  <MessageCircle className="w-4.5 h-4.5" strokeWidth={1.75} />
-                  <span className="text-[11px] tabular-nums">
-                    {formatCount(short.commentsCount)}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  aria-label="Share"
-                  className="flex flex-col items-center gap-0.5 text-text-muted hover:text-text-primary focus:outline-none"
-                >
-                  <Share2 className="w-4.5 h-4.5" strokeWidth={1.75} />
-                  <span className="text-[11px]">Share</span>
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setCommentsOpen(false)}
-                aria-label="Close comments"
-                className="rounded-full p-1.5 text-text-muted hover:bg-surface-raised focus:outline-none"
-              >
-                <X className="w-4 h-4" strokeWidth={2} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
-              <CommentSection contentType="short" contentId={short.id} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Modal
+        isOpen={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+        title="Comments"
+      >
+        <CommentSection contentType="short" contentId={short.id} />
+      </Modal>
     </div>
   );
 };

@@ -61,32 +61,32 @@ const VideoWatch = () => {
   return (
     <div ref={rootRef} className="flex w-full flex-col">
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_360px] lg:gap-4">
-        <VideoPlayer
-          video={video}
-          className="-mx-4 max-md:w-[calc(100%_+_2rem)] md:-mx-5 md:-mt-5 md:max-lg:w-[calc(100%_+_2.5rem)] lg:mr-0"
-          upNextSlot={
-            <UpNextRail
-              videoId={video.id}
-              onShowMore={() =>
-                suggestionsRef.current?.scrollIntoView({ behavior: 'smooth' })
-              }
-            />
-          }
-        />
-
         <div className="flex flex-col gap-3">
+          <VideoPlayer
+            video={video}
+            className="-mx-4 max-md:w-[calc(100%+2rem)] md:-mx-5 md:-mt-5 md:max-lg:w-[calc(100%+2.5rem)] lg:mr-0"
+            upNextSlot={
+              <UpNextRail
+                videoId={video.id}
+                onShowMore={() =>
+                  suggestionsRef.current?.scrollIntoView({ behavior: 'smooth' })
+                }
+              />
+            }
+          />
+
           <VideoMetaRail
             video={video}
             descriptionOpen={activePanel === 'description'}
             onToggleDescription={() => togglePanel('description')}
           />
-
-          <VideoEngagementPanel
-            video={video}
-            activePanel={activePanel}
-            onToggleComments={() => togglePanel('comments')}
-          />
         </div>
+
+        <VideoEngagementPanel
+          video={video}
+          activePanel={activePanel}
+          onToggleComments={() => togglePanel('comments')}
+        />
       </div>
 
       <div ref={suggestionsRef} className="py-4">

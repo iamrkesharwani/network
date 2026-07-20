@@ -7,6 +7,7 @@ import PlaybackSpeedControl from '../../../components/preferences/PlaybackSpeedC
 const PreferencesTab = () => {
   const [appearance, setAppearance] = usePreference('appearance');
   const [playback, setPlayback] = usePreference('playback');
+  const [layout, setLayout] = usePreference('layout');
 
   return (
     <div>
@@ -44,7 +45,7 @@ const PreferencesTab = () => {
       </div>
 
       <h3 className="mb-2 text-sm font-semibold text-text-primary">Playback</h3>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="mb-8 grid grid-cols-1 gap-3 md:grid-cols-2">
         <PreferenceOptionCard
           label="Playback speed"
           description="Default speed for videos."
@@ -52,6 +53,20 @@ const PreferencesTab = () => {
           <PlaybackSpeedControl
             value={playback.playbackRate ?? PREFERENCES_DEFAULT_PLAYBACK_RATE}
             onChange={(rate) => setPlayback({ playbackRate: rate })}
+          />
+        </PreferenceOptionCard>
+      </div>
+
+      <h3 className="mb-2 text-sm font-semibold text-text-primary">Shorts</h3>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <PreferenceOptionCard
+          label="Comments expanded by default"
+          description="Show the comments panel already open when watching shorts on tablet/desktop."
+        >
+          <PreferenceSwitch
+            label="Comments expanded by default"
+            checked={layout.shortsCommentsOpen ?? false}
+            onChange={(checked) => setLayout({ shortsCommentsOpen: checked })}
           />
         </PreferenceOptionCard>
       </div>
