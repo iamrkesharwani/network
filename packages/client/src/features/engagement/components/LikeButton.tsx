@@ -1,6 +1,4 @@
-import { useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import confetti from 'canvas-confetti';
 import { Heart } from 'lucide-react';
 import { formatCount, type EngageableContentType } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
@@ -17,8 +15,6 @@ export interface LikeButtonProps {
   className?: string;
 }
 
-const PARTICLE_COUNT = 8;
-
 const LikeButton = ({
   contentType,
   contentId,
@@ -27,8 +23,7 @@ const LikeButton = ({
   size = 'md',
   className,
 }: LikeButtonProps) => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const { liked, likesCount, toggle, justLiked } = useLikeToggle({
+  const { liked, likesCount, toggle } = useLikeToggle({
     contentType,
     contentId,
     initialLiked,
@@ -36,32 +31,12 @@ const LikeButton = ({
   });
   const { reduce } = useMotionSafe();
 
-  const handleClick = () => {
-    if (!liked && !reduce && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      confetti({
-        particleCount: PARTICLE_COUNT,
-        spread: 60,
-        startVelocity: 18,
-        gravity: 1.1,
-        scalar: 0.6,
-        ticks: 60,
-        origin: {
-          x: (rect.left + rect.width / 2) / window.innerWidth,
-          y: (rect.top + rect.height / 2) / window.innerHeight,
-        },
-      });
-    }
-    toggle();
-  };
-
   const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
 
   return (
     <button
-      ref={buttonRef}
       type="button"
-      onClick={handleClick}
+      onClick={toggle}
       aria-pressed={liked}
       aria-label={liked ? 'Unlike' : 'Like'}
       className={cn(
@@ -75,31 +50,14 @@ const LikeButton = ({
         transition={SPRINGS.snappy}
         className="relative inline-flex"
       >
-        {justLiked && !reduce && (
-          <>
-            <motion.span
-              initial={{ scale: 0.8, opacity: 0.5 }}
-              animate={{ scale: 2, opacity: 0 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="absolute inset-0 rounded-full bg-error/30"
-            />
-            <motion.span
-              initial={{ scale: 0.8, opacity: 0.4 }}
-              animate={{ scale: 1.6, opacity: 0 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-              className="absolute inset-0 rounded-full bg-error/40"
-            />
-          </>
-        )}
-
         <AnimatePresence mode="popLayout" initial={false}>
           {liked ? (
             <motion.span
               key="filled"
               initial={reduce ? false : { scale: 0, opacity: 0 }}
-              animate={{ scale: [0, 1.3, 1], opacity: 1 }}
+              animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.6, opacity: 0 }}
-              transition={SPRINGS.bouncy}
+              transition={SPRINGS.snappy}
             >
               <Heart className={cn(iconSize, 'fill-current')} strokeWidth={2} />
             </motion.span>

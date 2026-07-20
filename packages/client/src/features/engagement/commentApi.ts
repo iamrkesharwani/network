@@ -80,6 +80,25 @@ export const commentApi = createApi({
             }
           )
         );
+
+        if (input.parentCommentId) {
+          dispatch(
+            commentApi.util.updateQueryData(
+              'listComments',
+              {
+                contentType: input.contentType,
+                contentId: input.contentId,
+                parentCommentId: undefined,
+              },
+              (draft) => {
+                const parent = draft.data.find(
+                  (c) => c.id === input.parentCommentId
+                );
+                if (parent) parent.repliesCount += 1;
+              }
+            )
+          );
+        }
       },
     }),
 

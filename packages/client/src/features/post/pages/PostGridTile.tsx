@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Images } from 'lucide-react';
+import { Images, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../../shared/utils/cn';
 import Modal from '../../../shared/ui/overlay/Modal';
@@ -9,12 +9,18 @@ import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmD
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import PostEditForm from '../form/PostEditForm';
-import PostCard from './PostCard';
+import PostDetailLayout from '../components/PostDetailLayout';
+import LikeButton from '../../engagement/components/LikeButton';
+import ShareSheet from '../../engagement/components/ShareSheet';
+import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
+import { useContentRoom } from '../../engagement/hooks/useContentRoom';
+import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import type { IPostResponse } from '@network/shared';
 import {
   CLIENT_ROUTES,
   POST_TILE_QUOTE_THRESHOLD_CHARS,
   POST_TILE_HEIGHT_PX,
+  formatCount,
 } from '@network/shared';
 import {
   useUnsavedChangesGuard,
@@ -50,6 +56,16 @@ const PostGridTile = ({
   const editGuard = useUnsavedChangesGuard(editFormRef, () =>
     setEditModalOpen(false)
   );
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const socketRef = useSocketContext();
+  useContentRoom(socketRef, 'post', post.id, cardRef);
+
+  const { data: likeStatusData } = useGetLikeStatusesQuery({
+    contentType: 'post',
+    contentIds: [post.id],
+  });
+  const liked = likeStatusData?.data[post.id] ?? false;
 
   const text = post.text ?? '';
   const images = post.imageUrls ?? [];
@@ -111,6 +127,7 @@ const PostGridTile = ({
   return (
     <>
       <div
+        ref={cardRef}
         role="button"
         tabIndex={0}
         onClick={handleOpen}
@@ -177,14 +194,44 @@ const PostGridTile = ({
             </p>
           </div>
         )}
+
+        <div className="flex items-center gap-4 px-3 sm:px-4 py-2.5 shrink-0 border-t border-border">
+          <div onClick={(e) => e.stopPropagation()}>
+            <LikeButton
+              contentType="post"
+              contentId={post.id}
+              initialLiked={liked}
+              initialLikesCount={post.likes}
+              size="sm"
+            />
+          </div>
+
+          {post.commentsCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted">
+              <MessageCircle className="w-4 h-4" strokeWidth={2} />
+              {formatCount(post.commentsCount)}
+            </span>
+          )}
+
+          <div onClick={(e) => e.stopPropagation()}>
+            <ShareSheet contentType="post" contentId={post.id} compact />
+          </div>
+
+          {post.views > 0 && (
+            <span className="ml-auto text-xs text-text-muted">
+              {formatCount(post.views)} views
+            </span>
+          )}
+        </div>
       </div>
 
       <Modal
         isOpen={detailOpen}
         onClose={() => setDetailOpen(false)}
         title="Post"
+        className={hasImage ? 'max-w-4xl' : undefined}
       >
-        <PostCard
+        <PostDetailLayout
           post={post}
           isOwner={isOwner}
           onDelete={onDelete}

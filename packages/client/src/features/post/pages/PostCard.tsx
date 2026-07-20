@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { formatDaysLeft, type IPostResponse } from '@network/shared';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import { useContentRoom } from '../../engagement/hooks/useContentRoom';
@@ -26,6 +26,14 @@ export interface PostCardProps {
   onDelete?: (post: IPostResponse) => Promise<void> | void;
   onToggleVisibility?: (post: IPostResponse) => Promise<void> | void;
   className?: string;
+  /** 'split' renders media in a left column with header+footer scrolling
+   * together on the right (used by the post-detail modal/permalink layout).
+   * Defaults to the normal stacked card. */
+  layout?: 'stacked' | 'split';
+  /** Extra content rendered inside the footer region, after PostFooter - used
+   * to mount CommentSection so it scrolls together with the caption in split
+   * layout, rather than sitting as a disconnected sibling below the card. */
+  belowFooter?: ReactNode;
 }
 
 const PostCard = ({
@@ -34,6 +42,8 @@ const PostCard = ({
   onDelete,
   onToggleVisibility,
   className,
+  layout = 'stacked',
+  belowFooter,
 }: PostCardProps) => {
   const [editConfirmOpen, setEditConfirmOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -94,6 +104,7 @@ const PostCard = ({
     <div ref={cardRef}>
       <CardShell
         className={className}
+        layout={layout}
         header={
           <CardAuthorHeader
             username={post.author.username}
@@ -130,6 +141,7 @@ const PostCard = ({
               <RemovedContentBanner onAppealClick={() => setAppealOpen(true)} />
             )}
             <PostFooter post={post} daysLeft={daysLeft} />
+            {belowFooter}
           </>
         }
       />

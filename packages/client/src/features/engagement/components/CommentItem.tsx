@@ -82,7 +82,7 @@ const CommentItem = ({
     <motion.div
       layout="position"
       transition={SPRINGS.smooth}
-      className="flex flex-col gap-1.5 py-2.5"
+      className="group flex flex-col gap-1.5 py-2.5"
     >
       <CardAuthorHeader
         username={comment.author.username}

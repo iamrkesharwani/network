@@ -1,15 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CLIENT_ROUTES, SKIP_GUARD } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
-import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { COL_CLASS } from '../../video/utils/videoGrid';
 import { SHORT_COL_CLASS } from '../../short/utils/shortGrid';
 import { useFeedColumns } from '../hooks/useFeedColumns';
 import { createScheduler } from '../utils/scheduler';
 import VideoCard from '../../video/pages/VideoCard';
 import ShortRailCard from '../../short/components/ShortRailCard';
-import ShortTheaterModal from '../../short/components/ShortTheaterModal';
 import VideoErrorState from '../../video/components/VideoErrorState';
 import VideoEmptyState from '../../video/components/VideoEmptyState';
 import PostGridTile from '../../post/pages/PostGridTile';
@@ -49,7 +47,6 @@ const FeedRenderer = ({
   emptySubMessage = 'When content is added it will appear here.',
 }: FeedRendererProps) => {
   const navigate = useNavigate();
-  const isMobileLayout = useIsMobileLayout();
   const {
     columns,
     widthMode,
@@ -73,7 +70,6 @@ const FeedRenderer = ({
   } = useMixedFeedPools(source);
 
   const [blocks, setBlocks] = useState<FeedRenderBlock[]>([]);
-  const [theaterIndex, setTheaterIndex] = useState<number | null>(null);
   const schedulerRef = useRef(createScheduler());
   const isFirstVideoBlockRef = useRef(true);
 
@@ -185,37 +181,8 @@ const FeedRenderer = ({
     postsPerBlock,
   ]);
 
-  const allShorts = useMemo(
-    () =>
-      blocks
-        .filter(
-          (block): block is Extract<FeedRenderBlock, { type: 'short' }> =>
-            block.type === 'short'
-        )
-        .flatMap((block) => block.items),
-    [blocks]
-  );
-
   const handleShortClick = (short: IShortResponse) => {
-    if (isMobileLayout) {
-      navigate(CLIENT_ROUTES.SHORT_WATCH.replace(':shortId', short.id));
-      return;
-    }
-    const index = allShorts.findIndex((s) => s.id === short.id);
-    if (index === -1) return;
-    setTheaterIndex(index);
-  };
-
-  const handleTheaterNext = () => {
-    setTheaterIndex((index) =>
-      index === null ? index : Math.min(index + 1, allShorts.length - 1)
-    );
-  };
-
-  const handleTheaterPrev = () => {
-    setTheaterIndex((index) =>
-      index === null ? index : Math.max(index - 1, 0)
-    );
+    navigate(CLIENT_ROUTES.SHORT_WATCH.replace(':shortId', short.id));
   };
 
   if (isLoading && blocks.length === 0) {
@@ -287,24 +254,13 @@ const FeedRenderer = ({
                 className={`grid gap-4 ${COL_CLASS[postsPerBlock as FeedColumnCount]}`}
               >
                 {block.items.map((post) => (
-                  <PostGridTile key={post.id} post={post} />
+                  <PostGridTile key={post.id} post={post} variant="detail" />
                 ))}
               </div>
             );
           })}
         </div>
       </InfiniteScroll>
-
-      {theaterIndex !== null && (
-        <ShortTheaterModal
-          short={allShorts[theaterIndex] ?? null}
-          activeIndex={theaterIndex}
-          total={allShorts.length}
-          onNext={handleTheaterNext}
-          onPrev={handleTheaterPrev}
-          onClose={() => setTheaterIndex(null)}
-        />
-      )}
     </div>
   );
 };

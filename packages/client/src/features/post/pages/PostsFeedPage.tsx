@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { cn } from '../../../shared/utils/cn';
 import { DEFAULT_PAGE_LIMIT, type FeedColumnCount } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import InfiniteScroll from '../../../shared/ui/list/InfiniteScroll';
@@ -7,12 +8,11 @@ import { useLiveFeed } from '../../feed/hooks/useLiveFeed';
 import { COL_CLASS, type ColCount } from '../../video/utils/videoGrid';
 import { useGetPostByIdQuery, postApi } from '../postApi';
 import PostGridTile from './PostGridTile';
-import PostCard from './PostCard';
+import PostDetailLayout from '../components/PostDetailLayout';
 import PostEmptyState from '../components/PostEmptyState';
 import PostErrorState from '../components/PostErrorState';
 import { PostTileGridSkeleton } from '../skeleton/PostGridTileSkeleton';
 import { useFeedColumns } from '../../feed/hooks/useFeedColumns';
-import CommentSection from '../../engagement/components/CommentSection';
 
 const PostsFeedPage = () => {
   const { postId } = useParams<{ postId?: string }>();
@@ -83,9 +83,13 @@ const PostsFeedPage = () => {
   return (
     <div className="flex flex-col gap-8">
       {pinnedPost && (
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-          <PostCard post={pinnedPost} />
-          <CommentSection contentType="post" contentId={pinnedPost.id} />
+        <div
+          className={cn(
+            'mx-auto w-full',
+            pinnedPost.mediaType !== 'none' ? 'max-w-4xl' : 'max-w-2xl'
+          )}
+        >
+          <PostDetailLayout post={pinnedPost} />
         </div>
       )}
 

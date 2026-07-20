@@ -26,7 +26,7 @@ const CommentSection = ({ contentType, contentId }: CommentSectionProps) => {
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-sm font-semibold text-text-primary">Comments</h3>
+      <h3 className="ml-0 md:ml-1 text-sm font-semibold text-text-primary">Comments</h3>
       <CommentInput mode="create" onSubmit={handleCreate} />
       <CommentList
         contentType={contentType}

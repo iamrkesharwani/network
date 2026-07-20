@@ -10,6 +10,8 @@ import VideoEditForm from '../form/VideoEditForm';
 import ReportModal from '../../report/components/ReportModal';
 import RemovedContentBanner from '../../jury/components/RemovedContentBanner';
 import AppealModal from '../../jury/components/AppealModal';
+import { useContentRoom } from '../../engagement/hooks/useContentRoom';
+import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import { formatDaysLeft, type IVideoResponse } from '@network/shared';
 import {
   useUnsavedChangesGuard,
@@ -41,6 +43,10 @@ const VideoCard = ({
   const editGuard = useUnsavedChangesGuard(editFormRef, () =>
     setEditModalOpen(false)
   );
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const socketRef = useSocketContext();
+  useContentRoom(socketRef, 'video', video.id, cardRef);
 
   const isRemoved = isOwner && video.moderationStatus === 'jury_removed';
   const isReady = video.status === 'READY';
@@ -101,7 +107,7 @@ const VideoCard = ({
 
   return (
     <>
-      <div className="group flex flex-col gap-2.5">
+      <div ref={cardRef} className="group flex flex-col gap-2.5">
         <VideoCardThumbnail
           video={video}
           isReady={isReady}

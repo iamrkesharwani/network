@@ -60,7 +60,7 @@ const CommentInput = ({
         autoFocus={autoFocus}
         rows={mode === 'edit' ? 2 : 1}
         maxLength={COMMENT_TEXT_MAX_LENGTH}
-        className="min-w-0 flex-1 resize-none rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+        className="ml-0 md:ml-1 min-w-0 flex-1 resize-none rounded-lg border border-border bg-surface-raised px-2 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
       />
       <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
         {onCancel && (

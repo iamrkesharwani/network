@@ -33,7 +33,11 @@ export const useEngagementCountSocket = (
             Object.assign(draft.data, patch);
           })
         );
-        for (const listEndpoint of ['getMyPosts', 'getUserPosts'] as const) {
+        for (const listEndpoint of [
+          'getFeed',
+          'getMyPosts',
+          'getUserPosts',
+        ] as const) {
           const cachedArgs = postApi.util.selectCachedArgsForQuery(
             store.getState(),
             listEndpoint
@@ -53,7 +57,11 @@ export const useEngagementCountSocket = (
             Object.assign(draft.data, patch);
           })
         );
-        for (const listEndpoint of ['getMyVideos', 'getUserVideos'] as const) {
+        for (const listEndpoint of [
+          'getFeed',
+          'getMyVideos',
+          'getUserVideos',
+        ] as const) {
           const cachedArgs = videoApi.util.selectCachedArgsForQuery(
             store.getState(),
             listEndpoint
@@ -73,7 +81,11 @@ export const useEngagementCountSocket = (
             Object.assign(draft.data, patch);
           })
         );
-        for (const listEndpoint of ['getMyShorts', 'getUserShorts'] as const) {
+        for (const listEndpoint of [
+          'getFeed',
+          'getMyShorts',
+          'getUserShorts',
+        ] as const) {
           const cachedArgs = shortApi.util.selectCachedArgsForQuery(
             store.getState(),
             listEndpoint

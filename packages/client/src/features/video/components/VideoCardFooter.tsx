@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { formatCount } from '@network/shared';
+import { Eye, Heart, MessageCircle, Share2 } from 'lucide-react';
+import { formatCount, getRelativeDate } from '@network/shared';
 import type { IVideoResponse } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 
@@ -42,9 +43,25 @@ const VideoCardFooter = ({ video, menu }: VideoCardFooterProps) => (
         </h3>
       </Link>
 
-      <p className="mt-1 text-xs text-text-muted">
-        {formatCount(video.likes)} likes · {formatCount(video.views)} views
-      </p>
+      <div className="mt-1 flex items-center gap-3 text-xs text-text-muted">
+        <span className="inline-flex items-center gap-1">
+          <Eye className="w-3.5 h-3.5" strokeWidth={2} />
+          {formatCount(video.views)}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <Heart className="w-3.5 h-3.5" strokeWidth={2} />
+          {formatCount(video.likes)}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <MessageCircle className="w-3.5 h-3.5" strokeWidth={2} />
+          {formatCount(video.commentsCount)}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <Share2 className="w-3.5 h-3.5" strokeWidth={2} />
+          {formatCount(video.shares)}
+        </span>
+        <span>{getRelativeDate(video.createdAt)}</span>
+      </div>
     </div>
 
     {menu}

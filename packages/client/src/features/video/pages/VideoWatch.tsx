@@ -1,16 +1,16 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useGetVideoByIdQuery } from '../videoApi';
 import VideoPlayer from '../../player/variants/video/VideoPlayer';
 import VideoWatchSkeleton from '../skeleton/VideoWatchSkeleton';
-import VideoDescription from '../components/VideoDescription';
 import VideoMetaRail from '../components/VideoMetaRail';
-import LikesViewsCount from '../components/LikesViewsCount';
+import VideoEngagementPanel, {
+  type VideoEngagementActivePanel,
+} from '../components/VideoEngagementPanel';
 import UpNextRail from '../components/UpNextRail';
 import SuggestionsGrid from '../components/SuggestionsGrid';
-import CommentSection from '../../engagement/components/CommentSection';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import { useContentRoom } from '../../engagement/hooks/useContentRoom';
 
@@ -18,6 +18,8 @@ const VideoWatch = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const [activePanel, setActivePanel] =
+    useState<VideoEngagementActivePanel>('comments');
 
   const { data, isLoading, isError } = useGetVideoByIdQuery(videoId ?? '', {
     skip: !videoId,
@@ -29,6 +31,10 @@ const VideoWatch = () => {
   useContentRoom(socketRef, 'video', videoId ?? '', rootRef);
 
   usePageTitle(video ? video.title : 'Video');
+
+  const togglePanel = (panel: 'comments' | 'description') => {
+    setActivePanel((current) => (current === panel ? null : panel));
+  };
 
   if (!videoId) {
     return <Navigate to={CLIENT_ROUTES.FEED} replace />;
@@ -68,22 +74,23 @@ const VideoWatch = () => {
           }
         />
 
-        <VideoMetaRail video={video} />
+        <div className="flex flex-col gap-3">
+          <VideoMetaRail
+            video={video}
+            descriptionOpen={activePanel === 'description'}
+            onToggleDescription={() => togglePanel('description')}
+          />
+
+          <VideoEngagementPanel
+            video={video}
+            activePanel={activePanel}
+            onToggleComments={() => togglePanel('comments')}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 py-4">
-        <VideoDescription
-          description={video.description}
-          trailing={<LikesViewsCount likes={video.likes} views={video.views} />}
-        />
-
-        <div id="comments">
-          <CommentSection contentType="video" contentId={video.id} />
-        </div>
-
-        <div ref={suggestionsRef}>
-          <SuggestionsGrid videoId={video.id} />
-        </div>
+      <div ref={suggestionsRef} className="py-4">
+        <SuggestionsGrid videoId={video.id} />
       </div>
     </div>
   );
