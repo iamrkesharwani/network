@@ -68,6 +68,14 @@ const postSchema = new Schema<IPostDocument>(
       type: Number,
       default: 0,
     },
+    commentsCount: {
+      type: Number,
+      default: 0,
+    },
+    shares: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
       enum: POST_STATUS,

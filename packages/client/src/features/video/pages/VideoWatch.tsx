@@ -10,16 +10,23 @@ import VideoMetaRail from '../components/VideoMetaRail';
 import LikesViewsCount from '../components/LikesViewsCount';
 import UpNextRail from '../components/UpNextRail';
 import SuggestionsGrid from '../components/SuggestionsGrid';
+import CommentSection from '../../engagement/components/CommentSection';
+import { useSocketContext } from '../../../shared/hooks/SocketContext';
+import { useContentRoom } from '../../engagement/hooks/useContentRoom';
 
 const VideoWatch = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, isError } = useGetVideoByIdQuery(videoId ?? '', {
     skip: !videoId,
   });
 
   const video = data?.data;
+
+  const socketRef = useSocketContext();
+  useContentRoom(socketRef, 'video', videoId ?? '', rootRef);
 
   usePageTitle(video ? video.title : 'Video');
 
@@ -46,7 +53,7 @@ const VideoWatch = () => {
   }
 
   return (
-    <div className="flex w-full flex-col">
+    <div ref={rootRef} className="flex w-full flex-col">
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_360px] lg:gap-4">
         <VideoPlayer
           video={video}
@@ -69,6 +76,10 @@ const VideoWatch = () => {
           description={video.description}
           trailing={<LikesViewsCount likes={video.likes} views={video.views} />}
         />
+
+        <div id="comments">
+          <CommentSection contentType="video" contentId={video.id} />
+        </div>
 
         <div ref={suggestionsRef}>
           <SuggestionsGrid videoId={video.id} />

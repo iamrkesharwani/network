@@ -32,6 +32,17 @@ export * from './modules/jury/jury.schema.js';
 export * from './modules/jury/jury.types.js';
 export * from './modules/jury/jury.constants.js';
 
+export * from './modules/like/like.schema.js';
+export * from './modules/like/like.types.js';
+
+export * from './modules/comment/comment.schema.js';
+export * from './modules/comment/comment.types.js';
+export * from './modules/comment/comment.constants.js';
+
+export * from './modules/share/share.schema.js';
+export * from './modules/share/share.types.js';
+export * from './modules/share/share.constants.js';
+
 export * from './modules/location/location.schema.js';
 export * from './modules/location/location.constants.js';
 
@@ -86,6 +97,9 @@ export * from './modules/video/video.constants.js';
 export * from './core/api/api.types.js';
 export * from './core/api/api.constants.js';
 export * from './core/socket/socket.types.js';
+export * from './core/contentRef/contentRef.constants.js';
+export * from './core/contentRef/contentRef.types.js';
+export * from './core/contentRef/contentRef.schema.js';
 
 export * from './modules/general/constants/general.constants.js';
 export * from './modules/general/constants/time.constants.js';

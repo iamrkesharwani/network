@@ -16,8 +16,11 @@ import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
 import { juryApi } from '../../features/jury/juryApi';
 import { followApi } from '../../features/follow/followApi';
+import { likeApi } from '../../features/engagement/likeApi';
+import { shareApi } from '../../features/engagement/shareApi';
+import { commentApi } from '../../features/engagement/commentApi';
 
-export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
+export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
   configureStore({
     reducer: rootReducer,
     preloadedState,
@@ -38,6 +41,9 @@ export const createAppStore = (preloadedState?: Partial<RootReducerState>) =>
         reportApi.middleware,
         juryApi.middleware,
         followApi.middleware,
+        likeApi.middleware,
+        shareApi.middleware,
+        commentApi.middleware,
         preferencesSyncMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',

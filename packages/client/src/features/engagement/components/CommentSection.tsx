@@ -1,0 +1,44 @@
+import type { ContentType } from '@network/shared';
+import { useLiveFeed } from '../../feed/hooks/useLiveFeed';
+import { useCreateCommentMutation, useListCommentsQuery } from '../commentApi';
+import CommentInput from './CommentInput';
+import CommentList from './CommentList';
+
+const COMMENTS_PAGE_LIMIT = 20;
+
+export interface CommentSectionProps {
+  contentType: ContentType;
+  contentId: string;
+}
+
+const CommentSection = ({ contentType, contentId }: CommentSectionProps) => {
+  const [createComment] = useCreateCommentMutation();
+
+  const { items, isLoading, isFetchingNextPage, hasNextPage, loadMore } =
+    useLiveFeed(
+      (args) => useListCommentsQuery({ contentType, contentId, ...args }),
+      COMMENTS_PAGE_LIMIT
+    );
+
+  const handleCreate = async (text: string) => {
+    await createComment({ contentType, contentId, text }).unwrap();
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 className="text-sm font-semibold text-text-primary">Comments</h3>
+      <CommentInput mode="create" onSubmit={handleCreate} />
+      <CommentList
+        contentType={contentType}
+        contentId={contentId}
+        comments={items}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage}
+        onLoadMore={loadMore}
+      />
+    </div>
+  );
+};
+
+export default CommentSection;

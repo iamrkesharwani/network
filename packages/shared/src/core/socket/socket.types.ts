@@ -1,6 +1,7 @@
 import type { VideoStatus } from '../../modules/video/video.types.js';
 import type { ShortStatus } from '../../modules/short/short.types.js';
 import type { PostStatus } from '../../modules/post/post.types.js';
+import type { EngageableContentType } from '../contentRef/contentRef.types.js';
 
 export interface IMediaStatusEvent {
   mediaType: 'video' | 'short' | 'post';
@@ -19,4 +20,11 @@ export interface IUnlistedExpiryWarningEvent {
   id: string;
   title?: string;
   daysLeft: number;
+}
+
+export interface IEngagementCountEvent {
+  contentType: EngageableContentType;
+  contentId: string;
+  field: 'likes' | 'comments';
+  count: number;
 }

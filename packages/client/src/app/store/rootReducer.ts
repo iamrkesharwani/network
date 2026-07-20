@@ -20,6 +20,9 @@ import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
 import { juryApi } from '../../features/jury/juryApi';
 import { followApi } from '../../features/follow/followApi';
+import { likeApi } from '../../features/engagement/likeApi';
+import { shareApi } from '../../features/engagement/shareApi';
+import { commentApi } from '../../features/engagement/commentApi';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -43,6 +46,9 @@ const rootReducer = combineReducers({
   [reportApi.reducerPath]: reportApi.reducer,
   [juryApi.reducerPath]: juryApi.reducer,
   [followApi.reducerPath]: followApi.reducer,
+  [likeApi.reducerPath]: likeApi.reducer,
+  [shareApi.reducerPath]: shareApi.reducer,
+  [commentApi.reducerPath]: commentApi.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

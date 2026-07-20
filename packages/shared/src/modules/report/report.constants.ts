@@ -1,15 +1,13 @@
 import type { ReportReasonCode } from './report.types.js';
+import { ENGAGEABLE_CONTENT_TYPES } from '../../core/contentRef/contentRef.constants.js';
 
 export const REPORT_NOTE_MAX_LENGTH = 500;
 export const REPORT_JURY_CASE_TRIGGER_COUNT = 3;
 export const REPORT_REASON_CODES_BYPASSING_JURY: ReportReasonCode[] = ['CSAM'];
 
-export const REPORTABLE_CONTENT_TYPES = [
-  'video',
-  'short',
-  'post',
-  'comment',
-] as const;
+// Reportable content is exactly the engageable content set (video/short/post/comment) -
+// sourced from the shared primitive so the two never drift apart.
+export const REPORTABLE_CONTENT_TYPES = ENGAGEABLE_CONTENT_TYPES;
 
 export const REPORT_REASON_CATALOG = {
   SPAM: { label: 'Spam' },

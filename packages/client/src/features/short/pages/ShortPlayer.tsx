@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { formatCount } from '@network/shared';
 import type { IShortResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
@@ -11,6 +11,13 @@ import { useTelemetry } from '../../player/core/useTelemetry';
 import { useResumePlayback } from '../../player/core/useResumePlayback';
 import Overlay from '../../player/ui/Overlay';
 import DoubleTapSeekZones from '../../player/ui/DoubleTapSeekZones';
+import Modal from '../../../shared/ui/overlay/Modal';
+import CommentSection from '../../engagement/components/CommentSection';
+import { useLikeToggle } from '../../engagement/hooks/useLikeToggle';
+import { useContentRoom } from '../../engagement/hooks/useContentRoom';
+import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
+import { useCreateShareMutation } from '../../engagement/shareApi';
+import { useOptionalSocketContext } from '../../../shared/hooks/SocketContext';
 import {
   ChevronUp,
   ChevronDown,
@@ -28,7 +35,6 @@ interface ShortPlayerProps {
   onNext: () => void;
   onPrev: () => void;
   isActive?: boolean;
-  onLike?: () => void;
   className?: string;
 }
 
@@ -39,13 +45,51 @@ const ShortPlayer = ({
   onNext,
   onPrev,
   isActive = true,
-  onLike,
   className,
 }: ShortPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
 
   const { user } = useAuth();
+
+  const socketRef = useOptionalSocketContext();
+  useContentRoom(socketRef, 'short', short?.id ?? '', containerRef);
+
+  const { data: likeStatusData } = useGetLikeStatusesQuery(
+    { contentType: 'short', contentIds: short ? [short.id] : [] },
+    { skip: !short }
+  );
+  const { liked, likesCount, toggle: toggleLike } = useLikeToggle({
+    contentType: 'short',
+    contentId: short?.id ?? '',
+    initialLiked: short ? (likeStatusData?.data[short.id] ?? false) : false,
+    initialLikesCount: short?.likes ?? 0,
+  });
+
+  const [createShare] = useCreateShareMutation();
+
+  const handleDoubleTapLike = () => {
+    if (!liked) toggleLike();
+  };
+
+  const handleShare = async () => {
+    if (!short) return;
+    try {
+      const result = await createShare({
+        contentType: 'short',
+        contentId: short.id,
+      }).unwrap();
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ url: result.data.url }).catch(() => {});
+      } else {
+        await navigator.clipboard.writeText(result.data.url);
+      }
+    } catch {
+      // Best-effort - this player has no toast/snackbar slot of its own to
+      // surface a failure, and a failed share isn't worth interrupting playback for.
+    }
+  };
 
   const {
     state: sourceState,
@@ -132,7 +176,7 @@ const ShortPlayer = ({
         currentTimeRef={engine.currentTimeRef}
         seek={engine.seek}
         onToggleControls={engine.togglePlay}
-        onDoubleTapCenter={onLike}
+        onDoubleTapCenter={handleDoubleTapLike}
       />
 
       <Overlay
@@ -176,31 +220,43 @@ const ShortPlayer = ({
       <div className="absolute right-3 bottom-20 md:bottom-4 flex flex-col items-center gap-5">
         <button
           type="button"
-          onClick={onLike}
+          onClick={toggleLike}
+          aria-pressed={liked}
+          aria-label={liked ? 'Unlike' : 'Like'}
           className="flex flex-col items-center gap-1 focus:outline-none group"
         >
           <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">
-            <Heart className="w-5 h-5 text-white" strokeWidth={1.75} />
+            <Heart
+              className={cn(
+                'w-5 h-5',
+                liked ? 'fill-error text-error' : 'text-white'
+              )}
+              strokeWidth={1.75}
+            />
           </div>
           <span className="text-[11px] text-white/70 tabular-nums">
-            {formatCount(short.likes)}
+            {formatCount(likesCount)}
           </span>
         </button>
 
         <button
           type="button"
+          onClick={() => setCommentsOpen(true)}
+          aria-label="Comments"
           className="flex flex-col items-center gap-1 focus:outline-none group"
         >
           <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">
             <MessageCircle className="w-5 h-5 text-white" strokeWidth={1.75} />
           </div>
           <span className="text-[11px] text-white/70 tabular-nums">
-            {formatCount(short.views)}
+            {formatCount(short.commentsCount)}
           </span>
         </button>
 
         <button
           type="button"
+          onClick={handleShare}
+          aria-label="Share"
           className="flex flex-col items-center gap-1 focus:outline-none group"
         >
           <div className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10 group-hover:bg-black/70 transition-colors">
@@ -236,6 +292,14 @@ const ShortPlayer = ({
           {short.title}
         </p>
       </div>
+
+      <Modal
+        isOpen={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+        title="Comments"
+      >
+        <CommentSection contentType="short" contentId={short.id} />
+      </Modal>
     </div>
   );
 };

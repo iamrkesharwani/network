@@ -136,6 +136,14 @@ const videoSchema = new Schema<IVideoDocument>(
       type: Number,
       default: 0,
     },
+    commentsCount: {
+      type: Number,
+      default: 0,
+    },
+    shares: {
+      type: Number,
+      default: 0,
+    },
     duration: {
       type: Number,
       default: 0,

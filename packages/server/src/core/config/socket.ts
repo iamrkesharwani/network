@@ -5,7 +5,15 @@ import type { Server } from 'node:http';
 import { pubClient, subClient } from './redis.js';
 import { env } from '../env/env.js';
 import { logger } from '../utils/logger.js';
-import { DEFAULT_USER_ROLE } from '@network/shared';
+import {
+  DEFAULT_USER_ROLE,
+  CONTENT_ROOM_JOIN_EVENT,
+  CONTENT_ROOM_LEAVE_EVENT,
+  contentRefSchema,
+} from '@network/shared';
+
+const contentRoomName = (contentType: string, contentId: string): string =>
+  `content:${contentType}:${contentId}`;
 
 interface SocketUser {
   id: string;
@@ -65,6 +73,18 @@ const handleConnection = (socket: Socket): void => {
 
   socket.join(`user:${userId}`);
 
+  socket.on(CONTENT_ROOM_JOIN_EVENT, (payload) => {
+    const parsed = contentRefSchema.safeParse(payload);
+    if (!parsed.success) return;
+    socket.join(contentRoomName(parsed.data.contentType, parsed.data.contentId));
+  });
+
+  socket.on(CONTENT_ROOM_LEAVE_EVENT, (payload) => {
+    const parsed = contentRefSchema.safeParse(payload);
+    if (!parsed.success) return;
+    socket.leave(contentRoomName(parsed.data.contentType, parsed.data.contentId));
+  });
+
   socket.on('disconnect', (reason) => {
     logger.info({ userId, socketId: socket.id, reason }, 'User disconnected');
   });
@@ -112,5 +132,19 @@ export const emitToUser = (
     getIO().to(`user:${userId}`).emit(event, payload);
   } catch (error) {
     logger.warn(error, `Failed to emit "${event}" to user:${userId}`);
+  }
+};
+
+export const emitToContent = (
+  contentType: string,
+  contentId: string,
+  event: string,
+  payload: unknown
+): void => {
+  const room = contentRoomName(contentType, contentId);
+  try {
+    getIO().to(room).emit(event, payload);
+  } catch (error) {
+    logger.warn(error, `Failed to emit "${event}" to ${room}`);
   }
 };

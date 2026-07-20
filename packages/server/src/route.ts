@@ -15,6 +15,9 @@ import searchRoutes from './modules/search/search.routes.js';
 import reportRoutes from './modules/report/report.routes.js';
 import juryRoutes from './modules/jury/jury.routes.js';
 import followRoutes from './modules/follow/follow.routes.js';
+import likeRoutes from './modules/like/like.routes.js';
+import shareRoutes from './modules/share/share.routes.js';
+import commentRoutes from './modules/comment/comment.routes.js';
 
 const router = Router();
 
@@ -34,5 +37,8 @@ router.use('/search', searchRoutes);
 router.use('/reports', reportRoutes);
 router.use('/jury', juryRoutes);
 router.use('/follow', followRoutes);
+router.use('/likes', likeRoutes);
+router.use('/share', shareRoutes);
+router.use('/comments', commentRoutes);
 
 export default router;

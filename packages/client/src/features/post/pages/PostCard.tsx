@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 import { formatDaysLeft, type IPostResponse } from '@network/shared';
+import { useSocketContext } from '../../../shared/hooks/SocketContext';
+import { useContentRoom } from '../../engagement/hooks/useContentRoom';
 import CardShell from '../../../shared/ui/card/CardShell';
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
@@ -46,6 +48,10 @@ const PostCard = ({
     setEditModalOpen(false)
   );
 
+  const cardRef = useRef<HTMLDivElement>(null);
+  const socketRef = useSocketContext();
+  useContentRoom(socketRef, 'post', post.id, cardRef);
+
   const isRemoved = isOwner && post.moderationStatus === 'jury_removed';
   const isUnlisted = post.visibility === 'unlisted';
   const daysLeft =
@@ -85,7 +91,7 @@ const PostCard = ({
   };
 
   return (
-    <>
+    <div ref={cardRef}>
       <CardShell
         className={className}
         header={
@@ -203,7 +209,7 @@ const PostCard = ({
         isOpen={appealOpen}
         onClose={() => setAppealOpen(false)}
       />
-    </>
+    </div>
   );
 };
 

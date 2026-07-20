@@ -11,7 +11,6 @@ interface ShortTheaterModalProps {
   onNext: () => void;
   onPrev: () => void;
   onClose: () => void;
-  onLike?: () => void;
   className?: string;
 }
 
@@ -22,7 +21,6 @@ const ShortTheaterModal = ({
   onNext,
   onPrev,
   onClose,
-  onLike,
   className,
 }: ShortTheaterModalProps) => {
   useEffect(() => {
@@ -49,7 +47,6 @@ const ShortTheaterModal = ({
           total={total}
           onNext={onNext}
           onPrev={onPrev}
-          onLike={onLike}
           className={cn('h-full', className)}
         />
       </div>

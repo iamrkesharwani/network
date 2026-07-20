@@ -55,6 +55,8 @@ export interface IVideo {
   visibility: VideoVisibility;
   views: number;
   likes: number;
+  commentsCount: number;
+  shares: number;
   duration: number;
   deletedAt?: string | null;
   unlistedAt?: string | null;

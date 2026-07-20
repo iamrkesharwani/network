@@ -7,10 +7,12 @@ import { useLiveFeed } from '../../feed/hooks/useLiveFeed';
 import { COL_CLASS, type ColCount } from '../../video/utils/videoGrid';
 import { useGetPostByIdQuery, postApi } from '../postApi';
 import PostGridTile from './PostGridTile';
+import PostCard from './PostCard';
 import PostEmptyState from '../components/PostEmptyState';
 import PostErrorState from '../components/PostErrorState';
 import { PostTileGridSkeleton } from '../skeleton/PostGridTileSkeleton';
 import { useFeedColumns } from '../../feed/hooks/useFeedColumns';
+import CommentSection from '../../engagement/components/CommentSection';
 
 const PostsFeedPage = () => {
   const { postId } = useParams<{ postId?: string }>();
@@ -80,6 +82,13 @@ const PostsFeedPage = () => {
 
   return (
     <div className="flex flex-col gap-8">
+      {pinnedPost && (
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+          <PostCard post={pinnedPost} />
+          <CommentSection contentType="post" contentId={pinnedPost.id} />
+        </div>
+      )}
+
       <InfiniteScroll
         isLoading={isFetchingNextPage}
         hasMore={hasNextPage}
@@ -88,7 +97,6 @@ const PostsFeedPage = () => {
         <div
           className={`grid gap-4 ${COL_CLASS[postsPerBlock as FeedColumnCount]}`}
         >
-          {pinnedPost && <PostGridTile post={pinnedPost} variant="detail" />}
           {continuation.map((item) => (
             <PostGridTile key={item.id} post={item} variant="detail" />
           ))}

@@ -4,20 +4,11 @@ import {
   REPORT_REASON_CODES,
   REPORT_STATUS,
   REPORT_NOTE_MAX_LENGTH,
+  CONTENT_MODEL_BY_TYPE,
   type ReportableContentType,
   type ReportReasonCode,
   type ReportStatus,
 } from '@network/shared';
-
-const CONTENT_MODEL_BY_TYPE: Record<
-  ReportableContentType,
-  'Video' | 'Short' | 'Post' | 'Comment'
-> = {
-  video: 'Video',
-  short: 'Short',
-  post: 'Post',
-  comment: 'Comment',
-};
 
 export interface IReportDocument extends Document {
   reporterId: mongoose.Types.ObjectId;

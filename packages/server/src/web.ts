@@ -28,6 +28,12 @@ import { registerModerationContentAdapter } from './core/moderation/moderationCo
 import { videoModerationAdapter } from './modules/video/services/video.moderation.adapter.js';
 import { shortModerationAdapter } from './modules/short/services/short.moderation.adapter.js';
 import { postModerationAdapter } from './modules/post/services/post.moderation.adapter.js';
+import { commentModerationAdapter } from './modules/comment/services/comment.moderation.adapter.js';
+import { registerContentCounterAdapter } from './core/contentRef/contentCounter.registry.js';
+import { videoCounterAdapter } from './modules/video/services/video.counter.adapter.js';
+import { shortCounterAdapter } from './modules/short/services/short.counter.adapter.js';
+import { postCounterAdapter } from './modules/post/services/post.counter.adapter.js';
+import { commentCounterAdapter } from './modules/comment/services/comment.counter.adapter.js';
 import { startTrustDecayWorker } from './core/trust/trustDecay.worker.js';
 import { scheduleTrustDecay } from './core/trust/trustDecay.queue.js';
 import { registerJuryCaseTrigger } from './modules/report/report.hooks.js';
@@ -68,6 +74,12 @@ const startWeb = async () => {
     registerModerationContentAdapter(videoModerationAdapter);
     registerModerationContentAdapter(shortModerationAdapter);
     registerModerationContentAdapter(postModerationAdapter);
+    registerModerationContentAdapter(commentModerationAdapter);
+
+    registerContentCounterAdapter(videoCounterAdapter);
+    registerContentCounterAdapter(shortCounterAdapter);
+    registerContentCounterAdapter(postCounterAdapter);
+    registerContentCounterAdapter(commentCounterAdapter);
 
     startTrustDecayWorker();
     await scheduleTrustDecay();

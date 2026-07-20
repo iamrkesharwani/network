@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { EyeOff } from 'lucide-react';
 import { POST_TEXT_LINE_CLAMP, formatCount } from '@network/shared';
 import type { IPostResponse } from '@network/shared';
+import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
+import LikeButton from '../../engagement/components/LikeButton';
+import ShareSheet from '../../engagement/components/ShareSheet';
 
 interface PostFooterProps {
   post: IPostResponse;
@@ -12,6 +15,12 @@ const PostFooter = ({ post, daysLeft }: PostFooterProps) => {
   const [expanded, setExpanded] = useState(false);
   const [isClamped, setIsClamped] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
+
+  const { data: likeStatusData } = useGetLikeStatusesQuery({
+    contentType: 'post',
+    contentIds: [post.id],
+  });
+  const liked = likeStatusData?.data[post.id] ?? false;
 
   const text = post.text ?? '';
 
@@ -62,13 +71,26 @@ const PostFooter = ({ post, daysLeft }: PostFooterProps) => {
         </span>
       )}
 
-      {(post.views > 0 || post.likes > 0) && (
+      {post.views > 0 && (
         <p className="text-xs text-text-muted">
-          {post.likes > 0 && `${formatCount(post.likes)} likes`}
-          {post.likes > 0 && post.views > 0 && ' · '}
-          {post.views > 0 && `${formatCount(post.views)} views`}
+          {formatCount(post.views)} views
         </p>
       )}
+
+      <div className="flex items-center gap-4 pt-1">
+        <LikeButton
+          contentType="post"
+          contentId={post.id}
+          initialLiked={liked}
+          initialLikesCount={post.likes}
+        />
+        {post.commentsCount > 0 && (
+          <span className="text-sm font-medium text-text-muted">
+            {formatCount(post.commentsCount)} comments
+          </span>
+        )}
+        <ShareSheet contentType="post" contentId={post.id} compact />
+      </div>
     </div>
   );
 };

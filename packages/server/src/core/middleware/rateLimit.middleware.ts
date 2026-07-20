@@ -90,3 +90,24 @@ export const followLimiter = createLimiter(
   'Too many follow/unfollow actions. Please slow down.',
   'rl:follow:'
 );
+
+export const likeLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  300,
+  'Too many like actions. Please slow down.',
+  'rl:like:'
+);
+
+export const shareLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  60,
+  'Too many share links created. Please slow down.',
+  'rl:share:'
+);
+
+export const commentLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  120,
+  'Too many comments posted. Please slow down.',
+  'rl:comment:'
+);

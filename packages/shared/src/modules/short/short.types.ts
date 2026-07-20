@@ -49,6 +49,8 @@ export interface IShort {
   visibility: ShortVisibility;
   views: number;
   likes: number;
+  commentsCount: number;
+  shares: number;
   duration: number;
   deletedAt?: string | null;
   unlistedAt?: string | null;

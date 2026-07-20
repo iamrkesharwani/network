@@ -281,6 +281,79 @@ export const incrementViews = (
     .lean()
     .exec();
 
+export const incrementLikes = (
+  id: string
+): Promise<{ likes: number } | null> =>
+  ShortModel.findOneAndUpdate(
+    { _id: id },
+    [{ $set: { likes: { $add: ['$likes', 1] } } }],
+    { returnDocument: 'after', updatePipeline: true, projection: { likes: 1 } }
+  )
+    .lean()
+    .exec();
+
+export const decrementLikes = (
+  id: string
+): Promise<{ likes: number } | null> =>
+  ShortModel.findOneAndUpdate(
+    { _id: id },
+    [{ $set: { likes: { $max: [{ $add: ['$likes', -1] }, 0] } } }],
+    { returnDocument: 'after', updatePipeline: true, projection: { likes: 1 } }
+  )
+    .lean()
+    .exec();
+
+export const incrementCommentsCount = (
+  id: string
+): Promise<{ commentsCount: number } | null> =>
+  ShortModel.findOneAndUpdate(
+    { _id: id },
+    [{ $set: { commentsCount: { $add: ['$commentsCount', 1] } } }],
+    {
+      returnDocument: 'after',
+      updatePipeline: true,
+      projection: { commentsCount: 1 },
+    }
+  )
+    .lean()
+    .exec();
+
+export const decrementCommentsCount = (
+  id: string
+): Promise<{ commentsCount: number } | null> =>
+  ShortModel.findOneAndUpdate(
+    { _id: id },
+    [
+      {
+        $set: {
+          commentsCount: { $max: [{ $add: ['$commentsCount', -1] }, 0] },
+        },
+      },
+    ],
+    {
+      returnDocument: 'after',
+      updatePipeline: true,
+      projection: { commentsCount: 1 },
+    }
+  )
+    .lean()
+    .exec();
+
+export const incrementShares = (
+  id: string
+): Promise<{ shares: number } | null> =>
+  ShortModel.findOneAndUpdate(
+    { _id: id },
+    [{ $set: { shares: { $add: ['$shares', 1] } } }],
+    {
+      returnDocument: 'after',
+      updatePipeline: true,
+      projection: { shares: 1 },
+    }
+  )
+    .lean()
+    .exec();
+
 export const softDeleteById = (id: string): Promise<IShortDocument | null> =>
   ShortModel.findOneAndUpdate(
     { _id: id, deletedAt: null },

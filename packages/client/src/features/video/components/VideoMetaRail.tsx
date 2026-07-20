@@ -1,9 +1,14 @@
 import { Link } from 'react-router-dom';
-import { CLIENT_ROUTES, type IVideoResponse } from '@network/shared';
+import { MessageCircle } from 'lucide-react';
+import {
+  CLIENT_ROUTES,
+  formatCount,
+  type IVideoResponse,
+} from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
-import CommentsPlaceholder from './CommentsPlaceholder';
-import LikeButton from './LikeButton';
-import ShareButton from './ShareButton';
+import LikeButton from '../../engagement/components/LikeButton';
+import ShareSheet from '../../engagement/components/ShareSheet';
+import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
 
 interface VideoMetaRailProps {
   video: IVideoResponse;
@@ -14,6 +19,12 @@ const VideoMetaRail = ({ video }: VideoMetaRailProps) => {
     ':username',
     video.author.username
   );
+
+  const { data: likeStatusData } = useGetLikeStatusesQuery({
+    contentType: 'video',
+    contentIds: [video.id],
+  });
+  const liked = likeStatusData?.data[video.id] ?? false;
 
   return (
     <div className="flex flex-col gap-3">
@@ -40,17 +51,38 @@ const VideoMetaRail = ({ video }: VideoMetaRailProps) => {
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <LikeButton compact />
-          <ShareButton compact />
-          <CommentsPlaceholder compact />
+          <LikeButton
+            contentType="video"
+            contentId={video.id}
+            initialLiked={liked}
+            initialLikesCount={video.likes}
+            size="sm"
+          />
+          <ShareSheet contentType="video" contentId={video.id} compact />
         </div>
       </div>
 
-      <CommentsPlaceholder className="hidden lg:flex" />
+      <a
+        href="#comments"
+        className="hidden items-center gap-1.5 text-sm font-medium text-text-muted transition-colors hover:text-text-primary lg:flex"
+      >
+        <MessageCircle className="h-4 w-4" />
+        {formatCount(video.commentsCount)} comments
+      </a>
 
       <div className="hidden items-center gap-3 lg:flex">
-        <LikeButton className="flex-1" />
-        <ShareButton className="flex-1" />
+        <LikeButton
+          contentType="video"
+          contentId={video.id}
+          initialLiked={liked}
+          initialLikesCount={video.likes}
+          className="flex-1"
+        />
+        <ShareSheet
+          contentType="video"
+          contentId={video.id}
+          className="flex-1"
+        />
       </div>
     </div>
   );

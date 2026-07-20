@@ -36,6 +36,8 @@ export interface IPost {
   visibility: PostVisibility;
   views: number;
   likes: number;
+  commentsCount: number;
+  shares: number;
   deletedAt?: string | null;
   unlistedAt?: string | null;
   unlistedExpiryWarnedAt?: string | null;
