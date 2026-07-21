@@ -104,7 +104,7 @@ const VideoEngagementPanel = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={SPRINGS.smooth}
-              className="lg:max-h-[60vh] lg:overflow-y-auto lg:overflow-x-hidden"
+              className="lg:max-h-[85vh] lg:overflow-y-auto lg:overflow-x-hidden"
             >
               <CommentSection contentType="video" contentId={video.id} />
             </motion.div>
@@ -117,7 +117,7 @@ const VideoEngagementPanel = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={SPRINGS.smooth}
-              className="lg:max-h-[60vh] lg:overflow-y-auto lg:overflow-x-hidden"
+              className="lg:max-h-[85vh] lg:overflow-y-auto lg:overflow-x-hidden"
             >
               <p className="whitespace-pre-wrap wrap-break-word rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary">
                 {video.description || 'No description'}
