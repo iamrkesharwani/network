@@ -21,7 +21,7 @@ const VideoMetaRail = ({
   );
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:rounded-lg lg:border lg:border-border lg:p-3">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:rounded-lg lg:border lg:border-border lg:p-2">
       <button
         type="button"
         onClick={onToggleDescription}
@@ -29,13 +29,13 @@ const VideoMetaRail = ({
         disabled={!video.description}
         className="flex items-start gap-1.5 text-left focus:outline-none disabled:cursor-default lg:order-2 lg:min-w-0"
       >
-        <h1 className="text-lg font-semibold text-text-primary lg:truncate">
+        <h1 className="text-lg font-semibold text-text-primary lg:text-base lg:truncate">
           {video.title}
         </h1>
         {video.description && (
           <ChevronDown
             className={cn(
-              'mt-1.5 h-4 w-4 shrink-0 text-text-muted transition-transform',
+              'mt-1.5 h-4 w-4 shrink-0 text-text-muted transition-transform lg:mt-1',
               descriptionOpen && 'rotate-180'
             )}
             strokeWidth={2.5}

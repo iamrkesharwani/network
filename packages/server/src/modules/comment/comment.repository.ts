@@ -151,6 +151,18 @@ export const decrementLikes = (
     .lean()
     .exec();
 
+export const softDeleteManyByParentId = async (
+  parentCommentId: string
+): Promise<void> => {
+  await CommentModel.updateMany(
+    {
+      parentCommentId: new mongoose.Types.ObjectId(parentCommentId),
+      deletedAt: null,
+    },
+    { deletedAt: new Date() }
+  ).exec();
+};
+
 export const setModerationStatus = async (
   id: string,
   status: ModerationStatus

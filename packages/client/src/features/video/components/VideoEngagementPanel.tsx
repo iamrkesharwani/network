@@ -4,6 +4,8 @@ import { formatCount, type IVideoResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { SPRINGS } from '../../../shared/motion/springs';
 import { useMotionSafe } from '../../../shared/motion/useMotionSafe';
+import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
+import BottomSheet from '../../../shared/ui/overlay/BottomSheet';
 import LikeButton from '../../engagement/components/LikeButton';
 import ShareSheet from '../../engagement/components/ShareSheet';
 import CommentSection from '../../engagement/components/CommentSection';
@@ -15,12 +17,14 @@ interface VideoEngagementPanelProps {
   video: IVideoResponse;
   activePanel: VideoEngagementActivePanel;
   onToggleComments: () => void;
+  onToggleDescription: () => void;
 }
 
 const VideoEngagementPanel = ({
   video,
   activePanel,
   onToggleComments,
+  onToggleDescription,
 }: VideoEngagementPanelProps) => {
   const { data: likeStatusData } = useGetLikeStatusesQuery({
     contentType: 'video',
@@ -28,6 +32,7 @@ const VideoEngagementPanel = ({
   });
   const liked = likeStatusData?.data[video.id] ?? false;
   const { reduce } = useMotionSafe();
+  const isMobileLayout = useIsMobileLayout();
 
   return (
     <div className="flex flex-col gap-3">
@@ -62,35 +67,65 @@ const VideoEngagementPanel = ({
         </span>
       </div>
 
-      <AnimatePresence mode="wait" initial={false}>
-        {activePanel === 'comments' && (
-          <motion.div
-            key="comments"
-            initial={reduce ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={SPRINGS.smooth}
-            className="lg:max-h-[60vh] lg:overflow-y-auto lg:overflow-x-hidden"
+      {isMobileLayout ? (
+        <>
+          <BottomSheet
+            isOpen={activePanel === 'comments'}
+            onClose={onToggleComments}
+            title={
+              <h2 className="text-sm font-semibold text-text-primary">
+                Comments
+              </h2>
+            }
           >
             <CommentSection contentType="video" contentId={video.id} />
-          </motion.div>
-        )}
+          </BottomSheet>
 
-        {activePanel === 'description' && (
-          <motion.div
-            key="description"
-            initial={reduce ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={SPRINGS.smooth}
-            className="lg:max-h-[60vh] lg:overflow-y-auto lg:overflow-x-hidden"
+          <BottomSheet
+            isOpen={activePanel === 'description'}
+            onClose={onToggleDescription}
+            title={
+              <h2 className="truncate text-sm font-semibold text-text-primary">
+                {video.title}
+              </h2>
+            }
           >
-            <p className="whitespace-pre-wrap rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary">
+            <p className="whitespace-pre-wrap text-sm text-text-secondary">
               {video.description || 'No description'}
             </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </BottomSheet>
+        </>
+      ) : (
+        <AnimatePresence mode="wait" initial={false}>
+          {activePanel === 'comments' && (
+            <motion.div
+              key="comments"
+              initial={reduce ? false : { opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={SPRINGS.smooth}
+              className="lg:max-h-[60vh] lg:overflow-y-auto lg:overflow-x-hidden"
+            >
+              <CommentSection contentType="video" contentId={video.id} />
+            </motion.div>
+          )}
+
+          {activePanel === 'description' && (
+            <motion.div
+              key="description"
+              initial={reduce ? false : { opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={SPRINGS.smooth}
+              className="lg:max-h-[60vh] lg:overflow-y-auto lg:overflow-x-hidden"
+            >
+              <p className="whitespace-pre-wrap rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary">
+                {video.description || 'No description'}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   );
 };

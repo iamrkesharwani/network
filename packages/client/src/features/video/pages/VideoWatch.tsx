@@ -19,7 +19,7 @@ const VideoWatch = () => {
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const [activePanel, setActivePanel] =
-    useState<VideoEngagementActivePanel>('comments');
+    useState<VideoEngagementActivePanel>(null);
 
   const { data, isLoading, isError } = useGetVideoByIdQuery(videoId ?? '', {
     skip: !videoId,
@@ -86,6 +86,7 @@ const VideoWatch = () => {
           video={video}
           activePanel={activePanel}
           onToggleComments={() => togglePanel('comments')}
+          onToggleDescription={() => togglePanel('description')}
         />
       </div>
 

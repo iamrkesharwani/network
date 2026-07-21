@@ -152,6 +152,10 @@ export const deleteComment = async (
       count: result?.repliesCount ?? 0,
     });
   } else {
+    if (comment.repliesCount > 0) {
+      await commentRepository.softDeleteManyByParentId(commentId);
+    }
+
     const contentId = comment.contentId.toString();
     const counterAdapter = getContentCounterAdapter(comment.contentType);
     const count = counterAdapter?.decrementComments

@@ -5,7 +5,7 @@ import { CLIENT_ROUTES } from '@network/shared';
 import { useLiveShortsFeed } from '../../feed/hooks/useLiveShortsFeed';
 import { useGetShortByIdQuery } from '../shortApi';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
-import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
+import { useShortLayoutMode } from '../hooks/useShortLayoutMode';
 import { cn } from '../../../shared/utils/cn';
 import ShortFeed from '../../player/variants/short/ShortFeed';
 import ShortWatchDesktop from './ShortWatchDesktop';
@@ -14,7 +14,8 @@ const ShortWatch = () => {
   usePageTitle('Shorts');
   const { shortId } = useParams<{ shortId: string }>();
   const navigate = useNavigate();
-  const isMobileLayout = useIsMobileLayout();
+  const { mode, compact } = useShortLayoutMode();
+  const isMobileLayout = mode === 'mobile';
 
   const { items: shorts, hasNextPage, loadMore } = useLiveShortsFeed();
 
@@ -106,6 +107,7 @@ const ShortWatch = () => {
         shorts={displayShorts}
         index={displayIndex}
         onIndexChange={handleIndexChange}
+        compact={compact}
       />
     );
   }

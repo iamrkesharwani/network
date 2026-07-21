@@ -1,31 +1,42 @@
 import { useRef } from 'react';
+import type { WheelEvent } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { SHORT_THEATER_WIDTH_PX, type IShortResponse } from '@network/shared';
+import {
+  PLAYER_WHEEL_NAVIGATION_COOLDOWN_MS,
+  PLAYER_WHEEL_NAVIGATION_THRESHOLD,
+  SHORT_THEATER_WIDTH_PX,
+  type IShortResponse,
+} from '@network/shared';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import { useContentRoom } from '../../engagement/hooks/useContentRoom';
 import { useMotionSafe } from '../../../shared/motion/useMotionSafe';
 import { SPRINGS } from '../../../shared/motion/springs';
 import { usePreference } from '../../settings/hooks/usePreference';
+import { cn } from '../../../shared/utils/cn';
 import ShortPlayerStage from './ShortPlayerStage';
 import ShortMetaRail from '../components/ShortMetaRail';
 import ShortEngagementPanel from '../components/ShortEngagementPanel';
 
 const ENGAGEMENT_RAIL_COLLAPSED_WIDTH_PX = 64;
+const ENGAGEMENT_RAIL_EXPANDED_COMPACT_WIDTH_PX = 320;
 
 interface ShortWatchDesktopProps {
   shorts: IShortResponse[];
   index: number;
   onIndexChange: (index: number) => void;
+  compact?: boolean;
 }
 
 const ShortWatchDesktop = ({
   shorts,
   index,
   onIndexChange,
+  compact = false,
 }: ShortWatchDesktopProps) => {
   const short = shorts[index] ?? null;
   const rootRef = useRef<HTMLDivElement>(null);
+  const wheelCooldownRef = useRef(false);
   const [layout, setLayout] = usePreference('layout');
   const commentsOpen = layout.shortsCommentsOpen ?? false;
   const { reduce } = useMotionSafe();
@@ -36,15 +47,43 @@ const ShortWatchDesktop = ({
   const handleNext = () => onIndexChange(Math.min(index + 1, shorts.length - 1));
   const handlePrev = () => onIndexChange(Math.max(index - 1, 0));
 
+  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
+    if (commentsOpen || wheelCooldownRef.current) return;
+    if (Math.abs(event.deltaY) < PLAYER_WHEEL_NAVIGATION_THRESHOLD) return;
+
+    wheelCooldownRef.current = true;
+    if (event.deltaY > 0) handleNext();
+    else handlePrev();
+
+    setTimeout(() => {
+      wheelCooldownRef.current = false;
+    }, PLAYER_WHEEL_NAVIGATION_COOLDOWN_MS);
+  };
+
   if (!short) return null;
+
+  const expandedEngagementWidth = compact
+    ? ENGAGEMENT_RAIL_EXPANDED_COMPACT_WIDTH_PX
+    : SHORT_THEATER_WIDTH_PX;
 
   return (
     <div
       ref={rootRef}
-      className="flex items-stretch justify-center gap-4 py-2"
+      onWheel={handleWheel}
+      className={cn(
+        'flex items-stretch py-2',
+        compact
+          ? 'justify-start gap-2 overflow-x-auto px-4'
+          : 'justify-center gap-4'
+      )}
       style={{ height: 'calc(100dvh - 8rem)', maxHeight: 900 }}
     >
-      <div className="flex h-full w-72 shrink-0 flex-col justify-end">
+      <div
+        className={cn(
+          'flex h-full shrink-0 flex-col justify-end',
+          compact ? 'w-56' : 'w-72'
+        )}
+      >
         <ShortMetaRail short={short} />
       </div>
 
@@ -62,7 +101,7 @@ const ShortWatchDesktop = ({
         initial={false}
         animate={{
           width: commentsOpen
-            ? SHORT_THEATER_WIDTH_PX
+            ? expandedEngagementWidth
             : ENGAGEMENT_RAIL_COLLAPSED_WIDTH_PX,
         }}
         transition={reduce ? { duration: 0 } : SPRINGS.smooth}

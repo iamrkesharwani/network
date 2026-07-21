@@ -9,4 +9,6 @@ export const PLAYER_CONTROLS_AUTO_HIDE_MS = 3000;
 export const PLAYER_DOUBLE_TAP_SEEK_SECONDS = 10;
 export const PLAYER_DOUBLE_TAP_WINDOW_MS = 300;
 export const PLAYER_TELEMETRY_INTERVAL_MS = TEN_SECONDS_MS;
+export const PLAYER_WHEEL_NAVIGATION_THRESHOLD = 24;
+export const PLAYER_WHEEL_NAVIGATION_COOLDOWN_MS = 500;
 export type VideoSourceState = 'idle' | 'loading' | 'ready' | 'buffering' | 'error';

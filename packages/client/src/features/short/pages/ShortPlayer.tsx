@@ -12,7 +12,7 @@ import { useTelemetry } from '../../player/core/useTelemetry';
 import { useResumePlayback } from '../../player/core/useResumePlayback';
 import Overlay from '../../player/ui/Overlay';
 import DoubleTapSeekZones from '../../player/ui/DoubleTapSeekZones';
-import Modal from '../../../shared/ui/overlay/Modal';
+import BottomSheet from '../../../shared/ui/overlay/BottomSheet';
 import CommentSection from '../../engagement/components/CommentSection';
 import { useLikeToggle } from '../../engagement/hooks/useLikeToggle';
 import AnimatedHeartIcon from '../../engagement/components/AnimatedHeartIcon';
@@ -25,7 +25,6 @@ import { SPRINGS } from '../../../shared/motion/springs';
 import {
   ChevronUp,
   ChevronDown,
-  ArrowLeft,
   Eye,
   MessageCircle,
   Share2,
@@ -335,59 +334,45 @@ const ShortPlayer = ({
         )}
       </div>
 
-      <AnimatePresence>
-        {descriptionOpen && short.description && (
-          <motion.div
-            initial={reduce ? false : { y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={SPRINGS.smooth}
-            className="absolute inset-0 z-20 flex flex-col bg-surface-overlay/95 backdrop-blur-md p-4"
-          >
-            <button
-              type="button"
-              onClick={() => setDescriptionOpen(false)}
-              aria-label="Back"
-              className="flex items-center gap-1.5 self-start text-sm font-medium text-white/80 hover:text-white focus:outline-none"
-            >
-              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-              Back
-            </button>
-
-            <div className="flex items-center gap-2 mt-4">
-              <div className="w-7 h-7 rounded-full bg-surface-overlay ring-2 ring-white/20 overflow-hidden shrink-0">
-                {short.author.avatarUrl && (
-                  <img
-                    src={short.author.avatarUrl}
-                    alt={short.author.username}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  {short.title}
-                </p>
-                <p className="text-xs text-white/70 truncate">
-                  @{short.author.username}
-                </p>
-              </div>
+      <BottomSheet
+        isOpen={descriptionOpen && Boolean(short.description)}
+        onClose={() => setDescriptionOpen(false)}
+        title={
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 shrink-0 overflow-hidden rounded-full bg-surface-overlay ring-1 ring-border">
+              {short.author.avatarUrl && (
+                <img
+                  src={short.author.avatarUrl}
+                  alt={short.author.username}
+                  className="h-full w-full object-cover"
+                />
+              )}
             </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-text-primary">
+                {short.title}
+              </p>
+              <p className="truncate text-xs text-text-muted">
+                @{short.author.username}
+              </p>
+            </div>
+          </div>
+        }
+      >
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
+          {short.description}
+        </p>
+      </BottomSheet>
 
-            <p className="mt-4 flex-1 overflow-y-auto overflow-x-hidden text-sm text-white/90 leading-relaxed whitespace-pre-wrap">
-              {short.description}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <Modal
+      <BottomSheet
         isOpen={commentsOpen}
         onClose={() => setCommentsOpen(false)}
-        title="Comments"
+        title={
+          <h2 className="text-sm font-semibold text-text-primary">Comments</h2>
+        }
       >
         <CommentSection contentType="short" contentId={short.id} />
-      </Modal>
+      </BottomSheet>
     </div>
   );
 };
