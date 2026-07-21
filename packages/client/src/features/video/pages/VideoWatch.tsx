@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
+import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { useGetVideoByIdQuery } from '../videoApi';
 import VideoPlayer from '../../player/variants/video/VideoPlayer';
 import VideoWatchSkeleton from '../skeleton/VideoWatchSkeleton';
@@ -18,8 +19,16 @@ const VideoWatch = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const isMobileLayout = useIsMobileLayout();
   const [activePanel, setActivePanel] =
     useState<VideoEngagementActivePanel>(null);
+  const didDefaultPanel = useRef(false);
+
+  useEffect(() => {
+    if (didDefaultPanel.current || isMobileLayout) return;
+    didDefaultPanel.current = true;
+    setActivePanel('comments');
+  }, [isMobileLayout]);
 
   const { data, isLoading, isError } = useGetVideoByIdQuery(videoId ?? '', {
     skip: !videoId,
@@ -33,7 +42,13 @@ const VideoWatch = () => {
   usePageTitle(video ? video.title : 'Video');
 
   const togglePanel = (panel: 'comments' | 'description') => {
-    setActivePanel((current) => (current === panel ? null : panel));
+    setActivePanel((current) => {
+      if (isMobileLayout) return current === panel ? null : panel;
+      if (panel === 'description') {
+        return current === 'description' ? 'comments' : 'description';
+      }
+      return 'comments';
+    });
   };
 
   if (!videoId) {

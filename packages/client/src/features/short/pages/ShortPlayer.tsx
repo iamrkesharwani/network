@@ -359,7 +359,7 @@ const ShortPlayer = ({
           </div>
         }
       >
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
+        <p className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed text-text-secondary">
           {short.description}
         </p>
       </BottomSheet>

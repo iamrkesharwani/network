@@ -90,7 +90,7 @@ const VideoEngagementPanel = ({
               </h2>
             }
           >
-            <p className="whitespace-pre-wrap text-sm text-text-secondary">
+            <p className="whitespace-pre-wrap wrap-break-word text-sm text-text-secondary">
               {video.description || 'No description'}
             </p>
           </BottomSheet>
@@ -119,7 +119,7 @@ const VideoEngagementPanel = ({
               transition={SPRINGS.smooth}
               className="lg:max-h-[60vh] lg:overflow-y-auto lg:overflow-x-hidden"
             >
-              <p className="whitespace-pre-wrap rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary">
+              <p className="whitespace-pre-wrap wrap-break-word rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary">
                 {video.description || 'No description'}
               </p>
             </motion.div>

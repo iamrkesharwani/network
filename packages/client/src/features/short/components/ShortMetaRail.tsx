@@ -58,7 +58,7 @@ const ShortMetaRail = ({ short }: ShortMetaRailProps) => {
               </button>
             </div>
 
-            <p className="whitespace-pre-wrap text-sm text-text-secondary leading-relaxed">
+            <p className="whitespace-pre-wrap wrap-break-word text-sm text-text-secondary leading-relaxed">
               {short.description}
             </p>
           </motion.div>

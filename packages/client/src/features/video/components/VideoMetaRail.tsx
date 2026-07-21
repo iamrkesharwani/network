@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { CLIENT_ROUTES, type IVideoResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import Avatar from '../../../shared/ui/primitives/Avatar';
@@ -21,7 +21,7 @@ const VideoMetaRail = ({
   );
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:rounded-lg lg:border lg:border-border lg:p-2">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
       <button
         type="button"
         onClick={onToggleDescription}
@@ -33,13 +33,22 @@ const VideoMetaRail = ({
           {video.title}
         </h1>
         {video.description && (
-          <ChevronDown
-            className={cn(
-              'mt-1.5 h-4 w-4 shrink-0 text-text-muted transition-transform lg:mt-1',
-              descriptionOpen && 'rotate-180'
-            )}
-            strokeWidth={2.5}
-          />
+          <>
+            <ChevronDown
+              className={cn(
+                'mt-1.5 h-4 w-4 shrink-0 text-text-muted transition-transform lg:hidden',
+                descriptionOpen && 'rotate-180'
+              )}
+              strokeWidth={2.5}
+            />
+            <ChevronRight
+              className={cn(
+                'mt-1 hidden h-4 w-4 shrink-0 text-text-muted transition-transform lg:block',
+                descriptionOpen && 'rotate-180'
+              )}
+              strokeWidth={2.5}
+            />
+          </>
         )}
       </button>
 
