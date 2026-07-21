@@ -9,9 +9,14 @@ const COMMENTS_PAGE_LIMIT = 20;
 export interface CommentSectionProps {
   contentType: ContentType;
   contentId: string;
+  canModerate?: boolean;
 }
 
-const CommentSection = ({ contentType, contentId }: CommentSectionProps) => {
+const CommentSection = ({
+  contentType,
+  contentId,
+  canModerate = false,
+}: CommentSectionProps) => {
   const [createComment] = useCreateCommentMutation();
 
   const { items, isLoading, isFetchingNextPage, hasNextPage, loadMore } =
@@ -36,6 +41,7 @@ const CommentSection = ({ contentType, contentId }: CommentSectionProps) => {
         isFetchingNextPage={isFetchingNextPage}
         hasNextPage={hasNextPage}
         onLoadMore={loadMore}
+        canModerate={canModerate}
       />
     </div>
   );

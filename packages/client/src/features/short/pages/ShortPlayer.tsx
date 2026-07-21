@@ -58,6 +58,7 @@ const ShortPlayer = ({
   const { reduce } = useMotionSafe();
 
   const { user } = useAuth();
+  const isShortOwner = Boolean(user) && user?.id === short?.author.id;
 
   const socketRef = useSocketContext();
   useContentRoom(socketRef, 'short', short?.id ?? '', containerRef);
@@ -371,7 +372,11 @@ const ShortPlayer = ({
           <h2 className="text-sm font-semibold text-text-primary">Comments</h2>
         }
       >
-        <CommentSection contentType="short" contentId={short.id} />
+        <CommentSection
+          contentType="short"
+          contentId={short.id}
+          canModerate={isShortOwner}
+        />
       </BottomSheet>
     </div>
   );

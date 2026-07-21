@@ -14,6 +14,7 @@ export interface CommentListProps {
   isFetchingNextPage: boolean;
   hasNextPage: boolean;
   onLoadMore: () => void;
+  canModerate?: boolean;
 }
 
 const CommentList = ({
@@ -24,6 +25,7 @@ const CommentList = ({
   isFetchingNextPage,
   hasNextPage,
   onLoadMore,
+  canModerate = false,
 }: CommentListProps) => {
   const { reduce } = useMotionSafe();
   const commentIds = comments.map((comment) => comment.id);
@@ -76,6 +78,7 @@ const CommentList = ({
                 contentId={contentId}
                 topLevelCommentId={comment.id}
                 liked={likedMap[comment.id] ?? false}
+                canModerate={canModerate}
               />
             </motion.div>
           ))}

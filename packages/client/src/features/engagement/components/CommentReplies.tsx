@@ -11,12 +11,14 @@ export interface CommentRepliesProps {
   contentType: ContentType;
   contentId: string;
   parentComment: ICommentResponse;
+  canModerate?: boolean;
 }
 
 const CommentReplies = ({
   contentType,
   contentId,
   parentComment,
+  canModerate = false,
 }: CommentRepliesProps) => {
   const {
     expanded,
@@ -89,6 +91,7 @@ const CommentReplies = ({
                   topLevelCommentId={parentComment.id}
                   liked={likedMap[reply.id] ?? false}
                   isReply
+                  canModerate={canModerate}
                 />
               </motion.div>
             ))}

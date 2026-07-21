@@ -5,6 +5,7 @@ import { cn } from '../../../shared/utils/cn';
 import { SPRINGS } from '../../../shared/motion/springs';
 import { useMotionSafe } from '../../../shared/motion/useMotionSafe';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
+import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import BottomSheet from '../../../shared/ui/overlay/BottomSheet';
 import LikeButton from '../../engagement/components/LikeButton';
 import ShareSheet from '../../engagement/components/ShareSheet';
@@ -33,6 +34,8 @@ const VideoEngagementPanel = ({
   const liked = likeStatusData?.data[video.id] ?? false;
   const { reduce } = useMotionSafe();
   const isMobileLayout = useIsMobileLayout();
+  const currentUserId = useAppSelector((state) => state.auth.user?.id);
+  const isVideoOwner = Boolean(currentUserId) && currentUserId === video.author.id;
 
   return (
     <div className="flex flex-col gap-3">
@@ -78,7 +81,11 @@ const VideoEngagementPanel = ({
               </h2>
             }
           >
-            <CommentSection contentType="video" contentId={video.id} />
+            <CommentSection
+              contentType="video"
+              contentId={video.id}
+              canModerate={isVideoOwner}
+            />
           </BottomSheet>
 
           <BottomSheet
@@ -104,9 +111,13 @@ const VideoEngagementPanel = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={SPRINGS.smooth}
-              className="lg:max-h-[85vh] lg:overflow-y-auto lg:overflow-x-hidden"
+              className="lg:max-h-[70vh] lg:overflow-y-auto lg:overflow-x-hidden"
             >
-              <CommentSection contentType="video" contentId={video.id} />
+              <CommentSection
+                contentType="video"
+                contentId={video.id}
+                canModerate={isVideoOwner}
+              />
             </motion.div>
           )}
 
@@ -117,7 +128,7 @@ const VideoEngagementPanel = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={SPRINGS.smooth}
-              className="lg:max-h-[85vh] lg:overflow-y-auto lg:overflow-x-hidden"
+              className="lg:max-h-[70vh] lg:overflow-y-auto lg:overflow-x-hidden"
             >
               <p className="whitespace-pre-wrap wrap-break-word rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary">
                 {video.description || 'No description'}

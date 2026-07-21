@@ -4,6 +4,7 @@ import { formatCount, type IShortResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { SPRINGS, DURATIONS } from '../../../shared/motion/springs';
 import { useMotionSafe } from '../../../shared/motion/useMotionSafe';
+import { useAuth } from '../../auth/useAuth';
 import CommentSection from '../../engagement/components/CommentSection';
 import AnimatedHeartIcon from '../../engagement/components/AnimatedHeartIcon';
 import { useLikeToggle } from '../../engagement/hooks/useLikeToggle';
@@ -22,6 +23,8 @@ const ShortEngagementPanel = ({
   onToggleComments,
 }: ShortEngagementPanelProps) => {
   const { reduce } = useMotionSafe();
+  const { user } = useAuth();
+  const isShortOwner = Boolean(user) && user?.id === short.author.id;
 
   const { data: likeStatusData } = useGetLikeStatusesQuery({
     contentType: 'short',
@@ -130,7 +133,11 @@ const ShortEngagementPanel = ({
             </div>
 
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
-              <CommentSection contentType="short" contentId={short.id} />
+              <CommentSection
+                contentType="short"
+                contentId={short.id}
+                canModerate={isShortOwner}
+              />
             </div>
           </motion.div>
         ) : (

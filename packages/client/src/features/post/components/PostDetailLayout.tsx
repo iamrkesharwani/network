@@ -24,7 +24,13 @@ const PostDetailLayout = ({
       onDelete={onDelete}
       onToggleVisibility={onToggleVisibility}
       layout={hasMedia ? 'split' : 'stacked'}
-      belowFooter={<CommentSection contentType="post" contentId={post.id} />}
+      belowFooter={
+        <CommentSection
+          contentType="post"
+          contentId={post.id}
+          canModerate={isOwner}
+        />
+      }
     />
   );
 };

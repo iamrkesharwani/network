@@ -5,12 +5,27 @@ import {
   type PaginatedResponse,
 } from '@network/shared';
 import * as commentRepository from './comment.repository.js';
+import type { ICommentDocument } from './comment.model.js';
 import { toResponse, toResponseFromLean } from './comment.mappers.js';
 import { getModerationContentAdapter } from '../../core/moderation/moderationContent.registry.js';
 import { getContentCounterAdapter } from '../../core/contentRef/contentCounter.registry.js';
 import { emitToContent } from '../../core/config/socket.js';
 import { ApiError } from '../../core/utils/ApiError.js';
 import { getOwnerId } from '../../core/utils/getOwnerId.js';
+
+const canDeleteComment = async (
+  userId: string,
+  comment: Pick<ICommentDocument, 'userId' | 'contentType' | 'contentId'>
+): Promise<boolean> => {
+  if (getOwnerId(comment.userId) === userId) return true;
+
+  const moderationAdapter = getModerationContentAdapter(comment.contentType);
+  const lookup = moderationAdapter
+    ? await moderationAdapter.lookup(comment.contentId.toString())
+    : null;
+
+  return Boolean(lookup?.ownerId) && lookup?.ownerId === userId;
+};
 
 export const createComment = async (
   userId: string,
@@ -129,7 +144,7 @@ export const deleteComment = async (
   if (!comment || comment.deletedAt) {
     throw new ApiError(404, 'NOT_FOUND', 'Comment not found.');
   }
-  if (getOwnerId(comment.userId) !== userId) {
+  if (!(await canDeleteComment(userId, comment))) {
     throw new ApiError(
       403,
       'FORBIDDEN',

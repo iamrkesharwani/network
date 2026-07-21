@@ -22,6 +22,7 @@ export interface CommentItemProps {
   topLevelCommentId: string;
   liked: boolean;
   isReply?: boolean;
+  canModerate?: boolean;
 }
 
 const CommentItem = ({
@@ -31,9 +32,11 @@ const CommentItem = ({
   topLevelCommentId,
   liked,
   isReply = false,
+  canModerate = false,
 }: CommentItemProps) => {
   const currentUserId = useAppSelector((state) => state.auth.user?.id);
   const isOwner = Boolean(currentUserId) && currentUserId === comment.author.id;
+  const canDelete = isOwner || canModerate;
 
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
@@ -93,8 +96,9 @@ const CommentItem = ({
             <CardOptionsMenu
               itemLabel="Comment"
               isOwner={isOwner}
+              canDelete={canDelete}
               onEdit={isOwner ? () => setIsEditing(true) : undefined}
-              onDeleteClick={isOwner ? handleDelete : undefined}
+              onDeleteClick={canDelete ? handleDelete : undefined}
               onReport={!isOwner ? () => setReportOpen(true) : undefined}
             />
           ) : undefined
@@ -164,6 +168,7 @@ const CommentItem = ({
             contentType={contentType}
             contentId={contentId}
             parentComment={comment}
+            canModerate={canModerate}
           />
         </div>
       )}

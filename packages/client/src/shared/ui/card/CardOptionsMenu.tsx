@@ -6,6 +6,7 @@ import { cn } from '../../utils/cn';
 interface CardOptionsMenuProps {
   itemLabel: string;
   isOwner: boolean;
+  canDelete?: boolean;
   onEdit?: (e: React.MouseEvent) => void;
   onDeleteClick?: (e: React.MouseEvent) => void;
   visibilityAction?: {
@@ -24,11 +25,13 @@ interface MenuPosition {
 const CardOptionsMenu = ({
   itemLabel,
   isOwner,
+  canDelete = false,
   onEdit,
   onDeleteClick,
   visibilityAction,
   onReport,
 }: CardOptionsMenuProps) => {
+  const showDelete = isOwner || canDelete;
   const [menuOpen, setMenuOpen] = useState(false);
   const [position, setPosition] = useState<MenuPosition | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -84,7 +87,7 @@ const CardOptionsMenu = ({
     onReport?.(e);
   };
 
-  if (!isOwner && !onReport) return null;
+  if (!showDelete && !onReport) return null;
 
   return (
     <div className="relative shrink-0 self-start">
@@ -122,62 +125,52 @@ const CardOptionsMenu = ({
               }}
               className="z-50 w-40 py-1 rounded-xl bg-surface-overlay border border-border shadow-xl shadow-black/40"
             >
-              {isOwner ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleEdit}
-                    className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
-                  >
-                    <Edit2
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={handleEdit}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
+                >
+                  <Edit2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                  Edit
+                </button>
+              )}
+              {isOwner && visibilityAction && (
+                <button
+                  type="button"
+                  onClick={handleVisibility}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
+                >
+                  {visibilityAction.toPublic ? (
+                    <Eye className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                  ) : (
+                    <EyeOff
                       className="w-3.5 h-3.5 shrink-0"
                       strokeWidth={1.75}
                     />
-                    Edit
-                  </button>
-                  {visibilityAction && (
-                    <button
-                      type="button"
-                      onClick={handleVisibility}
-                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
-                    >
-                      {visibilityAction.toPublic ? (
-                        <Eye
-                          className="w-3.5 h-3.5 shrink-0"
-                          strokeWidth={1.75}
-                        />
-                      ) : (
-                        <EyeOff
-                          className="w-3.5 h-3.5 shrink-0"
-                          strokeWidth={1.75}
-                        />
-                      )}
-                      {visibilityAction.label}
-                    </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-error hover:bg-error-subtle transition-colors"
-                  >
-                    <Trash2
-                      className="w-3.5 h-3.5 shrink-0"
-                      strokeWidth={1.75}
-                    />
-                    Delete
-                  </button>
-                </>
-              ) : (
-                onReport && (
-                  <button
-                    type="button"
-                    onClick={handleReport}
-                    className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
-                  >
-                    <Flag className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-                    Report
-                  </button>
-                )
+                  {visibilityAction.label}
+                </button>
+              )}
+              {showDelete && (
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-error hover:bg-error-subtle transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                  Delete
+                </button>
+              )}
+              {!isOwner && onReport && (
+                <button
+                  type="button"
+                  onClick={handleReport}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-surface-raised transition-colors"
+                >
+                  <Flag className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                  Report
+                </button>
               )}
             </div>
           </>,
