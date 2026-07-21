@@ -28,7 +28,7 @@ const BottomSheet = ({
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[70] flex flex-col justify-end">
+        <div className="fixed inset-0 z-70 flex flex-col justify-end">
           <motion.div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
