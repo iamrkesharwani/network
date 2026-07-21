@@ -158,7 +158,6 @@ const PostGrid = ({
                   <PostGridTile
                     key={post.id}
                     post={post}
-                    variant="detail"
                     isOwner={isOwner}
                     onDelete={onDelete}
                     onToggleVisibility={onToggleVisibility}

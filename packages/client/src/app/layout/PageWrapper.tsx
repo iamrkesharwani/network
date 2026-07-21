@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { useSocket } from '../../shared/hooks/useSocket';
@@ -24,6 +24,13 @@ const PageWrapper = () => {
   const [appearance, setAppearance] = usePreference('appearance');
   const isSidebarCollapsed = appearance.sidebarCollapsed ?? true;
 
+  const mainRef = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0 });
+  }, [pathname]);
+
   return (
     <SocketProvider socketRef={socketRef}>
       <div className="h-screen bg-surface-alt flex flex-col overflow-hidden">
@@ -44,7 +51,10 @@ const PageWrapper = () => {
             }
           />
 
-          <main className="flex-1 min-w-0 overflow-y-auto pb-14 md:pb-0 max-md:scrollbar-none max-md:[-ms-overflow-style:none] max-md:[&::-webkit-scrollbar]:hidden">
+          <main
+            ref={mainRef}
+            className="flex-1 min-w-0 overflow-y-auto pb-14 md:pb-0 max-md:scrollbar-none max-md:[-ms-overflow-style:none] max-md:[&::-webkit-scrollbar]:hidden"
+          >
             <div className="w-full px-4 pt-0 pb-4 md:px-5 md:pt-5 md:pb-5">
               <Outlet />
             </div>

@@ -9,7 +9,6 @@ import MultiStepConfirmDelete from '../../../shared/ui/overlay/MultiStepConfirmD
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import PostEditForm from '../form/PostEditForm';
-import PostDetailLayout from '../components/PostDetailLayout';
 import LikeButton from '../../engagement/components/LikeButton';
 import ShareSheet from '../../engagement/components/ShareSheet';
 import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
@@ -30,7 +29,6 @@ import {
 export interface PostGridTileProps {
   post: IPostResponse;
   className?: string;
-  variant?: 'preview' | 'detail';
   isOwner?: boolean;
   onDelete?: (post: IPostResponse) => Promise<void> | void;
   onToggleVisibility?: (post: IPostResponse) => Promise<void> | void;
@@ -39,13 +37,11 @@ export interface PostGridTileProps {
 const PostGridTile = ({
   post,
   className,
-  variant = 'preview',
   isOwner = false,
   onDelete,
   onToggleVisibility,
 }: PostGridTileProps) => {
   const navigate = useNavigate();
-  const [detailOpen, setDetailOpen] = useState(false);
   const [editConfirmOpen, setEditConfirmOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [visibilityConfirmOpen, setVisibilityConfirmOpen] = useState(false);
@@ -77,10 +73,6 @@ const PostGridTile = ({
   const isUnlisted = post.visibility === 'unlisted';
 
   const handleOpen = () => {
-    if (variant === 'detail') {
-      setDetailOpen(true);
-      return;
-    }
     navigate(CLIENT_ROUTES.POST_WATCH.replace(':postId', post.id));
   };
 
@@ -124,6 +116,58 @@ const PostGridTile = ({
     }
   };
 
+  const authorHeader = (
+    <CardAuthorHeader
+      username={post.author.username}
+      avatarUrl={post.author.avatarUrl}
+      createdAt={post.createdAt}
+      menu={
+        <CardOptionsMenu
+          itemLabel="Post"
+          isOwner={isOwner}
+          onEdit={() => setEditConfirmOpen(true)}
+          onDeleteClick={() => setDeleteConfirmOpen(true)}
+          visibilityAction={{
+            label: isUnlisted ? 'Make public' : 'Make unlisted',
+            toPublic: isUnlisted,
+            onClick: () => setVisibilityConfirmOpen(true),
+          }}
+        />
+      }
+    />
+  );
+
+  const engagementRow = (
+    <div className="flex items-center gap-4">
+      <div onClick={(e) => e.stopPropagation()}>
+        <LikeButton
+          contentType="post"
+          contentId={post.id}
+          initialLiked={liked}
+          initialLikesCount={post.likes}
+          size="sm"
+        />
+      </div>
+
+      {post.commentsCount > 0 && (
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted">
+          <MessageCircle className="w-4 h-4" strokeWidth={2} />
+          {formatCount(post.commentsCount)}
+        </span>
+      )}
+
+      <div onClick={(e) => e.stopPropagation()}>
+        <ShareSheet contentType="post" contentId={post.id} compact />
+      </div>
+
+      {post.views > 0 && (
+        <span className="ml-auto text-xs text-text-muted">
+          {formatCount(post.views)} views
+        </span>
+      )}
+    </div>
+  );
+
   return (
     <>
       <div
@@ -138,27 +182,6 @@ const PostGridTile = ({
           className
         )}
       >
-        <div className="p-3 sm:p-4 shrink-0">
-          <CardAuthorHeader
-            username={post.author.username}
-            avatarUrl={post.author.avatarUrl}
-            createdAt={post.createdAt}
-            menu={
-              <CardOptionsMenu
-                itemLabel="Post"
-                isOwner={isOwner}
-                onEdit={() => setEditConfirmOpen(true)}
-                onDeleteClick={() => setDeleteConfirmOpen(true)}
-                visibilityAction={{
-                  label: isUnlisted ? 'Make public' : 'Make unlisted',
-                  toPublic: isUnlisted,
-                  onClick: () => setVisibilityConfirmOpen(true),
-                }}
-              />
-            }
-          />
-        </div>
-
         {hasImage ? (
           <>
             <div className="relative flex-1 min-h-0 bg-surface-raised overflow-hidden">
@@ -175,69 +198,41 @@ const PostGridTile = ({
                 </span>
               )}
             </div>
-            {text && (
-              <p className="px-3 sm:px-4 py-2 shrink-0 text-sm text-text-primary line-clamp-2 wrap-break-word">
-                {text}
-              </p>
-            )}
+
+            <div className="shrink-0 flex flex-col gap-2 p-3 sm:p-4 border-t border-border">
+              {authorHeader}
+              {text && (
+                <p className="text-sm text-text-primary line-clamp-1 wrap-break-word">
+                  {text}
+                </p>
+              )}
+              {engagementRow}
+            </div>
           </>
-        ) : isQuote ? (
-          <div className="flex-1 min-h-0 flex items-center justify-center px-5 py-4">
-            <p className="text-center text-lg sm:text-xl font-display font-medium text-text-primary leading-snug wrap-break-word line-clamp-6">
-              {text}
-            </p>
-          </div>
         ) : (
-          <div className="flex-1 min-h-0 px-3 sm:px-4 pb-3 overflow-hidden">
-            <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap wrap-break-word line-clamp-6">
-              {text}
-            </p>
-          </div>
+          <>
+            <div className="p-3 sm:p-4 shrink-0">{authorHeader}</div>
+
+            {isQuote ? (
+              <div className="flex-1 min-h-0 flex items-center justify-center px-5 py-4">
+                <p className="text-center text-lg sm:text-xl font-display font-medium text-text-primary leading-snug wrap-break-word line-clamp-6">
+                  {text}
+                </p>
+              </div>
+            ) : (
+              <div className="flex-1 min-h-0 px-3 sm:px-4 pb-3 overflow-hidden">
+                <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap wrap-break-word line-clamp-6">
+                  {text}
+                </p>
+              </div>
+            )}
+
+            <div className="px-3 sm:px-4 py-2.5 shrink-0 border-t border-border">
+              {engagementRow}
+            </div>
+          </>
         )}
-
-        <div className="flex items-center gap-4 px-3 sm:px-4 py-2.5 shrink-0 border-t border-border">
-          <div onClick={(e) => e.stopPropagation()}>
-            <LikeButton
-              contentType="post"
-              contentId={post.id}
-              initialLiked={liked}
-              initialLikesCount={post.likes}
-              size="sm"
-            />
-          </div>
-
-          {post.commentsCount > 0 && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted">
-              <MessageCircle className="w-4 h-4" strokeWidth={2} />
-              {formatCount(post.commentsCount)}
-            </span>
-          )}
-
-          <div onClick={(e) => e.stopPropagation()}>
-            <ShareSheet contentType="post" contentId={post.id} compact />
-          </div>
-
-          {post.views > 0 && (
-            <span className="ml-auto text-xs text-text-muted">
-              {formatCount(post.views)} views
-            </span>
-          )}
-        </div>
       </div>
-
-      <Modal
-        isOpen={detailOpen}
-        onClose={() => setDetailOpen(false)}
-        title="Post"
-        className={hasImage ? 'max-w-4xl' : undefined}
-      >
-        <PostDetailLayout
-          post={post}
-          isOwner={isOwner}
-          onDelete={onDelete}
-          onToggleVisibility={onToggleVisibility}
-        />
-      </Modal>
 
       <ConfirmModal
         isOpen={editConfirmOpen}

@@ -22,6 +22,7 @@ import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
 import PostComposer from '../../features/post/form/PostComposer';
 import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
+import PostWatch from '../../features/post/pages/PostWatch';
 import ProfilePage from '../../features/profile/pages/ProfilePage';
 import FollowListPage from '../../features/follow/pages/FollowListPage';
 import SettingsPage from '../../features/settings/pages/SettingsPage';
@@ -56,7 +57,7 @@ export const routes: RouteObject[] = [
               { path: CLIENT_ROUTES.VIDEO_WATCH, element: <VideoWatch /> },
               { path: CLIENT_ROUTES.SEARCH, element: <SearchResultsPage /> },
               { path: CLIENT_ROUTES.POSTS, element: <PostsFeedPage /> },
-              { path: CLIENT_ROUTES.POST_WATCH, element: <PostsFeedPage /> },
+              { path: CLIENT_ROUTES.POST_WATCH, element: <PostWatch /> },
               { path: CLIENT_ROUTES.SHORTS, element: <ShortsEntry /> },
               { path: CLIENT_ROUTES.SHORT_WATCH, element: <ShortWatch /> },
               { path: CLIENT_ROUTES.SHORTS_FEED, element: <ShortsFeedPage /> },

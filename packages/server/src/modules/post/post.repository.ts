@@ -182,7 +182,7 @@ export const incrementLikes = (
 ): Promise<{ likes: number } | null> =>
   PostModel.findOneAndUpdate(
     { _id: id },
-    [{ $set: { likes: { $add: ['$likes', 1] } } }],
+    [{ $set: { likes: { $add: [{ $ifNull: ['$likes', 0] }, 1] } } }],
     { returnDocument: 'after', updatePipeline: true, projection: { likes: 1 } }
   )
     .lean()
@@ -193,7 +193,11 @@ export const decrementLikes = (
 ): Promise<{ likes: number } | null> =>
   PostModel.findOneAndUpdate(
     { _id: id },
-    [{ $set: { likes: { $max: [{ $add: ['$likes', -1] }, 0] } } }],
+    [
+      {
+        $set: { likes: { $max: [{ $add: [{ $ifNull: ['$likes', 0] }, -1] }, 0] } },
+      },
+    ],
     { returnDocument: 'after', updatePipeline: true, projection: { likes: 1 } }
   )
     .lean()
@@ -204,7 +208,7 @@ export const incrementCommentsCount = (
 ): Promise<{ commentsCount: number } | null> =>
   PostModel.findOneAndUpdate(
     { _id: id },
-    [{ $set: { commentsCount: { $add: ['$commentsCount', 1] } } }],
+    [{ $set: { commentsCount: { $add: [{ $ifNull: ['$commentsCount', 0] }, 1] } } }],
     {
       returnDocument: 'after',
       updatePipeline: true,
@@ -222,7 +226,9 @@ export const decrementCommentsCount = (
     [
       {
         $set: {
-          commentsCount: { $max: [{ $add: ['$commentsCount', -1] }, 0] },
+          commentsCount: {
+            $max: [{ $add: [{ $ifNull: ['$commentsCount', 0] }, -1] }, 0],
+          },
         },
       },
     ],
@@ -240,7 +246,7 @@ export const incrementShares = (
 ): Promise<{ shares: number } | null> =>
   PostModel.findOneAndUpdate(
     { _id: id },
-    [{ $set: { shares: { $add: ['$shares', 1] } } }],
+    [{ $set: { shares: { $add: [{ $ifNull: ['$shares', 0] }, 1] } } }],
     { returnDocument: 'after', updatePipeline: true, projection: { shares: 1 } }
   )
     .lean()

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '../../../shared/utils/cn';
 import MediaVisibilityBadge from '../../../shared/ui/card/MediaVisibilityBadge';
 import UnlistedCountdownBadge from '../../../shared/ui/card/UnlistedCountdownBadge';
 import type { IPostResponse } from '@network/shared';
@@ -8,12 +9,14 @@ interface PostMediaProps {
   post: IPostResponse;
   isUnlisted?: boolean;
   daysLeft?: number | null;
+  className?: string;
 }
 
 const PostMedia = ({
   post,
   isUnlisted = false,
   daysLeft = null,
+  className,
 }: PostMediaProps) => {
   const [index, setIndex] = useState(0);
   const images = post.imageUrls ?? [];
@@ -42,12 +45,17 @@ const PostMedia = ({
   };
 
   return (
-    <div className="relative bg-surface-raised aspect-video overflow-hidden">
+    <div
+      className={cn(
+        'relative flex items-center justify-center overflow-hidden bg-surface-raised',
+        className
+      )}
+    >
       <img
         src={images[index]}
         alt={`Post attachment ${index + 1} of ${images.length}`}
         draggable={false}
-        className="w-full h-full object-cover"
+        className="max-h-[75vh] w-auto max-w-full object-contain"
       />
 
       <MediaVisibilityBadge visibility={post.visibility} />

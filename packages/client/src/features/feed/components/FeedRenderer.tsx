@@ -254,7 +254,7 @@ const FeedRenderer = ({
                 className={`grid gap-4 ${COL_CLASS[postsPerBlock as FeedColumnCount]}`}
               >
                 {block.items.map((post) => (
-                  <PostGridTile key={post.id} post={post} variant="detail" />
+                  <PostGridTile key={post.id} post={post} />
                 ))}
               </div>
             );
