@@ -18,6 +18,8 @@ import followRoutes from './modules/follow/follow.routes.js';
 import likeRoutes from './modules/like/like.routes.js';
 import shareRoutes from './modules/share/share.routes.js';
 import commentRoutes from './modules/comment/comment.routes.js';
+import playlistRoutes from './modules/playlist/playlist.routes.js';
+import bookmarkRoutes from './modules/bookmark/bookmark.routes.js';
 
 const router = Router();
 
@@ -40,5 +42,7 @@ router.use('/follow', followRoutes);
 router.use('/likes', likeRoutes);
 router.use('/share', shareRoutes);
 router.use('/comments', commentRoutes);
+router.use('/playlists', playlistRoutes);
+router.use('/bookmarks', bookmarkRoutes);
 
 export default router;

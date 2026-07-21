@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Eye, MessageCircle, Share2 } from 'lucide-react';
+import { Eye, MessageCircle, Share2, ListPlus, Bookmark } from 'lucide-react';
 import { formatCount, type IShortResponse } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { SPRINGS, DURATIONS } from '../../../shared/motion/springs';
@@ -10,6 +10,9 @@ import AnimatedHeartIcon from '../../engagement/components/AnimatedHeartIcon';
 import { useLikeToggle } from '../../engagement/hooks/useLikeToggle';
 import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
 import { useCreateShareMutation } from '../../engagement/shareApi';
+import { useBookmarkToggle } from '../../engagement/hooks/useBookmarkToggle';
+import { useGetBookmarkStatusesQuery } from '../../engagement/bookmarkApi';
+import PlaylistMenu from '../../playlist/components/PlaylistMenu';
 
 interface ShortEngagementPanelProps {
   short: IShortResponse;
@@ -35,6 +38,16 @@ const ShortEngagementPanel = ({
     contentId: short.id,
     initialLiked: likeStatusData?.data[short.id] ?? false,
     initialLikesCount: short.likes,
+  });
+
+  const { data: bookmarkStatusData } = useGetBookmarkStatusesQuery({
+    contentType: 'short',
+    contentIds: [short.id],
+  });
+  const { bookmarked, toggle: toggleBookmark } = useBookmarkToggle({
+    contentType: 'short',
+    contentId: short.id,
+    initialBookmarked: bookmarkStatusData?.data[short.id] ?? false,
   });
 
   const [createShare] = useCreateShareMutation();
@@ -130,6 +143,39 @@ const ShortEngagementPanel = ({
                 <Share2 className="h-5.5 w-5.5" strokeWidth={1.75} />
                 <span className="text-[11px]">Share</span>
               </button>
+
+              <PlaylistMenu
+                contentType="short"
+                contentId={short.id}
+                renderTrigger={({ onClick }) => (
+                  <button
+                    type="button"
+                    onClick={onClick}
+                    aria-label="Save to playlist"
+                    className="flex flex-col items-center gap-0.5 text-text-muted hover:text-text-primary focus:outline-none"
+                  >
+                    <ListPlus className="h-5.5 w-5.5" strokeWidth={1.75} />
+                    <span className="text-[11px]">Save</span>
+                  </button>
+                )}
+              />
+
+              <button
+                type="button"
+                onClick={toggleBookmark}
+                aria-pressed={bookmarked}
+                aria-label={bookmarked ? 'Remove from saved' : 'Save'}
+                className={cn(
+                  'flex flex-col items-center gap-0.5 focus:outline-none',
+                  bookmarked ? 'text-primary' : 'text-text-muted hover:text-text-primary'
+                )}
+              >
+                <Bookmark
+                  className={cn('h-5.5 w-5.5', bookmarked && 'fill-current')}
+                  strokeWidth={1.75}
+                />
+                <span className="text-[11px]">Saved</span>
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
@@ -209,6 +255,37 @@ const ShortEngagementPanel = ({
               className="flex flex-col items-center gap-1 text-text-muted hover:text-text-primary focus:outline-none"
             >
               <Share2 className="h-5 w-5" strokeWidth={1.75} />
+            </button>
+
+            <PlaylistMenu
+              contentType="short"
+              contentId={short.id}
+              renderTrigger={({ onClick }) => (
+                <button
+                  type="button"
+                  onClick={onClick}
+                  aria-label="Save to playlist"
+                  className="flex flex-col items-center gap-1 text-text-muted hover:text-text-primary focus:outline-none"
+                >
+                  <ListPlus className="h-5 w-5" strokeWidth={1.75} />
+                </button>
+              )}
+            />
+
+            <button
+              type="button"
+              onClick={toggleBookmark}
+              aria-pressed={bookmarked}
+              aria-label={bookmarked ? 'Remove from saved' : 'Save'}
+              className={cn(
+                'flex flex-col items-center gap-1 focus:outline-none',
+                bookmarked ? 'text-primary' : 'text-text-muted hover:text-text-primary'
+              )}
+            >
+              <Bookmark
+                className={cn('h-5 w-5', bookmarked && 'fill-current')}
+                strokeWidth={1.75}
+              />
             </button>
           </motion.div>
         )}

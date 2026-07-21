@@ -24,6 +24,8 @@ import PostComposer from '../../features/post/form/PostComposer';
 import PostsFeedPage from '../../features/post/pages/PostsFeedPage';
 import PostWatch from '../../features/post/pages/PostWatch';
 import ProfilePage from '../../features/profile/pages/ProfilePage';
+import PlaylistPage from '../../features/playlist/pages/PlaylistPage';
+import SavedPage from '../../features/bookmark/pages/SavedPage';
 import FollowListPage from '../../features/follow/pages/FollowListPage';
 import SettingsPage from '../../features/settings/pages/SettingsPage';
 import SearchResultsPage from '../../features/search/pages/SearchResultsPage';
@@ -67,6 +69,11 @@ export const routes: RouteObject[] = [
               { path: CLIENT_ROUTES.PROFILE_POSTS, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.PROFILE_STATS, element: <ProfilePage /> },
               { path: CLIENT_ROUTES.PROFILE_HISTORY, element: <ProfilePage /> },
+              {
+                path: CLIENT_ROUTES.PROFILE_PLAYLISTS,
+                element: <ProfilePage />,
+              },
+              { path: CLIENT_ROUTES.PLAYLIST, element: <PlaylistPage /> },
               {
                 path: CLIENT_ROUTES.PROFILE_FOLLOWERS,
                 element: <FollowListPage />,
@@ -131,6 +138,10 @@ export const routes: RouteObject[] = [
                   {
                     path: CLIENT_ROUTES.MESSAGES,
                     element: <MessagesPlaceholder />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.SAVED,
+                    element: <SavedPage />,
                   },
                   {
                     path: CLIENT_ROUTES.JURY_QUEUE,

@@ -9,8 +9,11 @@ import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import BottomSheet from '../../../shared/ui/overlay/BottomSheet';
 import LikeButton from '../../engagement/components/LikeButton';
 import ShareSheet from '../../engagement/components/ShareSheet';
+import BookmarkButton from '../../engagement/components/BookmarkButton';
 import CommentSection from '../../engagement/components/CommentSection';
+import PlaylistMenu from '../../playlist/components/PlaylistMenu';
 import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
+import { useGetBookmarkStatusesQuery } from '../../engagement/bookmarkApi';
 
 export type VideoEngagementActivePanel = 'comments' | 'description' | null;
 
@@ -32,6 +35,11 @@ const VideoEngagementPanel = ({
     contentIds: [video.id],
   });
   const liked = likeStatusData?.data[video.id] ?? false;
+  const { data: bookmarkStatusData } = useGetBookmarkStatusesQuery({
+    contentType: 'video',
+    contentIds: [video.id],
+  });
+  const bookmarked = bookmarkStatusData?.data[video.id] ?? false;
   const { reduce } = useMotionSafe();
   const isMobileLayout = useIsMobileLayout();
   const currentUserId = useAppSelector((state) => state.auth.user?.id);
@@ -45,6 +53,7 @@ const VideoEngagementPanel = ({
           contentId={video.id}
           initialLiked={liked}
           initialLikesCount={video.likes}
+          size="sm"
         />
 
         <button
@@ -63,6 +72,15 @@ const VideoEngagementPanel = ({
         </button>
 
         <ShareSheet contentType="video" contentId={video.id} compact />
+
+        <PlaylistMenu contentType="video" contentId={video.id} />
+
+        <BookmarkButton
+          contentType="video"
+          contentId={video.id}
+          initialBookmarked={bookmarked}
+          size="sm"
+        />
 
         <span className="ml-auto inline-flex items-center gap-1.5 text-sm font-medium text-text-muted">
           <Eye className="h-4 w-4" />

@@ -2,7 +2,7 @@ import usePageTitle from '../../shared/hooks/usePageTitle';
 import FeedRenderer from './components/FeedRenderer';
 
 const Feed = () => {
-  usePageTitle('Feed');
+  usePageTitle('Home');
 
   return (
     <FeedRenderer

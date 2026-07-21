@@ -23,6 +23,8 @@ import { followApi } from '../../features/follow/followApi';
 import { likeApi } from '../../features/engagement/likeApi';
 import { shareApi } from '../../features/engagement/shareApi';
 import { commentApi } from '../../features/engagement/commentApi';
+import { playlistApi } from '../../features/playlist/playlistApi';
+import { bookmarkApi } from '../../features/engagement/bookmarkApi';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -49,6 +51,8 @@ const rootReducer = combineReducers({
   [likeApi.reducerPath]: likeApi.reducer,
   [shareApi.reducerPath]: shareApi.reducer,
   [commentApi.reducerPath]: commentApi.reducer,
+  [playlistApi.reducerPath]: playlistApi.reducer,
+  [bookmarkApi.reducerPath]: bookmarkApi.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

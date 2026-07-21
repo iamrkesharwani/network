@@ -23,6 +23,7 @@ import {
 import PublishReviewModal, {
   type ReviewField,
 } from '../../upload/components/PublishReviewModal';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 
 const POST_STEPS: { key: PostComposerStep; label: string }[] = [
   { key: 'text', label: 'Write' },
@@ -62,6 +63,7 @@ const PostComposer = () => {
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  usePageTitle('Post Upload');
 
   const {
     register,

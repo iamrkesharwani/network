@@ -7,5 +7,6 @@ export type ProfileTab =
   | 'posts'
   | 'stats'
   | 'history'
+  | 'playlists'
   | 'jury'
   | 'settings';

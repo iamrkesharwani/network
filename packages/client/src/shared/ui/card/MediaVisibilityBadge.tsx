@@ -15,7 +15,7 @@ const MediaVisibilityBadge = ({
   return (
     <span
       className={cn(
-        'absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-black/70 text-text-secondary backdrop-blur-sm leading-tight',
+        'absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-black/70 text-white backdrop-blur-sm leading-tight',
         className
       )}
     >

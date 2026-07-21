@@ -7,8 +7,10 @@ import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import BottomSheet from '../../../shared/ui/overlay/BottomSheet';
 import LikeButton from '../../engagement/components/LikeButton';
 import ShareSheet from '../../engagement/components/ShareSheet';
+import BookmarkButton from '../../engagement/components/BookmarkButton';
 import CommentSection from '../../engagement/components/CommentSection';
 import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
+import { useGetBookmarkStatusesQuery } from '../../engagement/bookmarkApi';
 
 interface PostEngagementPanelProps {
   post: IPostResponse;
@@ -23,6 +25,12 @@ const PostEngagementPanel = ({ post }: PostEngagementPanelProps) => {
     contentIds: [post.id],
   });
   const liked = likeStatusData?.data[post.id] ?? false;
+
+  const { data: bookmarkStatusData } = useGetBookmarkStatusesQuery({
+    contentType: 'post',
+    contentIds: [post.id],
+  });
+  const bookmarked = bookmarkStatusData?.data[post.id] ?? false;
 
   const currentUserId = useAppSelector((state) => state.auth.user?.id);
   const isOwner = Boolean(currentUserId) && currentUserId === post.author.id;
@@ -55,6 +63,12 @@ const PostEngagementPanel = ({ post }: PostEngagementPanelProps) => {
         </button>
 
         <ShareSheet contentType="post" contentId={post.id} compact />
+
+        <BookmarkButton
+          contentType="post"
+          contentId={post.id}
+          initialBookmarked={bookmarked}
+        />
 
         <span className="ml-auto inline-flex items-center gap-1.5 text-sm font-medium text-text-muted">
           <Eye className="h-4 w-4" />

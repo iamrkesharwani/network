@@ -13,6 +13,8 @@ import {
   MAX_POST_IMAGES,
   ALLOWED_CAPTION_MIME_TYPES,
   MAX_CAPTION_SIZE_BYTES,
+  ALLOWED_PLAYLIST_COVER_MIME_TYPES,
+  MAX_PLAYLIST_COVER_SIZE_BYTES,
 } from '@network/shared';
 
 const memStorage = multer.memoryStorage();
@@ -79,3 +81,8 @@ export const uploadCaption = createMemUploadMiddleware(
   ALLOWED_CAPTION_MIME_TYPES,
   MAX_CAPTION_SIZE_BYTES
 ).single('caption');
+
+export const uploadPlaylistCover = createMemUploadMiddleware(
+  ALLOWED_PLAYLIST_COVER_MIME_TYPES,
+  MAX_PLAYLIST_COVER_SIZE_BYTES
+).single('cover');

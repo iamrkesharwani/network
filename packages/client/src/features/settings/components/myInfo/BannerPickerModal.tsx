@@ -10,7 +10,7 @@ import {
 } from '@network/shared';
 import Modal from '../../../../shared/ui/overlay/Modal';
 import Button from '../../../../shared/ui/primitives/Button';
-import { cropBannerImage } from '../../utils/cropBannerImage';
+import { cropImage } from '../../../../shared/utils/cropImage';
 import {
   useUploadBannerMutation,
   useSelectBannerPresetMutation,
@@ -108,7 +108,7 @@ const BannerPickerModal = ({ isOpen, onClose }: BannerPickerModalProps) => {
 
     setError(null);
     try {
-      const blob = await cropBannerImage(
+      const blob = await cropImage(
         pickedImage.src,
         croppedAreaPixels,
         BANNER_WIDTH_PX,

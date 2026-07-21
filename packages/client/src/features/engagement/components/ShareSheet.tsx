@@ -95,12 +95,12 @@ const ShareSheet = ({
         transition={SPRINGS.snappy}
         className={cn(
           compact
-            ? 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-icon transition-colors hover:bg-surface-raised cursor-pointer'
+            ? 'inline-flex items-center gap-1.5 text-sm font-medium text-text-muted transition-colors hover:text-text-primary cursor-pointer'
             : 'flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:bg-surface-raised cursor-pointer',
           className
         )}
       >
-        <Share2 className="h-4 w-4 text-icon" />
+        <Share2 className="h-4 w-4" />
         {!compact && 'Share'}
       </motion.button>
 

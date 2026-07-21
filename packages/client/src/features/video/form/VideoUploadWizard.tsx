@@ -13,10 +13,13 @@ import { VideoUploadSteps } from '../../upload/UploadSteps';
 import { AnimatePresence, motion } from 'framer-motion';
 import MediaDropzone from '../../upload/components/MediaDropzone';
 import UploadThumbnailStep from '../../upload/components/UploadThumbnailStep';
-import VideoDetailsWizard, { type VideoDetailsStep } from './VideoDetailsWizard';
+import VideoDetailsWizard, {
+  type VideoDetailsStep,
+} from './VideoDetailsWizard';
 import UploadConfirmation from '../../upload/components/UploadConfirmation';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import { SPRINGS } from '../../../shared/motion/springs';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 
 const stepVariants = {
   initial: { opacity: 0, x: 24 },
@@ -33,6 +36,7 @@ const VideoUploadWizard = () => {
   const [deleteVideo] = useDeleteVideoMutation();
   const [uploadThumbnail] = useUploadThumbnailMutation();
   const upload = useRawUpload();
+  usePageTitle('Video Upload');
 
   const {
     step,

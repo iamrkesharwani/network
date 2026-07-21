@@ -111,3 +111,17 @@ export const commentLimiter = createLimiter(
   'Too many comments posted. Please slow down.',
   'rl:comment:'
 );
+
+export const playlistLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  120,
+  'Too many playlist actions. Please slow down.',
+  'rl:playlist:'
+);
+
+export const bookmarkLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  300,
+  'Too many bookmark actions. Please slow down.',
+  'rl:bookmark:'
+);

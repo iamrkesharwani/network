@@ -3,6 +3,7 @@ import ShortsTabPanel from './ShortsTabPanel';
 import PostsTabPanel from './PostsTabPanel';
 import StatsTabPanel from './StatsTabPanel';
 import HistoryTabPanel from './HistoryTabPanel';
+import PlaylistTabPanel from '../../playlist/components/PlaylistTabPanel';
 import type { ProfileTab } from '@network/shared';
 
 export interface ProfileTabContentProps {
@@ -27,6 +28,9 @@ const ProfileTabContent = ({
   }
   if (tab === 'history') {
     return <HistoryTabPanel />;
+  }
+  if (tab === 'playlists') {
+    return <PlaylistTabPanel username={username} isOwner={isOwner} />;
   }
 
   return <StatsTabPanel />;

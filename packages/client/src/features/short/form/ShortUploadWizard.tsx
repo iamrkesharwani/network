@@ -19,6 +19,7 @@ import {
 import ShortDetailsWizard, {
   type ShortDetailsStep,
 } from './ShortDetailsWizard';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 
 const stepVariants = {
   initial: { opacity: 0, x: 24 },
@@ -33,6 +34,7 @@ const ShortUploadWizard = () => {
   const [deleteShort] = useDeleteShortMutation();
   const [uploadThumbnail] = useUploadThumbnailMutation();
   const upload = useRawShortUpload();
+  usePageTitle('Short Upload')
 
   const {
     step,

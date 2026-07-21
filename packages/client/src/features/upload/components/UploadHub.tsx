@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Clapperboard, Smartphone, FileText } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
+import usePageTitle from '../../../shared/hooks/usePageTitle';
 
 const UPLOAD_OPTIONS = [
   {
@@ -38,6 +39,8 @@ const UPLOAD_OPTIONS = [
 ] as const;
 
 const UploadHub = () => {
+  usePageTitle('Upload');
+  
   return (
     <div className="mx-auto max-w-4xl pb-8 sm:pb-20 pt-12 px-4">
       <div className="text-center mb-6 sm:mb-10">

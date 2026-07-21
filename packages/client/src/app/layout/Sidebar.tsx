@@ -9,6 +9,7 @@ import {
   FileText,
   Film,
   Gavel,
+  Bookmark,
 } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
@@ -43,7 +44,10 @@ const Sidebar = ({
     { name: 'Posts', path: CLIENT_ROUTES.POSTS, icon: FileText },
     { name: 'Upload', path: CLIENT_ROUTES.UPLOAD, icon: UploadCloud },
     ...(isAuthenticated && authUser?.username
-      ? [{ name: 'Jury', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel }]
+      ? [
+          { name: 'Saved', path: CLIENT_ROUTES.SAVED, icon: Bookmark },
+          { name: 'Jury', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel },
+        ]
       : []),
   ];
 

@@ -1,9 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
-import { CLIENT_ROUTES } from '@network/shared';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Link,
+  Navigate,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
+import { CLIENT_ROUTES, PLAYLIST_QUEUE_PARAM } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { useGetVideoByIdQuery } from '../videoApi';
+import { useGetPlaylistItemsQuery } from '../../playlist/playlistApi';
+import PlaylistQueueRail from '../../playlist/components/PlaylistQueueRail';
 import VideoPlayer from '../../player/variants/video/VideoPlayer';
 import VideoWatchSkeleton from '../skeleton/VideoWatchSkeleton';
 import VideoMetaRail from '../components/VideoMetaRail';
@@ -17,6 +25,9 @@ import { useContentRoom } from '../../engagement/hooks/useContentRoom';
 
 const VideoWatch = () => {
   const { videoId } = useParams<{ videoId: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const playlistId = searchParams.get(PLAYLIST_QUEUE_PARAM);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const isMobileLayout = useIsMobileLayout();
@@ -35,6 +46,36 @@ const VideoWatch = () => {
   });
 
   const video = data?.data;
+
+  const { data: playlistItemsData } = useGetPlaylistItemsQuery(
+    { playlistId: playlistId ?? '', limit: 100 },
+    { skip: !playlistId }
+  );
+
+  const playlistVideoItems = useMemo(
+    () =>
+      (playlistItemsData?.data ?? [])
+        .filter((item) => item.contentType === 'video')
+        .sort((a, b) => a.position - b.position),
+    [playlistItemsData]
+  );
+
+  const nextPlaylistItem = useMemo(() => {
+    if (!playlistId || !video) return undefined;
+    const currentIndex = playlistVideoItems.findIndex(
+      (item) => item.content.id === video.id
+    );
+    return currentIndex === -1
+      ? undefined
+      : playlistVideoItems[currentIndex + 1];
+  }, [playlistId, video, playlistVideoItems]);
+
+  const handlePlaylistEnded = useCallback(() => {
+    if (!playlistId || !nextPlaylistItem) return;
+    navigate(
+      `${CLIENT_ROUTES.VIDEO_WATCH.replace(':videoId', nextPlaylistItem.content.id)}?${PLAYLIST_QUEUE_PARAM}=${playlistId}`
+    );
+  }, [playlistId, nextPlaylistItem, navigate]);
 
   const socketRef = useSocketContext();
   useContentRoom(socketRef, 'video', videoId ?? '', rootRef);
@@ -80,13 +121,24 @@ const VideoWatch = () => {
           <VideoPlayer
             video={video}
             className="-mx-4 max-md:w-[calc(100%+2rem)] md:-mx-5 md:-mt-5 md:max-lg:w-[calc(100%+2.5rem)] lg:mr-0"
+            onEnded={playlistId ? handlePlaylistEnded : undefined}
             upNextSlot={
-              <UpNextRail
-                videoId={video.id}
-                onShowMore={() =>
-                  suggestionsRef.current?.scrollIntoView({ behavior: 'smooth' })
-                }
-              />
+              playlistId && playlistVideoItems.length > 0 ? (
+                <PlaylistQueueRail
+                  playlistId={playlistId}
+                  items={playlistVideoItems}
+                  currentVideoId={video.id}
+                />
+              ) : (
+                <UpNextRail
+                  videoId={video.id}
+                  onShowMore={() =>
+                    suggestionsRef.current?.scrollIntoView({
+                      behavior: 'smooth',
+                    })
+                  }
+                />
+              )
             }
           />
 

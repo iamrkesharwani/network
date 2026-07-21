@@ -14,7 +14,7 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
     image.src = src;
   });
 
-export const cropBannerImage = async (
+export const cropImage = async (
   imageSrc: string,
   croppedAreaPixels: CroppedAreaPixels,
   outputWidth: number,
