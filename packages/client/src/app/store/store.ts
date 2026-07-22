@@ -22,6 +22,7 @@ import { commentApi } from '../../features/engagement/commentApi';
 import { playlistApi } from '../../features/playlist/playlistApi';
 import { bookmarkApi } from '../../features/engagement/bookmarkApi';
 import { notificationApi } from '../../features/notification/notificationApi';
+import { keyBundleApi } from '../../features/message/keyBundleApi';
 
 export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
   configureStore({
@@ -50,6 +51,7 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
         playlistApi.middleware,
         bookmarkApi.middleware,
         notificationApi.middleware,
+        keyBundleApi.middleware,
         preferencesSyncMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',

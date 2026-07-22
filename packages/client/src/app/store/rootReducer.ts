@@ -26,6 +26,7 @@ import { commentApi } from '../../features/engagement/commentApi';
 import { playlistApi } from '../../features/playlist/playlistApi';
 import { bookmarkApi } from '../../features/engagement/bookmarkApi';
 import { notificationApi } from '../../features/notification/notificationApi';
+import { keyBundleApi } from '../../features/message/keyBundleApi';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -55,6 +56,7 @@ const rootReducer = combineReducers({
   [playlistApi.reducerPath]: playlistApi.reducer,
   [bookmarkApi.reducerPath]: bookmarkApi.reducer,
   [notificationApi.reducerPath]: notificationApi.reducer,
+  [keyBundleApi.reducerPath]: keyBundleApi.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
