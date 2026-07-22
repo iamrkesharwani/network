@@ -1,4 +1,4 @@
-import type { ApiErrorResponse } from '@network/shared';
+import type { ApiErrorResponse, ErrorCode } from '@network/shared';
 
 const isApiErrorResponse = (data: unknown): data is ApiErrorResponse =>
   typeof data === 'object' &&
@@ -14,4 +14,12 @@ export const getApiErrorMessage = (error: unknown, fallback: string): string => 
     if (typeof data === 'string') return data;
   }
   return fallback;
+};
+
+export const getApiErrorCode = (error: unknown): ErrorCode | undefined => {
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    const data = (error as { data: unknown }).data;
+    if (isApiErrorResponse(data)) return data.error.code as ErrorCode;
+  }
+  return undefined;
 };

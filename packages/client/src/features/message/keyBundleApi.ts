@@ -4,7 +4,9 @@ import type {
   ApiResponse,
   IKeyBundleOwnResponse,
   IKeyBundlePublicResponse,
+  IKeyBundleRecoveryResponse,
   KeyBundlePublishInput,
+  KeyRecoveryConfirmInput,
 } from '@network/shared';
 
 export const keyBundleApi = createApi({
@@ -39,6 +41,21 @@ export const keyBundleApi = createApi({
         params: { userIds: userIds.join(',') },
       }),
     }),
+
+    requestKeyOtp: builder.mutation<ApiResponse<null>, void>({
+      query: () => ({ url: '/otp/request', method: 'POST' }),
+    }),
+
+    confirmKeyOtp: builder.mutation<ApiResponse<null>, { otp: string }>({
+      query: (data) => ({ url: '/otp/confirm', method: 'POST', data }),
+    }),
+
+    confirmKeyRecovery: builder.mutation<
+      ApiResponse<IKeyBundleRecoveryResponse>,
+      KeyRecoveryConfirmInput
+    >({
+      query: (data) => ({ url: '/recovery/confirm', method: 'POST', data }),
+    }),
   }),
 });
 
@@ -48,4 +65,7 @@ export const {
   useLazyGetMyKeyBundleQuery,
   useGetPublicKeyQuery,
   useGetPublicKeysQuery,
+  useRequestKeyOtpMutation,
+  useConfirmKeyOtpMutation,
+  useConfirmKeyRecoveryMutation,
 } = keyBundleApi;

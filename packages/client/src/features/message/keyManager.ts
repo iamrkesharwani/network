@@ -1,4 +1,7 @@
-import { KEY_BUNDLE_PBKDF2_MIN_ITERATIONS } from '@network/shared';
+import {
+  KEY_BUNDLE_PBKDF2_MIN_ITERATIONS,
+  KEY_BUNDLE_RECOVERY_TOKEN_BYTES,
+} from '@network/shared';
 
 const RSA_OAEP_ALGORITHM = 'RSA-OAEP';
 const RSA_OAEP_MODULUS_LENGTH = 2048;
@@ -126,6 +129,13 @@ const deriveWrappingKey = async (
     false,
     ['wrapKey', 'unwrapKey']
   );
+};
+
+export const generateRecoveryToken = (): string => {
+  const bytes = crypto.getRandomValues(
+    new Uint8Array(KEY_BUNDLE_RECOVERY_TOKEN_BYTES)
+  );
+  return bufferToBase64(bytes.buffer);
 };
 
 export const wrapPrivateKey = async (

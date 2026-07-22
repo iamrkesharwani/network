@@ -11,6 +11,7 @@ import { preferencesApi } from '../../features/settings/preferencesApi';
 import { settingsApi } from '../../features/settings/settingsApi';
 import { accountApi } from '../../features/settings/accountApi';
 import { preferencesSyncMiddleware } from '../../features/settings/preferencesSyncMiddleware';
+import { messageKeyLogoutMiddleware } from '../../features/message/messageKeyLogoutMiddleware';
 import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
@@ -61,7 +62,8 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
         keyBundleApi.middleware,
         conversationApi.middleware,
         messageApi.middleware,
-        preferencesSyncMiddleware
+        preferencesSyncMiddleware,
+        messageKeyLogoutMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',
   });

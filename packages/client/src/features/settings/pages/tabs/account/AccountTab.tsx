@@ -161,6 +161,7 @@ const AccountTab = () => {
         isOpen={isKeyResetOpen}
         onClose={() => setIsKeyResetOpen(false)}
         userId={user.id}
+        hasPassword={user.hasPassword}
       />
     </div>
   );

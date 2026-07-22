@@ -12,6 +12,7 @@ import {
 } from '@network/shared';
 import * as conversationRepository from '../repository/conversation.repository.js';
 import * as userRepository from '../../user/user.repository.js';
+import * as keyBundleService from './keyBundle.service.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import { toConversationSummary } from './conversation.mappers.js';
@@ -62,6 +63,7 @@ export const createDirectConversation = async (
   }
 
   await assertActiveUsersExist([participantId]);
+  await keyBundleService.assertAllHaveKeyBundle([userId, participantId]);
 
   const doc = await conversationRepository.findOrCreateDirect(
     userId,
@@ -81,6 +83,10 @@ export const createGroupConversation = async (
   data: GroupConversationCreateInput
 ): Promise<IConversationSummary> => {
   await assertActiveUsersExist(data.participantIds);
+  await keyBundleService.assertAllHaveKeyBundle([
+    userId,
+    ...data.participantIds,
+  ]);
 
   const doc = await conversationRepository.createGroup(
     userId,
@@ -166,6 +172,7 @@ export const addParticipants = async (
   }
 
   await assertActiveUsersExist(newIds);
+  await keyBundleService.assertAllHaveKeyBundle(newIds);
 
   const updated = await conversationRepository.addParticipants(
     conversationId,

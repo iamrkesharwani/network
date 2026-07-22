@@ -8,9 +8,21 @@ import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import { cn } from '../../../shared/utils/cn';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import Button from '../../../shared/ui/primitives/Button';
-import { getCachedKeyBundle } from '../localKeyStore';
-import type { IWrappedPrivateKey } from '../keyManager';
+import {
+  getCachedPrivateKey,
+  clearCachedPrivateKey,
+  getCachedPinWrappedKey,
+  clearCachedPinWrappedKey,
+} from '../localKeyStore';
+import {
+  getPinConfig,
+  isPinConfigured,
+  clearPinConfig,
+  shouldShowPinNudge,
+  isPinReentryDue,
+} from '../pinLockStore';
 import { setPrivateKey } from '../messageKeySlice';
+import { getApiErrorCode } from '../../../shared/lib/getApiErrorMessage';
 import { buildConversationPath } from '../utils/buildMessagesPath';
 import {
   useGetConversationsQuery,
@@ -22,8 +34,11 @@ import { useCreateDirectConversationMutation } from '../conversationApi';
 import { useGetMyKeyBundleQuery } from '../keyBundleApi';
 import { useSearchCreatorsQuery } from '../../search/searchApi';
 import KeySetupModal from '../components/KeySetupModal';
-import KeyRecoveryModal from '../components/KeyRecoveryModal';
+import KeyOtpModal from '../components/KeyOtpModal';
+import KeyUnlockModal from '../components/KeyUnlockModal';
 import KeyResetModal from '../components/KeyResetModal';
+import PinEntryModal from '../components/PinEntryModal';
+import PinSetupModal from '../components/PinSetupModal';
 import ConversationList from '../components/ConversationList';
 import ArchivedConversationList from '../components/ArchivedConversationList';
 import MessageThread from '../components/MessageThread';
@@ -41,12 +56,13 @@ const MessagesPage = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const activeConversationId = conversationId ?? null;
 
-  const [localWrapped, setLocalWrapped] = useState<
-    IWrappedPrivateKey | null | undefined
-  >(undefined);
-  const [isSetupOpen, setIsSetupOpen] = useState(false);
-  const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
+  const [isCacheChecked, setIsCacheChecked] = useState(false);
+  const [isSetupDismissed, setIsSetupDismissed] = useState(false);
+  const [isUnlockDismissed, setIsUnlockDismissed] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
+  const [hasPendingPinCache, setHasPendingPinCache] = useState(false);
+  const [isPinEntryOpen, setIsPinEntryOpen] = useState(false);
+  const [isPinSetupOpen, setIsPinSetupOpen] = useState(false);
 
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [newChatQuery, setNewChatQuery] = useState('');
@@ -59,27 +75,85 @@ const MessagesPage = () => {
     if (!user) return;
     let cancelled = false;
 
-    getCachedKeyBundle(user.id).then((wrapped) => {
+    (async () => {
+      const pinConfig = getPinConfig(user.id);
+      if (pinConfig) {
+        if (!isPinReentryDue(user.id)) {
+          const rawKey = await getCachedPrivateKey(user.id);
+          if (cancelled) return;
+          if (rawKey) {
+            dispatch(setPrivateKey(rawKey));
+            setIsCacheChecked(true);
+            return;
+          }
+        }
+
+        const wrapped = await getCachedPinWrappedKey(user.id);
+        if (cancelled) return;
+        if (wrapped) {
+          setHasPendingPinCache(true);
+          setIsPinEntryOpen(true);
+          setIsCacheChecked(true);
+          return;
+        }
+        clearPinConfig(user.id);
+      }
+
+      const key = await getCachedPrivateKey(user.id);
       if (cancelled) return;
-      setLocalWrapped(wrapped);
-      if (wrapped) setIsRecoveryOpen(true);
-    });
+      if (key) dispatch(setPrivateKey(key));
+      setIsCacheChecked(true);
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, dispatch]);
 
-  const { isSuccess: hasServerKeyBundle, isError: hasNoServerKeyBundle } =
-    useGetMyKeyBundleQuery(undefined, {
-      skip: !user || localWrapped === undefined || Boolean(localWrapped),
-    });
+  const {
+    data: keyBundleData,
+    error: keyBundleError,
+    isError: hasKeyBundleError,
+    isSuccess: hasKeyBundleSuccess,
+    refetch: refetchKeyBundle,
+  } = useGetMyKeyBundleQuery(undefined, {
+    skip:
+      !user || !isCacheChecked || Boolean(privateKey) || hasPendingPinCache,
+  });
 
   useEffect(() => {
-    if (localWrapped === undefined || localWrapped) return;
-    if (hasServerKeyBundle) setIsRecoveryOpen(true);
-    else if (hasNoServerKeyBundle) setIsSetupOpen(true);
-  }, [localWrapped, hasServerKeyBundle, hasNoServerKeyBundle]);
+    if (!user || !privateKey) return;
+    if (!isPinConfigured(user.id) && shouldShowPinNudge(user.id)) {
+      setIsPinSetupOpen(true);
+    }
+  }, [user, privateKey]);
+
+  useEffect(() => {
+    if (!user || !privateKey) return;
+    if (isPinConfigured(user.id) && isPinReentryDue(user.id)) {
+      dispatch(setPrivateKey(null));
+      setHasPendingPinCache(true);
+      setIsPinEntryOpen(true);
+    }
+  }, [user, privateKey, dispatch]);
+
+  const handleForgotPin = () => {
+    if (!user) return;
+    clearPinConfig(user.id);
+    void clearCachedPinWrappedKey(user.id);
+    void clearCachedPrivateKey(user.id);
+    setIsPinEntryOpen(false);
+    setHasPendingPinCache(false);
+  };
+
+  const keyBundleErrorCode = hasKeyBundleError
+    ? getApiErrorCode(keyBundleError)
+    : undefined;
+  const needsSetup =
+    !privateKey && keyBundleErrorCode === 'NOT_FOUND' && !isSetupDismissed;
+  const needsOtp =
+    !privateKey && keyBundleErrorCode === 'OTP_VERIFICATION_REQUIRED';
+  const needsUnlock = !privateKey && hasKeyBundleSuccess && !isUnlockDismissed;
 
   const { data: conversationsData, isLoading: isLoadingConversations } =
     useGetConversationsQuery(CONVERSATION_LIST_ARGS, { skip: !privateKey });
@@ -238,27 +312,46 @@ const MessagesPage = () => {
       </div>
 
       <KeySetupModal
-        isOpen={isSetupOpen}
-        onClose={() => setIsSetupOpen(false)}
+        isOpen={needsSetup}
+        onClose={() => setIsSetupDismissed(true)}
         userId={user.id}
+        hasPassword={user.hasPassword}
         onKeyReady={(key) => dispatch(setPrivateKey(key))}
       />
-      <KeyRecoveryModal
-        isOpen={isRecoveryOpen}
-        onClose={() => setIsRecoveryOpen(false)}
+      <KeyOtpModal isOpen={needsOtp} onVerified={() => refetchKeyBundle()} />
+      <KeyUnlockModal
+        isOpen={needsUnlock}
+        onClose={() => setIsUnlockDismissed(true)}
         userId={user.id}
+        hasPassword={user.hasPassword}
+        keyBundle={keyBundleData?.data}
         onKeyReady={(key) => dispatch(setPrivateKey(key))}
-        onForgotPassphrase={() => {
-          setIsRecoveryOpen(false);
-          setIsResetOpen(true);
-        }}
-        localWrapped={localWrapped}
+        onReset={() => setIsResetOpen(true)}
       />
       <KeyResetModal
         isOpen={isResetOpen}
         onClose={() => setIsResetOpen(false)}
         userId={user.id}
+        hasPassword={user.hasPassword}
         onKeyReady={(key) => dispatch(setPrivateKey(key))}
+      />
+      <PinEntryModal
+        isOpen={isPinEntryOpen}
+        userId={user.id}
+        pinLength={getPinConfig(user.id)?.length ?? 6}
+        onUnlocked={(key) => {
+          dispatch(setPrivateKey(key));
+          setHasPendingPinCache(false);
+          setIsPinEntryOpen(false);
+        }}
+        onForgotPin={handleForgotPin}
+      />
+      <PinSetupModal
+        isOpen={isPinSetupOpen}
+        userId={user.id}
+        privateKey={privateKey}
+        onClose={() => setIsPinSetupOpen(false)}
+        onConfigured={() => setIsPinSetupOpen(false)}
       />
       <CreateGroupModal
         isOpen={isCreateGroupOpen}

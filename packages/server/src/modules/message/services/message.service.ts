@@ -38,6 +38,20 @@ export const sendMessage = async (
   );
   const recipientIds = conversation.participantIds.map((id) => id.toString());
 
+  const encryptedRecipientIds = new Set(
+    input.encryptedKeys.map((entry) => entry.recipientId)
+  );
+  const missingRecipients = recipientIds.filter(
+    (id) => !encryptedRecipientIds.has(id)
+  );
+  if (missingRecipients.length > 0) {
+    throw new ApiError(
+      400,
+      'BAD_REQUEST',
+      'Message is missing an encrypted key for one or more participants.'
+    );
+  }
+
   const inserted = await messageRepository.insertMessage(
     input.conversationId,
     userId,

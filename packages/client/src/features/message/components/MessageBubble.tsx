@@ -15,6 +15,27 @@ interface MessageBubbleProps {
   isLastFromSender: boolean;
 }
 
+const getDecryptFailureMessage = (
+  message: IMessageResponse,
+  myUserId: string
+): string => {
+  const hasSenderEntry = message.encryptedKeys.some(
+    (entry) => entry.recipientId === message.senderId
+  );
+  if (!hasSenderEntry) {
+    return "The sender hadn't set up messaging yet when this was sent.";
+  }
+
+  const hasMyEntry = message.encryptedKeys.some(
+    (entry) => entry.recipientId === myUserId
+  );
+  if (!hasMyEntry) {
+    return "You didn't have access to this conversation when it was sent.";
+  }
+
+  return 'Unable to decrypt this message.';
+};
+
 const MessageBubble = ({
   message,
   privateKey,
@@ -36,7 +57,7 @@ const MessageBubble = ({
         if (!cancelled) setText(decrypted);
       })
       .catch(() => {
-        if (!cancelled) setText('Unable to decrypt this message.');
+        if (!cancelled) setText(getDecryptFailureMessage(message, myUserId));
       });
 
     return () => {

@@ -2,7 +2,11 @@ import { useState } from 'react';
 import Modal from '../../../shared/ui/overlay/Modal';
 import Button from '../../../shared/ui/primitives/Button';
 import { useMediaEditForm } from '../../upload/hooks/useMediaEditForm';
-import { setPassphraseSchema, type SetPassphraseInput } from '../passphrase.schema';
+import {
+  setPassphraseSchema,
+  confirmAccountPasswordSchema,
+  type SetPassphraseInput,
+} from '../passphrase.schema';
 import { useKeyBundleSetup } from '../hooks/useKeyBundleSetup';
 import PassphraseField from './PassphraseField';
 
@@ -12,6 +16,7 @@ interface KeyResetModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
+  hasPassword: boolean;
   onKeyReady?: (privateKey: CryptoKey) => void;
 }
 
@@ -19,6 +24,7 @@ const KeyResetModal = ({
   isOpen,
   onClose,
   userId,
+  hasPassword,
   onKeyReady,
 }: KeyResetModalProps) => {
   const [step, setStep] = useState<ResetStep>('confirm');
@@ -31,7 +37,7 @@ const KeyResetModal = ({
     submitError,
     submit,
   } = useMediaEditForm<SetPassphraseInput, SetPassphraseInput>({
-    schema: setPassphraseSchema,
+    schema: hasPassword ? confirmAccountPasswordSchema : setPassphraseSchema,
     defaultValues: { passphrase: '', confirmPassphrase: '' },
     completenessRules: [],
   });
@@ -56,10 +62,11 @@ const KeyResetModal = ({
         title="Reset your messaging key?"
       >
         <p className="mb-6 text-sm text-text-secondary">
-          You'll set a new messaging passphrase, but you will permanently lose
+          You'll set up a new messaging key, but you will permanently lose
           access to all your previous conversations. No one — including us —
-          can recover old messages without your current passphrase, because we
-          never have it. This can't be undone.
+          can recover old messages without your{' '}
+          {hasPassword ? 'previous account password' : 'current passphrase'},
+          because we never have it. This can't be undone.
         </p>
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -82,22 +89,24 @@ const KeyResetModal = ({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Set a new messaging passphrase"
+      title={hasPassword ? 'Confirm your account password' : 'Set a new messaging passphrase'}
     >
       <form onSubmit={onSubmit}>
         <PassphraseField
-          label="New messaging passphrase"
-          autoComplete="new-password"
+          label={hasPassword ? 'Account password' : 'New messaging passphrase'}
+          autoComplete={hasPassword ? 'current-password' : 'new-password'}
           {...register('passphrase')}
           error={errors.passphrase?.message}
         />
 
-        <PassphraseField
-          label="Confirm new passphrase"
-          autoComplete="new-password"
-          {...register('confirmPassphrase')}
-          error={errors.confirmPassphrase?.message}
-        />
+        {!hasPassword && (
+          <PassphraseField
+            label="Confirm new passphrase"
+            autoComplete="new-password"
+            {...register('confirmPassphrase')}
+            error={errors.confirmPassphrase?.message}
+          />
+        )}
 
         {submitError && (
           <p className="mb-3 text-sm text-error" role="alert">

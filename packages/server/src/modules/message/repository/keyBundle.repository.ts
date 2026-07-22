@@ -9,6 +9,11 @@ export const findByUserId = (
 ): Promise<IKeyBundleDocument | null> =>
   KeyBundleModel.findOne({ userId }).exec();
 
+export const findByUserIdWithRecoveryHash = (
+  userId: string
+): Promise<IKeyBundleDocument | null> =>
+  KeyBundleModel.findOne({ userId }).select('+recoveryTokenHash').exec();
+
 export const findPublicByUserIds = (
   userIds: string[]
 ): Promise<IKeyBundleDocument[]> =>
@@ -16,11 +21,30 @@ export const findPublicByUserIds = (
     .select('userId publicKey keyVersion')
     .exec();
 
+export const findUserIdsWithKeyBundle = (
+  userIds: string[]
+): Promise<string[]> =>
+  KeyBundleModel.find({ userId: { $in: userIds } })
+    .select('userId')
+    .exec()
+    .then((docs) => docs.map((doc) => doc.userId.toString()));
+
 export const upsertKeyBundle = (
   userId: string,
-  data: KeyBundlePublishInput
-): Promise<IKeyBundleDocument> =>
-  KeyBundleModel.findOneAndUpdate(
+  data: KeyBundlePublishInput,
+  recoveryTokenHash?: string
+): Promise<IKeyBundleDocument> => {
+  const recoveryFields = data.recoveryWrappedPrivateKey
+    ? {
+        recoveryWrappedPrivateKey: data.recoveryWrappedPrivateKey,
+        recoveryWrapIv: data.recoveryWrapIv,
+        recoveryWrapSalt: data.recoveryWrapSalt,
+        recoveryPbkdf2Iterations: data.recoveryPbkdf2Iterations,
+        recoveryTokenHash,
+      }
+    : {};
+
+  return KeyBundleModel.findOneAndUpdate(
     { userId },
     {
       $set: {
@@ -29,6 +53,7 @@ export const upsertKeyBundle = (
         wrapIv: data.wrapIv,
         wrapSalt: data.wrapSalt,
         pbkdf2Iterations: data.pbkdf2Iterations,
+        ...recoveryFields,
       },
       $inc: { keyVersion: 1 },
     },
@@ -39,3 +64,4 @@ export const upsertKeyBundle = (
       setDefaultsOnInsert: true,
     }
   ).exec() as Promise<IKeyBundleDocument>;
+};

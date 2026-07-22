@@ -5,6 +5,7 @@ import type {
   keyBundlePublishSchema,
   keyBundleUserIdParamSchema,
   keyOtpConfirmSchema,
+  keyRecoveryConfirmSchema,
   directConversationCreateSchema,
   groupConversationCreateSchema,
   groupUpdateSchema,
@@ -24,11 +25,13 @@ import type {
   CONVERSATION_TYPES,
   MESSAGE_DELETE_SCOPES,
   MESSAGE_MUTE_DURATIONS,
+  MESSAGE_PIN_LENGTHS,
 } from './message.constants.js';
 
 export type ConversationType = (typeof CONVERSATION_TYPES)[number];
 export type MessageDeleteScope = (typeof MESSAGE_DELETE_SCOPES)[number];
 export type ConversationMuteDuration = (typeof MESSAGE_MUTE_DURATIONS)[number];
+export type MessagePinLength = (typeof MESSAGE_PIN_LENGTHS)[number];
 
 export type ConversationTypeInput = z.infer<typeof conversationTypeSchema>;
 export type KeyBundlePublicKeysQuery = z.infer<
@@ -37,6 +40,7 @@ export type KeyBundlePublicKeysQuery = z.infer<
 export type KeyBundlePublishInput = z.infer<typeof keyBundlePublishSchema>;
 export type KeyBundleUserIdParam = z.infer<typeof keyBundleUserIdParamSchema>;
 export type KeyOtpConfirmInput = z.infer<typeof keyOtpConfirmSchema>;
+export type KeyRecoveryConfirmInput = z.infer<typeof keyRecoveryConfirmSchema>;
 export type DirectConversationCreateInput = z.infer<
   typeof directConversationCreateSchema
 >;
@@ -71,6 +75,13 @@ export interface IKeyBundleOwnResponse {
   wrapSalt: string;
   pbkdf2Iterations: number;
   keyVersion: number;
+}
+
+export interface IKeyBundleRecoveryResponse {
+  recoveryWrappedPrivateKey: string;
+  recoveryWrapIv: string;
+  recoveryWrapSalt: string;
+  recoveryPbkdf2Iterations: number;
 }
 
 export interface IParticipantSummary {

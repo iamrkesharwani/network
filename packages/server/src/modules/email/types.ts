@@ -1,4 +1,8 @@
-export type EmailJobName = 'otp' | 'password-reset' | 'generic';
+export type EmailJobName =
+  | 'otp'
+  | 'password-reset'
+  | 'key-recovery'
+  | 'generic';
 
 export interface OtpEmailJob {
   type: 'otp';
@@ -14,6 +18,13 @@ export interface PasswordResetEmailJob {
   otp: string;
 }
 
+export interface KeyRecoveryEmailJob {
+  type: 'key-recovery';
+  to: string;
+  userName: string;
+  recoveryToken: string;
+}
+
 export interface GenericEmailJob {
   type: 'generic';
   to: string;
@@ -24,4 +35,5 @@ export interface GenericEmailJob {
 export type EmailJobData =
   | OtpEmailJob
   | PasswordResetEmailJob
+  | KeyRecoveryEmailJob
   | GenericEmailJob;

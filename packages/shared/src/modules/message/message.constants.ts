@@ -1,4 +1,10 @@
-import { THIRTY_MINUTES_SECONDS } from '../general/constants/time.constants.js';
+import {
+  THIRTY_MINUTES_SECONDS,
+  ONE_HOUR_SECONDS,
+  SEVENTY_TWO_HOURS_MS,
+  SEVEN_DAYS_MS,
+} from '../general/constants/time.constants.js';
+import { OTP_MAX_ATTEMPTS } from '../auth/auth.constants.js';
 
 export const CONVERSATION_TYPES = ['direct', 'group'] as const;
 
@@ -20,6 +26,15 @@ export const KEY_BUNDLE_WRAP_IV_MAX_LENGTH = 64;
 export const KEY_BUNDLE_WRAP_SALT_MAX_LENGTH = 64;
 
 export const KEY_OTP_VERIFIED_TTL_SECONDS = THIRTY_MINUTES_SECONDS;
+
+export const KEY_BUNDLE_RECOVERY_TOKEN_BYTES = 32;
+export const KEY_BUNDLE_RECOVERY_TOKEN_MAX_LENGTH = 128;
+export const KEY_RECOVERY_MAX_ATTEMPTS = OTP_MAX_ATTEMPTS;
+export const KEY_RECOVERY_ATTEMPTS_WINDOW_SECONDS = ONE_HOUR_SECONDS;
+
+export const MESSAGE_PIN_LENGTHS = [4, 6] as const;
+export const MESSAGE_PIN_NUDGE_THROTTLE_MS = SEVENTY_TWO_HOURS_MS;
+export const MESSAGE_PIN_REPROMPT_MS = SEVEN_DAYS_MS;
 
 export const MESSAGE_DELETE_SCOPES = ['me', 'everyone'] as const;
 

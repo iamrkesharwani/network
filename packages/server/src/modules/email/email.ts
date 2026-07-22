@@ -1,6 +1,7 @@
 export {
   queueOtpEmail,
   queuePasswordResetEmail,
+  queueKeyRecoveryEmail,
   queueGenericEmail,
 } from './queue.js';
 export { startEmailWorker } from './worker.js';
