@@ -1,7 +1,10 @@
 import Modal from '../../../shared/ui/overlay/Modal';
 import Button from '../../../shared/ui/primitives/Button';
 import { useMediaEditForm } from '../../upload/hooks/useMediaEditForm';
-import { setPassphraseSchema, type SetPassphraseInput } from '../passphrase.schema';
+import {
+  setPassphraseSchema,
+  type SetPassphraseInput,
+} from '../passphrase.schema';
 import { useKeyBundleSetup } from '../hooks/useKeyBundleSetup';
 import PassphraseField from './PassphraseField';
 
@@ -42,8 +45,11 @@ const KeySetupModal = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Set up secure messaging">
       <p className="mb-4 text-sm text-text-secondary">
         Choose a messaging passphrase. It encrypts your conversations
-        end-to-end — we never see it, and we can't recover it for you if it's
-        forgotten. This is separate from your account password.
+        end-to-end. We never see it, and we can't recover it for you if it's
+        forgotten.{' '}
+        <span className="font-bold text-primary">
+          This is separate from your account password.
+        </span>
       </p>
 
       <form onSubmit={onSubmit}>
