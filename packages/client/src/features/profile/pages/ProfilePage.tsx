@@ -9,7 +9,7 @@ import ProfileTabBar from '../components/ProfileTabBar';
 import ProfileMobileMenu from '../components/ProfileMobileMenu';
 import ProfileMobileTabScreen from '../components/ProfileMobileTabScreen';
 import ProfileTabContent from '../components/ProfileTabContent';
-import { getActiveProfileTab } from '../utils/profileTabs';
+import { getActiveProfileTab, PROFILE_TABS } from '../utils/profileTabs';
 
 const ProfilePage = () => {
   const { username } = useParams<{ username: string }>();
@@ -44,10 +44,9 @@ const ProfilePage = () => {
   const isOwner = authUser?.username === profile.username;
 
   const requestedTab = getActiveProfileTab(location.pathname);
+  const requestedTabDef = PROFILE_TABS.find((tab) => tab.id === requestedTab);
   const activeTab =
-    (requestedTab === 'stats' || requestedTab === 'history') && !isOwner
-      ? null
-      : requestedTab;
+    requestedTabDef?.ownerOnly && !isOwner ? null : requestedTab;
 
   return (
     <div>

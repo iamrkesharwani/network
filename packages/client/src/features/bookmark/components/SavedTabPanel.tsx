@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import type { IBookmarkResponse } from '@network/shared';
-import usePageTitle from '../../../shared/hooks/usePageTitle';
-import SavedList from '../components/SavedList';
+import SavedList from './SavedList';
 import {
   useGetBookmarksQuery,
   useToggleBookmarkMutation,
 } from '../../engagement/bookmarkApi';
 
-const SavedPage = () => {
+const SavedTabPanel = () => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
-
-  usePageTitle('Saved');
 
   const isFirstPage = cursor === undefined;
 
@@ -38,8 +35,6 @@ const SavedPage = () => {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-bold text-text-primary">Saved</h1>
-
       <SavedList
         entries={entries}
         isLoading={isLoading && isFirstPage}
@@ -54,4 +49,4 @@ const SavedPage = () => {
   );
 };
 
-export default SavedPage;
+export default SavedTabPanel;
