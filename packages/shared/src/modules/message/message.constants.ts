@@ -1,3 +1,5 @@
+import { THIRTY_MINUTES_SECONDS } from '../general/constants/time.constants.js';
+
 export const CONVERSATION_TYPES = ['direct', 'group'] as const;
 
 export const MESSAGE_GROUP_MAX_PARTICIPANTS = 50;
@@ -16,6 +18,8 @@ export const KEY_BUNDLE_PUBLIC_KEY_MAX_LENGTH = 1024;
 export const KEY_BUNDLE_WRAPPED_PRIVATE_KEY_MAX_LENGTH = 8192;
 export const KEY_BUNDLE_WRAP_IV_MAX_LENGTH = 64;
 export const KEY_BUNDLE_WRAP_SALT_MAX_LENGTH = 64;
+
+export const KEY_OTP_VERIFIED_TTL_SECONDS = THIRTY_MINUTES_SECONDS;
 
 export const MESSAGE_DELETE_SCOPES = ['me', 'everyone'] as const;
 

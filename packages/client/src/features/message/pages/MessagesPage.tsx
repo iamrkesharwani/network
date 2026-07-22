@@ -3,12 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
+import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import { cn } from '../../../shared/utils/cn';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import Button from '../../../shared/ui/primitives/Button';
 import { getCachedKeyBundle } from '../localKeyStore';
 import type { IWrappedPrivateKey } from '../keyManager';
+import { setPrivateKey } from '../messageKeySlice';
 import { buildConversationPath } from '../utils/buildMessagesPath';
 import {
   useGetConversationsQuery,
@@ -32,6 +34,8 @@ import AddParticipantsModal from '../components/AddParticipantsModal';
 const MessagesPage = () => {
   usePageTitle('Messages');
   const user = useAppSelector((state) => state.auth.user);
+  const privateKey = useAppSelector((state) => state.messageKey.privateKey);
+  const dispatch = useAppDispatch();
   const socketRef = useSocketContext();
   const navigate = useNavigate();
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -40,7 +44,6 @@ const MessagesPage = () => {
   const [localWrapped, setLocalWrapped] = useState<
     IWrappedPrivateKey | null | undefined
   >(undefined);
-  const [privateKey, setPrivateKey] = useState<CryptoKey | null>(null);
   const [isSetupOpen, setIsSetupOpen] = useState(false);
   const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
@@ -173,7 +176,11 @@ const MessagesPage = () => {
                 onClick={() => handleStartChat(result.id)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-surface-raised"
               >
-                <Avatar src={result.avatarUrl} size="sm" fallback={result.name} />
+                <Avatar
+                  src={result.avatarUrl}
+                  size="sm"
+                  fallback={result.name}
+                />
                 {result.name}
               </button>
             ))}
@@ -234,13 +241,13 @@ const MessagesPage = () => {
         isOpen={isSetupOpen}
         onClose={() => setIsSetupOpen(false)}
         userId={user.id}
-        onKeyReady={setPrivateKey}
+        onKeyReady={(key) => dispatch(setPrivateKey(key))}
       />
       <KeyRecoveryModal
         isOpen={isRecoveryOpen}
         onClose={() => setIsRecoveryOpen(false)}
         userId={user.id}
-        onKeyReady={setPrivateKey}
+        onKeyReady={(key) => dispatch(setPrivateKey(key))}
         onForgotPassphrase={() => {
           setIsRecoveryOpen(false);
           setIsResetOpen(true);
@@ -251,7 +258,7 @@ const MessagesPage = () => {
         isOpen={isResetOpen}
         onClose={() => setIsResetOpen(false)}
         userId={user.id}
-        onKeyReady={setPrivateKey}
+        onKeyReady={(key) => dispatch(setPrivateKey(key))}
       />
       <CreateGroupModal
         isOpen={isCreateGroupOpen}

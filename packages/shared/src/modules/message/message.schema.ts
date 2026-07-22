@@ -4,6 +4,7 @@ import {
   MAX_PAGE_LIMIT,
 } from '../../core/api/api.constants.js';
 import { mongoIdSchema } from '../../core/contentRef/contentRef.schema.js';
+import { otpCodeSchema } from '../auth/auth.schema.js';
 import {
   CONVERSATION_TYPES,
   GROUP_NAME_MAX_LENGTH,
@@ -39,6 +40,10 @@ export const keyBundlePublishSchema = z.object({
 
 export const keyBundleUserIdParamSchema = z.object({
   userId: mongoIdSchema,
+});
+
+export const keyOtpConfirmSchema = z.object({
+  otp: otpCodeSchema,
 });
 
 export const directConversationCreateSchema = z.object({

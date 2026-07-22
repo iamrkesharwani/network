@@ -31,7 +31,12 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
     reducer: rootReducer,
     preloadedState,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: ['messageKey/setPrivateKey'],
+          ignoredPaths: ['messageKey.privateKey'],
+        },
+      }).concat(
         authApi.middleware,
         videoApi.middleware,
         shortApi.middleware,

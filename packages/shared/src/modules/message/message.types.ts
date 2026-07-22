@@ -4,6 +4,7 @@ import type {
   keyBundlePublicKeysQuerySchema,
   keyBundlePublishSchema,
   keyBundleUserIdParamSchema,
+  keyOtpConfirmSchema,
   directConversationCreateSchema,
   groupConversationCreateSchema,
   groupUpdateSchema,
@@ -35,6 +36,7 @@ export type KeyBundlePublicKeysQuery = z.infer<
 >;
 export type KeyBundlePublishInput = z.infer<typeof keyBundlePublishSchema>;
 export type KeyBundleUserIdParam = z.infer<typeof keyBundleUserIdParamSchema>;
+export type KeyOtpConfirmInput = z.infer<typeof keyOtpConfirmSchema>;
 export type DirectConversationCreateInput = z.infer<
   typeof directConversationCreateSchema
 >;

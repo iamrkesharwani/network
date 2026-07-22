@@ -5,6 +5,7 @@ import shortReducer from '../../features/short/shortSlice';
 import uploadReducer from '../../features/upload/uploadSlice';
 import playerReducer from '../../features/player/store/playerSlice';
 import preferencesReducer from '../../features/settings/preferencesSlice';
+import messageKeyReducer from '../../features/message/messageKeySlice';
 import { authApi } from '../../features/auth/authApi';
 import { videoApi } from '../../features/video/videoApi';
 import { shortApi } from '../../features/short/shortApi';
@@ -37,6 +38,7 @@ const rootReducer = combineReducers({
   upload: uploadReducer,
   player: playerReducer,
   preferences: preferencesReducer,
+  messageKey: messageKeyReducer,
   [authApi.reducerPath]: authApi.reducer,
   [videoApi.reducerPath]: videoApi.reducer,
   [shortApi.reducerPath]: shortApi.reducer,

@@ -2,6 +2,7 @@ export const SEVEN_DAYS_MS = 604800000;
 export const SEVEN_DAYS_SECONDS = 7 * 24 * 60 * 60;
 export const FIFTEEN_MINUTES_MS = 15 * 60 * 1000;
 export const FIFTEEN_MINUTES_SECONDS = 15 * 60;
+export const THIRTY_MINUTES_SECONDS = 30 * 60;
 export const TEN_MINUTES_MS = 10 * 60 * 1000;
 export const TEN_SECONDS_MS = 10 * 1000;
 export const FIVE_MINUTES_MS = 5 * 60 * 1000;
