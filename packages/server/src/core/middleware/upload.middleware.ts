@@ -86,3 +86,8 @@ export const uploadPlaylistCover = createMemUploadMiddleware(
   ALLOWED_PLAYLIST_COVER_MIME_TYPES,
   MAX_PLAYLIST_COVER_SIZE_BYTES
 ).single('cover');
+
+export const uploadGroupAvatar = createMemUploadMiddleware(
+  ALLOWED_AVATAR_MIME_TYPES,
+  MAX_AVATAR_SIZE_BYTES
+).single('avatar');

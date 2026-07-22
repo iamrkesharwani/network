@@ -80,6 +80,18 @@ export const conversationApi = createApi({
       invalidatesTags: ['Conversation'],
     }),
 
+    uploadGroupAvatar: builder.mutation<
+      ApiResponse<IConversationSummary>,
+      { conversationId: string; formData: FormData }
+    >({
+      query: ({ conversationId, formData }) => ({
+        url: `/${conversationId}/avatar`,
+        method: 'POST',
+        data: formData,
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
+
     leaveGroup: builder.mutation<ApiResponse<null>, string>({
       query: (conversationId) => ({
         url: `/${conversationId}/leave`,
@@ -103,6 +115,7 @@ export const {
   useCreateGroupConversationMutation,
   useAddParticipantsMutation,
   useUpdateGroupMutation,
+  useUploadGroupAvatarMutation,
   useLeaveGroupMutation,
   useMarkConversationReadMutation,
 } = conversationApi;

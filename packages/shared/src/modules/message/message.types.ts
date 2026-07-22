@@ -81,6 +81,8 @@ export interface IConversationSummaryBase {
   type: ConversationType;
   lastMessageAt: string;
   isUnread: boolean;
+  /** participantId -> ISO timestamp of their last read, for whichever participants have read at least once. Powers "Seen by ..." indicators client-side. */
+  participantReadState: Record<string, string>;
 }
 
 export interface IDirectConversationSummary extends IConversationSummaryBase {

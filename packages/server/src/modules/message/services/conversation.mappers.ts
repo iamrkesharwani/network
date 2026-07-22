@@ -21,6 +21,23 @@ const getLastReadAt = (
   return (lastReadAt as unknown as Record<string, Date>)[userId];
 };
 
+const toParticipantReadState = (
+  lastReadAt: IConversationDocument['lastReadAt']
+): Record<string, string> => {
+  if (!lastReadAt) return {};
+
+  const entries =
+    lastReadAt instanceof Map
+      ? Array.from(lastReadAt.entries())
+      : Object.entries(lastReadAt as unknown as Record<string, Date>);
+
+  const readState: Record<string, string> = {};
+  for (const [userId, date] of entries) {
+    if (date) readState[userId] = new Date(date).toISOString();
+  }
+  return readState;
+};
+
 const toParticipantSummary = (
   participant: PopulatedParticipant,
   onlineUserIds: ReadonlySet<string>
@@ -55,6 +72,7 @@ export const toConversationSummary = (
     id: doc._id.toString(),
     lastMessageAt: doc.lastMessageAt.toISOString(),
     isUnread,
+    participantReadState: toParticipantReadState(doc.lastReadAt),
   };
 
   if (doc.type === 'group') {

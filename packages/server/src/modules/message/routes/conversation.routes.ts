@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { validate } from '../../../core/middleware/validate.middleware.js';
 import { requireAuth } from '../../../core/middleware/auth.middleware.js';
-import { conversationLimiter } from '../../../core/middleware/rateLimit.middleware.js';
+import { conversationLimiter, uploadLimiter } from '../../../core/middleware/rateLimit.middleware.js';
+import { uploadGroupAvatar as uploadGroupAvatarMiddleware } from '../../../core/middleware/upload.middleware.js';
 import {
   directConversationCreateSchema,
   groupConversationCreateSchema,
@@ -51,6 +52,15 @@ router.patch(
   conversationLimiter,
   validate({ params: conversationIdParamSchema, body: groupUpdateSchema }),
   conversationController.updateGroupMeta
+);
+
+router.post(
+  '/:conversationId/avatar',
+  requireAuth,
+  uploadLimiter,
+  validate({ params: conversationIdParamSchema }),
+  uploadGroupAvatarMiddleware,
+  conversationController.uploadGroupAvatar
 );
 
 router.post(

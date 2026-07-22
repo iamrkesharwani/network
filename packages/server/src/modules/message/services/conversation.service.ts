@@ -15,6 +15,7 @@ import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import { toConversationSummary } from './conversation.mappers.js';
 import * as presenceService from './presence.service.js';
+import { imageProvider } from '../../../core/providers/provider.js';
 import type { IConversationDocument } from '../models/conversation.model.js';
 
 const assertActiveUsersExist = async (userIds: string[]): Promise<void> => {
@@ -185,6 +186,49 @@ export const updateGroupMeta = async (
   );
   if (!updated) {
     throw new ApiError(404, 'NOT_FOUND', 'Conversation not found.');
+  }
+
+  const recipientIds = updated.participantIds.map((id) => id.toString());
+  const [withParticipants, onlineUserIds] = await Promise.all([
+    updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+    presenceService.getOnlineUserIds(recipientIds),
+  ]);
+
+  for (const recipientId of recipientIds) {
+    emitToUser(
+      recipientId,
+      CONVERSATION_UPDATED_SOCKET_EVENT,
+      toConversationSummary(withParticipants, recipientId, onlineUserIds)
+    );
+  }
+  return toConversationSummary(withParticipants, userId, onlineUserIds);
+};
+
+export const uploadGroupAvatar = async (
+  userId: string,
+  conversationId: string,
+  buffer: Buffer,
+  mimeType: string
+): Promise<IConversationSummary> => {
+  const conversation = await getConversationOrThrow(conversationId);
+  assertMembership(conversation, userId);
+
+  if (conversation.type !== 'group') {
+    throw new ApiError(400, 'BAD_REQUEST', 'Only group conversations have a group photo.');
+  }
+
+  const previousAvatarUrl = conversation.groupAvatarUrl;
+  const groupAvatarUrl = await imageProvider.uploadImage(buffer, mimeType);
+
+  const updated = await conversationRepository.updateGroupMeta(conversationId, {
+    groupAvatarUrl,
+  });
+  if (!updated) {
+    throw new ApiError(404, 'NOT_FOUND', 'Conversation not found.');
+  }
+
+  if (previousAvatarUrl) {
+    await imageProvider.deleteImage(previousAvatarUrl);
   }
 
   const recipientIds = updated.participantIds.map((id) => id.toString());

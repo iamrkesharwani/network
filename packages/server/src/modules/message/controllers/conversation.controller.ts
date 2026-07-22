@@ -1,15 +1,17 @@
 import type { Request, Response } from 'express';
-import type {
-  ConversationListQuery,
-  DirectConversationCreateInput,
-  GroupConversationCreateInput,
-  GroupUpdateInput,
-  ParticipantAddInput,
+import {
+  ALLOWED_AVATAR_MIME_TYPES,
+  type ConversationListQuery,
+  type DirectConversationCreateInput,
+  type GroupConversationCreateInput,
+  type GroupUpdateInput,
+  type ParticipantAddInput,
 } from '@network/shared';
 import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { ApiResponse } from '../../../core/utils/ApiResponse.js';
 import { ApiPaginatedResponse } from '../../../core/utils/ApiPaginatedResponse.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
+import { verifyFileMagicBytes } from '../../../core/middleware/upload.middleware.js';
 import * as conversationService from '../services/conversation.service.js';
 
 const requireUser = (req: Request): { id: string } => {
@@ -94,6 +96,29 @@ export const updateGroupMeta = asyncHandler(
     );
 
     res.status(200).json(new ApiResponse(result, 'Group updated successfully'));
+  }
+);
+
+export const uploadGroupAvatar = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+
+    const file = req.file;
+    if (!file) throw new ApiError(400, 'VALIDATION_ERROR', 'No file uploaded.');
+
+    await verifyFileMagicBytes(file, ALLOWED_AVATAR_MIME_TYPES);
+
+    const result = await conversationService.uploadGroupAvatar(
+      user.id,
+      conversationId,
+      file.buffer,
+      file.mimetype
+    );
+
+    res
+      .status(200)
+      .json(new ApiResponse(result, 'Group photo updated successfully'));
   }
 );
 
