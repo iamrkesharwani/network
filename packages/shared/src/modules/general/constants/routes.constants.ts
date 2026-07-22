@@ -13,6 +13,7 @@ export const CLIENT_ROUTES = {
   SEARCH: '/search',
   MESSAGES: '/messages',
   SAVED: '/saved',
+  NOTIFICATIONS: '/notifications',
   POSTS: '/posts',
   POST_WATCH: '/post/:postId',
   UPLOAD: '/upload',

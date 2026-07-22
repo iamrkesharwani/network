@@ -4,6 +4,7 @@ import { COMMENT_TEXT_MAX_LENGTH } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { SPRINGS } from '../../../shared/motion/springs';
 import { useMotionSafe } from '../../../shared/motion/useMotionSafe';
+import MentionTextArea from '../../../shared/ui/primitives/MentionTextArea';
 
 export interface CommentInputProps {
   mode: 'create' | 'reply' | 'edit';
@@ -53,14 +54,14 @@ const CommentInput = ({
       onSubmit={handleSubmit}
       className={cn('flex items-start gap-2', className)}
     >
-      <textarea
+      <MentionTextArea
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={setText}
         placeholder={placeholder}
         autoFocus={autoFocus}
         rows={mode === 'edit' ? 2 : 1}
         maxLength={COMMENT_TEXT_MAX_LENGTH}
-        className="ml-0 md:ml-1 min-w-0 flex-1 resize-none rounded-lg border border-border bg-surface-raised px-2 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+        className="ml-0 md:ml-1 min-w-0 flex-1"
       />
       <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
         {onCancel && (

@@ -14,6 +14,7 @@ import CommentSection from '../../engagement/components/CommentSection';
 import PlaylistMenu from '../../playlist/components/PlaylistMenu';
 import { useGetLikeStatusesQuery } from '../../engagement/likeApi';
 import { useGetBookmarkStatusesQuery } from '../../engagement/bookmarkApi';
+import MentionedText from '../../../shared/ui/primitives/MentionedText';
 
 export type VideoEngagementActivePanel = 'comments' | 'description' | null;
 
@@ -116,7 +117,11 @@ const VideoEngagementPanel = ({
             }
           >
             <p className="whitespace-pre-wrap wrap-break-word text-sm text-text-secondary">
-              {video.description || 'No description'}
+              {video.description ? (
+                <MentionedText text={video.description} />
+              ) : (
+                'No description'
+              )}
             </p>
           </BottomSheet>
         </>
@@ -149,7 +154,11 @@ const VideoEngagementPanel = ({
               className="lg:max-h-[70vh] lg:overflow-y-auto lg:overflow-x-hidden"
             >
               <p className="whitespace-pre-wrap wrap-break-word rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary">
-                {video.description || 'No description'}
+                {video.description ? (
+                <MentionedText text={video.description} />
+              ) : (
+                'No description'
+              )}
               </p>
             </motion.div>
           )}

@@ -12,7 +12,7 @@ import {
 import { useUpdatePostMutation } from '../postApi';
 import { useMediaEditForm } from '../../upload/hooks/useMediaEditForm';
 import type { EditFormHandle } from '../../../shared/hooks/useUnsavedChangesGuard';
-import FloatingTextarea from '../../upload/components/FloatingTextarea';
+import FloatingMentionTextarea from '../../upload/components/FloatingMentionTextarea';
 import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
 
@@ -37,7 +37,6 @@ const PostEditForm = forwardRef<EditFormHandle, PostEditFormProps>(
     const [updatePost, { isLoading }] = useUpdatePostMutation();
 
     const {
-      register,
       control,
       watch,
       formState: { errors, isDirty },
@@ -71,14 +70,22 @@ const PostEditForm = forwardRef<EditFormHandle, PostEditFormProps>(
 
     return (
       <form onSubmit={onSubmit} className="w-full max-w-lg mx-auto">
-        <FloatingTextarea
-          label="What's on your mind?"
-          {...register('text')}
-          maxLength={POST_TEXT_MAX_LENGTH}
-          counter={{ current: text.length, max: POST_TEXT_MAX_LENGTH }}
-          rows={4}
-          error={errors.text?.message}
-          disabled={isLoading}
+        <Controller
+          control={control}
+          name="text"
+          render={({ field }) => (
+            <FloatingMentionTextarea
+              label="What's on your mind?"
+              value={field.value ?? ''}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              maxLength={POST_TEXT_MAX_LENGTH}
+              counter={{ current: text.length, max: POST_TEXT_MAX_LENGTH }}
+              rows={4}
+              error={errors.text?.message}
+              disabled={isLoading}
+            />
+          )}
         />
 
         <Controller

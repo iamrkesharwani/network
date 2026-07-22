@@ -12,6 +12,8 @@ import { getContentCounterAdapter } from '../../core/contentRef/contentCounter.r
 import { emitToContent } from '../../core/config/socket.js';
 import { ApiError } from '../../core/utils/ApiError.js';
 import { getOwnerId } from '../../core/utils/getOwnerId.js';
+import { queueNotification } from '../notification/notification.queue.js';
+import { queueMentionNotifications } from '../notification/notification.mention.service.js';
 
 const canDeleteComment = async (
   userId: string,
@@ -43,7 +45,7 @@ export const createComment = async (
     );
   }
 
-  const { exists } = await moderationAdapter.lookup(contentId);
+  const { exists, ownerId } = await moderationAdapter.lookup(contentId);
   if (!exists) {
     throw new ApiError(404, 'NOT_FOUND', 'Content not found.');
   }
@@ -68,6 +70,8 @@ export const createComment = async (
     parentCommentId ?? null
   );
 
+  const excludeFromMentions = new Set<string>([userId]);
+
   if (parentComment) {
     const parentId = parentComment._id.toString();
     const repliesResult = await commentRepository.incrementReplies(parentId);
@@ -76,6 +80,16 @@ export const createComment = async (
       contentId: parentId,
       field: 'comments',
       count: repliesResult?.repliesCount ?? 0,
+    });
+
+    const parentAuthorId = getOwnerId(parentComment.userId);
+    excludeFromMentions.add(parentAuthorId);
+    await queueNotification({
+      type: 'comment_reply',
+      recipientId: parentAuthorId,
+      actorId: userId,
+      targetType: 'comment',
+      targetId: parentId,
     });
   } else {
     const counterAdapter = getContentCounterAdapter(contentType);
@@ -88,7 +102,28 @@ export const createComment = async (
       field: 'comments',
       count,
     });
+
+    if (ownerId) {
+      excludeFromMentions.add(ownerId);
+      await queueNotification({
+        type: 'comment',
+        recipientId: ownerId,
+        actorId: userId,
+        targetType: contentType,
+        targetId: contentId,
+      });
+    }
   }
+
+  await queueMentionNotifications(
+    text,
+    {
+      actorId: userId,
+      targetType: 'comment',
+      targetId: comment._id.toString(),
+    },
+    excludeFromMentions
+  );
 
   return toResponse(comment);
 };

@@ -6,6 +6,7 @@ import {
   NAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   USERNAME_MAX_LENGTH,
+  USERNAME_REGEX,
   BIO_MAX_LENGTH,
   NAME_MIN_LENGTH,
   MIN_AGE_YEARS,
@@ -48,7 +49,7 @@ export const userRegistrationSchema = z.object({
       `Username cannot exceed ${USERNAME_MAX_LENGTH} characters.`
     )
     .regex(
-      /^[a-z0-9_]+$/,
+      USERNAME_REGEX,
       'Username can only contain lowercase letters, numbers, and underscores.'
     )
     .optional(),

@@ -13,6 +13,7 @@ import type { Requester } from '../video.types.js';
 import { toResponse, toResponseFromLean } from './video.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
 import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
+import { queueMentionDiffNotifications } from '../../notification/notification.mention.service.js';
 
 export const getUserVisibilityCounts = async (
   username: string,
@@ -156,6 +157,15 @@ export const updateVideo = async (
   });
 
   if (!updated) throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
+
+  if (data.description !== undefined) {
+    await queueMentionDiffNotifications(video.description ?? '', data.description, {
+      actorId: requester.id,
+      targetType: 'video',
+      targetId: videoId,
+    });
+  }
+
   return toResponse(updated);
 };
 

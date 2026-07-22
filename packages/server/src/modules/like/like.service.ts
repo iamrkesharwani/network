@@ -8,6 +8,7 @@ import { getModerationContentAdapter } from '../../core/moderation/moderationCon
 import { getContentCounterAdapter } from '../../core/contentRef/contentCounter.registry.js';
 import { emitToContent } from '../../core/config/socket.js';
 import { ApiError } from '../../core/utils/ApiError.js';
+import { queueNotification } from '../notification/notification.queue.js';
 
 export const toggleLike = async (
   userId: string,
@@ -24,7 +25,7 @@ export const toggleLike = async (
     );
   }
 
-  const { exists } = await moderationAdapter.lookup(contentId);
+  const { exists, ownerId } = await moderationAdapter.lookup(contentId);
   if (!exists) {
     throw new ApiError(404, 'NOT_FOUND', 'Content not found.');
   }
@@ -40,6 +41,16 @@ export const toggleLike = async (
     field: 'likes',
     count: likesCount,
   });
+
+  if (liked && ownerId) {
+    await queueNotification({
+      type: 'like',
+      recipientId: ownerId,
+      actorId: userId,
+      targetType: contentType,
+      targetId: contentId,
+    });
+  }
 
   return { liked, likesCount };
 };

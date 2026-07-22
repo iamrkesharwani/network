@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Search, X, Bell, UploadCloud } from 'lucide-react';
+import { Menu, Search, X, UploadCloud } from 'lucide-react';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import {
   SITE_NAME,
@@ -10,6 +10,7 @@ import {
 import LogoIcon from '../../public/Logo.svg?react';
 import { useSearchNavigation } from '../../features/search/hooks/useSearchNavigation';
 import SearchSuggestionsDropdown from '../../features/search/components/SearchSuggestionsDropdown';
+import NotificationBell from '../../features/notification/components/NotificationBell';
 import NavbarAvatar from './NavbarAvatar';
 
 export interface NavbarProps {
@@ -115,13 +116,7 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
       <div className="hidden md:flex items-center gap-1 ml-auto shrink-0">
         {isAuthenticated ? (
           <>
-            <button className="relative p-2 rounded-lg text-icon hover:text-icon-hover hover:bg-surface-raised transition-colors focus:outline-none">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
-            </button>
+            <NotificationBell />
 
             <NavbarAvatar user={user} />
           </>

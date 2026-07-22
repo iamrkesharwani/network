@@ -1,10 +1,10 @@
-import type { UseFormRegister, FieldErrors } from 'react-hook-form';
+import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 import { POST_TEXT_MAX_LENGTH } from '@network/shared';
-import FloatingTextarea from '../../upload/components/FloatingTextarea';
+import FloatingMentionTextarea from '../../upload/components/FloatingMentionTextarea';
 import type { PostComposeFormValues } from '../hooks/usePostComposer';
 
 interface PostStepOneProps {
-  register: UseFormRegister<PostComposeFormValues>;
+  control: Control<PostComposeFormValues>;
   errors: FieldErrors<PostComposeFormValues>;
   text: string;
   onContinue: () => void;
@@ -12,21 +12,29 @@ interface PostStepOneProps {
 }
 
 const PostStepOne = ({
-  register,
+  control,
   errors,
   text,
   onContinue,
   disabled,
 }: PostStepOneProps) => (
   <div>
-    <FloatingTextarea
-      label="What's on your mind?"
-      {...register('text')}
-      maxLength={POST_TEXT_MAX_LENGTH}
-      counter={{ current: text.length, max: POST_TEXT_MAX_LENGTH }}
-      rows={6}
-      error={errors.text?.message}
-      disabled={disabled}
+    <Controller
+      control={control}
+      name="text"
+      render={({ field }) => (
+        <FloatingMentionTextarea
+          label="What's on your mind?"
+          value={field.value ?? ''}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          maxLength={POST_TEXT_MAX_LENGTH}
+          counter={{ current: text.length, max: POST_TEXT_MAX_LENGTH }}
+          rows={6}
+          error={errors.text?.message}
+          disabled={disabled}
+        />
+      )}
     />
 
     <button

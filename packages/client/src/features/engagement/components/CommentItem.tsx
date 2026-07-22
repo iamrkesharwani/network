@@ -5,6 +5,7 @@ import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import { SPRINGS, DURATIONS } from '../../../shared/motion/springs';
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
+import MentionedText from '../../../shared/ui/primitives/MentionedText';
 import ReportModal from '../../report/components/ReportModal';
 import LikeButton from './LikeButton';
 import CommentInput from './CommentInput';
@@ -125,7 +126,7 @@ const CommentItem = ({
               transition={{ duration: DURATIONS.fast }}
               className="text-sm text-text-secondary whitespace-pre-wrap wrap-break-word"
             >
-              {comment.text}
+              <MentionedText text={comment.text} />
             </motion.p>
           </AnimatePresence>
         )}

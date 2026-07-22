@@ -159,6 +159,7 @@ const ShortDetailsWizard = ({
           {step === 'details-1' && (
             <ShortDetailsStepOne
               register={register}
+              control={control}
               errors={errors}
               title={title}
               description={description}

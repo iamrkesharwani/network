@@ -6,6 +6,7 @@ import { CLIENT_ROUTES, type IShortResponse } from '@network/shared';
 import { SPRINGS } from '../../../shared/motion/springs';
 import { useMotionSafe } from '../../../shared/motion/useMotionSafe';
 import Avatar from '../../../shared/ui/primitives/Avatar';
+import MentionedText from '../../../shared/ui/primitives/MentionedText';
 
 interface ShortMetaRailProps {
   short: IShortResponse;
@@ -59,7 +60,7 @@ const ShortMetaRail = ({ short }: ShortMetaRailProps) => {
             </div>
 
             <p className="whitespace-pre-wrap wrap-break-word text-sm text-text-secondary leading-relaxed">
-              {short.description}
+              <MentionedText text={short.description ?? ''} />
             </p>
           </motion.div>
         ) : (

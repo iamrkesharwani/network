@@ -7,6 +7,7 @@ import {
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
+import MentionedText from '../../../shared/ui/primitives/MentionedText';
 
 interface PostMetaRailProps {
   post: IPostResponse;
@@ -56,7 +57,7 @@ const PostMetaRail = ({ post, className }: PostMetaRailProps) => {
                 !expanded && `line-clamp-${POST_TEXT_LINE_CLAMP}`
               )}
             >
-              {text}
+              <MentionedText text={text} />
             </p>
 
             {(isClamped || expanded) && (
@@ -77,7 +78,7 @@ const PostMetaRail = ({ post, className }: PostMetaRailProps) => {
                 heroTextClass(text.length)
               )}
             >
-              {text}
+              <MentionedText text={text} />
             </p>
           </div>
         ))}

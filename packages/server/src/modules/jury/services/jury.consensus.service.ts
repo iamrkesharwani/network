@@ -6,6 +6,8 @@ import * as juryAssignmentRepository from '../repository/jury-assignment.reposit
 import * as juryAppealRepository from '../repository/jury-appeal.repository.js';
 import * as reportRepository from '../../report/report.repository.js';
 import type { IJuryCaseDocument } from '../models/jury-case.model.js';
+import { getOwnerId } from '../../../core/utils/getOwnerId.js';
+import { queueNotification } from '../../notification/notification.queue.js';
 
 const applyVerdictSideEffects = async (
   juryCase: IJuryCaseDocument,
@@ -40,17 +42,34 @@ const applyVerdictSideEffects = async (
         const adapter = getModerationContentAdapter(juryCase.contentType);
         await adapter?.setModerationStatus(contentId, 'active');
       }
+
+      await queueNotification({
+        type: appealStatus === 'upheld' ? 'appeal_upheld' : 'appeal_overturned',
+        recipientId: getOwnerId(appeal.requesterId),
+        targetType: 'appeal',
+        targetId: appeal._id.toString(),
+      });
     }
     return;
   }
 
   if (verdict === 'uphold_removal') {
     const adapter = getModerationContentAdapter(juryCase.contentType);
+    const lookup = adapter ? await adapter.lookup(contentId) : null;
     await adapter?.setModerationStatus(contentId, 'jury_removed');
     await reportRepository.markResolvedForContent(
       juryCase.contentType,
       contentId
     );
+
+    if (lookup?.ownerId) {
+      await queueNotification({
+        type: 'content_removed',
+        recipientId: lookup.ownerId,
+        targetType: juryCase.contentType,
+        targetId: contentId,
+      });
+    }
 
     if (!options.isTimeout) {
       const reporterIds = await reportRepository.findReporterIdsForContent(
@@ -59,6 +78,12 @@ const applyVerdictSideEffects = async (
       );
       for (const reporterId of reporterIds) {
         await applyTrustSignal(reporterId, 'VALID_REPORT_FILED');
+        await queueNotification({
+          type: 'report_resolved',
+          recipientId: reporterId,
+          targetType: juryCase.contentType,
+          targetId: contentId,
+        });
       }
     }
   } else {
@@ -74,6 +99,12 @@ const applyVerdictSideEffects = async (
       );
       for (const reporterId of reporterIds) {
         await applyTrustSignal(reporterId, 'FALSE_REPORT_FILED');
+        await queueNotification({
+          type: 'report_dismissed',
+          recipientId: reporterId,
+          targetType: juryCase.contentType,
+          targetId: contentId,
+        });
       }
     }
   }

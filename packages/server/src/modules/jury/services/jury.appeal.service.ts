@@ -4,6 +4,8 @@ import * as juryCaseRepository from '../repository/jury-case.repository.js';
 import * as juryAppealRepository from '../repository/jury-appeal.repository.js';
 import { enqueueJuryAssignment } from '../jury-assignment.queue.js';
 import type { IJuryAppealDocument } from '../models/jury-appeal.model.js';
+import { getOwnerId } from '../../../core/utils/getOwnerId.js';
+import { queueNotification } from '../../notification/notification.queue.js';
 
 export const createAppeal = async (
   caseId: string,
@@ -132,6 +134,13 @@ export const resolveAppealProcedurally = async (
       );
     }
   }
+
+  await queueNotification({
+    type: status === 'upheld' ? 'appeal_upheld' : 'appeal_overturned',
+    recipientId: getOwnerId(appeal.requesterId),
+    targetType: 'appeal',
+    targetId: appeal._id.toString(),
+  });
 
   return resolved;
 };

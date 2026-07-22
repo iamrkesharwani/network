@@ -22,7 +22,7 @@ import {
 } from '../../upload/hooks/useMediaEditForm';
 import type { EditFormHandle } from '../../../shared/hooks/useUnsavedChangesGuard';
 import FloatingInput from '../../upload/components/FloatingInput';
-import FloatingTextarea from '../../upload/components/FloatingTextarea';
+import FloatingMentionTextarea from '../../upload/components/FloatingMentionTextarea';
 import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
 import ThumbnailPicker from '../../upload/components/ThumbnailPicker';
@@ -140,12 +140,20 @@ const ShortEditForm = forwardRef<EditFormHandle, ShortEditFormProps>(
           counter={{ current: title.length, max: 100 }}
         />
 
-        <FloatingTextarea
-          label="Description (optional)"
-          rows={3}
-          {...register('description')}
-          error={errors.description?.message}
-          counter={{ current: description.length, max: 500 }}
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <FloatingMentionTextarea
+              label="Description (optional)"
+              value={field.value ?? ''}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              rows={3}
+              error={errors.description?.message}
+              counter={{ current: description.length, max: 500 }}
+            />
+          )}
         />
 
         <Controller

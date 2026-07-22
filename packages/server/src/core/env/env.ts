@@ -9,6 +9,7 @@ import { emailEnvSchema } from './email.env.js';
 import { storageEnvSchema } from './storage.env.js';
 import { videoEnvSchema } from './video.env.js';
 import { typesenseEnvSchema } from './typesense.env.js';
+import { webPushEnvSchema } from './webPush.env.js';
 import { withCrossFieldRules } from './validators.js';
 
 const mergedEnvSchema = z.object({
@@ -20,6 +21,7 @@ const mergedEnvSchema = z.object({
   ...storageEnvSchema.shape,
   ...videoEnvSchema.shape,
   ...typesenseEnvSchema.shape,
+  ...webPushEnvSchema.shape,
 });
 
 const envSchema = withCrossFieldRules(mergedEnvSchema);

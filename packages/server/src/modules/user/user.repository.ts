@@ -27,6 +27,14 @@ export const searchUsers = (
 export const findByIds = (ids: string[]): Promise<IUserDocument[]> =>
   User.find({ _id: { $in: ids } }).exec();
 
+export const findActiveByUsernames = (
+  usernames: string[]
+): Promise<IUserDocument[]> =>
+  User.find({
+    username: { $in: usernames },
+    status: 'active',
+  }).exec();
+
 export const updateBasicProfile = (
   userId: string,
   data: BasicProfileInput & { usernameChangedAt?: Date }

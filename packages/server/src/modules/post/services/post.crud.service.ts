@@ -12,6 +12,7 @@ import { toResponse, toResponseFromLean } from './post.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
 import { logger } from '../../../core/utils/logger.js';
 import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
+import { queueMentionDiffNotifications } from '../../notification/notification.mention.service.js';
 
 export const getUserVisibilityCounts = async (
   username: string,
@@ -135,6 +136,15 @@ export const updatePost = async (
   });
 
   if (!updated) throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
+
+  if (data.text !== undefined) {
+    await queueMentionDiffNotifications(post.text ?? '', data.text, {
+      actorId: requester.id,
+      targetType: 'post',
+      targetId: postId,
+    });
+  }
+
   return toResponse(updated);
 };
 

@@ -170,6 +170,7 @@ const VideoDetailsWizard = ({
           {step === 'details-1' && (
             <VideoDetailsStepOne
               register={register}
+              control={control}
               errors={errors}
               title={title}
               description={description}

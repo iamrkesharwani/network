@@ -24,7 +24,7 @@ import {
 } from '../../upload/hooks/useMediaEditForm';
 import type { EditFormHandle } from '../../../shared/hooks/useUnsavedChangesGuard';
 import FloatingInput from '../../upload/components/FloatingInput';
-import FloatingTextarea from '../../upload/components/FloatingTextarea';
+import FloatingMentionTextarea from '../../upload/components/FloatingMentionTextarea';
 import CategoryPicker from '../../upload/components/CategoryPicker';
 import TagInput from '../../upload/components/TagInput';
 import VisibilitySelector from '../../upload/components/VisibilitySelector';
@@ -151,17 +151,25 @@ const VideoEditForm = forwardRef<EditFormHandle, VideoEditFormProps>(
           counter={{ current: title.length, max: 100 }}
         />
 
-        <FloatingTextarea
-          label="Description (optional)"
-          rows={4}
-          {...register('description')}
-          error={errors.description?.message}
-          counter={{ current: description.length, max: 5000 }}
-          hint={
-            description.length >= 50
-              ? undefined
-              : 'A description of 50+ characters helps viewers find your video'
-          }
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <FloatingMentionTextarea
+              label="Description (optional)"
+              value={field.value ?? ''}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              rows={4}
+              error={errors.description?.message}
+              counter={{ current: description.length, max: 5000 }}
+              hint={
+                description.length >= 50
+                  ? undefined
+                  : 'A description of 50+ characters helps viewers find your video'
+              }
+            />
+          )}
         />
 
         <Controller

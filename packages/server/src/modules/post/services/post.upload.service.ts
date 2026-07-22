@@ -3,6 +3,7 @@ import * as postRepository from '../post.repository.js';
 import { imageProvider } from '../../../core/providers/provider.js';
 import { toResponse } from './post.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
+import { queueMentionNotifications } from '../../notification/notification.mention.service.js';
 
 export const createPost = async (
   userId: string,
@@ -27,6 +28,14 @@ export const createPost = async (
   });
 
   const creatorEvent = await recordPublish(userId, 'post');
+
+  if (data.text) {
+    await queueMentionNotifications(data.text, {
+      actorId: userId,
+      targetType: 'post',
+      targetId: post._id.toString(),
+    });
+  }
 
   return { post: toResponse(post), creatorEvent };
 };

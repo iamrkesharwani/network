@@ -15,6 +15,7 @@ import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields
 import { uploadSessionKey, toResponse } from './short.mappers.js';
 import { recordPublish } from '../../creator/services/creator.publish.service.js';
 import { ingestFromStorage } from '../../upload/services/upload.ingest.service.js';
+import { queueMentionNotifications } from '../../notification/notification.mention.service.js';
 
 export const initiateUpload = async (
   userId: string,
@@ -126,6 +127,14 @@ export const finaliseShort = async (
   const creatorEvent = alreadyRecorded
     ? null
     : await recordPublish(userId, 'short');
+
+  if (data.description) {
+    await queueMentionNotifications(data.description, {
+      actorId: userId,
+      targetType: 'short',
+      targetId: shortId,
+    });
+  }
 
   return { short: toResponse(updated), creatorEvent };
 };

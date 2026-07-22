@@ -48,6 +48,9 @@ import { videoDeletionAdapter } from './modules/video/services/video.deletion.se
 import { shortDeletionAdapter } from './modules/short/services/short.deletion.service.js';
 import { postDeletionAdapter } from './modules/post/services/post.deletion.service.js';
 import { followDeletionAdapter } from './modules/follow/follow.deletion.adapter.js';
+import { startNotificationWorker } from './modules/notification/notification.worker.js';
+import { startNotificationReaperWorker } from './modules/notification/notification.reaper.worker.js';
+import { scheduleNotificationReaper } from './modules/notification/notification.reaper.queue.js';
 
 const port = env.PORT;
 const httpServer = createServer(app);
@@ -96,6 +99,10 @@ const startWeb = async () => {
     registerAccountDeletionAdapter(postDeletionAdapter);
     registerAccountDeletionAdapter(followDeletionAdapter);
     startAccountDeletionWorker();
+
+    startNotificationWorker();
+    startNotificationReaperWorker();
+    await scheduleNotificationReaper();
 
     httpServer.listen(port, '0.0.0.0', () => {
       logger.info(`Web server listening on port ${port}`);

@@ -4,6 +4,7 @@ import * as followRepository from '../follow.repository.js';
 import * as userRepository from '../../user/user.repository.js';
 import type { IUserDocument } from '../../user/user.model.js';
 import { toFollowListItem } from './follow.mappers.js';
+import { queueNotification } from '../../notification/notification.queue.js';
 
 const resolveActiveTarget = async (username: string): Promise<IUserDocument> => {
   const target = await userRepository.findByUsername(username);
@@ -30,6 +31,13 @@ export const follow = async (
   }
 
   await followRepository.create(followerId, followeeId);
+
+  await queueNotification({
+    type: 'follow',
+    recipientId: followeeId,
+    actorId: followerId,
+    targetType: 'none',
+  });
 };
 
 export const unfollow = async (

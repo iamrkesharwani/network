@@ -12,6 +12,7 @@ import type { Requester } from '../short.types.js';
 import { toResponse, toResponseFromLean } from './short.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
 import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
+import { queueMentionDiffNotifications } from '../../notification/notification.mention.service.js';
 
 export const getUserVisibilityCounts = async (
   username: string,
@@ -146,6 +147,15 @@ export const updateShort = async (
   });
 
   if (!updated) throw new ApiError(404, 'NOT_FOUND', 'Short not found.');
+
+  if (data.description !== undefined) {
+    await queueMentionDiffNotifications(short.description ?? '', data.description, {
+      actorId: requester.id,
+      targetType: 'short',
+      targetId: shortId,
+    });
+  }
+
   return toResponse(updated);
 };
 

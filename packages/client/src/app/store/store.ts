@@ -21,6 +21,7 @@ import { shareApi } from '../../features/engagement/shareApi';
 import { commentApi } from '../../features/engagement/commentApi';
 import { playlistApi } from '../../features/playlist/playlistApi';
 import { bookmarkApi } from '../../features/engagement/bookmarkApi';
+import { notificationApi } from '../../features/notification/notificationApi';
 
 export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
   configureStore({
@@ -48,6 +49,7 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
         commentApi.middleware,
         playlistApi.middleware,
         bookmarkApi.middleware,
+        notificationApi.middleware,
         preferencesSyncMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',

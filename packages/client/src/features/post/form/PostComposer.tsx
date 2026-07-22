@@ -66,7 +66,6 @@ const PostComposer = () => {
   usePageTitle('Post Upload');
 
   const {
-    register,
     control,
     errors,
     trigger,
@@ -190,7 +189,7 @@ const PostComposer = () => {
           >
             {step === 'text' && (
               <PostStepOne
-                register={register}
+                control={control}
                 errors={errors}
                 text={text}
                 onContinue={goToPhotos}

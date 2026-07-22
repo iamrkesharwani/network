@@ -8,6 +8,7 @@ import * as juryCaseRepository from './repository/jury-case.repository.js';
 import * as juryAssignmentRepository from './repository/jury-assignment.repository.js';
 import * as reportRepository from '../report/report.repository.js';
 import type { JuryAssignmentJobData } from './jury-assignment.queue.js';
+import { queueNotification } from '../notification/notification.queue.js';
 
 const processAssignmentJob = async (
   job: Job<JuryAssignmentJobData>
@@ -45,6 +46,15 @@ const processAssignmentJob = async (
 
   await juryAssignmentRepository.createMany(caseId, jurorIds);
   await juryCaseRepository.markDeciding(caseId);
+
+  for (const jurorId of jurorIds) {
+    await queueNotification({
+      type: 'jury_case_assigned',
+      recipientId: jurorId,
+      targetType: 'juryCase',
+      targetId: caseId,
+    });
+  }
 
   logger.info(
     `Jury assignment: case ${caseId} assigned to ${jurorIds.length} juror(s)`

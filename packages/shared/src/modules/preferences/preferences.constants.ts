@@ -5,6 +5,9 @@ export const PREFERENCES_NOTIFICATION_CATEGORIES = [
   'mentions',
   'moderation',
   'newsletter',
+  'reports',
+  'appeals',
+  'uploads',
 ] as const;
 
 

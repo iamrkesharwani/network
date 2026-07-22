@@ -1,10 +1,11 @@
-import type { UseFormRegister, FieldErrors } from 'react-hook-form';
+import { Controller, type Control, type UseFormRegister, type FieldErrors } from 'react-hook-form';
 import FloatingInput from '../../upload/components/FloatingInput';
-import FloatingTextarea from '../../upload/components/FloatingTextarea';
+import FloatingMentionTextarea from '../../upload/components/FloatingMentionTextarea';
 import type { ShortDetailsFormValues } from './ShortDetailsWizard';
 
 interface ShortDetailsStepOneProps {
   register: UseFormRegister<ShortDetailsFormValues>;
+  control: Control<ShortDetailsFormValues>;
   errors: FieldErrors<ShortDetailsFormValues>;
   title: string;
   description: string;
@@ -13,6 +14,7 @@ interface ShortDetailsStepOneProps {
 
 const ShortDetailsStepOne = ({
   register,
+  control,
   errors,
   title,
   description,
@@ -26,12 +28,20 @@ const ShortDetailsStepOne = ({
       counter={{ current: title.length, max: 100 }}
     />
 
-    <FloatingTextarea
-      label="Description (optional)"
-      rows={3}
-      {...register('description')}
-      error={errors.description?.message}
-      counter={{ current: description.length, max: 500 }}
+    <Controller
+      control={control}
+      name="description"
+      render={({ field }) => (
+        <FloatingMentionTextarea
+          label="Description (optional)"
+          value={field.value ?? ''}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          rows={3}
+          error={errors.description?.message}
+          counter={{ current: description.length, max: 500 }}
+        />
+      )}
     />
 
     <button

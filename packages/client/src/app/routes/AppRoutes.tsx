@@ -32,6 +32,7 @@ import SearchResultsPage from '../../features/search/pages/SearchResultsPage';
 import JuryQueuePage from '../../features/jury/pages/JuryQueuePage';
 import JuryCaseDetailPage from '../../features/jury/pages/JuryCaseDetailPage';
 import AppealsPage from '../../features/jury/pages/AppealsPage';
+import NotificationsPage from '../../features/notification/pages/NotificationsPage';
 import NotFound from './NotFound';
 
 export const routes: RouteObject[] = [
@@ -142,6 +143,10 @@ export const routes: RouteObject[] = [
                   {
                     path: CLIENT_ROUTES.SAVED,
                     element: <SavedPage />,
+                  },
+                  {
+                    path: CLIENT_ROUTES.NOTIFICATIONS,
+                    element: <NotificationsPage />,
                   },
                   {
                     path: CLIENT_ROUTES.JURY_QUEUE,

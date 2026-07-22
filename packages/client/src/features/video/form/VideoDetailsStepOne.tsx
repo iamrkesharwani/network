@@ -1,10 +1,11 @@
-import type { UseFormRegister, FieldErrors } from 'react-hook-form';
+import { Controller, type Control, type UseFormRegister, type FieldErrors } from 'react-hook-form';
 import FloatingInput from '../../upload/components/FloatingInput';
-import FloatingTextarea from '../../upload/components/FloatingTextarea';
+import FloatingMentionTextarea from '../../upload/components/FloatingMentionTextarea';
 import type { VideoDetailsFormValues } from './VideoDetailsWizard';
 
 interface VideoDetailsStepOneProps {
   register: UseFormRegister<VideoDetailsFormValues>;
+  control: Control<VideoDetailsFormValues>;
   errors: FieldErrors<VideoDetailsFormValues>;
   title: string;
   description: string;
@@ -13,6 +14,7 @@ interface VideoDetailsStepOneProps {
 
 const VideoDetailsStepOne = ({
   register,
+  control,
   errors,
   title,
   description,
@@ -26,17 +28,25 @@ const VideoDetailsStepOne = ({
       counter={{ current: title.length, max: 100 }}
     />
 
-    <FloatingTextarea
-      label="Description (optional)"
-      rows={4}
-      {...register('description')}
-      error={errors.description?.message}
-      counter={{ current: description.length, max: 5000 }}
-      hint={
-        description.length >= 50
-          ? undefined
-          : 'A description of 50+ characters helps viewers find your video'
-      }
+    <Controller
+      control={control}
+      name="description"
+      render={({ field }) => (
+        <FloatingMentionTextarea
+          label="Description (optional)"
+          value={field.value ?? ''}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          rows={4}
+          error={errors.description?.message}
+          counter={{ current: description.length, max: 5000 }}
+          hint={
+            description.length >= 50
+              ? undefined
+              : 'A description of 50+ characters helps viewers find your video'
+          }
+        />
+      )}
     />
 
     <button
