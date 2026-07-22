@@ -61,7 +61,7 @@ const SettingsPage = () => {
           </SettingsMobileTabScreen>
         )
       ) : (
-        <div className="flex flex-row gap-10">
+        <div className="flex flex-row items-start gap-10">
           <SettingsNav activeTab={requestedTab ?? 'my-info'} />
 
           <div className="mx-auto w-full min-w-0 max-w-4xl flex-1">
