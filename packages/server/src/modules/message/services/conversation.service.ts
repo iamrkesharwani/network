@@ -14,6 +14,7 @@ import * as userRepository from '../../user/user.repository.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import { toConversationSummary } from './conversation.mappers.js';
+import * as presenceService from './presence.service.js';
 import type { IConversationDocument } from '../models/conversation.model.js';
 
 const emitToParticipants = (
@@ -23,16 +24,6 @@ const emitToParticipants = (
 ): void => {
   for (const participantId of doc.participantIds) {
     emitToUser(participantId.toString(), event, payload);
-  }
-};
-
-const emitToUserIds = (
-  userIds: string[],
-  event: string,
-  payload: unknown
-): void => {
-  for (const userId of userIds) {
-    emitToUser(userId, event, payload);
   }
 };
 
@@ -84,12 +75,13 @@ export const createDirectConversation = async (
     userId,
     participantId
   );
-  const withParticipants = await doc.populate(
-    'participantIds',
-    'username name avatarUrl lastActiveAt status'
-  );
+  const participantIds = doc.participantIds.map((id) => id.toString());
+  const [withParticipants, onlineUserIds] = await Promise.all([
+    doc.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+    presenceService.getOnlineUserIds(participantIds),
+  ]);
 
-  return toConversationSummary(withParticipants, userId);
+  return toConversationSummary(withParticipants, userId, onlineUserIds);
 };
 
 export const createGroupConversation = async (
@@ -103,12 +95,13 @@ export const createGroupConversation = async (
     data.groupName,
     data.participantIds
   );
-  const withParticipants = await doc.populate(
-    'participantIds',
-    'username name avatarUrl lastActiveAt status'
-  );
+  const participantIds = doc.participantIds.map((id) => id.toString());
+  const [withParticipants, onlineUserIds] = await Promise.all([
+    doc.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+    presenceService.getOnlineUserIds(participantIds),
+  ]);
 
-  return toConversationSummary(withParticipants, userId);
+  return toConversationSummary(withParticipants, userId, onlineUserIds);
 };
 
 export const listConversations = async (
@@ -122,8 +115,13 @@ export const listConversations = async (
     limit
   );
 
+  const participantIds = Array.from(
+    new Set(data.flatMap((doc) => doc.participantIds.map((id) => id.toString())))
+  );
+  const onlineUserIds = await presenceService.getOnlineUserIds(participantIds);
+
   return {
-    data: data.map((doc) => toConversationSummary(doc, userId)),
+    data: data.map((doc) => toConversationSummary(doc, userId, onlineUserIds)),
     meta,
   };
 };
@@ -164,14 +162,19 @@ export const addParticipants = async (
   }
 
   const recipientIds = updated.participantIds.map((id) => id.toString());
-  const withParticipants = await updated.populate(
-    'participantIds',
-    'username name avatarUrl lastActiveAt status'
-  );
+  const [withParticipants, onlineUserIds] = await Promise.all([
+    updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+    presenceService.getOnlineUserIds(recipientIds),
+  ]);
 
-  const summary = toConversationSummary(withParticipants, userId);
-  emitToUserIds(recipientIds, CONVERSATION_UPDATED_SOCKET_EVENT, summary);
-  return summary;
+  for (const recipientId of recipientIds) {
+    emitToUser(
+      recipientId,
+      CONVERSATION_UPDATED_SOCKET_EVENT,
+      toConversationSummary(withParticipants, recipientId, onlineUserIds)
+    );
+  }
+  return toConversationSummary(withParticipants, userId, onlineUserIds);
 };
 
 export const updateGroupMeta = async (
@@ -195,14 +198,19 @@ export const updateGroupMeta = async (
   }
 
   const recipientIds = updated.participantIds.map((id) => id.toString());
-  const withParticipants = await updated.populate(
-    'participantIds',
-    'username name avatarUrl lastActiveAt status'
-  );
+  const [withParticipants, onlineUserIds] = await Promise.all([
+    updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+    presenceService.getOnlineUserIds(recipientIds),
+  ]);
 
-  const summary = toConversationSummary(withParticipants, userId);
-  emitToUserIds(recipientIds, CONVERSATION_UPDATED_SOCKET_EVENT, summary);
-  return summary;
+  for (const recipientId of recipientIds) {
+    emitToUser(
+      recipientId,
+      CONVERSATION_UPDATED_SOCKET_EVENT,
+      toConversationSummary(withParticipants, recipientId, onlineUserIds)
+    );
+  }
+  return toConversationSummary(withParticipants, userId, onlineUserIds);
 };
 
 export const leaveGroup = async (

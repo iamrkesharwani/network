@@ -12,8 +12,6 @@ interface PopulatedParticipant {
   lastActiveAt?: Date;
 }
 
-const isUserOnline = (_userId: string): boolean => false;
-
 const getLastReadAt = (
   lastReadAt: IConversationDocument['lastReadAt'],
   userId: string
@@ -24,7 +22,8 @@ const getLastReadAt = (
 };
 
 const toParticipantSummary = (
-  participant: PopulatedParticipant
+  participant: PopulatedParticipant,
+  onlineUserIds: ReadonlySet<string>
 ): IParticipantSummary => {
   const id = participant._id.toString();
 
@@ -33,7 +32,7 @@ const toParticipantSummary = (
     username: participant.username,
     name: participant.name,
     ...(participant.avatarUrl && { avatarUrl: participant.avatarUrl }),
-    isOnline: isUserOnline(id),
+    isOnline: onlineUserIds.has(id),
     ...(participant.lastActiveAt && {
       lastActiveAt: participant.lastActiveAt.toISOString(),
     }),
@@ -42,7 +41,8 @@ const toParticipantSummary = (
 
 export const toConversationSummary = (
   doc: IConversationDocument,
-  viewerId: string
+  viewerId: string,
+  onlineUserIds: ReadonlySet<string> = new Set()
 ): IConversationSummary => {
   const participants = (
     doc.participantIds as unknown as PopulatedParticipant[]
@@ -63,7 +63,9 @@ export const toConversationSummary = (
       type: 'group',
       groupName: doc.groupName ?? '',
       ...(doc.groupAvatarUrl && { groupAvatarUrl: doc.groupAvatarUrl }),
-      participants: participants.map(toParticipantSummary),
+      participants: participants.map((participant) =>
+        toParticipantSummary(participant, onlineUserIds)
+      ),
     };
   }
 
@@ -75,7 +77,7 @@ export const toConversationSummary = (
     ...base,
     type: 'direct',
     otherParticipant: otherParticipant
-      ? toParticipantSummary(otherParticipant)
+      ? toParticipantSummary(otherParticipant, onlineUserIds)
       : {
           id: '',
           username: 'unknown',

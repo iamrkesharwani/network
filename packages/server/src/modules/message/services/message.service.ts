@@ -13,6 +13,7 @@ import * as messageRepository from '../repository/message.repository.js';
 import * as conversationRepository from '../repository/conversation.repository.js';
 import * as conversationService from './conversation.service.js';
 import { toConversationSummary } from './conversation.mappers.js';
+import * as presenceService from './presence.service.js';
 import { toMessageResponse } from './message.mappers.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
@@ -52,15 +53,15 @@ export const sendMessage = async (
     input.conversationId
   );
   if (touched) {
-    const populated = await touched.populate(
-      'participantIds',
-      'username name avatarUrl lastActiveAt status'
-    );
+    const [populated, onlineUserIds] = await Promise.all([
+      touched.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+      presenceService.getOnlineUserIds(recipientIds),
+    ]);
     for (const recipientId of recipientIds) {
       emitToUser(
         recipientId,
         CONVERSATION_UPDATED_SOCKET_EVENT,
-        toConversationSummary(populated, recipientId)
+        toConversationSummary(populated, recipientId, onlineUserIds)
       );
     }
   }

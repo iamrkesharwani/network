@@ -123,6 +123,16 @@ export const updateBannerUrl = (
     .select('+password')
     .exec();
 
+export const setLastActiveAt = (
+  userId: string,
+  lastActiveAt: Date
+): Promise<IUserDocument | null> =>
+  User.findByIdAndUpdate(
+    userId,
+    { $set: { lastActiveAt } },
+    { returnDocument: 'after' }
+  ).exec();
+
 export const appendLocationEntry = (
   userId: string,
   entry: IUserLocationEntry
