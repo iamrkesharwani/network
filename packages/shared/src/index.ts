@@ -50,6 +50,10 @@ export * from './modules/share/share.constants.js';
 export * from './modules/location/location.schema.js';
 export * from './modules/location/location.constants.js';
 
+export * from './modules/message/message.schema.js';
+export * from './modules/message/message.types.js';
+export * from './modules/message/message.constants.js';
+
 export * from './modules/notification/notification.schema.js';
 export * from './modules/notification/notification.types.js';
 export * from './modules/notification/notification.constants.js';
@@ -135,3 +139,4 @@ export * from './utils/formatDaysLeft.js';
 export * from './utils/trustTier.js';
 export * from './utils/mediaProcessingLabel.js';
 export * from './utils/extractMentions.js';
+export * from './utils/formatLastActive.js';
