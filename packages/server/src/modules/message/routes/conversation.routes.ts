@@ -10,6 +10,7 @@ import {
   participantAddSchema,
   conversationListQuerySchema,
   conversationIdParamSchema,
+  conversationMuteSchema,
 } from '@network/shared';
 import * as conversationController from '../controllers/conversation.controller.js';
 
@@ -20,6 +21,13 @@ router.get(
   requireAuth,
   validate({ query: conversationListQuerySchema }),
   conversationController.list
+);
+
+router.get(
+  '/archived',
+  requireAuth,
+  validate({ query: conversationListQuerySchema }),
+  conversationController.listArchived
 );
 
 router.post(
@@ -77,6 +85,54 @@ router.post(
   conversationLimiter,
   validate({ params: conversationIdParamSchema }),
   conversationController.markRead
+);
+
+router.post(
+  '/:conversationId/mute',
+  requireAuth,
+  conversationLimiter,
+  validate({ params: conversationIdParamSchema, body: conversationMuteSchema }),
+  conversationController.muteConversation
+);
+
+router.post(
+  '/:conversationId/unmute',
+  requireAuth,
+  conversationLimiter,
+  validate({ params: conversationIdParamSchema }),
+  conversationController.unmuteConversation
+);
+
+router.post(
+  '/:conversationId/archive',
+  requireAuth,
+  conversationLimiter,
+  validate({ params: conversationIdParamSchema }),
+  conversationController.archiveConversation
+);
+
+router.post(
+  '/:conversationId/unarchive',
+  requireAuth,
+  conversationLimiter,
+  validate({ params: conversationIdParamSchema }),
+  conversationController.unarchiveConversation
+);
+
+router.post(
+  '/:conversationId/pin',
+  requireAuth,
+  conversationLimiter,
+  validate({ params: conversationIdParamSchema }),
+  conversationController.pinConversation
+);
+
+router.post(
+  '/:conversationId/unpin',
+  requireAuth,
+  conversationLimiter,
+  validate({ params: conversationIdParamSchema }),
+  conversationController.unpinConversation
 );
 
 export default router;

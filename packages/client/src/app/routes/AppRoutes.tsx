@@ -141,6 +141,10 @@ export const routes: RouteObject[] = [
                     element: <MessagesPage />,
                   },
                   {
+                    path: CLIENT_ROUTES.MESSAGES_CONVERSATION,
+                    element: <MessagesPage />,
+                  },
+                  {
                     path: CLIENT_ROUTES.NOTIFICATIONS,
                     element: <NotificationsPage />,
                   },

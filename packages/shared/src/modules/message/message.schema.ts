@@ -12,6 +12,7 @@ import {
   MESSAGE_ENCRYPTED_KEY_MAX_LENGTH,
   MESSAGE_IV_MAX_LENGTH,
   MESSAGE_DELETE_SCOPES,
+  MESSAGE_MUTE_DURATIONS,
   KEY_BUNDLE_PBKDF2_MIN_ITERATIONS,
   KEY_BUNDLE_PUBLIC_KEY_MAX_LENGTH,
   KEY_BUNDLE_WRAPPED_PRIVATE_KEY_MAX_LENGTH,
@@ -115,6 +116,10 @@ export const conversationReadSchema = z.object({
 
 export const conversationRoomEventSchema = z.object({
   conversationId: mongoIdSchema,
+});
+
+export const conversationMuteSchema = z.object({
+  duration: z.enum(MESSAGE_MUTE_DURATIONS),
 });
 
 export const conversationListQuerySchema = z.object({

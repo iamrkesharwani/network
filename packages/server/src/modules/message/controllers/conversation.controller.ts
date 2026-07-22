@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import {
   ALLOWED_AVATAR_MIME_TYPES,
   type ConversationListQuery,
+  type ConversationMuteInput,
   type DirectConversationCreateInput,
   type GroupConversationCreateInput,
   type GroupUpdateInput,
@@ -62,6 +63,27 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
         result.data,
         result.meta,
         'Conversations fetched successfully'
+      )
+    );
+});
+
+export const listArchived = asyncHandler(async (req: Request, res: Response) => {
+  const user = requireUser(req);
+  const { cursor, limit } = req.query as unknown as ConversationListQuery;
+
+  const result = await conversationService.listArchivedConversations(
+    user.id,
+    cursor ?? null,
+    limit
+  );
+
+  res
+    .status(200)
+    .json(
+      new ApiPaginatedResponse(
+        result.data,
+        result.meta,
+        'Archived conversations fetched successfully'
       )
     );
 });
@@ -139,3 +161,89 @@ export const markRead = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json(new ApiResponse(null, 'Conversation marked as read'));
 });
+
+export const muteConversation = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+    const { duration } = req.body as ConversationMuteInput;
+
+    const result = await conversationService.muteConversation(
+      user.id,
+      conversationId,
+      duration
+    );
+
+    res.status(200).json(new ApiResponse(result, 'Conversation muted'));
+  }
+);
+
+export const unmuteConversation = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+
+    const result = await conversationService.unmuteConversation(
+      user.id,
+      conversationId
+    );
+
+    res.status(200).json(new ApiResponse(result, 'Conversation unmuted'));
+  }
+);
+
+export const archiveConversation = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+
+    const result = await conversationService.archiveConversation(
+      user.id,
+      conversationId
+    );
+
+    res.status(200).json(new ApiResponse(result, 'Conversation archived'));
+  }
+);
+
+export const unarchiveConversation = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+
+    const result = await conversationService.unarchiveConversation(
+      user.id,
+      conversationId
+    );
+
+    res.status(200).json(new ApiResponse(result, 'Conversation unarchived'));
+  }
+);
+
+export const pinConversation = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+
+    const result = await conversationService.pinConversation(
+      user.id,
+      conversationId
+    );
+
+    res.status(200).json(new ApiResponse(result, 'Conversation pinned'));
+  }
+);
+
+export const unpinConversation = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+
+    const result = await conversationService.unpinConversation(
+      user.id,
+      conversationId
+    );
+
+    res.status(200).json(new ApiResponse(result, 'Conversation unpinned'));
+  }
+);

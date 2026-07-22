@@ -40,6 +40,47 @@ const decodeCursor = (
   }
 };
 
+interface PinAwareConversationDoc extends IConversationDocument {
+  isPinnedForViewer: boolean;
+}
+
+const encodePinAwareCursor = (doc: PinAwareConversationDoc): string =>
+  Buffer.from(
+    `${doc.isPinnedForViewer ? 1 : 0}_${doc.lastMessageAt.getTime()}_${doc._id.toString()}`
+  ).toString('base64url');
+
+const decodePinAwareCursor = (
+  cursor: string
+): { isPinned: boolean; lastMessageAt: Date; id: string } | null => {
+  try {
+    const decoded = Buffer.from(cursor, 'base64url').toString('utf8');
+    const [pinnedFlag, timestamp, id] = decoded.split('_');
+    if (!pinnedFlag || !timestamp || !id || !mongoose.isValidObjectId(id)) {
+      return null;
+    }
+
+    const ms = Number(timestamp);
+    if (!Number.isFinite(ms)) return null;
+
+    return { isPinned: pinnedFlag === '1', lastMessageAt: new Date(ms), id };
+  } catch {
+    return null;
+  }
+};
+
+const isPinnedForViewerExpr = (userId: string) => ({
+  $in: [
+    userId,
+    {
+      $map: {
+        input: { $objectToArray: { $ifNull: ['$pinnedAt', {}] } },
+        as: 'entry',
+        in: '$$entry.k',
+      },
+    },
+  ],
+});
+
 export const findById = (
   conversationId: string
 ): Promise<IConversationDocument | null> =>
@@ -98,6 +139,68 @@ export const listByUser = async (
   Omit<PaginatedResponse<IConversationDocument>, 'success' | 'message'>
 > => {
   const safeLimit = Math.min(Math.max(1, limit), MAX_PAGE_LIMIT);
+  const decoded = cursor ? decodePinAwareCursor(cursor) : null;
+
+  const pipeline: mongoose.PipelineStage[] = [
+    {
+      $match: {
+        participantIds: new mongoose.Types.ObjectId(userId),
+        [`archivedAt.${userId}`]: { $exists: false },
+      },
+    },
+    { $addFields: { isPinnedForViewer: isPinnedForViewerExpr(userId) } },
+  ];
+
+  if (decoded) {
+    pipeline.push({
+      $match: {
+        $or: [
+          { isPinnedForViewer: { $lt: decoded.isPinned } },
+          {
+            isPinnedForViewer: decoded.isPinned,
+            lastMessageAt: { $lt: decoded.lastMessageAt },
+          },
+          {
+            isPinnedForViewer: decoded.isPinned,
+            lastMessageAt: decoded.lastMessageAt,
+            _id: { $lt: new mongoose.Types.ObjectId(decoded.id) },
+          },
+        ],
+      },
+    });
+  }
+
+  pipeline.push(
+    { $sort: { isPinnedForViewer: -1, lastMessageAt: -1, _id: -1 } },
+    { $limit: safeLimit + 1 }
+  );
+
+  const rawDocs = await ConversationModel.aggregate(pipeline).exec();
+  const data = (await ConversationModel.populate(rawDocs, {
+    path: 'participantIds',
+    select: 'username name avatarUrl lastActiveAt status',
+  })) as unknown as PinAwareConversationDoc[];
+
+  const hasNextPage = data.length > safeLimit;
+  if (hasNextPage) data.pop();
+
+  const lastItem = data[data.length - 1];
+  const nextCursor = hasNextPage && lastItem ? encodePinAwareCursor(lastItem) : null;
+
+  return {
+    data,
+    meta: { nextCursor, hasNextPage, limit: safeLimit },
+  };
+};
+
+export const listArchivedByUser = async (
+  userId: string,
+  cursor: string | null,
+  limit: number
+): Promise<
+  Omit<PaginatedResponse<IConversationDocument>, 'success' | 'message'>
+> => {
+  const safeLimit = Math.min(Math.max(1, limit), MAX_PAGE_LIMIT);
   const decoded = cursor ? decodeCursor(cursor) : null;
 
   const cursorFilter = decoded
@@ -114,6 +217,7 @@ export const listByUser = async (
 
   const data = (await ConversationModel.find({
     participantIds: userId,
+    [`archivedAt.${userId}`]: { $exists: true },
     ...cursorFilter,
   })
     .sort({ lastMessageAt: -1, _id: -1 })
@@ -181,6 +285,45 @@ export const updateLastReadAt = (
   ConversationModel.findByIdAndUpdate(
     conversationId,
     { $set: { [`lastReadAt.${userId}`]: new Date() } },
+    { new: true }
+  ).exec();
+
+export const setMuted = (
+  conversationId: string,
+  userId: string,
+  mutedUntil: Date | null
+): Promise<IConversationDocument | null> =>
+  ConversationModel.findByIdAndUpdate(
+    conversationId,
+    mutedUntil
+      ? { $set: { [`mutedUntil.${userId}`]: mutedUntil } }
+      : { $unset: { [`mutedUntil.${userId}`]: '' } },
+    { new: true }
+  ).exec();
+
+export const setArchived = (
+  conversationId: string,
+  userId: string,
+  archived: boolean
+): Promise<IConversationDocument | null> =>
+  ConversationModel.findByIdAndUpdate(
+    conversationId,
+    archived
+      ? { $set: { [`archivedAt.${userId}`]: new Date() } }
+      : { $unset: { [`archivedAt.${userId}`]: '' } },
+    { new: true }
+  ).exec();
+
+export const setPinned = (
+  conversationId: string,
+  userId: string,
+  pinned: boolean
+): Promise<IConversationDocument | null> =>
+  ConversationModel.findByIdAndUpdate(
+    conversationId,
+    pinned
+      ? { $set: { [`pinnedAt.${userId}`]: new Date() } }
+      : { $unset: { [`pinnedAt.${userId}`]: '' } },
     { new: true }
   ).exec();
 

@@ -15,16 +15,19 @@ import type {
   conversationIdParamSchema,
   conversationReadSchema,
   conversationRoomEventSchema,
+  conversationMuteSchema,
   conversationListQuerySchema,
   messageListQuerySchema,
 } from './message.schema.js';
 import type {
   CONVERSATION_TYPES,
   MESSAGE_DELETE_SCOPES,
+  MESSAGE_MUTE_DURATIONS,
 } from './message.constants.js';
 
 export type ConversationType = (typeof CONVERSATION_TYPES)[number];
 export type MessageDeleteScope = (typeof MESSAGE_DELETE_SCOPES)[number];
+export type ConversationMuteDuration = (typeof MESSAGE_MUTE_DURATIONS)[number];
 
 export type ConversationTypeInput = z.infer<typeof conversationTypeSchema>;
 export type KeyBundlePublicKeysQuery = z.infer<
@@ -49,6 +52,7 @@ export type ConversationReadInput = z.infer<typeof conversationReadSchema>;
 export type ConversationRoomEventInput = z.infer<
   typeof conversationRoomEventSchema
 >;
+export type ConversationMuteInput = z.infer<typeof conversationMuteSchema>;
 export type ConversationListQuery = z.infer<typeof conversationListQuerySchema>;
 export type MessageListQuery = z.infer<typeof messageListQuerySchema>;
 
@@ -81,6 +85,9 @@ export interface IConversationSummaryBase {
   type: ConversationType;
   lastMessageAt: string;
   isUnread: boolean;
+  isMuted: boolean;
+  isArchived: boolean;
+  isPinned: boolean;
   /** participantId -> ISO timestamp of their last read, for whichever participants have read at least once. Powers "Seen by ..." indicators client-side. */
   participantReadState: Record<string, string>;
 }

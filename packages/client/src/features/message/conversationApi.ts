@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   IConversationSummary,
   ConversationListQuery,
+  ConversationMuteDuration,
   DirectConversationCreateInput,
   GroupConversationCreateInput,
   GroupUpdateInput,
@@ -12,6 +13,7 @@ import type {
 } from '@network/shared';
 
 export const CONVERSATION_LIST_ARGS = { limit: 20 };
+export const CONVERSATION_ARCHIVED_LIST_ARGS = { limit: 20 };
 
 export const conversationApi = createApi({
   reducerPath: 'conversationApi',
@@ -23,6 +25,28 @@ export const conversationApi = createApi({
       ConversationListQuery
     >({
       query: (params) => ({ url: '/', method: 'GET', params }),
+      serializeQueryArgs: ({ endpointName }) => endpointName,
+      merge: (currentCache, newData, { arg }) => {
+        if (arg.cursor === undefined) {
+          currentCache.data = newData.data;
+          currentCache.meta = newData.meta;
+          return;
+        }
+        const byId = new Map(currentCache.data.map((item) => [item.id, item]));
+        for (const item of newData.data) byId.set(item.id, item);
+        currentCache.data = Array.from(byId.values());
+        currentCache.meta = newData.meta;
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        currentArg?.cursor !== previousArg?.cursor,
+      providesTags: ['Conversation'],
+    }),
+
+    getArchivedConversations: builder.query<
+      PaginatedResponse<IConversationSummary>,
+      ConversationListQuery
+    >({
+      query: (params) => ({ url: '/archived', method: 'GET', params }),
       serializeQueryArgs: ({ endpointName }) => endpointName,
       merge: (currentCache, newData, { arg }) => {
         if (arg.cursor === undefined) {
@@ -88,6 +112,7 @@ export const conversationApi = createApi({
         url: `/${conversationId}/avatar`,
         method: 'POST',
         data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
       }),
       invalidatesTags: ['Conversation'],
     }),
@@ -106,11 +131,64 @@ export const conversationApi = createApi({
         method: 'POST',
       }),
     }),
+
+    muteConversation: builder.mutation<
+      ApiResponse<IConversationSummary>,
+      { conversationId: string; duration: ConversationMuteDuration }
+    >({
+      query: ({ conversationId, duration }) => ({
+        url: `/${conversationId}/mute`,
+        method: 'POST',
+        data: { duration },
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
+
+    unmuteConversation: builder.mutation<ApiResponse<IConversationSummary>, string>({
+      query: (conversationId) => ({
+        url: `/${conversationId}/unmute`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
+
+    archiveConversation: builder.mutation<ApiResponse<IConversationSummary>, string>({
+      query: (conversationId) => ({
+        url: `/${conversationId}/archive`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
+
+    unarchiveConversation: builder.mutation<ApiResponse<IConversationSummary>, string>({
+      query: (conversationId) => ({
+        url: `/${conversationId}/unarchive`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
+
+    pinConversation: builder.mutation<ApiResponse<IConversationSummary>, string>({
+      query: (conversationId) => ({
+        url: `/${conversationId}/pin`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
+
+    unpinConversation: builder.mutation<ApiResponse<IConversationSummary>, string>({
+      query: (conversationId) => ({
+        url: `/${conversationId}/unpin`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
   }),
 });
 
 export const {
   useGetConversationsQuery,
+  useGetArchivedConversationsQuery,
   useCreateDirectConversationMutation,
   useCreateGroupConversationMutation,
   useAddParticipantsMutation,
@@ -118,4 +196,10 @@ export const {
   useUploadGroupAvatarMutation,
   useLeaveGroupMutation,
   useMarkConversationReadMutation,
+  useMuteConversationMutation,
+  useUnmuteConversationMutation,
+  useArchiveConversationMutation,
+  useUnarchiveConversationMutation,
+  usePinConversationMutation,
+  useUnpinConversationMutation,
 } = conversationApi;

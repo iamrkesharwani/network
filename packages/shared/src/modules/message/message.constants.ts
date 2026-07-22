@@ -3,6 +3,10 @@ export const CONVERSATION_TYPES = ['direct', 'group'] as const;
 export const MESSAGE_GROUP_MAX_PARTICIPANTS = 50;
 export const GROUP_NAME_MAX_LENGTH = 100;
 
+export const GROUP_AVATAR_ASPECT_RATIO = 1;
+export const GROUP_AVATAR_WIDTH_PX = 512;
+export const GROUP_AVATAR_HEIGHT_PX = 512;
+
 export const MESSAGE_CIPHERTEXT_MAX_LENGTH = 20000;
 export const MESSAGE_ENCRYPTED_KEY_MAX_LENGTH = 512;
 export const MESSAGE_IV_MAX_LENGTH = 64;
@@ -14,6 +18,8 @@ export const KEY_BUNDLE_WRAP_IV_MAX_LENGTH = 64;
 export const KEY_BUNDLE_WRAP_SALT_MAX_LENGTH = 64;
 
 export const MESSAGE_DELETE_SCOPES = ['me', 'everyone'] as const;
+
+export const MESSAGE_MUTE_DURATIONS = ['8h', '1d', '1w', 'forever'] as const;
 
 export const MESSAGE_NEW_SOCKET_EVENT = 'message:new';
 export const CONVERSATION_UPDATED_SOCKET_EVENT = 'conversation:updated';

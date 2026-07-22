@@ -20,9 +20,16 @@ export const findByUsername = (
 export const searchUsers = (
   q: string,
   cursor: string | null,
-  limit: number
+  limit: number,
+  excludeUserId?: string
 ): Promise<Omit<PaginatedResponse<IUserDocument>, 'success' | 'message'>> =>
-  hybridSearchPaginate(User, q, {}, cursor, limit);
+  hybridSearchPaginate(
+    User,
+    q,
+    excludeUserId ? { _id: { $ne: excludeUserId } } : {},
+    cursor,
+    limit
+  );
 
 export const findByIds = (ids: string[]): Promise<IUserDocument[]> =>
   User.find({ _id: { $in: ids } }).exec();

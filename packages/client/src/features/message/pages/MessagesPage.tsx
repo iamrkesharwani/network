@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { CLIENT_ROUTES } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
+import { cn } from '../../../shared/utils/cn';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import Button from '../../../shared/ui/primitives/Button';
 import { getCachedKeyBundle } from '../localKeyStore';
 import type { IWrappedPrivateKey } from '../keyManager';
-import { useGetConversationsQuery, CONVERSATION_LIST_ARGS } from '../conversationApi';
+import { buildConversationPath } from '../utils/buildMessagesPath';
+import {
+  useGetConversationsQuery,
+  useGetArchivedConversationsQuery,
+  CONVERSATION_LIST_ARGS,
+  CONVERSATION_ARCHIVED_LIST_ARGS,
+} from '../conversationApi';
 import { useCreateDirectConversationMutation } from '../conversationApi';
 import { useGetMyKeyBundleQuery } from '../keyBundleApi';
 import { useSearchCreatorsQuery } from '../../search/searchApi';
@@ -14,6 +23,7 @@ import KeySetupModal from '../components/KeySetupModal';
 import KeyRecoveryModal from '../components/KeyRecoveryModal';
 import KeyResetModal from '../components/KeyResetModal';
 import ConversationList from '../components/ConversationList';
+import ArchivedConversationList from '../components/ArchivedConversationList';
 import MessageThread from '../components/MessageThread';
 import CreateGroupModal from '../components/CreateGroupModal';
 import GroupInfoPanel from '../components/GroupInfoPanel';
@@ -23,6 +33,9 @@ const MessagesPage = () => {
   usePageTitle('Messages');
   const user = useAppSelector((state) => state.auth.user);
   const socketRef = useSocketContext();
+  const navigate = useNavigate();
+  const { conversationId } = useParams<{ conversationId: string }>();
+  const activeConversationId = conversationId ?? null;
 
   const [localWrapped, setLocalWrapped] = useState<
     IWrappedPrivateKey | null | undefined
@@ -32,14 +45,12 @@ const MessagesPage = () => {
   const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
   const [isResetOpen, setIsResetOpen] = useState(false);
 
-  const [activeConversationId, setActiveConversationId] = useState<
-    string | null
-  >(null);
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [newChatQuery, setNewChatQuery] = useState('');
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
   const [isAddParticipantsOpen, setIsAddParticipantsOpen] = useState(false);
+  const [isArchivedViewOpen, setIsArchivedViewOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -67,13 +78,24 @@ const MessagesPage = () => {
     else if (hasNoServerKeyBundle) setIsSetupOpen(true);
   }, [localWrapped, hasServerKeyBundle, hasNoServerKeyBundle]);
 
-  const { data: conversationsData } = useGetConversationsQuery(
-    CONVERSATION_LIST_ARGS,
-    { skip: !privateKey }
-  );
+  const { data: conversationsData, isLoading: isLoadingConversations } =
+    useGetConversationsQuery(CONVERSATION_LIST_ARGS, { skip: !privateKey });
+  const {
+    data: archivedConversationsData,
+    isLoading: isLoadingArchivedConversations,
+  } = useGetArchivedConversationsQuery(CONVERSATION_ARCHIVED_LIST_ARGS, {
+    skip: !privateKey,
+  });
   const conversations = conversationsData?.data ?? [];
+  const archivedConversations = archivedConversationsData?.data ?? [];
   const activeConversation =
-    conversations.find((c) => c.id === activeConversationId) ?? null;
+    conversations.find((c) => c.id === activeConversationId) ??
+    archivedConversations.find((c) => c.id === activeConversationId) ??
+    null;
+  const isLoadingActiveConversation =
+    Boolean(activeConversationId) &&
+    !activeConversation &&
+    (isLoadingConversations || isLoadingArchivedConversations);
 
   const { data: searchResults } = useSearchCreatorsQuery(
     { q: newChatQuery, limit: 10 },
@@ -83,7 +105,7 @@ const MessagesPage = () => {
 
   const handleStartChat = async (participantId: string) => {
     const result = await createDirectConversation({ participantId }).unwrap();
-    setActiveConversationId(result.data.id);
+    navigate(buildConversationPath(result.data.id));
     setIsNewChatOpen(false);
     setNewChatQuery('');
   };
@@ -91,31 +113,53 @@ const MessagesPage = () => {
   if (!user) return null;
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-4">
-      <div className="flex w-full max-w-xs shrink-0 flex-col overflow-y-auto border-r border-border pr-3">
+    <div className="flex h-[calc(100vh-8rem)] gap-4 pt-4 md:pt-0">
+      <div
+        className={cn(
+          'w-full flex-col overflow-y-auto md:max-w-xs md:shrink-0 md:border-r md:border-border md:pr-3',
+          activeConversationId ? 'hidden md:flex' : 'flex'
+        )}
+      >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-xl font-bold text-text-primary">
-            Messages
+            {isArchivedViewOpen ? 'Archived' : 'Messages'}
           </h2>
-          <div className="flex gap-1.5">
+          {isArchivedViewOpen ? (
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setIsNewChatOpen((open) => !open)}
+              onClick={() => setIsArchivedViewOpen(false)}
             >
-              New
+              Back to chats
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsCreateGroupOpen(true)}
-            >
-              Group
-            </Button>
-          </div>
+          ) : (
+            <div className="flex gap-1.5">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsArchivedViewOpen(true)}
+              >
+                Archived
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsNewChatOpen((open) => !open)}
+              >
+                New
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsCreateGroupOpen(true)}
+              >
+                Group
+              </Button>
+            </div>
+          )}
         </div>
 
-        {isNewChatOpen && (
+        {!isArchivedViewOpen && isNewChatOpen && (
           <div className="mb-4 rounded-lg border border-border p-2">
             <input
               value={newChatQuery}
@@ -136,20 +180,39 @@ const MessagesPage = () => {
           </div>
         )}
 
-        {privateKey && (
+        {privateKey && isArchivedViewOpen && (
+          <ArchivedConversationList
+            activeConversationId={activeConversationId}
+            onSelect={(id) => navigate(buildConversationPath(id))}
+            privateKey={privateKey}
+            myUserId={user.id}
+          />
+        )}
+        {privateKey && !isArchivedViewOpen && (
           <ConversationList
             activeConversationId={activeConversationId}
-            onSelect={setActiveConversationId}
+            onSelect={(id) => navigate(buildConversationPath(id))}
             privateKey={privateKey}
             myUserId={user.id}
           />
         )}
       </div>
 
-      <div className="flex flex-1 flex-col">
-        {!activeConversation || !privateKey ? (
+      <div
+        className={cn(
+          'flex-1 flex-col',
+          activeConversationId ? 'flex' : 'hidden md:flex'
+        )}
+      >
+        {!privateKey ? null : isLoadingActiveConversation ? (
           <div className="flex flex-1 items-center justify-center text-sm text-text-muted">
-            Select a conversation to start chatting.
+            Loading conversation…
+          </div>
+        ) : !activeConversation ? (
+          <div className="flex flex-1 items-center justify-center text-sm text-text-muted">
+            {activeConversationId
+              ? 'Conversation not found.'
+              : 'Select a conversation to start chatting.'}
           </div>
         ) : (
           <MessageThread
@@ -157,6 +220,7 @@ const MessagesPage = () => {
             privateKey={privateKey}
             myUserId={user.id}
             socketRef={socketRef}
+            onBack={() => navigate(CLIENT_ROUTES.MESSAGES)}
             onOpenGroupInfo={
               activeConversation.type === 'group'
                 ? () => setIsGroupInfoOpen(true)
@@ -192,7 +256,7 @@ const MessagesPage = () => {
       <CreateGroupModal
         isOpen={isCreateGroupOpen}
         onClose={() => setIsCreateGroupOpen(false)}
-        onCreated={setActiveConversationId}
+        onCreated={(id) => navigate(buildConversationPath(id))}
       />
       {activeConversation?.type === 'group' && (
         <>
@@ -201,7 +265,7 @@ const MessagesPage = () => {
             onClose={() => setIsGroupInfoOpen(false)}
             conversation={activeConversation}
             myUserId={user.id}
-            onLeft={() => setActiveConversationId(null)}
+            onLeft={() => navigate(CLIENT_ROUTES.MESSAGES)}
             onAddParticipants={() => {
               setIsGroupInfoOpen(false);
               setIsAddParticipantsOpen(true);

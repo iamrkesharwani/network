@@ -9,9 +9,11 @@ import {
   FileText,
   Film,
   Gavel,
+  MessageCircle,
 } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
+import { useHasUnreadConversations } from '../../features/message/hooks/useHasUnreadConversations';
 
 export interface SidebarProps {
   isMobileOpen: boolean;
@@ -36,12 +38,23 @@ const Sidebar = ({
 }: SidebarProps) => {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const authUser = useAppSelector((state) => state.auth.user);
+  const hasUnreadConversations = useHasUnreadConversations();
 
   const navItems = [
     { name: 'Home', path: CLIENT_ROUTES.FEED, icon: Home },
     { name: 'Shorts', path: CLIENT_ROUTES.SHORTS_FEED, icon: Film },
     { name: 'Posts', path: CLIENT_ROUTES.POSTS, icon: FileText },
     { name: 'Upload', path: CLIENT_ROUTES.UPLOAD, icon: UploadCloud },
+    ...(isAuthenticated
+      ? [
+          {
+            name: 'Messages',
+            path: CLIENT_ROUTES.MESSAGES,
+            icon: MessageCircle,
+            hasBadge: hasUnreadConversations,
+          },
+        ]
+      : []),
     ...(isAuthenticated && authUser?.username
       ? [{ name: 'Jury', path: CLIENT_ROUTES.JURY_QUEUE, icon: Gavel }]
       : []),
@@ -127,7 +140,11 @@ const Sidebar = ({
                       : 'flex items-center gap-3 w-full'
                   }
                 >
-                  <motion.div layout="position" transition={LAYOUT_TRANSITION}>
+                  <motion.div
+                    layout="position"
+                    transition={LAYOUT_TRANSITION}
+                    className="relative"
+                  >
                     <item.icon
                       className={[
                         'shrink-0 transition-all duration-300',
@@ -138,6 +155,12 @@ const Sidebar = ({
                       ].join(' ')}
                       strokeWidth={isActive ? 2.5 : 1.75}
                     />
+                    {'hasBadge' in item && item.hasBadge && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                      </span>
+                    )}
                   </motion.div>
 
                   <AnimatePresence mode="popLayout" initial={false}>

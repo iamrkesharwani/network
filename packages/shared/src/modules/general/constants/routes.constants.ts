@@ -12,6 +12,7 @@ export const CLIENT_ROUTES = {
   SHORTS_FEED: '/shorts/all',
   SEARCH: '/search',
   MESSAGES: '/messages',
+  MESSAGES_CONVERSATION: '/messages/:conversationId',
   NOTIFICATIONS: '/notifications',
   POSTS: '/posts',
   POST_WATCH: '/post/:postId',

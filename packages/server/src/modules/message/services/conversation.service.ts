@@ -1,4 +1,5 @@
 import type {
+  ConversationMuteDuration,
   GroupConversationCreateInput,
   GroupUpdateInput,
   IConversationSummary,
@@ -101,6 +102,28 @@ export const listConversations = async (
   limit: number
 ): Promise<Omit<PaginatedResponse<IConversationSummary>, 'success' | 'message'>> => {
   const { data, meta } = await conversationRepository.listByUser(
+    userId,
+    cursor,
+    limit
+  );
+
+  const participantIds = Array.from(
+    new Set(data.flatMap((doc) => doc.participantIds.map((id) => id.toString())))
+  );
+  const onlineUserIds = await presenceService.getOnlineUserIds(participantIds);
+
+  return {
+    data: data.map((doc) => toConversationSummary(doc, userId, onlineUserIds)),
+    meta,
+  };
+};
+
+export const listArchivedConversations = async (
+  userId: string,
+  cursor: string | null,
+  limit: number
+): Promise<Omit<PaginatedResponse<IConversationSummary>, 'success' | 'message'>> => {
+  const { data, meta } = await conversationRepository.listArchivedByUser(
     userId,
     cursor,
     limit
@@ -291,6 +314,90 @@ export const markRead = async (
     lastReadAt: new Date().toISOString(),
   });
 };
+
+const MUTE_DURATION_MS: Record<Exclude<ConversationMuteDuration, 'forever'>, number> = {
+  '8h': 8 * 60 * 60 * 1000,
+  '1d': 24 * 60 * 60 * 1000,
+  '1w': 7 * 24 * 60 * 60 * 1000,
+};
+const MUTE_FOREVER_DATE = new Date('9999-12-31T23:59:59.999Z');
+
+const resolveMutedUntil = (duration: ConversationMuteDuration): Date =>
+  duration === 'forever'
+    ? MUTE_FOREVER_DATE
+    : new Date(Date.now() + MUTE_DURATION_MS[duration]);
+
+const applyParticipantFlagUpdate = async (
+  userId: string,
+  conversationId: string,
+  updater: () => Promise<IConversationDocument | null>
+): Promise<IConversationSummary> => {
+  const conversation = await getConversationOrThrow(conversationId);
+  assertMembership(conversation, userId);
+
+  const updated = await updater();
+  if (!updated) {
+    throw new ApiError(404, 'NOT_FOUND', 'Conversation not found.');
+  }
+
+  const [withParticipants, onlineUserIds] = await Promise.all([
+    updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+    presenceService.getOnlineUserIds(
+      updated.participantIds.map((id) => id.toString())
+    ),
+  ]);
+
+  return toConversationSummary(withParticipants, userId, onlineUserIds);
+};
+
+export const muteConversation = (
+  userId: string,
+  conversationId: string,
+  duration: ConversationMuteDuration
+): Promise<IConversationSummary> =>
+  applyParticipantFlagUpdate(userId, conversationId, () =>
+    conversationRepository.setMuted(conversationId, userId, resolveMutedUntil(duration))
+  );
+
+export const unmuteConversation = (
+  userId: string,
+  conversationId: string
+): Promise<IConversationSummary> =>
+  applyParticipantFlagUpdate(userId, conversationId, () =>
+    conversationRepository.setMuted(conversationId, userId, null)
+  );
+
+export const archiveConversation = (
+  userId: string,
+  conversationId: string
+): Promise<IConversationSummary> =>
+  applyParticipantFlagUpdate(userId, conversationId, () =>
+    conversationRepository.setArchived(conversationId, userId, true)
+  );
+
+export const unarchiveConversation = (
+  userId: string,
+  conversationId: string
+): Promise<IConversationSummary> =>
+  applyParticipantFlagUpdate(userId, conversationId, () =>
+    conversationRepository.setArchived(conversationId, userId, false)
+  );
+
+export const pinConversation = (
+  userId: string,
+  conversationId: string
+): Promise<IConversationSummary> =>
+  applyParticipantFlagUpdate(userId, conversationId, () =>
+    conversationRepository.setPinned(conversationId, userId, true)
+  );
+
+export const unpinConversation = (
+  userId: string,
+  conversationId: string
+): Promise<IConversationSummary> =>
+  applyParticipantFlagUpdate(userId, conversationId, () =>
+    conversationRepository.setPinned(conversationId, userId, false)
+  );
 
 export const assertConversationMembership = async (
   userId: string,

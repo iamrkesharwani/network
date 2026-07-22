@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { GROUP_NAME_MAX_LENGTH } from '@network/shared';
 import Modal from '../../../shared/ui/overlay/Modal';
 import Button from '../../../shared/ui/primitives/Button';
+import { useAuth } from '../../auth/useAuth';
 import { useCreateGroupConversationMutation } from '../conversationApi';
 import ParticipantPicker, { type ParticipantCandidate } from './ParticipantPicker';
 
@@ -12,6 +13,7 @@ interface CreateGroupModalProps {
 }
 
 const CreateGroupModal = ({ isOpen, onClose, onCreated }: CreateGroupModalProps) => {
+  const { user } = useAuth();
   const [groupName, setGroupName] = useState('');
   const [selected, setSelected] = useState<ParticipantCandidate[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +64,11 @@ const CreateGroupModal = ({ isOpen, onClose, onCreated }: CreateGroupModalProps)
         className="mb-3 w-full rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm outline-none focus:border-primary"
       />
 
-      <ParticipantPicker selected={selected} onToggle={toggleSelect} />
+      <ParticipantPicker
+        selected={selected}
+        onToggle={toggleSelect}
+        excludeIds={user ? [user.id] : []}
+      />
 
       {error && (
         <p className="mb-3 mt-3 text-sm text-error" role="alert">

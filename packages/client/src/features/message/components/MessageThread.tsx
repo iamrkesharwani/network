@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import type { IConversationSummary } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import type { useSocket } from '../../../shared/hooks/useSocket';
@@ -19,6 +20,7 @@ interface MessageThreadProps {
   myUserId: string;
   socketRef: ReturnType<typeof useSocket>;
   onOpenGroupInfo?: () => void;
+  onBack: () => void;
 }
 
 const getLabel = (conversation: IConversationSummary): string =>
@@ -34,6 +36,7 @@ const MessageThread = ({
   myUserId,
   socketRef,
   onOpenGroupInfo,
+  onBack,
 }: MessageThreadProps) => {
   const { emitTyping } = useConversationRoom(socketRef, conversation.id);
   const { data, isLoading } = useGetMessagesQuery({
@@ -106,30 +109,41 @@ const MessageThread = ({
 
   return (
     <div className="flex flex-1 flex-col">
-      <button
-        type="button"
-        onClick={onOpenGroupInfo}
-        disabled={conversation.type !== 'group'}
-        className="flex items-center gap-3 border-b border-border pb-3 text-left disabled:cursor-default"
-      >
-        <Avatar
-          src={headerAvatar.src}
-          isOnline={headerAvatar.isOnline}
-          fallback={getLabel(conversation)}
-        />
-        <div>
-          <p className="font-semibold text-text-primary">
-            {getLabel(conversation)}
-          </p>
-          {conversation.type === 'direct' && (
-            <PresenceDot
-              isOnline={conversation.otherParticipant.isOnline}
-              lastActiveAt={conversation.otherParticipant.lastActiveAt}
-              showLabel
-            />
-          )}
-        </div>
-      </button>
+      <div className="flex items-center gap-1 border-b border-border pb-3">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back to conversations"
+          className="shrink-0 rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover md:hidden"
+        >
+          <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenGroupInfo}
+          disabled={conversation.type !== 'group'}
+          className="flex flex-1 items-center gap-3 text-left disabled:cursor-default"
+        >
+          <Avatar
+            src={headerAvatar.src}
+            isOnline={headerAvatar.isOnline}
+            fallback={getLabel(conversation)}
+          />
+          <div>
+            <p className="font-semibold text-text-primary">
+              {getLabel(conversation)}
+            </p>
+            {conversation.type === 'direct' && (
+              <PresenceDot
+                isOnline={conversation.otherParticipant.isOnline}
+                lastActiveAt={conversation.otherParticipant.lastActiveAt}
+                showLabel
+              />
+            )}
+          </div>
+        </button>
+      </div>
 
       {isLoading ? (
         <MessageThreadSkeleton />

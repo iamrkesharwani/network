@@ -15,6 +15,9 @@ export interface IConversationDocument extends Document {
   createdBy: Types.ObjectId;
   lastMessageAt: Date;
   lastReadAt: Map<string, Date>;
+  mutedUntil: Map<string, Date>;
+  archivedAt: Map<string, Date>;
+  pinnedAt: Map<string, Date>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +60,21 @@ const conversationSchema = new Schema<IConversationDocument>(
       default: () => new Date(),
     },
     lastReadAt: {
+      type: Map,
+      of: Date,
+      default: () => new Map(),
+    },
+    mutedUntil: {
+      type: Map,
+      of: Date,
+      default: () => new Map(),
+    },
+    archivedAt: {
+      type: Map,
+      of: Date,
+      default: () => new Map(),
+    },
+    pinnedAt: {
       type: Map,
       of: Date,
       default: () => new Map(),

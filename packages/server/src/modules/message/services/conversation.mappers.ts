@@ -12,13 +12,13 @@ interface PopulatedParticipant {
   lastActiveAt?: Date;
 }
 
-const getLastReadAt = (
-  lastReadAt: IConversationDocument['lastReadAt'],
+const getMapValue = (
+  map: Map<string, Date> | undefined,
   userId: string
 ): Date | undefined => {
-  if (!lastReadAt) return undefined;
-  if (lastReadAt instanceof Map) return lastReadAt.get(userId);
-  return (lastReadAt as unknown as Record<string, Date>)[userId];
+  if (!map) return undefined;
+  if (map instanceof Map) return map.get(userId);
+  return (map as unknown as Record<string, Date>)[userId];
 };
 
 const toParticipantReadState = (
@@ -65,13 +65,21 @@ export const toConversationSummary = (
     doc.participantIds as unknown as PopulatedParticipant[]
   ).filter((participant) => participant && participant.username);
 
-  const viewerLastReadAt = getLastReadAt(doc.lastReadAt, viewerId);
+  const viewerLastReadAt = getMapValue(doc.lastReadAt, viewerId);
   const isUnread = !viewerLastReadAt || doc.lastMessageAt > viewerLastReadAt;
+
+  const viewerMutedUntil = getMapValue(doc.mutedUntil, viewerId);
+  const isMuted = Boolean(viewerMutedUntil && viewerMutedUntil.getTime() > Date.now());
+  const isArchived = Boolean(getMapValue(doc.archivedAt, viewerId));
+  const isPinned = Boolean(getMapValue(doc.pinnedAt, viewerId));
 
   const base = {
     id: doc._id.toString(),
     lastMessageAt: doc.lastMessageAt.toISOString(),
     isUnread,
+    isMuted,
+    isArchived,
+    isPinned,
     participantReadState: toParticipantReadState(doc.lastReadAt),
   };
 

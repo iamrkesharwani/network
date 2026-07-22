@@ -1,20 +1,12 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Camera, LogOut, UserPlus } from 'lucide-react';
-import {
-  ALLOWED_AVATAR_MIME_TYPES,
-  MAX_AVATAR_SIZE_BYTES,
-  GROUP_NAME_MAX_LENGTH,
-  type IGroupConversationSummary,
-} from '@network/shared';
+import { GROUP_NAME_MAX_LENGTH, type IGroupConversationSummary } from '@network/shared';
 import Modal from '../../../shared/ui/overlay/Modal';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import Button from '../../../shared/ui/primitives/Button';
 import Avatar from '../../../shared/ui/primitives/Avatar';
-import {
-  useUpdateGroupMutation,
-  useUploadGroupAvatarMutation,
-  useLeaveGroupMutation,
-} from '../conversationApi';
+import GroupAvatarPickerModal from './GroupAvatarPickerModal';
+import { useUpdateGroupMutation, useLeaveGroupMutation } from '../conversationApi';
 
 interface GroupInfoPanelProps {
   isOpen: boolean;
@@ -33,46 +25,17 @@ const GroupInfoPanel = ({
   onLeft,
   onAddParticipants,
 }: GroupInfoPanelProps) => {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [groupName, setGroupName] = useState(conversation.groupName);
   const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
-  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
 
   const [updateGroup, { isLoading: isRenaming }] = useUpdateGroupMutation();
-  const [uploadGroupAvatar, { isLoading: isUploadingPhoto }] =
-    useUploadGroupAvatarMutation();
   const [leaveGroup, { isLoading: isLeaving }] = useLeaveGroupMutation();
 
   const handleRename = async () => {
     const trimmed = groupName.trim();
     if (!trimmed || trimmed === conversation.groupName) return;
     await updateGroup({ conversationId: conversation.id, groupName: trimmed }).unwrap();
-  };
-
-  const handlePhotoChange = async (file: File) => {
-    setPhotoError(null);
-
-    if (
-      !ALLOWED_AVATAR_MIME_TYPES.includes(
-        file.type as (typeof ALLOWED_AVATAR_MIME_TYPES)[number]
-      )
-    ) {
-      setPhotoError('Please use a JPEG, PNG, or WebP image.');
-      return;
-    }
-    if (file.size > MAX_AVATAR_SIZE_BYTES) {
-      setPhotoError('Image is too large. Max size is 5MB.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('avatar', file);
-
-    try {
-      await uploadGroupAvatar({ conversationId: conversation.id, formData }).unwrap();
-    } catch {
-      setPhotoError("Couldn't upload that image. Please try again.");
-    }
   };
 
   const handleLeave = async () => {
@@ -86,19 +49,9 @@ const GroupInfoPanel = ({
     <>
       <Modal isOpen={isOpen} onClose={onClose} title="Group info">
         <div className="mb-6 flex flex-col items-center">
-          <input
-            ref={inputRef}
-            type="file"
-            accept={ALLOWED_AVATAR_MIME_TYPES.join(',')}
-            className="hidden"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) handlePhotoChange(file);
-            }}
-          />
           <button
             type="button"
-            onClick={() => !isUploadingPhoto && inputRef.current?.click()}
+            onClick={() => setIsAvatarPickerOpen(true)}
             className="group relative h-20 w-20 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface"
             aria-label="Change group photo"
           >
@@ -111,11 +64,6 @@ const GroupInfoPanel = ({
               <Camera className="h-5 w-5 text-white" strokeWidth={1.75} />
             </div>
           </button>
-          {photoError && (
-            <p role="alert" className="mt-2 text-[0.72rem] text-error">
-              {photoError}
-            </p>
-          )}
         </div>
 
         <div className="mb-6 flex gap-2">
@@ -178,6 +126,12 @@ const GroupInfoPanel = ({
         description="You'll stop receiving messages from this group. You can be re-added later by any member."
         confirmLabel="Leave group"
         isLoading={isLeaving}
+      />
+
+      <GroupAvatarPickerModal
+        isOpen={isAvatarPickerOpen}
+        onClose={() => setIsAvatarPickerOpen(false)}
+        conversationId={conversation.id}
       />
     </>
   );

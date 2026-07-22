@@ -97,7 +97,8 @@ export const searchCreators = async (
   const result = await userRepository.searchUsers(
     requireQuery(q),
     cursor,
-    limit
+    limit,
+    viewerId
   );
 
   return {

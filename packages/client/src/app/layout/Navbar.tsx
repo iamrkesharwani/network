@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Search, X, UploadCloud } from 'lucide-react';
+import { Menu, Search, X, UploadCloud, MessageCircle } from 'lucide-react';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
 import {
   SITE_NAME,
@@ -11,6 +11,7 @@ import LogoIcon from '../../public/Logo.svg?react';
 import { useSearchNavigation } from '../../features/search/hooks/useSearchNavigation';
 import SearchSuggestionsDropdown from '../../features/search/components/SearchSuggestionsDropdown';
 import NotificationBell from '../../features/notification/components/NotificationBell';
+import { useHasUnreadConversations } from '../../features/message/hooks/useHasUnreadConversations';
 import NavbarAvatar from './NavbarAvatar';
 
 export interface NavbarProps {
@@ -19,6 +20,7 @@ export interface NavbarProps {
 
 const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const hasUnreadConversations = useHasUnreadConversations();
   const {
     searchInput,
     setSearchInput,
@@ -116,6 +118,20 @@ const Navbar = ({ onMobileMenuClick }: NavbarProps) => {
       <div className="hidden md:flex items-center gap-1 ml-auto shrink-0">
         {isAuthenticated ? (
           <>
+            <Link
+              to={CLIENT_ROUTES.MESSAGES}
+              aria-label="Messages"
+              className="relative p-2 rounded-lg text-icon hover:text-icon-hover hover:bg-surface-raised transition-colors focus:outline-none"
+            >
+              <MessageCircle className="w-5 h-5" />
+              {hasUnreadConversations && (
+                <span className="absolute top-1 right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                </span>
+              )}
+            </Link>
+
             <NotificationBell />
 
             <NavbarAvatar user={user} />
