@@ -3,9 +3,9 @@ import type {
   IKeyBundlePublicResponse,
   KeyBundlePublishInput,
 } from '@network/shared';
-import * as keyBundleRepository from './keyBundle.repository.js';
-import { ApiError } from '../../core/utils/ApiError.js';
-import type { IKeyBundleDocument } from './keyBundle.model.js';
+import * as keyBundleRepository from '../repository/keyBundle.repository.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import type { IKeyBundleDocument } from '../models/keyBundle.model.js';
 
 const toOwnResponse = (doc: IKeyBundleDocument): IKeyBundleOwnResponse => ({
   publicKey: doc.publicKey,

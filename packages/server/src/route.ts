@@ -21,7 +21,9 @@ import commentRoutes from './modules/comment/comment.routes.js';
 import playlistRoutes from './modules/playlist/playlist.routes.js';
 import bookmarkRoutes from './modules/bookmark/bookmark.routes.js';
 import notificationRoutes from './modules/notification/notification.routes.js';
-import keyBundleRoutes from './modules/message/keyBundle.routes.js';
+import keyBundleRoutes from './modules/message/routes/keyBundle.routes.js';
+import conversationRoutes from './modules/message/routes/conversation.routes.js';
+import messageRoutes from './modules/message/routes/message.routes.js';
 
 const router = Router();
 
@@ -48,5 +50,7 @@ router.use('/playlists', playlistRoutes);
 router.use('/bookmarks', bookmarkRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/keys', keyBundleRoutes);
+router.use('/conversations', conversationRoutes);
+router.use('/messages', messageRoutes);
 
 export default router;

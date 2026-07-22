@@ -125,3 +125,17 @@ export const bookmarkLimiter = createLimiter(
   'Too many bookmark actions. Please slow down.',
   'rl:bookmark:'
 );
+
+export const conversationLimiter = createLimiter(
+  FIFTEEN_MINUTES_MS,
+  30,
+  'Too many conversation actions. Please slow down.',
+  'rl:conversation:'
+);
+
+export const messageLimiter = createLimiter(
+  60 * 1000,
+  120,
+  'Too many messages sent. Please slow down.',
+  'rl:message:'
+);

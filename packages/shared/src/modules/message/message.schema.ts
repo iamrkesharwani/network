@@ -101,6 +101,10 @@ export const messageDeleteSchema = z.object({
   scope: z.enum(MESSAGE_DELETE_SCOPES),
 });
 
+export const messageIdParamSchema = z.object({
+  messageId: mongoIdSchema,
+});
+
 export const conversationIdParamSchema = z.object({
   conversationId: mongoIdSchema,
 });

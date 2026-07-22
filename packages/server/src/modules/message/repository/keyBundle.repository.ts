@@ -1,5 +1,8 @@
 import type { KeyBundlePublishInput } from '@network/shared';
-import { KeyBundleModel, type IKeyBundleDocument } from './keyBundle.model.js';
+import {
+  KeyBundleModel,
+  type IKeyBundleDocument,
+} from '../models/keyBundle.model.js';
 
 export const findByUserId = (
   userId: string

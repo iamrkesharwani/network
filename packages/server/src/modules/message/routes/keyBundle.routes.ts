@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { validate } from '../../core/middleware/validate.middleware.js';
-import { requireAuth } from '../../core/middleware/auth.middleware.js';
+import { validate } from '../../../core/middleware/validate.middleware.js';
+import { requireAuth } from '../../../core/middleware/auth.middleware.js';
 import {
   keyBundlePublishSchema,
   keyBundlePublicKeysQuerySchema,
   keyBundleUserIdParamSchema,
 } from '@network/shared';
-import * as keyBundleController from './keyBundle.controller.js';
+import * as keyBundleController from '../controllers/keyBundle.controller.js';
 
 const router = Router();
 

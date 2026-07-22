@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
 import type { KeyBundlePublishInput } from '@network/shared';
-import { asyncHandler } from '../../core/utils/asyncHandler.js';
-import { ApiResponse } from '../../core/utils/ApiResponse.js';
-import { ApiError } from '../../core/utils/ApiError.js';
-import * as keyBundleService from './keyBundle.service.js';
+import { asyncHandler } from '../../../core/utils/asyncHandler.js';
+import { ApiResponse } from '../../../core/utils/ApiResponse.js';
+import { ApiError } from '../../../core/utils/ApiError.js';
+import * as keyBundleService from '../services/keyBundle.service.js';
 
 export const publish = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {

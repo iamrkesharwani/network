@@ -11,6 +11,7 @@ import type {
   encryptedKeyEntrySchema,
   messageSendSchema,
   messageDeleteSchema,
+  messageIdParamSchema,
   conversationIdParamSchema,
   conversationReadSchema,
   conversationRoomEventSchema,
@@ -42,6 +43,7 @@ export type ParticipantAddInput = z.infer<typeof participantAddSchema>;
 export type EncryptedKeyEntryInput = z.infer<typeof encryptedKeyEntrySchema>;
 export type MessageSendInput = z.infer<typeof messageSendSchema>;
 export type MessageDeleteInput = z.infer<typeof messageDeleteSchema>;
+export type MessageIdParam = z.infer<typeof messageIdParamSchema>;
 export type ConversationIdParam = z.infer<typeof conversationIdParamSchema>;
 export type ConversationReadInput = z.infer<typeof conversationReadSchema>;
 export type ConversationRoomEventInput = z.infer<
