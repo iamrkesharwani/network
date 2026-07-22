@@ -7,9 +7,10 @@ import { REPLIES_PAGE_LIMIT } from '@network/shared';
 export const useCommentThread = (
   contentType: ContentType,
   contentId: string,
-  parentCommentId: string
+  parentCommentId: string,
+  initiallyExpanded = false
 ) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(initiallyExpanded);
 
   const repliesFeed = useLiveFeed(
     (args) =>

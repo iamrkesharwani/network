@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { WheelEvent } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -26,6 +26,8 @@ interface ShortWatchDesktopProps {
   index: number;
   onIndexChange: (index: number) => void;
   compact?: boolean;
+  highlightCommentId?: string;
+  threadRootId?: string;
 }
 
 const ShortWatchDesktop = ({
@@ -33,6 +35,8 @@ const ShortWatchDesktop = ({
   index,
   onIndexChange,
   compact = false,
+  highlightCommentId,
+  threadRootId,
 }: ShortWatchDesktopProps) => {
   const short = shorts[index] ?? null;
   const rootRef = useRef<HTMLDivElement>(null);
@@ -40,6 +44,10 @@ const ShortWatchDesktop = ({
   const [layout, setLayout] = usePreference('layout');
   const commentsOpen = layout.shortsCommentsOpen ?? false;
   const { reduce } = useMotionSafe();
+
+  useEffect(() => {
+    if (highlightCommentId) setLayout({ shortsCommentsOpen: true });
+  }, [highlightCommentId, setLayout]);
 
   const socketRef = useSocketContext();
   useContentRoom(socketRef, 'short', short?.id ?? '', rootRef);
@@ -112,6 +120,8 @@ const ShortWatchDesktop = ({
           onToggleComments={() =>
             setLayout({ shortsCommentsOpen: !commentsOpen })
           }
+          highlightCommentId={highlightCommentId}
+          threadRootId={threadRootId}
         />
       </motion.div>
 

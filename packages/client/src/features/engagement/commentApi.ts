@@ -11,6 +11,7 @@ import type { RootState } from '../../app/store/store';
 import { videoApi } from '../video/videoApi';
 import { shortApi } from '../short/shortApi';
 import { postApi } from '../post/postApi';
+import { OPTIMISTIC_COMMENT_ID_PREFIX } from './engagement.constants';
 
 interface ListCommentsArgs {
   contentType: ContentType;
@@ -72,7 +73,7 @@ export const commentApi = createApi({
         const author = state.auth.user;
         if (!author) return;
 
-        const tempId = `optimistic-${crypto.randomUUID()}`;
+        const tempId = `${OPTIMISTIC_COMMENT_ID_PREFIX}${crypto.randomUUID()}`;
         const now = new Date().toISOString();
         const optimisticComment: ICommentResponse = {
           id: tempId,

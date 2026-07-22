@@ -108,6 +108,7 @@ const preferencesSchema = new Schema<IPreferencesDocument>(
   },
   {
     timestamps: true,
+    minimize: false,
     toJSON: {
       virtuals: false,
       transform(_doc, ret) {

@@ -6,7 +6,12 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { CLIENT_ROUTES, PLAYLIST_QUEUE_PARAM } from '@network/shared';
+import {
+  CLIENT_ROUTES,
+  PLAYLIST_QUEUE_PARAM,
+  NOTIFICATION_COMMENT_PARAM,
+  NOTIFICATION_THREAD_PARAM,
+} from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { useGetVideoByIdQuery } from '../videoApi';
@@ -28,12 +33,16 @@ const VideoWatch = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const playlistId = searchParams.get(PLAYLIST_QUEUE_PARAM);
+  const highlightCommentId =
+    searchParams.get(NOTIFICATION_COMMENT_PARAM) ?? undefined;
+  const threadRootId = searchParams.get(NOTIFICATION_THREAD_PARAM) ?? undefined;
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const isMobileLayout = useIsMobileLayout();
-  const [activePanel, setActivePanel] =
-    useState<VideoEngagementActivePanel>(null);
-  const didDefaultPanel = useRef(false);
+  const [activePanel, setActivePanel] = useState<VideoEngagementActivePanel>(
+    highlightCommentId ? 'comments' : null
+  );
+  const didDefaultPanel = useRef(Boolean(highlightCommentId));
 
   useEffect(() => {
     if (didDefaultPanel.current || isMobileLayout) return;
@@ -154,6 +163,8 @@ const VideoWatch = () => {
           activePanel={activePanel}
           onToggleComments={() => togglePanel('comments')}
           onToggleDescription={() => togglePanel('description')}
+          highlightCommentId={highlightCommentId}
+          threadRootId={threadRootId}
         />
       </div>
 

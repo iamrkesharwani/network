@@ -23,6 +23,8 @@ interface VideoEngagementPanelProps {
   activePanel: VideoEngagementActivePanel;
   onToggleComments: () => void;
   onToggleDescription: () => void;
+  highlightCommentId?: string;
+  threadRootId?: string;
 }
 
 const VideoEngagementPanel = ({
@@ -30,6 +32,8 @@ const VideoEngagementPanel = ({
   activePanel,
   onToggleComments,
   onToggleDescription,
+  highlightCommentId,
+  threadRootId,
 }: VideoEngagementPanelProps) => {
   const { data: likeStatusData } = useGetLikeStatusesQuery({
     contentType: 'video',
@@ -104,6 +108,8 @@ const VideoEngagementPanel = ({
               contentType="video"
               contentId={video.id}
               canModerate={isVideoOwner}
+              highlightCommentId={highlightCommentId}
+              threadRootId={threadRootId}
             />
           </BottomSheet>
 
@@ -140,6 +146,8 @@ const VideoEngagementPanel = ({
                 contentType="video"
                 contentId={video.id}
                 canModerate={isVideoOwner}
+                highlightCommentId={highlightCommentId}
+                threadRootId={threadRootId}
               />
             </motion.div>
           )}

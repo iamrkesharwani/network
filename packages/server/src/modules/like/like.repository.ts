@@ -49,11 +49,15 @@ export const getUserLikedSet = async (
   contentType: EngageableContentType,
   contentIds: string[]
 ): Promise<Set<string>> => {
+  const validContentIds = contentIds.filter((id) =>
+    mongoose.Types.ObjectId.isValid(id)
+  );
+
   const docs = await LikeModel.find({
     userId: new mongoose.Types.ObjectId(userId),
     contentType,
     contentId: {
-      $in: contentIds.map((id) => new mongoose.Types.ObjectId(id)),
+      $in: validContentIds.map((id) => new mongoose.Types.ObjectId(id)),
     },
   })
     .select('contentId')

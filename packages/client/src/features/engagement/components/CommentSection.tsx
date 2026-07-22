@@ -10,12 +10,16 @@ export interface CommentSectionProps {
   contentType: ContentType;
   contentId: string;
   canModerate?: boolean;
+  highlightCommentId?: string;
+  threadRootId?: string;
 }
 
 const CommentSection = ({
   contentType,
   contentId,
   canModerate = false,
+  highlightCommentId,
+  threadRootId,
 }: CommentSectionProps) => {
   const [createComment] = useCreateCommentMutation();
 
@@ -42,6 +46,8 @@ const CommentSection = ({
         hasNextPage={hasNextPage}
         onLoadMore={loadMore}
         canModerate={canModerate}
+        highlightCommentId={highlightCommentId}
+        threadRootId={threadRootId}
       />
     </div>
   );

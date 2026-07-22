@@ -4,6 +4,7 @@ import { SPRINGS } from '../../../shared/motion/springs';
 import { useMotionSafe } from '../../../shared/motion/useMotionSafe';
 import InfiniteScroll from '../../../shared/ui/list/InfiniteScroll';
 import { useGetLikeStatusesQuery } from '../likeApi';
+import { isOptimisticCommentId } from '../engagement.constants';
 import CommentItem from './CommentItem';
 
 export interface CommentListProps {
@@ -15,6 +16,8 @@ export interface CommentListProps {
   hasNextPage: boolean;
   onLoadMore: () => void;
   canModerate?: boolean;
+  highlightCommentId?: string;
+  threadRootId?: string;
 }
 
 const CommentList = ({
@@ -26,9 +29,13 @@ const CommentList = ({
   hasNextPage,
   onLoadMore,
   canModerate = false,
+  highlightCommentId,
+  threadRootId,
 }: CommentListProps) => {
   const { reduce } = useMotionSafe();
-  const commentIds = comments.map((comment) => comment.id);
+  const commentIds = comments
+    .map((comment) => comment.id)
+    .filter((id) => !isOptimisticCommentId(id));
   const { data: likeStatusData } = useGetLikeStatusesQuery(
     { contentType: 'comment', contentIds: commentIds },
     { skip: commentIds.length === 0 }
@@ -79,6 +86,11 @@ const CommentList = ({
                 topLevelCommentId={comment.id}
                 liked={likedMap[comment.id] ?? false}
                 canModerate={canModerate}
+                highlightCommentId={highlightCommentId}
+                autoExpandReplies={
+                  threadRootId === comment.id &&
+                  highlightCommentId !== comment.id
+                }
               />
             </motion.div>
           ))}

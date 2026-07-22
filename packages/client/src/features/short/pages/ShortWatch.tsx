@@ -1,7 +1,16 @@
 import { useCallback, useMemo } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import {
+  Navigate,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { CLIENT_ROUTES } from '@network/shared';
+import {
+  CLIENT_ROUTES,
+  NOTIFICATION_COMMENT_PARAM,
+  NOTIFICATION_THREAD_PARAM,
+} from '@network/shared';
 import { useLiveShortsFeed } from '../../feed/hooks/useLiveShortsFeed';
 import { useGetShortByIdQuery } from '../shortApi';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
@@ -14,6 +23,10 @@ const ShortWatch = () => {
   usePageTitle('Shorts');
   const { shortId } = useParams<{ shortId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const highlightCommentId =
+    searchParams.get(NOTIFICATION_COMMENT_PARAM) ?? undefined;
+  const threadRootId = searchParams.get(NOTIFICATION_THREAD_PARAM) ?? undefined;
   const { mode, compact } = useShortLayoutMode();
   const isMobileLayout = mode === 'mobile';
 
@@ -108,6 +121,8 @@ const ShortWatch = () => {
         index={displayIndex}
         onIndexChange={handleIndexChange}
         compact={compact}
+        highlightCommentId={highlightCommentId}
+        threadRootId={threadRootId}
       />
     );
   }
@@ -129,6 +144,9 @@ const ShortWatch = () => {
         onIndexChange={handleIndexChange}
         onLoadMore={loadMore}
         hasNextPage={hasNextPage}
+        highlightShortId={highlightCommentId ? shortId : undefined}
+        highlightCommentId={highlightCommentId}
+        threadRootId={threadRootId}
       />
     </div>
   );

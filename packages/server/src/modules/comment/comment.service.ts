@@ -90,6 +90,9 @@ export const createComment = async (
       actorId: userId,
       targetType: 'comment',
       targetId: parentId,
+      contentType: parentComment.contentType,
+      contentId: parentComment.contentId.toString(),
+      topLevelCommentId: parentId,
     });
   } else {
     const counterAdapter = getContentCounterAdapter(contentType);
@@ -111,6 +114,7 @@ export const createComment = async (
         actorId: userId,
         targetType: contentType,
         targetId: contentId,
+        topLevelCommentId: comment._id.toString(),
       });
     }
   }
@@ -121,6 +125,11 @@ export const createComment = async (
       actorId: userId,
       targetType: 'comment',
       targetId: comment._id.toString(),
+      contentType,
+      contentId,
+      topLevelCommentId: comment.parentCommentId
+        ? comment.parentCommentId.toString()
+        : comment._id.toString(),
     },
     excludeFromMentions
   );

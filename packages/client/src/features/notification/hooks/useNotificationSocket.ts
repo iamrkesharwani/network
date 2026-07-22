@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
-import { notificationApi } from '../notificationApi';
+import { notificationApi, NOTIFICATION_LIST_ARGS } from '../notificationApi';
 import type { useSocket } from '../../../shared/hooks/useSocket';
 import {
   NOTIFICATION_NEW_SOCKET_EVENT,
@@ -8,8 +8,6 @@ import {
   type INotificationEvent,
   type IUnreadCountEvent,
 } from '@network/shared';
-
-const LIST_ARGS = { limit: 20 };
 
 export const useNotificationSocket = (
   socketRef: ReturnType<typeof useSocket>
@@ -24,7 +22,7 @@ export const useNotificationSocket = (
       dispatch(
         notificationApi.util.updateQueryData(
           'getNotifications',
-          LIST_ARGS,
+          NOTIFICATION_LIST_ARGS,
           (draft) => {
             const existingIndex = draft.data.findIndex(
               (item) => item.id === event.id

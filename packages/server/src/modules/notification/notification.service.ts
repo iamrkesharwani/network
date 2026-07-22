@@ -4,6 +4,7 @@ import type {
   INotificationListItem,
   PaginatedResponse,
   PushSubscriptionCreateInput,
+  ContentType,
 } from '@network/shared';
 import {
   NOTIFICATION_TYPE_CATEGORY_MAP,
@@ -27,6 +28,9 @@ export interface DispatchNotificationPayload {
   actorId?: string;
   targetType: NotificationTargetType;
   targetId?: string;
+  contentType?: ContentType;
+  contentId?: string;
+  topLevelCommentId?: string;
 }
 
 export const dispatchNotification = async (
@@ -46,6 +50,11 @@ export const dispatchNotification = async (
     ...(payload.actorId && { actorId: payload.actorId }),
     targetType: payload.targetType,
     ...(payload.targetId && { targetId: payload.targetId }),
+    ...(payload.contentType && { contentType: payload.contentType }),
+    ...(payload.contentId && { contentId: payload.contentId }),
+    ...(payload.topLevelCommentId && {
+      topLevelCommentId: payload.topLevelCommentId,
+    }),
   });
 
   await doc.populate('actorIds', 'username name avatarUrl');
@@ -59,7 +68,7 @@ export const dispatchNotification = async (
     count: unreadCount,
   });
 
-  const pushEnabled = preferences.notifications.push?.[category] ?? true;
+  const pushEnabled = preferences.notifications?.push?.[category] ?? true;
   if (pushEnabled) {
     const copy = buildNotificationCopy(item);
     await sendWebPush(payload.recipientId, {
@@ -68,7 +77,7 @@ export const dispatchNotification = async (
     });
   }
 
-  const emailEnabled = preferences.notifications.email?.[category] ?? false;
+  const emailEnabled = preferences.notifications?.email?.[category] ?? false;
   if (emailEnabled) {
     const recipient = await userRepository.findById(payload.recipientId);
     if (recipient) {

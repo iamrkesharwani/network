@@ -1,4 +1,9 @@
-import { CLIENT_ROUTES, type INotificationListItem } from '@network/shared';
+import {
+  CLIENT_ROUTES,
+  NOTIFICATION_COMMENT_PARAM,
+  NOTIFICATION_THREAD_PARAM,
+  type INotificationListItem,
+} from '@network/shared';
 import { buildProfilePath } from '../../profile/utils/buildProfilePath';
 
 const SOCIAL_VERB_BY_TYPE: Partial<Record<string, string>> = {
@@ -39,6 +44,23 @@ const CONTENT_WATCH_ROUTE: Partial<Record<string, string>> = {
   video: CLIENT_ROUTES.VIDEO_WATCH.replace(':videoId', ''),
 };
 
+const withCommentParams = (
+  path: string,
+  item: INotificationListItem
+): string => {
+  if (!item.topLevelCommentId) return path;
+
+  const commentId =
+    item.targetType === 'comment' ? item.targetId : item.topLevelCommentId;
+  if (!commentId) return path;
+
+  const params = new URLSearchParams({
+    [NOTIFICATION_COMMENT_PARAM]: commentId,
+    [NOTIFICATION_THREAD_PARAM]: item.topLevelCommentId,
+  });
+  return `${path}?${params.toString()}`;
+};
+
 export const getNotificationPath = (
   item: INotificationListItem
 ): string | null => {
@@ -54,9 +76,19 @@ export const getNotificationPath = (
     return CLIENT_ROUTES.JURY_APPEALS;
   }
 
+  // Comment-scoped notifications (reply/mention/like on a comment) carry the
+  // navigable parent content separately, since targetId points at the comment itself.
+  if (item.targetType === 'comment') {
+    if (!item.contentType || !item.contentId) return null;
+    const contentRoute = CONTENT_WATCH_ROUTE[item.contentType];
+    return contentRoute
+      ? withCommentParams(`${contentRoute}${item.contentId}`, item)
+      : null;
+  }
+
   const contentRoute = CONTENT_WATCH_ROUTE[item.targetType];
   if (contentRoute && item.targetId) {
-    return `${contentRoute}${item.targetId}`;
+    return withCommentParams(`${contentRoute}${item.targetId}`, item);
   }
 
   return null;

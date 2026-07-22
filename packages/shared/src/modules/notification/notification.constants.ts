@@ -56,3 +56,6 @@ export const NOTIFICATION_RETENTION_DAYS = 90;
 export const NOTIFICATION_REAPER_QUEUE_NAME = 'notification-reaper';
 export const NOTIFICATION_REAPER_JOB_ID = 'notification-reaper';
 export const NOTIFICATION_REAPER_INTERVAL_MS = ONE_DAY_MS;
+
+export const NOTIFICATION_COMMENT_PARAM = 'comment';
+export const NOTIFICATION_THREAD_PARAM = 'thread';

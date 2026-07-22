@@ -5,6 +5,7 @@ import { SPRINGS, DURATIONS } from '../../../shared/motion/springs';
 import { useMotionSafe } from '../../../shared/motion/useMotionSafe';
 import { useGetLikeStatusesQuery } from '../likeApi';
 import { useCommentThread } from '../hooks/useCommentThread';
+import { isOptimisticCommentId } from '../engagement.constants';
 import CommentItem from './CommentItem';
 
 export interface CommentRepliesProps {
@@ -12,6 +13,8 @@ export interface CommentRepliesProps {
   contentId: string;
   parentComment: ICommentResponse;
   canModerate?: boolean;
+  autoExpand?: boolean;
+  highlightCommentId?: string;
 }
 
 const CommentReplies = ({
@@ -19,6 +22,8 @@ const CommentReplies = ({
   contentId,
   parentComment,
   canModerate = false,
+  autoExpand = false,
+  highlightCommentId,
 }: CommentRepliesProps) => {
   const {
     expanded,
@@ -28,10 +33,12 @@ const CommentReplies = ({
     isFetchingNextPage,
     hasNextPage,
     loadMore,
-  } = useCommentThread(contentType, contentId, parentComment.id);
+  } = useCommentThread(contentType, contentId, parentComment.id, autoExpand);
   const { reduce } = useMotionSafe();
 
-  const replyIds = items.map((reply) => reply.id);
+  const replyIds = items
+    .map((reply) => reply.id)
+    .filter((id) => !isOptimisticCommentId(id));
   const { data: likeStatusData } = useGetLikeStatusesQuery(
     { contentType: 'comment', contentIds: replyIds },
     { skip: replyIds.length === 0 }
@@ -92,6 +99,7 @@ const CommentReplies = ({
                   liked={likedMap[reply.id] ?? false}
                   isReply
                   canModerate={canModerate}
+                  highlightCommentId={highlightCommentId}
                 />
               </motion.div>
             ))}

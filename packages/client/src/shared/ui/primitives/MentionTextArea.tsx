@@ -39,6 +39,7 @@ const boxedStyle = {
     },
   },
   suggestions: {
+    zIndex: 80,
     list: {
       backgroundColor: 'var(--color-surface)',
       border: '1px solid var(--color-border)',
@@ -81,6 +82,7 @@ const underlineStyle = {
     },
   },
   suggestions: {
+    zIndex: 80,
     list: {
       backgroundColor: 'var(--color-surface)',
       border: '1px solid var(--color-border)',

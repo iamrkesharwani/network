@@ -7,6 +7,7 @@ import type {
 } from './notification.schema.js';
 import type { NOTIFICATION_TYPES, NOTIFICATION_TARGET_TYPES } from './notification.constants.js';
 import type { PreferencesNotificationCategory } from '../preferences/preferences.types.js';
+import type { ContentType } from '../../core/contentRef/contentRef.types.js';
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 export type NotificationTargetType =
@@ -44,6 +45,11 @@ export interface INotificationListItem {
   targetType: NotificationTargetType;
   targetId?: string;
   targetPreview?: INotificationTargetPreview;
+  /** Navigable parent content, set when targetType is 'comment' (targetId points at the comment itself). */
+  contentType?: ContentType;
+  contentId?: string;
+  /** Root of the comment thread targetId belongs to - equals targetId itself for top-level comments. */
+  topLevelCommentId?: string;
   isRead: boolean;
   createdAt: string;
 }

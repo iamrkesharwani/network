@@ -3,9 +3,11 @@ import {
   NOTIFICATION_TYPES,
   NOTIFICATION_TARGET_TYPES,
   PREFERENCES_NOTIFICATION_CATEGORIES,
+  CONTENT_TYPES,
   type NotificationType,
   type NotificationTargetType,
   type PreferencesNotificationCategory,
+  type ContentType,
 } from '@network/shared';
 
 export interface INotificationDocument extends Document {
@@ -15,6 +17,9 @@ export interface INotificationDocument extends Document {
   groupKey: string;
   targetType: NotificationTargetType;
   targetId: string | null;
+  contentType: ContentType | null;
+  contentId: string | null;
+  topLevelCommentId: string | null;
   actorIds: mongoose.Types.ObjectId[];
   actorCount: number;
   isRead: boolean;
@@ -50,6 +55,19 @@ const notificationSchema = new Schema<INotificationDocument>(
       required: true,
     },
     targetId: {
+      type: String,
+      default: null,
+    },
+    contentType: {
+      type: String,
+      enum: CONTENT_TYPES,
+      default: null,
+    },
+    contentId: {
+      type: String,
+      default: null,
+    },
+    topLevelCommentId: {
       type: String,
       default: null,
     },

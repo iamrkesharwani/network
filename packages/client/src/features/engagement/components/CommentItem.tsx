@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ContentType, ICommentResponse } from '@network/shared';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import { SPRINGS, DURATIONS } from '../../../shared/motion/springs';
+import { cn } from '../../../shared/utils/cn';
 import CardAuthorHeader from '../../../shared/ui/card/CardAuthorHeader';
 import CardOptionsMenu from '../../../shared/ui/card/CardOptionsMenu';
 import MentionedText from '../../../shared/ui/primitives/MentionedText';
@@ -16,6 +17,8 @@ import {
   useUpdateCommentMutation,
 } from '../commentApi';
 
+const HIGHLIGHT_DURATION_MS = 2500;
+
 export interface CommentItemProps {
   comment: ICommentResponse;
   contentType: ContentType;
@@ -24,6 +27,8 @@ export interface CommentItemProps {
   liked: boolean;
   isReply?: boolean;
   canModerate?: boolean;
+  highlightCommentId?: string;
+  autoExpandReplies?: boolean;
 }
 
 const CommentItem = ({
@@ -34,14 +39,30 @@ const CommentItem = ({
   liked,
   isReply = false,
   canModerate = false,
+  highlightCommentId,
+  autoExpandReplies = false,
 }: CommentItemProps) => {
   const currentUserId = useAppSelector((state) => state.auth.user?.id);
   const isOwner = Boolean(currentUserId) && currentUserId === comment.author.id;
   const canDelete = isOwner || canModerate;
 
+  const isHighlighted = comment.id === highlightCommentId;
+  const [isHighlightActive, setIsHighlightActive] = useState(isHighlighted);
+  const rootRef = useRef<HTMLDivElement>(null);
+
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isHighlighted) return;
+    rootRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const timeout = setTimeout(
+      () => setIsHighlightActive(false),
+      HIGHLIGHT_DURATION_MS
+    );
+    return () => clearTimeout(timeout);
+  }, [isHighlighted]);
 
   const [updateCommentMutation] = useUpdateCommentMutation();
   const [deleteCommentMutation] = useDeleteCommentMutation();
@@ -84,9 +105,13 @@ const CommentItem = ({
 
   return (
     <motion.div
+      ref={rootRef}
       layout="position"
       transition={SPRINGS.smooth}
-      className="group flex flex-col gap-1.5 py-2.5"
+      className={cn(
+        'group flex flex-col gap-1.5 rounded-lg py-2.5 px-2 -mx-2 transition-colors duration-700',
+        isHighlightActive && 'bg-primary/10 ring-2 ring-primary'
+      )}
     >
       <CardAuthorHeader
         username={comment.author.username}
@@ -170,6 +195,8 @@ const CommentItem = ({
             contentId={contentId}
             parentComment={comment}
             canModerate={canModerate}
+            autoExpand={autoExpandReplies}
+            highlightCommentId={highlightCommentId}
           />
         </div>
       )}

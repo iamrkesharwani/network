@@ -9,4 +9,5 @@ export type ProfileTab =
   | 'history'
   | 'playlists'
   | 'jury'
-  | 'settings';
+  | 'settings'
+  | 'saved';

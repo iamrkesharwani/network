@@ -1,4 +1,8 @@
-import { extractMentionedUsernames, type NotificationTargetType } from '@network/shared';
+import {
+  extractMentionedUsernames,
+  type NotificationTargetType,
+  type ContentType,
+} from '@network/shared';
 import * as userRepository from '../user/user.repository.js';
 import { queueNotification } from './notification.queue.js';
 
@@ -6,6 +10,9 @@ interface MentionTarget {
   actorId: string;
   targetType: NotificationTargetType;
   targetId: string;
+  contentType?: ContentType;
+  contentId?: string;
+  topLevelCommentId?: string;
 }
 
 const queueMentionsFor = async (
@@ -28,6 +35,11 @@ const queueMentionsFor = async (
       actorId: target.actorId,
       targetType: target.targetType,
       targetId: target.targetId,
+      ...(target.contentType && { contentType: target.contentType }),
+      ...(target.contentId && { contentId: target.contentId }),
+      ...(target.topLevelCommentId && {
+        topLevelCommentId: target.topLevelCommentId,
+      }),
     });
   }
 };

@@ -13,6 +13,9 @@ interface ShortFeedProps {
   onLoadMore?: () => void;
   hasNextPage?: boolean;
   className?: string;
+  highlightShortId?: string;
+  highlightCommentId?: string;
+  threadRootId?: string;
 }
 
 const ShortFeed = ({
@@ -22,6 +25,9 @@ const ShortFeed = ({
   onLoadMore,
   hasNextPage = false,
   className,
+  highlightShortId,
+  highlightCommentId,
+  threadRootId,
 }: ShortFeedProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -114,6 +120,15 @@ const ShortFeed = ({
                 onPrev={handlePrev}
                 isActive={index === activeIndex}
                 className="rounded-none"
+                autoOpenComments={
+                  Boolean(highlightCommentId) && short.id === highlightShortId
+                }
+                highlightCommentId={
+                  short.id === highlightShortId ? highlightCommentId : undefined
+                }
+                threadRootId={
+                  short.id === highlightShortId ? threadRootId : undefined
+                }
               />
             ) : short.thumbnailUrl ? (
               <img

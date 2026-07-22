@@ -5,6 +5,7 @@ import StatsTabPanel from './StatsTabPanel';
 import HistoryTabPanel from './HistoryTabPanel';
 import PlaylistTabPanel from '../../playlist/components/PlaylistTabPanel';
 import type { ProfileTab } from '@network/shared';
+import SavedPage from '../../bookmark/pages/SavedPage';
 
 export interface ProfileTabContentProps {
   tab: ProfileTab;
@@ -32,7 +33,9 @@ const ProfileTabContent = ({
   if (tab === 'playlists') {
     return <PlaylistTabPanel username={username} isOwner={isOwner} />;
   }
-
+  if (tab === 'saved') {
+    return <SavedPage />;
+  }
   return <StatsTabPanel />;
 };
 

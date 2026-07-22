@@ -30,6 +30,9 @@ export const toListItem = (
     actorCount: doc.actorCount,
     targetType: doc.targetType,
     ...(doc.targetId && { targetId: doc.targetId }),
+    ...(doc.contentType && { contentType: doc.contentType }),
+    ...(doc.contentId && { contentId: doc.contentId }),
+    ...(doc.topLevelCommentId && { topLevelCommentId: doc.topLevelCommentId }),
     isRead: doc.isRead,
     createdAt: doc.createdAt.toISOString(),
   };

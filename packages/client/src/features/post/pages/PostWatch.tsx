@@ -1,6 +1,10 @@
 import { useRef } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
-import { CLIENT_ROUTES } from '@network/shared';
+import { Navigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+  CLIENT_ROUTES,
+  NOTIFICATION_COMMENT_PARAM,
+  NOTIFICATION_THREAD_PARAM,
+} from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import { useContentRoom } from '../../engagement/hooks/useContentRoom';
@@ -15,6 +19,9 @@ import PostWatchSkeleton from '../skeleton/PostWatchSkeleton';
 const PostWatch = () => {
   const { postId } = useParams<{ postId: string }>();
   const rootRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  const highlightCommentId = searchParams.get(NOTIFICATION_COMMENT_PARAM) ?? undefined;
+  const threadRootId = searchParams.get(NOTIFICATION_THREAD_PARAM) ?? undefined;
 
   const { data, isLoading, isError } = useGetPostByIdQuery(postId ?? '', {
     skip: !postId,
@@ -58,7 +65,12 @@ const PostWatch = () => {
           <PostMetaRail post={post} className={hasMedia ? undefined : 'flex-1'} />
         </div>
 
-        <PostEngagementPanel post={post} />
+        <PostEngagementPanel
+          post={post}
+          autoOpenComments={Boolean(highlightCommentId)}
+          highlightCommentId={highlightCommentId}
+          threadRootId={threadRootId}
+        />
       </div>
 
       <PostContinuationFeed excludeId={post.id} />

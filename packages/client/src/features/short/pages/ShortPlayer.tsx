@@ -40,6 +40,9 @@ interface ShortPlayerProps {
   onPrev: () => void;
   isActive?: boolean;
   className?: string;
+  autoOpenComments?: boolean;
+  highlightCommentId?: string;
+  threadRootId?: string;
 }
 
 const ShortPlayer = ({
@@ -50,10 +53,13 @@ const ShortPlayer = ({
   onPrev,
   isActive = true,
   className,
+  autoOpenComments = false,
+  highlightCommentId,
+  threadRootId,
 }: ShortPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(autoOpenComments);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const { reduce } = useMotionSafe();
 
@@ -376,6 +382,8 @@ const ShortPlayer = ({
           contentType="short"
           contentId={short.id}
           canModerate={isShortOwner}
+          highlightCommentId={highlightCommentId}
+          threadRootId={threadRootId}
         />
       </BottomSheet>
     </div>

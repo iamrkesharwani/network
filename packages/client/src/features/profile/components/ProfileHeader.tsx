@@ -7,7 +7,10 @@ import { useTheme } from '../../../shared/hooks/useTheme';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import TrustBadge from '../../creator/components/TrustBadge';
 import FollowButton from '../../follow/components/FollowButton';
-import { buildFollowersPath, buildFollowingPath } from '../utils/buildProfilePath';
+import {
+  buildFollowersPath,
+  buildFollowingPath,
+} from '../utils/buildProfilePath';
 import BioModal from './BioModal';
 
 export interface ProfileHeaderProps {
@@ -28,7 +31,7 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
 
   return (
     <div className="pb-4">
-      <div className="relative -mx-4 -mt-0 w-[calc(100%+2rem)] min-h-[9rem] overflow-hidden rounded-b-xl bg-surface-raised md:-mx-5 md:-mt-5 md:w-[calc(100%+2.5rem)] md:min-h-[11rem]">
+      <div className="relative -mx-4 mt-0 w-[calc(100%+2rem)] min-h-36 overflow-hidden rounded-b-xl bg-surface-raised md:-mx-5 md:-mt-5 md:w-[calc(100%+2.5rem)] md:min-h-44">
         {profile.bannerUrl && (
           <img
             src={profile.bannerUrl}
@@ -36,7 +39,7 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-b from-transparent to-surface-alt" />
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-b from-transparent to-surface-alt" />
 
         <div
           className={cn(
@@ -77,7 +80,6 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
               </div>
             </div>
 
-            {/* Mobile only: count-on-top, label-below stacked pills */}
             <div className="flex items-stretch gap-2 text-sm md:hidden">
               <Link
                 to={buildFollowersPath(profile.username)}
@@ -108,20 +110,25 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
                 <FollowButton
                   username={profile.username}
                   isFollowedByViewer={profile.isFollowedByViewer ?? false}
-                  className="!h-auto flex-1 !py-2 !font-semibold"
+                  className="h-auto! flex-1 py-2! font-semibold!"
                 />
               )}
             </div>
 
-            {/* Desktop/tablet: unchanged — single inline row */}
             <div className="hidden items-center gap-2 text-sm md:flex">
-              <Link to={buildFollowersPath(profile.username)} className={pillClass}>
+              <Link
+                to={buildFollowersPath(profile.username)}
+                className={pillClass}
+              >
                 <span className="font-semibold text-text-primary">
                   {formatCount(profile.followerCount)}
                 </span>
                 <span className="ml-1 text-text-secondary">Followers</span>
               </Link>
-              <Link to={buildFollowingPath(profile.username)} className={pillClass}>
+              <Link
+                to={buildFollowingPath(profile.username)}
+                className={pillClass}
+              >
                 <span className="font-semibold text-text-primary">
                   {formatCount(profile.followingCount)}
                 </span>

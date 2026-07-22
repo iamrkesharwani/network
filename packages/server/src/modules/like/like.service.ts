@@ -4,6 +4,7 @@ import {
   type ILikeToggleResponse,
 } from '@network/shared';
 import * as likeRepository from './like.repository.js';
+import * as commentRepository from '../comment/comment.repository.js';
 import { getModerationContentAdapter } from '../../core/moderation/moderationContent.registry.js';
 import { getContentCounterAdapter } from '../../core/contentRef/contentCounter.registry.js';
 import { emitToContent } from '../../core/config/socket.js';
@@ -43,12 +44,22 @@ export const toggleLike = async (
   });
 
   if (liked && ownerId) {
+    const parentComment =
+      contentType === 'comment' ? await commentRepository.findById(contentId) : null;
+
     await queueNotification({
       type: 'like',
       recipientId: ownerId,
       actorId: userId,
       targetType: contentType,
       targetId: contentId,
+      ...(parentComment && {
+        contentType: parentComment.contentType,
+        contentId: parentComment.contentId.toString(),
+        topLevelCommentId: (
+          parentComment.parentCommentId ?? parentComment._id
+        ).toString(),
+      }),
     });
   }
 

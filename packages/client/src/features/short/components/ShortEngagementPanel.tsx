@@ -18,12 +18,16 @@ interface ShortEngagementPanelProps {
   short: IShortResponse;
   commentsOpen: boolean;
   onToggleComments: () => void;
+  highlightCommentId?: string;
+  threadRootId?: string;
 }
 
 const ShortEngagementPanel = ({
   short,
   commentsOpen,
   onToggleComments,
+  highlightCommentId,
+  threadRootId,
 }: ShortEngagementPanelProps) => {
   const { reduce } = useMotionSafe();
   const { user } = useAuth();
@@ -183,6 +187,8 @@ const ShortEngagementPanel = ({
                 contentType="short"
                 contentId={short.id}
                 canModerate={isShortOwner}
+                highlightCommentId={highlightCommentId}
+                threadRootId={threadRootId}
               />
             </div>
           </motion.div>

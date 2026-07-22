@@ -14,10 +14,18 @@ import { useGetBookmarkStatusesQuery } from '../../engagement/bookmarkApi';
 
 interface PostEngagementPanelProps {
   post: IPostResponse;
+  autoOpenComments?: boolean;
+  highlightCommentId?: string;
+  threadRootId?: string;
 }
 
-const PostEngagementPanel = ({ post }: PostEngagementPanelProps) => {
-  const [sheetOpen, setSheetOpen] = useState(false);
+const PostEngagementPanel = ({
+  post,
+  autoOpenComments = false,
+  highlightCommentId,
+  threadRootId,
+}: PostEngagementPanelProps) => {
+  const [sheetOpen, setSheetOpen] = useState(autoOpenComments);
   const isMobileLayout = useIsMobileLayout();
 
   const { data: likeStatusData } = useGetLikeStatusesQuery({
@@ -88,6 +96,8 @@ const PostEngagementPanel = ({ post }: PostEngagementPanelProps) => {
             contentType="post"
             contentId={post.id}
             canModerate={isOwner}
+            highlightCommentId={highlightCommentId}
+            threadRootId={threadRootId}
           />
         </BottomSheet>
       ) : (
@@ -96,6 +106,8 @@ const PostEngagementPanel = ({ post }: PostEngagementPanelProps) => {
             contentType="post"
             contentId={post.id}
             canModerate={isOwner}
+            highlightCommentId={highlightCommentId}
+            threadRootId={threadRootId}
           />
         </div>
       )}

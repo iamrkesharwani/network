@@ -1,6 +1,10 @@
 import { Queue } from 'bullmq';
 import { NOTIFICATION_QUEUE_NAME } from '@network/shared';
-import type { NotificationType, NotificationTargetType } from '@network/shared';
+import type {
+  NotificationType,
+  NotificationTargetType,
+  ContentType,
+} from '@network/shared';
 import { logger } from '../../core/utils/logger.js';
 import { bullMqConnection } from '../../core/config/bullmq.js';
 
@@ -10,6 +14,9 @@ export interface NotificationJobData {
   actorId?: string;
   targetType: NotificationTargetType;
   targetId?: string;
+  contentType?: ContentType;
+  contentId?: string;
+  topLevelCommentId?: string;
 }
 
 const notificationQueue = new Queue<NotificationJobData>(

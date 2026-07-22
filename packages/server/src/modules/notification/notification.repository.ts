@@ -6,6 +6,7 @@ import {
   type NotificationType,
   type NotificationTargetType,
   type PreferencesNotificationCategory,
+  type ContentType,
 } from '@network/shared';
 import { NotificationModel, type INotificationDocument } from './notification.model.js';
 
@@ -23,6 +24,9 @@ interface UpsertGroupedNotificationParams {
   actorId?: string;
   targetType: NotificationTargetType;
   targetId?: string | null;
+  contentType?: ContentType;
+  contentId?: string;
+  topLevelCommentId?: string;
 }
 
 export const upsertGroupedNotification = async (
@@ -42,6 +46,9 @@ export const upsertGroupedNotification = async (
     groupKey,
     targetType: params.targetType,
     targetId: params.targetId ?? null,
+    contentType: params.contentType ?? null,
+    contentId: params.contentId ?? null,
+    topLevelCommentId: params.topLevelCommentId ?? null,
     isRead: false,
     readAt: null,
     createdAt: { $ifNull: ['$createdAt', '$$NOW'] },
