@@ -9,6 +9,7 @@ import { useEngagementCountSocket } from '../../shared/hooks/useEngagementCountS
 import { SocketProvider } from '../../shared/hooks/SocketContext';
 import { useCreatorEventSocket } from '../../features/creator/hooks/useCreatorEventSocket';
 import { useNotificationSocket } from '../../features/notification/hooks/useNotificationSocket';
+import { useMessageSocket } from '../../features/message/hooks/useMessageSocket';
 import BadgeToast from '../../features/creator/components/BadgeToast';
 import { usePreference } from '../../features/settings/hooks/usePreference';
 import DeactivatedAccountBanner from '../../features/settings/components/account/DeactivatedAccountBanner';
@@ -19,6 +20,7 @@ const PageWrapper = () => {
   useMediaStatusSocket(socketRef);
   useEngagementCountSocket(socketRef);
   useNotificationSocket(socketRef);
+  useMessageSocket(socketRef);
   const { current: creatorCelebration, dismiss: dismissCreatorCelebration } =
     useCreatorEventSocket(socketRef);
 

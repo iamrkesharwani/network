@@ -17,16 +17,6 @@ import { toConversationSummary } from './conversation.mappers.js';
 import * as presenceService from './presence.service.js';
 import type { IConversationDocument } from '../models/conversation.model.js';
 
-const emitToParticipants = (
-  doc: IConversationDocument,
-  event: string,
-  payload: unknown
-): void => {
-  for (const participantId of doc.participantIds) {
-    emitToUser(participantId.toString(), event, payload);
-  }
-};
-
 const assertActiveUsersExist = async (userIds: string[]): Promise<void> => {
   const users = await userRepository.findByIds(userIds);
   const activeIds = new Set(
@@ -226,10 +216,19 @@ export const leaveGroup = async (
 
   const updated = await conversationRepository.leaveGroup(conversationId, userId);
   if (updated) {
-    emitToParticipants(updated, CONVERSATION_UPDATED_SOCKET_EVENT, {
-      conversationId,
-      leftUserId: userId,
-    });
+    const recipientIds = updated.participantIds.map((id) => id.toString());
+    const [withParticipants, onlineUserIds] = await Promise.all([
+      updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+      presenceService.getOnlineUserIds(recipientIds),
+    ]);
+
+    for (const recipientId of recipientIds) {
+      emitToUser(
+        recipientId,
+        CONVERSATION_UPDATED_SOCKET_EVENT,
+        toConversationSummary(withParticipants, recipientId, onlineUserIds)
+      );
+    }
   }
 };
 

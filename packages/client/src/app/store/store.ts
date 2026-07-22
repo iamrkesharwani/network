@@ -23,6 +23,8 @@ import { playlistApi } from '../../features/playlist/playlistApi';
 import { bookmarkApi } from '../../features/engagement/bookmarkApi';
 import { notificationApi } from '../../features/notification/notificationApi';
 import { keyBundleApi } from '../../features/message/keyBundleApi';
+import { conversationApi } from '../../features/message/conversationApi';
+import { messageApi } from '../../features/message/messageApi';
 
 export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
   configureStore({
@@ -52,6 +54,8 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
         bookmarkApi.middleware,
         notificationApi.middleware,
         keyBundleApi.middleware,
+        conversationApi.middleware,
+        messageApi.middleware,
         preferencesSyncMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',

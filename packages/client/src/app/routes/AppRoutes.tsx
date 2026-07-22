@@ -16,7 +16,7 @@ import VideoWatch from '../../features/video/pages/VideoWatch';
 import ShortsEntry from '../../features/short/pages/ShortsEntry';
 import ShortWatch from '../../features/short/pages/ShortWatch';
 import ShortsFeedPage from '../../features/short/pages/ShortsFeedPage';
-import MessagesPlaceholder from '../../features/message/pages/MessagesPlaceholder';
+import MessagesPage from '../../features/message/pages/MessagesPage';
 import UploadHub from '../../features/upload/components/UploadHub';
 import VideoUploadWizard from '../../features/video/form/VideoUploadWizard';
 import ShortUploadWizard from '../../features/short/form/ShortUploadWizard';
@@ -138,7 +138,7 @@ export const routes: RouteObject[] = [
                   },
                   {
                     path: CLIENT_ROUTES.MESSAGES,
-                    element: <MessagesPlaceholder />,
+                    element: <MessagesPage />,
                   },
                   {
                     path: CLIENT_ROUTES.NOTIFICATIONS,

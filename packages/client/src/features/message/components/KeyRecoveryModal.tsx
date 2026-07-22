@@ -7,6 +7,7 @@ import {
   type EnterPassphraseInput,
 } from '../passphrase.schema';
 import { useKeyBundleRecovery } from '../hooks/useKeyBundleRecovery';
+import type { IWrappedPrivateKey } from '../keyManager';
 import PassphraseField from './PassphraseField';
 
 const WRONG_ATTEMPTS_BEFORE_RESET_PROMPT = 3;
@@ -17,6 +18,7 @@ interface KeyRecoveryModalProps {
   userId: string;
   onKeyReady: (privateKey: CryptoKey) => void;
   onForgotPassphrase: () => void;
+  localWrapped?: IWrappedPrivateKey | null;
 }
 
 const KeyRecoveryModal = ({
@@ -25,9 +27,14 @@ const KeyRecoveryModal = ({
   userId,
   onKeyReady,
   onForgotPassphrase,
+  localWrapped,
 }: KeyRecoveryModalProps) => {
   const [wrongAttempts, setWrongAttempts] = useState(0);
-  const { recoverKey, isFetching } = useKeyBundleRecovery(userId, isOpen);
+  const { recoverKey, isFetching } = useKeyBundleRecovery(
+    userId,
+    isOpen,
+    localWrapped
+  );
 
   const {
     register,
