@@ -197,6 +197,10 @@ const userSchema = new Schema<IUserDocument>(
       type: Date,
       default: null,
     },
+    lastActiveAt: {
+      type: Date,
+      default: null,
+    },
     searchTokens: {
       type: [String],
       default: [],

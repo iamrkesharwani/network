@@ -1,7 +1,9 @@
 import type { z } from 'zod';
 import type {
   conversationTypeSchema,
+  keyBundlePublicKeysQuerySchema,
   keyBundlePublishSchema,
+  keyBundleUserIdParamSchema,
   directConversationCreateSchema,
   groupConversationCreateSchema,
   groupUpdateSchema,
@@ -24,7 +26,11 @@ export type ConversationType = (typeof CONVERSATION_TYPES)[number];
 export type MessageDeleteScope = (typeof MESSAGE_DELETE_SCOPES)[number];
 
 export type ConversationTypeInput = z.infer<typeof conversationTypeSchema>;
+export type KeyBundlePublicKeysQuery = z.infer<
+  typeof keyBundlePublicKeysQuerySchema
+>;
 export type KeyBundlePublishInput = z.infer<typeof keyBundlePublishSchema>;
+export type KeyBundleUserIdParam = z.infer<typeof keyBundleUserIdParamSchema>;
 export type DirectConversationCreateInput = z.infer<
   typeof directConversationCreateSchema
 >;
@@ -47,6 +53,15 @@ export type MessageListQuery = z.infer<typeof messageListQuerySchema>;
 export interface IKeyBundlePublicResponse {
   userId: string;
   publicKey: string;
+  keyVersion: number;
+}
+
+export interface IKeyBundleOwnResponse {
+  publicKey: string;
+  wrappedPrivateKey: string;
+  wrapIv: string;
+  wrapSalt: string;
+  pbkdf2Iterations: number;
   keyVersion: number;
 }
 

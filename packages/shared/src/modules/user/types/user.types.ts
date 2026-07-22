@@ -79,6 +79,7 @@ export interface IUser {
   reactivateAt?: Date | null;
   deletionRequestedAt?: Date | null;
   deletionScheduledAt?: Date | null;
+  lastActiveAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

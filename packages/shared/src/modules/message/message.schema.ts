@@ -21,6 +21,10 @@ import {
 
 export const conversationTypeSchema = z.enum(CONVERSATION_TYPES);
 
+export const keyBundlePublicKeysQuerySchema = z.object({
+  userIds: z.string().min(1),
+});
+
 export const keyBundlePublishSchema = z.object({
   publicKey: z.string().min(1).max(KEY_BUNDLE_PUBLIC_KEY_MAX_LENGTH),
   wrappedPrivateKey: z
@@ -30,6 +34,10 @@ export const keyBundlePublishSchema = z.object({
   wrapIv: z.string().min(1).max(KEY_BUNDLE_WRAP_IV_MAX_LENGTH),
   wrapSalt: z.string().min(1).max(KEY_BUNDLE_WRAP_SALT_MAX_LENGTH),
   pbkdf2Iterations: z.number().int().min(KEY_BUNDLE_PBKDF2_MIN_ITERATIONS),
+});
+
+export const keyBundleUserIdParamSchema = z.object({
+  userId: mongoIdSchema,
 });
 
 export const directConversationCreateSchema = z.object({
