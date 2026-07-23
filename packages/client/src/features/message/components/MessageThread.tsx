@@ -7,6 +7,7 @@ import {
   type ConversationDisappearingTtl,
   type IConversationSummary,
   type IMessageResponse,
+  type MessageAttachmentType,
 } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
@@ -17,16 +18,26 @@ import {
   useSetMessageReactionMutation,
   useRemoveMessageReactionMutation,
   useEditMessageMutation,
+  usePresignMessageAttachmentMutation,
 } from '../messageApi';
 import { useMarkConversationReadMutation } from '../conversationApi';
 import { useGetPublicKeysQuery } from '../keyBundleApi';
 import { useConversationRoom } from '../hooks/useConversationRoom';
-import { encryptForRecipients, decryptMessage } from '../keyManager';
+import {
+  encryptForRecipients,
+  decryptMessage,
+  generateMessageKey,
+  encryptFile,
+  encryptTextWithKey,
+  wrapMessageKeyForRecipients,
+} from '../keyManager';
 import {
   encodeMessagePayload,
   decodeMessagePayload,
   fetchLinkPreview,
+  type IMessagePayload,
 } from '../messagePayload';
+import { uploadEncryptedAttachment } from '../utils/uploadAttachment';
 import { useBlockUserMutation } from '../../block/blockApi';
 import { usePreference } from '../../settings/hooks/usePreference';
 import MessageBubble from './MessageBubble';
@@ -107,6 +118,7 @@ const MessageThread = ({
     skip: recipientIds.length === 0,
   });
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
+  const [presignAttachment] = usePresignMessageAttachmentMutation();
   const [markConversationRead] = useMarkConversationReadMutation();
 
   const participantNameById = useMemo(() => {
@@ -175,6 +187,61 @@ const MessageThread = ({
       encryptedKeys,
       ...(replyTo && { replyToMessageId: replyTo.id }),
       ...(ttlOverride && { ttlOverride }),
+    }).unwrap();
+    setReplyTo(null);
+  };
+
+  const handleSendAttachment = async (
+    file: File,
+    type: MessageAttachmentType,
+    duration?: number
+  ) => {
+    const recipients = getRecipients();
+    if (recipients.length === 0) return;
+
+    const messageKey = await generateMessageKey();
+    const fileBuffer = await file.arrayBuffer();
+    const { ciphertext: attachmentCiphertext, iv: attachmentIv } =
+      await encryptFile(messageKey, fileBuffer);
+
+    const presigned = await presignAttachment({
+      conversationId: conversation.id,
+      contentLength: attachmentCiphertext.byteLength,
+    }).unwrap();
+
+    await uploadEncryptedAttachment(
+      presigned.data.uploadUrl,
+      attachmentCiphertext
+    );
+
+    const payload: IMessagePayload = {
+      text: '',
+      attachment: {
+        type,
+        storageKey: presigned.data.storageKey,
+        attachmentIv,
+        mimeType: file.type,
+        size: file.size,
+        ...(duration !== undefined && { duration }),
+      },
+    };
+
+    const { ciphertext, iv } = await encryptTextWithKey(
+      messageKey,
+      encodeMessagePayload(payload)
+    );
+    const encryptedKeys = await wrapMessageKeyForRecipients(
+      messageKey,
+      recipients
+    );
+
+    await sendMessage({
+      conversationId: conversation.id,
+      ciphertext,
+      iv,
+      encryptedKeys,
+      attachmentStorageKey: presigned.data.storageKey,
+      ...(replyTo && { replyToMessageId: replyTo.id }),
     }).unwrap();
     setReplyTo(null);
   };
@@ -318,6 +385,7 @@ const MessageThread = ({
 
       <MessageInput
         onSend={handleSend}
+        onSendAttachment={handleSendAttachment}
         onTyping={emitTyping}
         isSending={isSending}
         replyToLabel={

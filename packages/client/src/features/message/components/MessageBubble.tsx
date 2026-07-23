@@ -1,17 +1,33 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MoreHorizontal, Trash2, Reply, Pencil, Smile, X, Clock, Link2 } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Trash2,
+  Reply,
+  Pencil,
+  Smile,
+  X,
+  Clock,
+  Link2,
+  ImageOff,
+} from 'lucide-react';
 import type {
   IConversationSummary,
+  IMessageAttachmentPayload,
   IMessageLinkPreview,
   IMessageResponse,
 } from '@network/shared';
-import { getRelativeDate, MESSAGE_QUICK_REACTION_EMOJIS } from '@network/shared';
+import {
+  getRelativeDate,
+  formatDuration,
+  MESSAGE_QUICK_REACTION_EMOJIS,
+} from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
-import { decryptMessage } from '../keyManager';
+import { decryptMessage, unwrapMessageKey, decryptFile } from '../keyManager';
 import { decodeMessagePayload } from '../messagePayload';
 import {
   useDeleteMessageMutation,
   useGetMessageByIdQuery,
+  useLazyGetMessageAttachmentUrlQuery,
 } from '../messageApi';
 import SeenByIndicator from './SeenByIndicator';
 
@@ -138,6 +154,101 @@ const ReplyPreview = ({
   );
 };
 
+interface MessageAttachmentViewProps {
+  message: IMessageResponse;
+  attachment: IMessageAttachmentPayload;
+  privateKey: CryptoKey;
+  myUserId: string;
+  isOwn: boolean;
+}
+
+const MessageAttachmentView = ({
+  message,
+  attachment,
+  privateKey,
+  myUserId,
+  isOwn,
+}: MessageAttachmentViewProps) => {
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
+  const [fetchAttachmentUrl] = useLazyGetMessageAttachmentUrlQuery();
+
+  useEffect(() => {
+    let cancelled = false;
+    let createdUrl: string | null = null;
+
+    const load = async () => {
+      try {
+        const messageKey = await unwrapMessageKey(message, privateKey, myUserId);
+        const { data } = await fetchAttachmentUrl(message.id).unwrap();
+        const response = await fetch(data.url);
+        const ciphertextBuffer = await response.arrayBuffer();
+        const plaintextBuffer = await decryptFile(
+          messageKey,
+          ciphertextBuffer,
+          attachment.attachmentIv
+        );
+        createdUrl = URL.createObjectURL(
+          new Blob([plaintextBuffer], { type: attachment.mimeType })
+        );
+        if (!cancelled) setObjectUrl(createdUrl);
+      } catch {
+        if (!cancelled) setHasError(true);
+      }
+    };
+    load();
+
+    return () => {
+      cancelled = true;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
+    };
+  }, [message, attachment, privateKey, myUserId, fetchAttachmentUrl]);
+
+  if (hasError) {
+    return (
+      <div className="mt-2 flex items-center gap-1.5 rounded-lg border border-border bg-black/5 px-2 py-1.5 text-xs opacity-80">
+        <ImageOff className="h-3.5 w-3.5" /> Couldn't load attachment
+      </div>
+    );
+  }
+
+  if (attachment.type === 'voice') {
+    return (
+      <div className="mt-2 flex items-center gap-2">
+        {objectUrl ? (
+          <audio controls src={objectUrl} className="h-10 max-w-full" />
+        ) : (
+          <span className="text-xs opacity-70">Loading voice note…</span>
+        )}
+        {attachment.duration !== undefined && (
+          <span className="text-xs opacity-70">
+            {formatDuration(attachment.duration)}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return objectUrl ? (
+    <a href={objectUrl} target="_blank" rel="noreferrer noopener">
+      <img
+        src={objectUrl}
+        alt="Attachment"
+        className="mt-2 max-h-72 max-w-full rounded-lg object-contain"
+      />
+    </a>
+  ) : (
+    <div
+      className={cn(
+        'mt-2 flex h-40 w-52 items-center justify-center rounded-lg text-xs opacity-70',
+        isOwn ? 'bg-black/10' : 'bg-black/5'
+      )}
+    >
+      Loading image…
+    </div>
+  );
+};
+
 const MessageBubble = ({
   message,
   privateKey,
@@ -153,6 +264,9 @@ const MessageBubble = ({
 }: MessageBubbleProps) => {
   const [text, setText] = useState<string | null>(null);
   const [linkPreview, setLinkPreview] = useState<IMessageLinkPreview | null>(null);
+  const [attachment, setAttachment] = useState<IMessageAttachmentPayload | null>(
+    null
+  );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -172,6 +286,7 @@ const MessageBubble = ({
         const payload = decodeMessagePayload(decrypted);
         setText(payload.text);
         setLinkPreview(payload.linkPreview ?? null);
+        setAttachment(payload.attachment ?? null);
       })
       .catch(() => {
         if (!cancelled) setText(getDecryptFailureMessage(message, myUserId));
@@ -310,6 +425,16 @@ const MessageBubble = ({
               : message.expiredAt
                 ? 'This message has expired.'
                 : (text ?? '...')}
+
+            {!isRemoved && attachment && (
+              <MessageAttachmentView
+                message={message}
+                attachment={attachment}
+                privateKey={privateKey}
+                myUserId={myUserId}
+                isOwn={isOwn}
+              />
+            )}
 
             {linkPreview && (
               <a

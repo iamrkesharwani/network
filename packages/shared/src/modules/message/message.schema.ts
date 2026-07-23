@@ -16,6 +16,8 @@ import {
   MESSAGE_MUTE_DURATIONS,
   MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH,
   MESSAGE_DISAPPEARING_TTL_OPTIONS,
+  MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH,
+  MESSAGE_ATTACHMENT_MAX_BYTES,
   KEY_BUNDLE_PBKDF2_MIN_ITERATIONS,
   KEY_BUNDLE_PUBLIC_KEY_MAX_LENGTH,
   KEY_BUNDLE_WRAPPED_PRIVATE_KEY_MAX_LENGTH,
@@ -144,6 +146,16 @@ export const messageSendSchema = z.object({
   encryptedKeys: z.array(encryptedKeyEntrySchema).min(1),
   replyToMessageId: mongoIdSchema.optional(),
   ttlOverride: z.enum(MESSAGE_DISAPPEARING_TTL_OPTIONS).optional(),
+  attachmentStorageKey: z
+    .string()
+    .min(1)
+    .max(MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH)
+    .optional(),
+});
+
+export const messageAttachmentPresignSchema = z.object({
+  conversationId: mongoIdSchema,
+  contentLength: z.number().int().positive().max(MESSAGE_ATTACHMENT_MAX_BYTES),
 });
 
 export const messageDeleteSchema = z.object({

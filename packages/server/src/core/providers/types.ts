@@ -1,6 +1,6 @@
 import type { MultipartMediaType, VideoStatus } from '@network/shared';
 
-export type RawUploadMediaType = MultipartMediaType;
+export type RawUploadMediaType = MultipartMediaType | 'message-attachment';
 
 export interface PresignUploadResult {
   url: string;

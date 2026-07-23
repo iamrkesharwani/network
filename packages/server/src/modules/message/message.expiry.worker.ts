@@ -9,6 +9,7 @@ import {
 } from '../../core/config/bullmq.js';
 import { logger } from '../../core/utils/logger.js';
 import { emitToUser } from '../../core/config/socket.js';
+import { storageProvider } from '../../core/providers/provider.js';
 import * as messageRepository from './repository/message.repository.js';
 import * as conversationRepository from './repository/conversation.repository.js';
 
@@ -20,6 +21,17 @@ export const startMessageExpiryWorker = (): Worker => {
 
       const message = await messageRepository.expireMessage(messageId);
       if (!message || !message.expiredAt) return;
+
+      if (message.attachmentStorageKey) {
+        await storageProvider
+          .deleteObject(message.attachmentStorageKey)
+          .catch((error) =>
+            logger.warn(
+              error,
+              `Message expiry: failed to delete attachment ${message.attachmentStorageKey}`
+            )
+          );
+      }
 
       const conversation = await conversationRepository.findById(
         message.conversationId.toString()

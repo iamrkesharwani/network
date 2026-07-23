@@ -10,8 +10,10 @@ import {
   messageIdParamSchema,
   conversationIdParamSchema,
   messageListQuerySchema,
+  messageAttachmentPresignSchema,
 } from '@network/shared';
 import * as messageController from '../controllers/message.controller.js';
+import * as messageAttachmentController from '../controllers/messageAttachment.controller.js';
 
 const router = Router();
 
@@ -23,11 +25,26 @@ router.post(
   messageController.send
 );
 
+router.post(
+  '/attachments/presign',
+  requireAuth,
+  messageLimiter,
+  validate({ body: messageAttachmentPresignSchema }),
+  messageAttachmentController.presign
+);
+
 router.get(
   '/single/:messageId',
   requireAuth,
   validate({ params: messageIdParamSchema }),
   messageController.getById
+);
+
+router.get(
+  '/:messageId/attachment',
+  requireAuth,
+  validate({ params: messageIdParamSchema }),
+  messageController.getAttachmentUrl
 );
 
 router.get(

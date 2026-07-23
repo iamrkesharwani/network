@@ -1,6 +1,8 @@
 import {
   THIRTY_MINUTES_SECONDS,
   ONE_HOUR_SECONDS,
+  SIX_HOURS_SECONDS,
+  FIFTEEN_MINUTES_MS,
   SEVENTY_TWO_HOURS_MS,
   SEVEN_DAYS_MS,
 } from '../general/constants/time.constants.js';
@@ -75,6 +77,17 @@ export const MESSAGE_DISAPPEARING_TTL_OPTIONS = ['off', '24h', '7d'] as const;
 
 export const MESSAGE_EXPIRY_QUEUE_NAME = 'message-expiry';
 export const MESSAGE_EXPIRE_JOB_NAME = 'expire-message';
+
+export const MESSAGE_ATTACHMENT_TYPES = ['image', 'voice'] as const;
+export const MESSAGE_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
+export const MESSAGE_ATTACHMENT_MAX_VOICE_DURATION_MS = 5 * 60 * 1000;
+export const MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH = 256;
+export const MESSAGE_ATTACHMENT_UPLOAD_TTL_SECONDS = ONE_HOUR_SECONDS;
+export const MESSAGE_ATTACHMENT_ACCESS_URL_TTL_SECONDS = SIX_HOURS_SECONDS;
+
+export const MESSAGE_ATTACHMENT_REAPER_QUEUE_NAME = 'message-attachment-reaper';
+export const MESSAGE_ATTACHMENT_REAPER_JOB_ID = 'message-attachment-reaper';
+export const MESSAGE_ATTACHMENT_REAPER_INTERVAL_MS = FIFTEEN_MINUTES_MS;
 
 export const MESSAGE_OEMBED_PROVIDERS = [
   {

@@ -1,6 +1,7 @@
 import type {
   ConversationDisappearingTtl,
   EncryptedKeyEntryInput,
+  IMessageAttachmentUrlResult,
   IMessageResponse,
   MessageDeleteScope,
   MessageSendInput,
@@ -19,11 +20,14 @@ import {
 import * as messageRepository from '../repository/message.repository.js';
 import * as conversationRepository from '../repository/conversation.repository.js';
 import * as conversationService from './conversation.service.js';
+import * as messageAttachmentService from './messageAttachment.service.js';
 import { toConversationSummary } from './conversation.mappers.js';
 import * as presenceService from './presence.service.js';
 import { toMessageResponse } from './message.mappers.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
+import { storageProvider } from '../../../core/providers/provider.js';
+import { logger } from '../../../core/utils/logger.js';
 import {
   scheduleMessageExpiry,
   cancelMessageExpiry,
@@ -89,6 +93,13 @@ export const sendMessage = async (
     }
   }
 
+  if (input.attachmentStorageKey) {
+    await messageAttachmentService.assertOwnedPendingAttachment(
+      userId,
+      input.attachmentStorageKey
+    );
+  }
+
   const ttl = input.ttlOverride ?? conversation.disappearingMessagesTtl;
   const expiresAt =
     ttl === 'off' ? undefined : new Date(Date.now() + DISAPPEARING_TTL_DURATIONS_MS[ttl]);
@@ -100,8 +111,16 @@ export const sendMessage = async (
     input.iv,
     input.encryptedKeys,
     input.replyToMessageId,
-    expiresAt
+    expiresAt,
+    input.attachmentStorageKey
   );
+
+  if (input.attachmentStorageKey) {
+    await messageAttachmentService.confirmPendingAttachment(
+      input.attachmentStorageKey
+    );
+  }
+
   const response = toMessageResponse(inserted);
 
   if (expiresAt) {
@@ -179,6 +198,16 @@ export const deleteMessage = async (
     if (message.expiresAt) {
       await cancelMessageExpiry(messageId);
     }
+    if (message.attachmentStorageKey) {
+      await storageProvider
+        .deleteObject(message.attachmentStorageKey)
+        .catch((error) =>
+          logger.warn(
+            error,
+            `Unsend: failed to delete attachment ${message.attachmentStorageKey}`
+          )
+        );
+    }
 
     const recipientIds = conversation.participantIds.map((id) => id.toString());
     emitToUserIds(recipientIds, MESSAGE_DELETED_SOCKET_EVENT, {
@@ -213,6 +242,28 @@ export const getMessageById = async (
   );
 
   return toMessageResponse(message);
+};
+
+export const getMessageAttachmentUrl = async (
+  userId: string,
+  messageId: string
+): Promise<IMessageAttachmentUrlResult> => {
+  const message = await messageRepository.findById(messageId);
+  if (!message) {
+    throw new ApiError(404, 'NOT_FOUND', 'Message not found.');
+  }
+
+  await conversationService.assertConversationMembership(
+    userId,
+    message.conversationId.toString()
+  );
+
+  if (!message.attachmentStorageKey) {
+    throw new ApiError(404, 'NOT_FOUND', 'This message has no attachment.');
+  }
+
+  const url = await storageProvider.buildAccessUrl(message.attachmentStorageKey);
+  return { url };
 };
 
 export const setReaction = async (

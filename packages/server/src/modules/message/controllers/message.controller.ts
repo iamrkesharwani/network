@@ -73,6 +73,22 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json(new ApiResponse(result, 'Message fetched successfully'));
 });
 
+export const getAttachmentUrl = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { messageId } = req.params as unknown as MessageIdParam;
+
+    const result = await messageService.getMessageAttachmentUrl(
+      user.id,
+      messageId
+    );
+
+    res
+      .status(200)
+      .json(new ApiResponse(result, 'Attachment URL fetched successfully'));
+  }
+);
+
 export const setReaction = asyncHandler(async (req: Request, res: Response) => {
   const user = requireUser(req);
   const { messageId } = req.params as unknown as MessageIdParam;

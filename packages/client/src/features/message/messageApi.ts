@@ -4,11 +4,14 @@ import type {
   ApiResponse,
   PaginatedResponse,
   IMessageResponse,
+  IMessageAttachmentPresignResult,
+  IMessageAttachmentUrlResult,
   MessageListQuery,
   MessageSendInput,
   MessageDeleteInput,
   MessageReactionSetInput,
   MessageEditInput,
+  MessageAttachmentPresignInput,
 } from '@network/shared';
 
 export const messageApi = createApi({
@@ -92,6 +95,23 @@ export const messageApi = createApi({
         method: 'DELETE',
       }),
     }),
+
+    presignMessageAttachment: builder.mutation<
+      ApiResponse<IMessageAttachmentPresignResult>,
+      MessageAttachmentPresignInput
+    >({
+      query: (data) => ({ url: '/attachments/presign', method: 'POST', data }),
+    }),
+
+    getMessageAttachmentUrl: builder.query<
+      ApiResponse<IMessageAttachmentUrlResult>,
+      string
+    >({
+      query: (messageId) => ({
+        url: `/${messageId}/attachment`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
@@ -103,4 +123,6 @@ export const {
   useEditMessageMutation,
   useSetMessageReactionMutation,
   useRemoveMessageReactionMutation,
+  usePresignMessageAttachmentMutation,
+  useLazyGetMessageAttachmentUrlQuery,
 } = messageApi;

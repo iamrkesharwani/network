@@ -188,26 +188,20 @@ export const unwrapPrivateKey = async (
   );
 };
 
-export const encryptForRecipients = async (
-  plaintext: string,
-  recipients: IRecipientPublicKey[]
-): Promise<IEncryptedPayload> => {
-  const messageKey = await crypto.subtle.generateKey(
+export const generateMessageKey = (): Promise<CryptoKey> =>
+  crypto.subtle.generateKey(
     { name: AES_GCM_ALGORITHM, length: AES_GCM_KEY_LENGTH },
     true,
     ['encrypt', 'decrypt']
   );
 
-  const iv = crypto.getRandomValues(new Uint8Array(AES_GCM_IV_BYTE_LENGTH));
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: AES_GCM_ALGORITHM, iv },
-    messageKey,
-    new TextEncoder().encode(plaintext)
-  );
-
+export const wrapMessageKeyForRecipients = async (
+  messageKey: CryptoKey,
+  recipients: IRecipientPublicKey[]
+): Promise<IEncryptedKeyEntry[]> => {
   const rawMessageKey = await crypto.subtle.exportKey('raw', messageKey);
 
-  const encryptedKeys = await Promise.all(
+  return Promise.all(
     recipients.map(async (recipient) => {
       const recipientPublicKey = await importPublicKey(recipient.publicKey);
       const wrappedKey = await crypto.subtle.encrypt(
@@ -222,19 +216,71 @@ export const encryptForRecipients = async (
       };
     })
   );
-
-  return {
-    ciphertext: bufferToBase64(ciphertext),
-    iv: bufferToBase64(iv.buffer),
-    encryptedKeys,
-  };
 };
 
-export const decryptMessage = async (
+export const encryptTextWithKey = async (
+  messageKey: CryptoKey,
+  plaintext: string
+): Promise<{ ciphertext: string; iv: string }> => {
+  const iv = crypto.getRandomValues(new Uint8Array(AES_GCM_IV_BYTE_LENGTH));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: AES_GCM_ALGORITHM, iv },
+    messageKey,
+    new TextEncoder().encode(plaintext)
+  );
+
+  return { ciphertext: bufferToBase64(ciphertext), iv: bufferToBase64(iv.buffer) };
+};
+
+export const encryptForRecipients = async (
+  plaintext: string,
+  recipients: IRecipientPublicKey[]
+): Promise<IEncryptedPayload> => {
+  const messageKey = await generateMessageKey();
+  const { ciphertext, iv } = await encryptTextWithKey(messageKey, plaintext);
+  const encryptedKeys = await wrapMessageKeyForRecipients(messageKey, recipients);
+
+  return { ciphertext, iv, encryptedKeys };
+};
+
+/**
+ * Encrypts raw file bytes with an already-generated message key, using a
+ * distinct IV from the text envelope. Recipients who unwrap that same key to
+ * read the envelope can reuse it unmodified to decrypt the attachment — no
+ * separate per-recipient key-wrap is needed for the file.
+ */
+export const encryptFile = async (
+  messageKey: CryptoKey,
+  fileBuffer: ArrayBuffer
+): Promise<{ ciphertext: ArrayBuffer; iv: string }> => {
+  const iv = crypto.getRandomValues(new Uint8Array(AES_GCM_IV_BYTE_LENGTH));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: AES_GCM_ALGORITHM, iv },
+    messageKey,
+    fileBuffer
+  );
+
+  return { ciphertext, iv: bufferToBase64(iv.buffer) };
+};
+
+export const decryptFile = async (
+  messageKey: CryptoKey,
+  ciphertext: ArrayBuffer,
+  ivBase64: string
+): Promise<ArrayBuffer> => {
+  const iv = new Uint8Array(base64ToBuffer(ivBase64));
+  return crypto.subtle.decrypt(
+    { name: AES_GCM_ALGORITHM, iv },
+    messageKey,
+    ciphertext
+  );
+};
+
+export const unwrapMessageKey = async (
   message: IEncryptedMessageInput,
   myPrivateKey: CryptoKey,
   myUserId: string
-): Promise<string> => {
+): Promise<CryptoKey> => {
   const myEntry = message.encryptedKeys.find(
     (entry) => entry.recipientId === myUserId
   );
@@ -248,13 +294,21 @@ export const decryptMessage = async (
     base64ToBuffer(myEntry.encryptedKey)
   );
 
-  const messageKey = await crypto.subtle.importKey(
+  return crypto.subtle.importKey(
     'raw',
     rawMessageKey,
     AES_GCM_ALGORITHM,
     false,
     ['decrypt']
   );
+};
+
+export const decryptMessage = async (
+  message: IEncryptedMessageInput,
+  myPrivateKey: CryptoKey,
+  myUserId: string
+): Promise<string> => {
+  const messageKey = await unwrapMessageKey(message, myPrivateKey, myUserId);
 
   const iv = new Uint8Array(base64ToBuffer(message.iv));
   const plaintextBuffer = await crypto.subtle.decrypt(

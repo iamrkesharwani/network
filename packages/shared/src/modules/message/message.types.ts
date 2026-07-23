@@ -23,6 +23,7 @@ import type {
   conversationDisappearingTtlSchema,
   conversationListQuerySchema,
   messageListQuerySchema,
+  messageAttachmentPresignSchema,
 } from './message.schema.js';
 import type {
   CONVERSATION_TYPES,
@@ -30,6 +31,7 @@ import type {
   MESSAGE_MUTE_DURATIONS,
   MESSAGE_PIN_LENGTHS,
   MESSAGE_DISAPPEARING_TTL_OPTIONS,
+  MESSAGE_ATTACHMENT_TYPES,
 } from './message.constants.js';
 
 export type ConversationType = (typeof CONVERSATION_TYPES)[number];
@@ -38,6 +40,7 @@ export type ConversationMuteDuration = (typeof MESSAGE_MUTE_DURATIONS)[number];
 export type MessagePinLength = (typeof MESSAGE_PIN_LENGTHS)[number];
 export type ConversationDisappearingTtl =
   (typeof MESSAGE_DISAPPEARING_TTL_OPTIONS)[number];
+export type MessageAttachmentType = (typeof MESSAGE_ATTACHMENT_TYPES)[number];
 
 export type ConversationTypeInput = z.infer<typeof conversationTypeSchema>;
 export type KeyBundlePublicKeysQuery = z.infer<
@@ -72,6 +75,9 @@ export type ConversationDisappearingTtlInput = z.infer<
 >;
 export type ConversationListQuery = z.infer<typeof conversationListQuerySchema>;
 export type MessageListQuery = z.infer<typeof messageListQuerySchema>;
+export type MessageAttachmentPresignInput = z.infer<
+  typeof messageAttachmentPresignSchema
+>;
 
 export interface IKeyBundlePublicResponse {
   userId: string;
@@ -144,6 +150,31 @@ export interface IMessageLinkPreview {
   title: string;
   authorName?: string;
   thumbnailUrl?: string;
+}
+
+/**
+ * Client-side-only shape: bundled into the encrypted message payload's
+ * plaintext, never sent to the server as a separate field — except
+ * `storageKey`, which is duplicated as a plaintext top-level field on
+ * `Message` purely so the server can manage the R2 object's lifecycle
+ * (delete on unsend/expiry/orphan sweep) without decrypting anything.
+ */
+export interface IMessageAttachmentPayload {
+  type: MessageAttachmentType;
+  storageKey: string;
+  attachmentIv: string;
+  mimeType: string;
+  size: number;
+  duration?: number;
+}
+
+export interface IMessageAttachmentPresignResult {
+  storageKey: string;
+  uploadUrl: string;
+}
+
+export interface IMessageAttachmentUrlResult {
+  url: string;
 }
 
 export interface IMessageReactionEntry {

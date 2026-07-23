@@ -37,7 +37,8 @@ export const insertMessage = (
   iv: string,
   encryptedKeys: EncryptedKeyEntryInput[],
   replyToMessageId?: string,
-  expiresAt?: Date
+  expiresAt?: Date,
+  attachmentStorageKey?: string
 ): Promise<IMessageDocument> =>
   MessageModel.create({
     conversationId,
@@ -47,6 +48,7 @@ export const insertMessage = (
     encryptedKeys,
     ...(replyToMessageId && { replyToMessageId }),
     ...(expiresAt && { expiresAt }),
+    ...(attachmentStorageKey && { attachmentStorageKey }),
   });
 
 export const listByConversation = async (

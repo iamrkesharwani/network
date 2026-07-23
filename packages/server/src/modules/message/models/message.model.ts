@@ -4,6 +4,7 @@ import {
   MESSAGE_IV_MAX_LENGTH,
   MESSAGE_ENCRYPTED_KEY_MAX_LENGTH,
   MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH,
+  MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH,
 } from '@network/shared';
 
 export interface IEncryptedKeyEntry {
@@ -27,6 +28,7 @@ export interface IMessageDocument extends Document {
   encryptedKeys: IEncryptedKeyEntry[];
   reactions: IMessageReactionEntry[];
   replyToMessageId?: Types.ObjectId;
+  attachmentStorageKey?: string;
   deletedFor: Types.ObjectId[];
   unsentAt?: Date;
   editedAt?: Date;
@@ -114,6 +116,10 @@ const messageSchema = new Schema<IMessageDocument>(
     replyToMessageId: {
       type: Schema.Types.ObjectId,
       ref: 'Message',
+    },
+    attachmentStorageKey: {
+      type: String,
+      maxlength: MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH,
     },
     deletedFor: {
       type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
