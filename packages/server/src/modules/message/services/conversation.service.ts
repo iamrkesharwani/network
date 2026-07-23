@@ -1,4 +1,5 @@
 import type {
+  ConversationDisappearingTtl,
   ConversationMuteDuration,
   GroupConversationCreateInput,
   GroupUpdateInput,
@@ -500,6 +501,47 @@ export const unpinConversation = (
   applyParticipantFlagUpdate(userId, conversationId, () =>
     conversationRepository.setPinned(conversationId, userId, false)
   );
+
+export const setDisappearingMessagesTtl = async (
+  userId: string,
+  conversationId: string,
+  ttl: ConversationDisappearingTtl
+): Promise<IConversationSummary> => {
+  const conversation = await getConversationOrThrow(conversationId);
+  assertMembership(conversation, userId);
+
+  if (conversation.type === 'group' && conversation.createdBy.toString() !== userId) {
+    throw new ApiError(
+      403,
+      'FORBIDDEN',
+      'Only the group creator can change disappearing messages for this group.'
+    );
+  }
+
+  const updated = await conversationRepository.setDisappearingTtl(
+    conversationId,
+    ttl
+  );
+  if (!updated) {
+    throw new ApiError(404, 'NOT_FOUND', 'Conversation not found.');
+  }
+
+  const recipientIds = updated.participantIds.map((id) => id.toString());
+  const [withParticipants, onlineUserIds, privacyByUserId] = await Promise.all([
+    updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
+    presenceService.getOnlineUserIds(recipientIds),
+    preferencesService.getResolvedPrivacyByUserIds(recipientIds),
+  ]);
+
+  for (const recipientId of recipientIds) {
+    emitToUser(
+      recipientId,
+      CONVERSATION_UPDATED_SOCKET_EVENT,
+      toConversationSummary(withParticipants, recipientId, onlineUserIds, privacyByUserId)
+    );
+  }
+  return toConversationSummary(withParticipants, userId, onlineUserIds, privacyByUserId);
+};
 
 export const assertConversationMembership = async (
   userId: string,

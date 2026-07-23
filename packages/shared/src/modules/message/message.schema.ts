@@ -14,6 +14,8 @@ import {
   MESSAGE_IV_MAX_LENGTH,
   MESSAGE_DELETE_SCOPES,
   MESSAGE_MUTE_DURATIONS,
+  MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH,
+  MESSAGE_DISAPPEARING_TTL_OPTIONS,
   KEY_BUNDLE_PBKDF2_MIN_ITERATIONS,
   KEY_BUNDLE_PUBLIC_KEY_MAX_LENGTH,
   KEY_BUNDLE_WRAPPED_PRIVATE_KEY_MAX_LENGTH,
@@ -140,10 +142,23 @@ export const messageSendSchema = z.object({
   ciphertext: z.string().min(1).max(MESSAGE_CIPHERTEXT_MAX_LENGTH),
   iv: z.string().min(1).max(MESSAGE_IV_MAX_LENGTH),
   encryptedKeys: z.array(encryptedKeyEntrySchema).min(1),
+  replyToMessageId: mongoIdSchema.optional(),
 });
 
 export const messageDeleteSchema = z.object({
   scope: z.enum(MESSAGE_DELETE_SCOPES),
+});
+
+export const messageReactionSetSchema = z.object({
+  ciphertext: z.string().min(1).max(MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH),
+  iv: z.string().min(1).max(MESSAGE_IV_MAX_LENGTH),
+  encryptedKeys: z.array(encryptedKeyEntrySchema).min(1),
+});
+
+export const messageEditSchema = z.object({
+  ciphertext: z.string().min(1).max(MESSAGE_CIPHERTEXT_MAX_LENGTH),
+  iv: z.string().min(1).max(MESSAGE_IV_MAX_LENGTH),
+  encryptedKeys: z.array(encryptedKeyEntrySchema).min(1),
 });
 
 export const messageIdParamSchema = z.object({
@@ -164,6 +179,10 @@ export const conversationRoomEventSchema = z.object({
 
 export const conversationMuteSchema = z.object({
   duration: z.enum(MESSAGE_MUTE_DURATIONS),
+});
+
+export const conversationDisappearingTtlSchema = z.object({
+  ttl: z.enum(MESSAGE_DISAPPEARING_TTL_OPTIONS),
 });
 
 export const conversationListQuerySchema = z.object({

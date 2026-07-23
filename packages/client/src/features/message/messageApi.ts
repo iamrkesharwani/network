@@ -7,6 +7,8 @@ import type {
   MessageListQuery,
   MessageSendInput,
   MessageDeleteInput,
+  MessageReactionSetInput,
+  MessageEditInput,
 } from '@network/shared';
 
 export const messageApi = createApi({
@@ -54,6 +56,42 @@ export const messageApi = createApi({
         data,
       }),
     }),
+
+    getMessageById: builder.query<ApiResponse<IMessageResponse>, string>({
+      query: (messageId) => ({ url: `/single/${messageId}`, method: 'GET' }),
+    }),
+
+    editMessage: builder.mutation<
+      ApiResponse<IMessageResponse>,
+      { messageId: string } & MessageEditInput
+    >({
+      query: ({ messageId, ...data }) => ({
+        url: `/${messageId}`,
+        method: 'PATCH',
+        data,
+      }),
+    }),
+
+    setMessageReaction: builder.mutation<
+      ApiResponse<IMessageResponse>,
+      { messageId: string } & MessageReactionSetInput
+    >({
+      query: ({ messageId, ...data }) => ({
+        url: `/${messageId}/reactions`,
+        method: 'PUT',
+        data,
+      }),
+    }),
+
+    removeMessageReaction: builder.mutation<
+      ApiResponse<null>,
+      { messageId: string }
+    >({
+      query: ({ messageId }) => ({
+        url: `/${messageId}/reactions`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 });
 
@@ -61,4 +99,8 @@ export const {
   useGetMessagesQuery,
   useSendMessageMutation,
   useDeleteMessageMutation,
+  useGetMessageByIdQuery,
+  useEditMessageMutation,
+  useSetMessageReactionMutation,
+  useRemoveMessageReactionMutation,
 } = messageApi;

@@ -6,6 +6,7 @@ import type { INotificationListItem } from '../../modules/notification/notificat
 import type {
   IMessageResponse,
   IConversationSummary,
+  IMessageReactionEntry,
   MessageDeleteScope,
 } from '../../modules/message/message.types.js';
 
@@ -55,6 +56,28 @@ export interface IMessageDeletedEvent {
   conversationId: string;
   messageId: string;
   scope: MessageDeleteScope;
+}
+
+export interface IMessageReactionEvent {
+  conversationId: string;
+  messageId: string;
+  userId: string;
+  reaction: IMessageReactionEntry | null;
+}
+
+export interface IMessageEditedEvent {
+  conversationId: string;
+  messageId: string;
+  ciphertext: string;
+  iv: string;
+  encryptedKeys: IMessageResponse['encryptedKeys'];
+  editedAt: string;
+}
+
+export interface IMessageExpiredEvent {
+  conversationId: string;
+  messageId: string;
+  expiredAt: string;
 }
 
 export interface IPresenceEvent {

@@ -3,6 +3,7 @@ import {
   ALLOWED_AVATAR_MIME_TYPES,
   type ConversationListQuery,
   type ConversationMuteInput,
+  type ConversationDisappearingTtlInput,
   type DirectConversationCreateInput,
   type GroupConversationCreateInput,
   type GroupUpdateInput,
@@ -245,5 +246,23 @@ export const unpinConversation = asyncHandler(
     );
 
     res.status(200).json(new ApiResponse(result, 'Conversation unpinned'));
+  }
+);
+
+export const setDisappearingMessagesTtl = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+    const { ttl } = req.body as ConversationDisappearingTtlInput;
+
+    const result = await conversationService.setDisappearingMessagesTtl(
+      user.id,
+      conversationId,
+      ttl
+    );
+
+    res
+      .status(200)
+      .json(new ApiResponse(result, 'Disappearing messages setting updated'));
   }
 );

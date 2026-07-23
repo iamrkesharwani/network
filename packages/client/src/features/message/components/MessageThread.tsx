@@ -1,20 +1,38 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Ban } from 'lucide-react';
-import { CLIENT_ROUTES, type IConversationSummary } from '@network/shared';
+import {
+  CLIENT_ROUTES,
+  MESSAGE_EDIT_WINDOW_MS,
+  type IConversationSummary,
+  type IMessageResponse,
+} from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import type { useSocket } from '../../../shared/hooks/useSocket';
-import { useGetMessagesQuery, useSendMessageMutation } from '../messageApi';
+import {
+  useGetMessagesQuery,
+  useSendMessageMutation,
+  useSetMessageReactionMutation,
+  useRemoveMessageReactionMutation,
+  useEditMessageMutation,
+} from '../messageApi';
 import { useMarkConversationReadMutation } from '../conversationApi';
 import { useGetPublicKeysQuery } from '../keyBundleApi';
 import { useConversationRoom } from '../hooks/useConversationRoom';
-import { encryptForRecipients } from '../keyManager';
+import { encryptForRecipients, decryptMessage } from '../keyManager';
+import {
+  encodeMessagePayload,
+  decodeMessagePayload,
+  fetchLinkPreview,
+} from '../messagePayload';
 import { useBlockUserMutation } from '../../block/blockApi';
+import { usePreference } from '../../settings/hooks/usePreference';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import TypingIndicator from './TypingIndicator';
 import PresenceDot from './PresenceDot';
+import DisappearingMessagesMenu from './DisappearingMessagesMenu';
 import MessageThreadSkeleton from '../skeleton/MessageThreadSkeleton';
 
 interface MessageThreadProps {
@@ -31,6 +49,19 @@ const getLabel = (conversation: IConversationSummary): string =>
     ? conversation.otherParticipant.name
     : conversation.groupName;
 
+const getParticipantLabel = (
+  conversation: IConversationSummary,
+  userId: string,
+  myUserId: string
+): string => {
+  if (userId === myUserId) return 'yourself';
+  const participants =
+    conversation.type === 'direct'
+      ? [conversation.otherParticipant]
+      : conversation.participants;
+  return participants.find((participant) => participant.id === userId)?.name ?? '';
+};
+
 const MESSAGE_LIST_ARGS = { limit: 30 };
 
 const MessageThread = ({
@@ -44,6 +75,8 @@ const MessageThread = ({
   const navigate = useNavigate();
   const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
   const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
+  const [replyTo, setReplyTo] = useState<IMessageResponse | null>(null);
+  const [replyToPreview, setReplyToPreview] = useState<string | null>(null);
   const { emitTyping } = useConversationRoom(socketRef, conversation.id);
   const { data, isLoading } = useGetMessagesQuery({
     conversationId: conversation.id,
@@ -51,6 +84,15 @@ const MessageThread = ({
   });
   const messages = data?.data ?? [];
   const orderedMessages = useMemo(() => [...messages].reverse(), [messages]);
+  const messagesById = useMemo(
+    () => new Map(messages.map((message) => [message.id, message])),
+    [messages]
+  );
+
+  const [setReaction] = useSetMessageReactionMutation();
+  const [removeReaction] = useRemoveMessageReactionMutation();
+  const [editMessage] = useEditMessageMutation();
+  const [privacy] = usePreference('privacy');
 
   const recipientIds = useMemo(
     () =>
@@ -85,15 +127,40 @@ const MessageThread = ({
     bottomRef.current?.scrollIntoView({ block: 'end' });
   }, [orderedMessages.length]);
 
-  const handleSend = async (text: string) => {
-    if (!publicKeysData) return;
+  useEffect(() => {
+    if (!replyTo || replyTo.unsentAt) {
+      setReplyToPreview(null);
+      return;
+    }
+    let cancelled = false;
+    decryptMessage(replyTo, privateKey, myUserId)
+      .then((decrypted) => {
+        if (!cancelled) setReplyToPreview(decodeMessagePayload(decrypted).text);
+      })
+      .catch(() => {
+        if (!cancelled) setReplyToPreview(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [replyTo, privateKey, myUserId]);
 
-    const recipients = publicKeysData.data.map((key) => ({
+  const getRecipients = () =>
+    publicKeysData?.data.map((key) => ({
       userId: key.userId,
       publicKey: key.publicKey,
-    }));
+    })) ?? [];
+
+  const handleSend = async (text: string) => {
+    const recipients = getRecipients();
+    if (recipients.length === 0) return;
+
+    const linkPreview = privacy.linkPreviewsEnabled
+      ? await fetchLinkPreview(text)
+      : undefined;
+
     const { ciphertext, iv, encryptedKeys } = await encryptForRecipients(
-      text,
+      encodeMessagePayload({ text, ...(linkPreview && { linkPreview }) }),
       recipients
     );
 
@@ -102,7 +169,33 @@ const MessageThread = ({
       ciphertext,
       iv,
       encryptedKeys,
+      ...(replyTo && { replyToMessageId: replyTo.id }),
     }).unwrap();
+    setReplyTo(null);
+  };
+
+  const handleReact = async (messageId: string, emoji: string) => {
+    const recipients = getRecipients();
+    if (recipients.length === 0) return;
+    const { ciphertext, iv, encryptedKeys } = await encryptForRecipients(
+      emoji,
+      recipients
+    );
+    await setReaction({ messageId, ciphertext, iv, encryptedKeys }).unwrap();
+  };
+
+  const handleRemoveReaction = async (messageId: string) => {
+    await removeReaction({ messageId }).unwrap();
+  };
+
+  const handleEdit = async (messageId: string, text: string) => {
+    const recipients = getRecipients();
+    if (recipients.length === 0) return;
+    const { ciphertext, iv, encryptedKeys } = await encryptForRecipients(
+      encodeMessagePayload({ text }),
+      recipients
+    );
+    await editMessage({ messageId, ciphertext, iv, encryptedKeys }).unwrap();
   };
 
   const headerAvatar =
@@ -157,6 +250,13 @@ const MessageThread = ({
           </div>
         </button>
 
+        <DisappearingMessagesMenu
+          conversation={conversation}
+          canEdit={
+            conversation.type === 'direct' || conversation.isOwnedByViewer
+          }
+        />
+
         {conversation.type === 'direct' && (
           <button
             type="button"
@@ -184,6 +284,20 @@ const MessageThread = ({
                 index === orderedMessages.length - 1 ||
                 orderedMessages[index + 1]?.senderId !== message.senderId
               }
+              canEdit={
+                message.senderId === myUserId &&
+                Date.now() - new Date(message.createdAt).getTime() <
+                  MESSAGE_EDIT_WINDOW_MS
+              }
+              repliedToMessage={
+                message.replyToMessageId
+                  ? messagesById.get(message.replyToMessageId)
+                  : undefined
+              }
+              onReply={setReplyTo}
+              onReact={handleReact}
+              onRemoveReaction={handleRemoveReaction}
+              onEdit={handleEdit}
             />
           ))}
           <div ref={bottomRef} />
@@ -197,7 +311,17 @@ const MessageThread = ({
         myUserId={myUserId}
       />
 
-      <MessageInput onSend={handleSend} onTyping={emitTyping} isSending={isSending} />
+      <MessageInput
+        onSend={handleSend}
+        onTyping={emitTyping}
+        isSending={isSending}
+        replyToLabel={
+          replyTo
+            ? `${getParticipantLabel(conversation, replyTo.senderId, myUserId)}: ${replyToPreview ?? '…'}`
+            : undefined
+        }
+        onCancelReply={() => setReplyTo(null)}
+      />
 
       {conversation.type === 'direct' && (
         <ConfirmModal

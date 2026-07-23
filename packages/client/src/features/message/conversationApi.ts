@@ -6,6 +6,7 @@ import type {
   IConversationSummary,
   ConversationListQuery,
   ConversationMuteDuration,
+  ConversationDisappearingTtl,
   DirectConversationCreateInput,
   GroupConversationCreateInput,
   GroupUpdateInput,
@@ -183,6 +184,18 @@ export const conversationApi = createApi({
       }),
       invalidatesTags: ['Conversation'],
     }),
+
+    setDisappearingTtl: builder.mutation<
+      ApiResponse<IConversationSummary>,
+      { conversationId: string; ttl: ConversationDisappearingTtl }
+    >({
+      query: ({ conversationId, ttl }) => ({
+        url: `/${conversationId}/disappearing`,
+        method: 'POST',
+        data: { ttl },
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
   }),
 });
 
@@ -202,4 +215,5 @@ export const {
   useUnarchiveConversationMutation,
   usePinConversationMutation,
   useUnpinConversationMutation,
+  useSetDisappearingTtlMutation,
 } = conversationApi;

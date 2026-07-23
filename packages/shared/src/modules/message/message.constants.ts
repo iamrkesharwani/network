@@ -53,3 +53,43 @@ export const PRESENCE_REDIS_KEY_PREFIX = 'presence:online:';
 
 export const MESSAGE_TYPING_DEBOUNCE_MS = 2000;
 export const MESSAGE_TYPING_AUTO_CLEAR_MS = 3000;
+
+export const MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH = 256;
+
+export const MESSAGE_QUICK_REACTION_EMOJIS = [
+  '❤️',
+  '😂',
+  '😮',
+  '😢',
+  '🙏',
+  '👍',
+] as const;
+
+export const MESSAGE_REACTION_UPDATED_SOCKET_EVENT = 'message:reaction';
+export const MESSAGE_EDITED_SOCKET_EVENT = 'message:edited';
+export const MESSAGE_EXPIRED_SOCKET_EVENT = 'message:expired';
+
+export const MESSAGE_EDIT_WINDOW_MS = 30 * 60 * 1000;
+
+export const MESSAGE_DISAPPEARING_TTL_OPTIONS = ['off', '24h', '7d'] as const;
+
+export const MESSAGE_EXPIRY_QUEUE_NAME = 'message-expiry';
+export const MESSAGE_EXPIRE_JOB_NAME = 'expire-message';
+
+export const MESSAGE_OEMBED_PROVIDERS = [
+  {
+    name: 'YouTube',
+    hostnames: ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'],
+    endpoint: 'https://www.youtube.com/oembed',
+  },
+  {
+    name: 'X',
+    hostnames: ['twitter.com', 'www.twitter.com', 'x.com', 'www.x.com'],
+    endpoint: 'https://publish.twitter.com/oembed',
+  },
+  {
+    name: 'Vimeo',
+    hostnames: ['vimeo.com', 'www.vimeo.com'],
+    endpoint: 'https://vimeo.com/api/oembed.json',
+  },
+] as const;

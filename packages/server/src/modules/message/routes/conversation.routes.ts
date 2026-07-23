@@ -11,6 +11,7 @@ import {
   conversationListQuerySchema,
   conversationIdParamSchema,
   conversationMuteSchema,
+  conversationDisappearingTtlSchema,
 } from '@network/shared';
 import * as conversationController from '../controllers/conversation.controller.js';
 
@@ -133,6 +134,17 @@ router.post(
   conversationLimiter,
   validate({ params: conversationIdParamSchema }),
   conversationController.unpinConversation
+);
+
+router.post(
+  '/:conversationId/disappearing',
+  requireAuth,
+  conversationLimiter,
+  validate({
+    params: conversationIdParamSchema,
+    body: conversationDisappearingTtlSchema,
+  }),
+  conversationController.setDisappearingMessagesTtl
 );
 
 export default router;

@@ -11,7 +11,23 @@ export const toMessageResponse = (doc: IMessageDocument): IMessageResponse => ({
     recipientId: entry.recipientId.toString(),
     encryptedKey: entry.encryptedKey,
   })),
+  reactions: doc.reactions.map((reaction) => ({
+    userId: reaction.userId.toString(),
+    ciphertext: reaction.ciphertext,
+    iv: reaction.iv,
+    encryptedKeys: reaction.encryptedKeys.map((entry) => ({
+      recipientId: entry.recipientId.toString(),
+      encryptedKey: entry.encryptedKey,
+    })),
+    createdAt: reaction.createdAt.toISOString(),
+  })),
   createdAt: doc.createdAt.toISOString(),
+  ...(doc.replyToMessageId && {
+    replyToMessageId: doc.replyToMessageId.toString(),
+  }),
+  ...(doc.editedAt && { editedAt: doc.editedAt.toISOString() }),
+  ...(doc.expiresAt && { expiresAt: doc.expiresAt.toISOString() }),
+  ...(doc.expiredAt && { expiredAt: doc.expiredAt.toISOString() }),
   ...(doc.deliveredAt && { deliveredAt: doc.deliveredAt.toISOString() }),
   ...(doc.unsentAt && { unsentAt: doc.unsentAt.toISOString() }),
 });

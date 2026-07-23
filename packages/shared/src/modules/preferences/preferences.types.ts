@@ -52,6 +52,7 @@ export interface IPreferencesPrivacy {
   profilePhotoVisibleInChat?: boolean;
   aboutVisibleInChat?: boolean;
   typingIndicator?: boolean;
+  linkPreviewsEnabled?: boolean;
 }
 
 export interface IPreferences {

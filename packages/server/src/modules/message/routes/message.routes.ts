@@ -5,6 +5,8 @@ import { messageLimiter } from '../../../core/middleware/rateLimit.middleware.js
 import {
   messageSendSchema,
   messageDeleteSchema,
+  messageReactionSetSchema,
+  messageEditSchema,
   messageIdParamSchema,
   conversationIdParamSchema,
   messageListQuerySchema,
@@ -22,10 +24,25 @@ router.post(
 );
 
 router.get(
+  '/single/:messageId',
+  requireAuth,
+  validate({ params: messageIdParamSchema }),
+  messageController.getById
+);
+
+router.get(
   '/:conversationId',
   requireAuth,
   validate({ params: conversationIdParamSchema, query: messageListQuerySchema }),
   messageController.list
+);
+
+router.patch(
+  '/:messageId',
+  requireAuth,
+  messageLimiter,
+  validate({ params: messageIdParamSchema, body: messageEditSchema }),
+  messageController.edit
 );
 
 router.delete(
@@ -34,6 +51,22 @@ router.delete(
   messageLimiter,
   validate({ params: messageIdParamSchema, body: messageDeleteSchema }),
   messageController.remove
+);
+
+router.put(
+  '/:messageId/reactions',
+  requireAuth,
+  messageLimiter,
+  validate({ params: messageIdParamSchema, body: messageReactionSetSchema }),
+  messageController.setReaction
+);
+
+router.delete(
+  '/:messageId/reactions',
+  requireAuth,
+  messageLimiter,
+  validate({ params: messageIdParamSchema }),
+  messageController.removeReaction
 );
 
 export default router;

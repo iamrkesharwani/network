@@ -160,6 +160,22 @@ const PrivacyTab = () => {
       </div>
 
       <h3 className="mb-2 text-sm font-semibold text-text-primary">
+        Link previews
+      </h3>
+      <div className="mb-8 grid grid-cols-1 gap-3">
+        <PreferenceOptionCard
+          label="Show link previews"
+          description="Show a preview card for supported links (YouTube, X, Vimeo) you share in messages. Fetching a preview reveals the linked page to that site, so this is off by default."
+        >
+          <PreferenceSwitch
+            label="Show link previews"
+            checked={privacy.linkPreviewsEnabled ?? false}
+            onChange={(checked) => setPrivacy({ linkPreviewsEnabled: checked })}
+          />
+        </PreferenceOptionCard>
+      </div>
+
+      <h3 className="mb-2 text-sm font-semibold text-text-primary">
         Blocked accounts
       </h3>
       <div className="mb-8 grid grid-cols-1 gap-3">

@@ -27,4 +27,5 @@ export const PREFERENCES_DEFAULT_PRIVACY = {
   profilePhotoVisibleInChat: true,
   aboutVisibleInChat: true,
   typingIndicator: true,
+  linkPreviewsEnabled: false,
 } as const;

@@ -5,6 +5,8 @@ import type {
   MessageIdParam,
   MessageListQuery,
   MessageSendInput,
+  MessageReactionSetInput,
+  MessageEditInput,
 } from '@network/shared';
 import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { ApiResponse } from '../../../core/utils/ApiResponse.js';
@@ -60,4 +62,52 @@ export const remove = asyncHandler(async (req: Request, res: Response) => {
   await messageService.deleteMessage(user.id, messageId, scope);
 
   res.status(200).json(new ApiResponse(null, 'Message deleted successfully'));
+});
+
+export const getById = asyncHandler(async (req: Request, res: Response) => {
+  const user = requireUser(req);
+  const { messageId } = req.params as unknown as MessageIdParam;
+
+  const result = await messageService.getMessageById(user.id, messageId);
+
+  res.status(200).json(new ApiResponse(result, 'Message fetched successfully'));
+});
+
+export const setReaction = asyncHandler(async (req: Request, res: Response) => {
+  const user = requireUser(req);
+  const { messageId } = req.params as unknown as MessageIdParam;
+
+  const result = await messageService.setReaction(
+    user.id,
+    messageId,
+    req.body as MessageReactionSetInput
+  );
+
+  res.status(200).json(new ApiResponse(result, 'Reaction set successfully'));
+});
+
+export const removeReaction = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { messageId } = req.params as unknown as MessageIdParam;
+
+    await messageService.removeReaction(user.id, messageId);
+
+    res
+      .status(200)
+      .json(new ApiResponse(null, 'Reaction removed successfully'));
+  }
+);
+
+export const edit = asyncHandler(async (req: Request, res: Response) => {
+  const user = requireUser(req);
+  const { messageId } = req.params as unknown as MessageIdParam;
+
+  const result = await messageService.editMessage(
+    user.id,
+    messageId,
+    req.body as MessageEditInput
+  );
+
+  res.status(200).json(new ApiResponse(result, 'Message edited successfully'));
 });

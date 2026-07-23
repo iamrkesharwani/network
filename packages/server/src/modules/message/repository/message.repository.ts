@@ -35,7 +35,9 @@ export const insertMessage = (
   senderId: string,
   ciphertext: string,
   iv: string,
-  encryptedKeys: EncryptedKeyEntryInput[]
+  encryptedKeys: EncryptedKeyEntryInput[],
+  replyToMessageId?: string,
+  expiresAt?: Date
 ): Promise<IMessageDocument> =>
   MessageModel.create({
     conversationId,
@@ -43,6 +45,8 @@ export const insertMessage = (
     ciphertext,
     iv,
     encryptedKeys,
+    ...(replyToMessageId && { replyToMessageId }),
+    ...(expiresAt && { expiresAt }),
   });
 
 export const listByConversation = async (
@@ -123,5 +127,91 @@ export const unsendForEveryone = (
         },
       },
     ],
+    { new: true }
+  ).exec();
+
+export const setReaction = (
+  messageId: string,
+  userId: string,
+  ciphertext: string,
+  iv: string,
+  encryptedKeys: EncryptedKeyEntryInput[]
+): Promise<IMessageDocument | null> => {
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+  // Pipeline-form updates bypass Mongoose's schema casting, so recipientId
+  // must be cast to ObjectId here to match how insertMessage stores it.
+  const castEncryptedKeys = encryptedKeys.map((entry) => ({
+    recipientId: new mongoose.Types.ObjectId(entry.recipientId),
+    encryptedKey: entry.encryptedKey,
+  }));
+
+  return MessageModel.findByIdAndUpdate(
+    messageId,
+    [
+      {
+        $set: {
+          reactions: {
+            $concatArrays: [
+              {
+                $filter: {
+                  input: '$reactions',
+                  as: 'reaction',
+                  cond: { $ne: ['$$reaction.userId', userObjectId] },
+                },
+              },
+              [
+                {
+                  userId: userObjectId,
+                  ciphertext,
+                  iv,
+                  encryptedKeys: castEncryptedKeys,
+                  createdAt: '$$NOW',
+                },
+              ],
+            ],
+          },
+        },
+      },
+    ],
+    { new: true }
+  ).exec();
+};
+
+export const removeReaction = (
+  messageId: string,
+  userId: string
+): Promise<IMessageDocument | null> =>
+  MessageModel.findByIdAndUpdate(
+    messageId,
+    { $pull: { reactions: { userId } } },
+    { new: true }
+  ).exec();
+
+export const expireMessage = (
+  messageId: string
+): Promise<IMessageDocument | null> =>
+  MessageModel.findByIdAndUpdate(
+    messageId,
+    {
+      $set: {
+        ciphertext: '',
+        iv: '',
+        encryptedKeys: [],
+        reactions: [],
+        expiredAt: new Date(),
+      },
+    },
+    { new: true }
+  ).exec();
+
+export const editMessage = (
+  messageId: string,
+  ciphertext: string,
+  iv: string,
+  encryptedKeys: EncryptedKeyEntryInput[]
+): Promise<IMessageDocument | null> =>
+  MessageModel.findByIdAndUpdate(
+    messageId,
+    { $set: { ciphertext, iv, encryptedKeys, editedAt: new Date() } },
     { new: true }
   ).exec();

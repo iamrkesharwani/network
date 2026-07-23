@@ -3,7 +3,9 @@ import {
   CONVERSATION_TYPES,
   GROUP_NAME_MAX_LENGTH,
   MESSAGE_GROUP_MAX_PARTICIPANTS,
+  MESSAGE_DISAPPEARING_TTL_OPTIONS,
   type ConversationType,
+  type ConversationDisappearingTtl,
 } from '@network/shared';
 
 export interface IConversationDocument extends Document {
@@ -19,6 +21,7 @@ export interface IConversationDocument extends Document {
   archivedAt: Map<string, Date>;
   pinnedAt: Map<string, Date>;
   hiddenByBlockAt: Map<string, Date>;
+  disappearingMessagesTtl: ConversationDisappearingTtl;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,6 +87,11 @@ const conversationSchema = new Schema<IConversationDocument>(
       type: Map,
       of: Date,
       default: () => new Map(),
+    },
+    disappearingMessagesTtl: {
+      type: String,
+      enum: MESSAGE_DISAPPEARING_TTL_OPTIONS,
+      default: 'off',
     },
   },
   {

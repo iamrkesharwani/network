@@ -58,6 +58,7 @@ const privacyPatchSchema = z.object({
   profilePhotoVisibleInChat: z.boolean().optional(),
   aboutVisibleInChat: z.boolean().optional(),
   typingIndicator: z.boolean().optional(),
+  linkPreviewsEnabled: z.boolean().optional(),
 });
 
 export const preferencesPatchSchema = z.object({

@@ -42,6 +42,7 @@ export interface IPreferencesDocument extends Document {
     profilePhotoVisibleInChat?: boolean;
     aboutVisibleInChat?: boolean;
     typingIndicator?: boolean;
+    linkPreviewsEnabled?: boolean;
   };
   updatedAt: Date;
   createdAt: Date;
@@ -112,6 +113,7 @@ const privacySchema = new Schema(
     profilePhotoVisibleInChat: { type: Boolean },
     aboutVisibleInChat: { type: Boolean },
     typingIndicator: { type: Boolean },
+    linkPreviewsEnabled: { type: Boolean },
   },
   { _id: false }
 );

@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
-import type { GroupUpdateInput, PaginatedResponse } from '@network/shared';
+import type {
+  ConversationDisappearingTtl,
+  GroupUpdateInput,
+  PaginatedResponse,
+} from '@network/shared';
 import { MAX_PAGE_LIMIT } from '@network/shared';
 import {
   ConversationModel,
@@ -354,6 +358,16 @@ export const setHiddenByBlock = (
     hidden
       ? { $set: { [`hiddenByBlockAt.${userId}`]: new Date() } }
       : { $unset: { [`hiddenByBlockAt.${userId}`]: '' } },
+    { new: true }
+  ).exec();
+
+export const setDisappearingTtl = (
+  conversationId: string,
+  ttl: ConversationDisappearingTtl
+): Promise<IConversationDocument | null> =>
+  ConversationModel.findByIdAndUpdate(
+    conversationId,
+    { $set: { disappearingMessagesTtl: ttl } },
     { new: true }
   ).exec();
 

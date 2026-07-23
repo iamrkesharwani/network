@@ -96,6 +96,7 @@ export const toConversationSummary = (
     isMuted,
     isArchived,
     isPinned,
+    disappearingMessagesTtl: doc.disappearingMessagesTtl,
     participantReadState: toParticipantReadState(doc.lastReadAt, viewerId, privacyByUserId),
   };
 
@@ -108,6 +109,7 @@ export const toConversationSummary = (
       participants: participants.map((participant) =>
         toParticipantSummary(participant, onlineUserIds, viewerId, privacyByUserId)
       ),
+      isOwnedByViewer: doc.createdBy.toString() === viewerId,
     };
   }
 

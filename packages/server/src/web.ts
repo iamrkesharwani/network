@@ -11,6 +11,7 @@ import {
 } from './core/config/redis.js';
 import { initSocket } from './core/config/socket.js';
 import { registerMessageSocketHandlers } from './modules/message/message.socket.js';
+import { startMessageExpiryWorker } from './modules/message/message.expiry.worker.js';
 import { initTypesense } from './core/config/typesense.js';
 import { logger } from './core/utils/logger.js';
 import { env } from './core/env/env.js';
@@ -67,6 +68,7 @@ const startWeb = async () => {
     await initTypesense();
     initSocket(httpServer);
     registerMessageSocketHandlers();
+    startMessageExpiryWorker();
     startEmailWorker();
     startUploadReaperWorker();
     await scheduleUploadSessionReaper();

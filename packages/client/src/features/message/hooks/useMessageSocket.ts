@@ -8,12 +8,18 @@ import {
   CONVERSATION_UPDATED_SOCKET_EVENT,
   CONVERSATION_READ_SOCKET_EVENT,
   MESSAGE_DELETED_SOCKET_EVENT,
+  MESSAGE_REACTION_UPDATED_SOCKET_EVENT,
+  MESSAGE_EDITED_SOCKET_EVENT,
+  MESSAGE_EXPIRED_SOCKET_EVENT,
   PRESENCE_ONLINE_SOCKET_EVENT,
   PRESENCE_OFFLINE_SOCKET_EVENT,
   type IMessageEvent,
   type IConversationUpdatedEvent,
   type IConversationReadEvent,
   type IMessageDeletedEvent,
+  type IMessageReactionEvent,
+  type IMessageEditedEvent,
+  type IMessageExpiredEvent,
   type IPresenceEvent,
   type IParticipantSummary,
 } from '@network/shared';
@@ -100,6 +106,60 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
       );
     };
 
+    const handleMessageReaction = (event: IMessageReactionEvent) => {
+      dispatch(
+        messageApi.util.updateQueryData(
+          'getMessages',
+          { conversationId: event.conversationId, limit: 20 },
+          (draft) => {
+            const message = draft.data.find((m) => m.id === event.messageId);
+            if (!message) return;
+            const withoutUser = message.reactions.filter(
+              (reaction) => reaction.userId !== event.userId
+            );
+            message.reactions = event.reaction
+              ? [...withoutUser, event.reaction]
+              : withoutUser;
+          }
+        )
+      );
+    };
+
+    const handleMessageEdited = (event: IMessageEditedEvent) => {
+      dispatch(
+        messageApi.util.updateQueryData(
+          'getMessages',
+          { conversationId: event.conversationId, limit: 20 },
+          (draft) => {
+            const message = draft.data.find((m) => m.id === event.messageId);
+            if (!message) return;
+            message.ciphertext = event.ciphertext;
+            message.iv = event.iv;
+            message.encryptedKeys = event.encryptedKeys;
+            message.editedAt = event.editedAt;
+          }
+        )
+      );
+    };
+
+    const handleMessageExpired = (event: IMessageExpiredEvent) => {
+      dispatch(
+        messageApi.util.updateQueryData(
+          'getMessages',
+          { conversationId: event.conversationId, limit: 20 },
+          (draft) => {
+            const message = draft.data.find((m) => m.id === event.messageId);
+            if (!message) return;
+            message.ciphertext = '';
+            message.iv = '';
+            message.encryptedKeys = [];
+            message.reactions = [];
+            message.expiredAt = event.expiredAt;
+          }
+        )
+      );
+    };
+
     const handlePresence = (event: IPresenceEvent) => {
       dispatch(
         conversationApi.util.updateQueryData(
@@ -127,6 +187,9 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
     socket.on(CONVERSATION_UPDATED_SOCKET_EVENT, handleConversationUpdated);
     socket.on(CONVERSATION_READ_SOCKET_EVENT, handleConversationRead);
     socket.on(MESSAGE_DELETED_SOCKET_EVENT, handleMessageDeleted);
+    socket.on(MESSAGE_REACTION_UPDATED_SOCKET_EVENT, handleMessageReaction);
+    socket.on(MESSAGE_EDITED_SOCKET_EVENT, handleMessageEdited);
+    socket.on(MESSAGE_EXPIRED_SOCKET_EVENT, handleMessageExpired);
     socket.on(PRESENCE_ONLINE_SOCKET_EVENT, handlePresence);
     socket.on(PRESENCE_OFFLINE_SOCKET_EVENT, handlePresence);
 
@@ -135,6 +198,9 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
       socket.off(CONVERSATION_UPDATED_SOCKET_EVENT, handleConversationUpdated);
       socket.off(CONVERSATION_READ_SOCKET_EVENT, handleConversationRead);
       socket.off(MESSAGE_DELETED_SOCKET_EVENT, handleMessageDeleted);
+      socket.off(MESSAGE_REACTION_UPDATED_SOCKET_EVENT, handleMessageReaction);
+      socket.off(MESSAGE_EDITED_SOCKET_EVENT, handleMessageEdited);
+      socket.off(MESSAGE_EXPIRED_SOCKET_EVENT, handleMessageExpired);
       socket.off(PRESENCE_ONLINE_SOCKET_EVENT, handlePresence);
       socket.off(PRESENCE_OFFLINE_SOCKET_EVENT, handlePresence);
     };
