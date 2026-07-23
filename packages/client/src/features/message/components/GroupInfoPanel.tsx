@@ -10,7 +10,10 @@ import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import Button from '../../../shared/ui/primitives/Button';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import GroupAvatarPickerModal from './GroupAvatarPickerModal';
+import SafetyNumberBadge from './SafetyNumberBadge';
+import VerifyContactModal from './VerifyContactModal';
 import { useUpdateGroupMutation, useLeaveGroupMutation } from '../conversationApi';
+import { useGetPublicKeysQuery } from '../keyBundleApi';
 import { useBlockUserMutation } from '../../block/blockApi';
 
 interface GroupInfoPanelProps {
@@ -34,10 +37,25 @@ const GroupInfoPanel = ({
   const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
   const [blockTarget, setBlockTarget] = useState<IParticipantSummary | null>(null);
+  const [verifyTarget, setVerifyTarget] = useState<IParticipantSummary | null>(
+    null
+  );
 
   const [updateGroup, { isLoading: isRenaming }] = useUpdateGroupMutation();
   const [leaveGroup, { isLoading: isLeaving }] = useLeaveGroupMutation();
   const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
+
+  const participantIds = conversation.participants.map(
+    (participant) => participant.id
+  );
+  const { data: publicKeysData } = useGetPublicKeysQuery(participantIds, {
+    skip: !isOpen || participantIds.length === 0,
+  });
+  const myPublicKey = publicKeysData?.data.find(
+    (key) => key.userId === myUserId
+  )?.publicKey;
+  const publicKeyFor = (userId: string): string | undefined =>
+    publicKeysData?.data.find((key) => key.userId === userId)?.publicKey;
 
   const handleRename = async () => {
     const trimmed = groupName.trim();
@@ -121,6 +139,15 @@ const GroupInfoPanel = ({
                   )}
                 </span>
                 {participant.id !== myUserId && (
+                  <SafetyNumberBadge
+                    myUserId={myUserId}
+                    myPublicKey={myPublicKey}
+                    contactUserId={participant.id}
+                    contactPublicKey={publicKeyFor(participant.id)}
+                    onClick={() => setVerifyTarget(participant)}
+                  />
+                )}
+                {participant.id !== myUserId && (
                   <button
                     type="button"
                     onClick={() => setBlockTarget(participant)}
@@ -169,6 +196,16 @@ const GroupInfoPanel = ({
         confirmLabel="Block"
         isLoading={isBlocking}
       />
+
+      {verifyTarget && (
+        <VerifyContactModal
+          isOpen={verifyTarget !== null}
+          onClose={() => setVerifyTarget(null)}
+          myUserId={myUserId}
+          contactUserId={verifyTarget.id}
+          contactName={verifyTarget.name}
+        />
+      )}
     </>
   );
 };

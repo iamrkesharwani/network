@@ -45,6 +45,8 @@ import MessageInput from './MessageInput';
 import TypingIndicator from './TypingIndicator';
 import PresenceDot from './PresenceDot';
 import DisappearingMessagesMenu from './DisappearingMessagesMenu';
+import SafetyNumberBadge from './SafetyNumberBadge';
+import VerifyContactModal from './VerifyContactModal';
 import MessageThreadSkeleton from '../skeleton/MessageThreadSkeleton';
 
 interface MessageThreadProps {
@@ -86,6 +88,7 @@ const MessageThread = ({
 }: MessageThreadProps) => {
   const navigate = useNavigate();
   const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
+  const [isVerifyOpen, setIsVerifyOpen] = useState(false);
   const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
   const [replyTo, setReplyTo] = useState<IMessageResponse | null>(null);
   const [replyToPreview, setReplyToPreview] = useState<string | null>(null);
@@ -117,6 +120,15 @@ const MessageThread = ({
   const { data: publicKeysData } = useGetPublicKeysQuery(recipientIds, {
     skip: recipientIds.length === 0,
   });
+  const myPublicKey = publicKeysData?.data.find(
+    (key) => key.userId === myUserId
+  )?.publicKey;
+  const otherParticipantPublicKey =
+    conversation.type === 'direct'
+      ? publicKeysData?.data.find(
+          (key) => key.userId === conversation.otherParticipant.id
+        )?.publicKey
+      : undefined;
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [presignAttachment] = usePresignMessageAttachmentMutation();
   const [markConversationRead] = useMarkConversationReadMutation();
@@ -330,6 +342,16 @@ const MessageThread = ({
         />
 
         {conversation.type === 'direct' && (
+          <SafetyNumberBadge
+            myUserId={myUserId}
+            myPublicKey={myPublicKey}
+            contactUserId={conversation.otherParticipant.id}
+            contactPublicKey={otherParticipantPublicKey}
+            onClick={() => setIsVerifyOpen(true)}
+          />
+        )}
+
+        {conversation.type === 'direct' && (
           <button
             type="button"
             onClick={() => setIsBlockConfirmOpen(true)}
@@ -405,6 +427,16 @@ const MessageThread = ({
           description="They won't be able to message you or see your content, and this conversation will be removed from your list. You can unblock them later from your Privacy settings."
           confirmLabel="Block"
           isLoading={isBlocking}
+        />
+      )}
+
+      {conversation.type === 'direct' && (
+        <VerifyContactModal
+          isOpen={isVerifyOpen}
+          onClose={() => setIsVerifyOpen(false)}
+          myUserId={myUserId}
+          contactUserId={conversation.otherParticipant.id}
+          contactName={conversation.otherParticipant.name}
         />
       )}
     </div>

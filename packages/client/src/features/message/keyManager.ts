@@ -17,6 +17,9 @@ const PBKDF2_SALT_BYTE_LENGTH = 16;
 
 const BASE64_CHUNK_SIZE = 0x8000;
 
+const SAFETY_NUMBER_GROUP_COUNT = 4;
+const SAFETY_NUMBER_GROUP_DIGITS = 5;
+
 export interface IGeneratedKeyPair {
   publicKey: CryptoKey;
   privateKey: CryptoKey;
@@ -301,6 +304,50 @@ export const unwrapMessageKey = async (
     false,
     ['decrypt']
   );
+};
+
+/**
+ * A safety number is a symmetric fingerprint of both participants' public
+ * keys — computing it in either direction yields the same code, so two
+ * people can read theirs aloud and confirm they match without either being
+ * "first" or "second". A mismatch means at least one side's public key
+ * isn't what the other actually has, the MITM/impersonation signal this
+ * exists to catch.
+ */
+export const computeSafetyNumber = async (
+  myUserId: string,
+  myPublicKey: string,
+  theirUserId: string,
+  theirPublicKey: string
+): Promise<string> => {
+  const [first, second] =
+    myUserId < theirUserId
+      ? [`${myUserId}:${myPublicKey}`, `${theirUserId}:${theirPublicKey}`]
+      : [`${theirUserId}:${theirPublicKey}`, `${myUserId}:${myPublicKey}`];
+
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(`${first}|${second}`)
+  );
+  const bytes = new Uint8Array(digest);
+
+  const groups: string[] = [];
+  for (let i = 0; i < SAFETY_NUMBER_GROUP_COUNT; i += 1) {
+    const offset = i * 4;
+    const value =
+      ((bytes[offset] << 24) |
+        (bytes[offset + 1] << 16) |
+        (bytes[offset + 2] << 8) |
+        bytes[offset + 3]) >>>
+      0;
+    groups.push(
+      (value % 10 ** SAFETY_NUMBER_GROUP_DIGITS)
+        .toString()
+        .padStart(SAFETY_NUMBER_GROUP_DIGITS, '0')
+    );
+  }
+
+  return groups.join(' ');
 };
 
 export const decryptMessage = async (

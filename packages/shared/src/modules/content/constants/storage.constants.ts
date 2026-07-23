@@ -13,3 +13,5 @@ export const MESSAGE_PIN_NUDGE_STORAGE_KEY_PREFIX =
   'network:messaging:pin-nudge:';
 export const MESSAGE_PIN_LAST_ENTRY_STORAGE_KEY_PREFIX =
   'network:messaging:pin-last-entry:';
+export const MESSAGE_SAFETY_NUMBER_STORAGE_KEY_PREFIX =
+  'network:messaging:safety-number:';
