@@ -103,6 +103,14 @@ export const directExists = async (
   return (await ConversationModel.exists({ directKey })) !== null;
 };
 
+export const findDirectBetween = (
+  userIdA: string,
+  userIdB: string
+): Promise<IConversationDocument | null> => {
+  const directKey = buildDirectKey(userIdA, userIdB);
+  return ConversationModel.findOne({ directKey }).exec();
+};
+
 export const findOrCreateDirect = async (
   userId: string,
   participantId: string
@@ -154,6 +162,7 @@ export const listByUser = async (
       $match: {
         participantIds: new mongoose.Types.ObjectId(userId),
         [`archivedAt.${userId}`]: { $exists: false },
+        [`hiddenByBlockAt.${userId}`]: { $exists: false },
       },
     },
     { $addFields: { isPinnedForViewer: isPinnedForViewerExpr(userId) } },
@@ -332,6 +341,19 @@ export const setPinned = (
     pinned
       ? { $set: { [`pinnedAt.${userId}`]: new Date() } }
       : { $unset: { [`pinnedAt.${userId}`]: '' } },
+    { new: true }
+  ).exec();
+
+export const setHiddenByBlock = (
+  conversationId: string,
+  userId: string,
+  hidden: boolean
+): Promise<IConversationDocument | null> =>
+  ConversationModel.findByIdAndUpdate(
+    conversationId,
+    hidden
+      ? { $set: { [`hiddenByBlockAt.${userId}`]: new Date() } }
+      : { $unset: { [`hiddenByBlockAt.${userId}`]: '' } },
     { new: true }
   ).exec();
 

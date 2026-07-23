@@ -1,12 +1,17 @@
 import { useState } from 'react';
-import { Camera, LogOut, UserPlus } from 'lucide-react';
-import { GROUP_NAME_MAX_LENGTH, type IGroupConversationSummary } from '@network/shared';
+import { Camera, LogOut, UserPlus, Ban } from 'lucide-react';
+import {
+  GROUP_NAME_MAX_LENGTH,
+  type IGroupConversationSummary,
+  type IParticipantSummary,
+} from '@network/shared';
 import Modal from '../../../shared/ui/overlay/Modal';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import Button from '../../../shared/ui/primitives/Button';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import GroupAvatarPickerModal from './GroupAvatarPickerModal';
 import { useUpdateGroupMutation, useLeaveGroupMutation } from '../conversationApi';
+import { useBlockUserMutation } from '../../block/blockApi';
 
 interface GroupInfoPanelProps {
   isOpen: boolean;
@@ -28,9 +33,11 @@ const GroupInfoPanel = ({
   const [groupName, setGroupName] = useState(conversation.groupName);
   const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
+  const [blockTarget, setBlockTarget] = useState<IParticipantSummary | null>(null);
 
   const [updateGroup, { isLoading: isRenaming }] = useUpdateGroupMutation();
   const [leaveGroup, { isLoading: isLeaving }] = useLeaveGroupMutation();
+  const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
 
   const handleRename = async () => {
     const trimmed = groupName.trim();
@@ -43,6 +50,12 @@ const GroupInfoPanel = ({
     setIsLeaveConfirmOpen(false);
     onClose();
     onLeft();
+  };
+
+  const handleBlock = async () => {
+    if (!blockTarget) return;
+    await blockUser(blockTarget.username).unwrap();
+    setBlockTarget(null);
   };
 
   return (
@@ -91,19 +104,32 @@ const GroupInfoPanel = ({
 
           <div className="max-h-56 space-y-1 overflow-y-auto">
             {conversation.participants.map((participant) => (
-              <div key={participant.id} className="flex items-center gap-2 rounded-md px-2 py-1.5">
+              <div
+                key={participant.id}
+                className="group flex items-center gap-2 rounded-md px-2 py-1.5"
+              >
                 <Avatar
                   src={participant.avatarUrl}
                   fallback={participant.name}
                   isOnline={participant.isOnline}
                   size="sm"
                 />
-                <span className="text-sm text-text-primary">
+                <span className="flex-1 text-sm text-text-primary">
                   {participant.name}
                   {participant.id === myUserId && (
                     <span className="ml-1 text-xs text-text-muted">(you)</span>
                   )}
                 </span>
+                {participant.id !== myUserId && (
+                  <button
+                    type="button"
+                    onClick={() => setBlockTarget(participant)}
+                    aria-label={`Block ${participant.name}`}
+                    className="shrink-0 rounded-lg p-1 text-icon opacity-0 transition-opacity hover:bg-error-subtle hover:text-error group-hover:opacity-100"
+                  >
+                    <Ban className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -132,6 +158,16 @@ const GroupInfoPanel = ({
         isOpen={isAvatarPickerOpen}
         onClose={() => setIsAvatarPickerOpen(false)}
         conversationId={conversation.id}
+      />
+
+      <ConfirmModal
+        isOpen={blockTarget !== null}
+        onClose={() => setBlockTarget(null)}
+        onConfirm={handleBlock}
+        title={`Block ${blockTarget?.name ?? 'this person'}?`}
+        description="They won't be able to message you or see your content, and you won't see theirs. This doesn't remove them from the group. You can unblock them later from your Privacy settings."
+        confirmLabel="Block"
+        isLoading={isBlocking}
       />
     </>
   );

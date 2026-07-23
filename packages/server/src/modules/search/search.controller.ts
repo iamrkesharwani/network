@@ -30,7 +30,8 @@ export const getSearchAll = asyncHandler(
     const result = await searchService.searchAll(
       q,
       { videoCursor, shortCursor, postCursor },
-      limit
+      limit,
+      req.user?.id
     );
 
     res
@@ -48,7 +49,8 @@ export const getSearchByType = asyncHandler(
       q,
       type,
       cursor ?? null,
-      limit
+      limit,
+      req.user?.id
     );
 
     res

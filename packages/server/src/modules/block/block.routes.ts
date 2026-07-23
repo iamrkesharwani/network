@@ -1,10 +1,17 @@
 import { Router } from 'express';
 import { validate } from '../../core/middleware/validate.middleware.js';
 import { requireAuth } from '../../core/middleware/auth.middleware.js';
-import { usernameParamSchema } from '@network/shared';
+import { usernameParamSchema, blockListQuerySchema } from '@network/shared';
 import * as blockController from './block.controller.js';
 
 const router = Router();
+
+router.get(
+  '/',
+  requireAuth,
+  validate({ query: blockListQuerySchema }),
+  blockController.listBlockedUsersHandler
+);
 
 router.put(
   '/:username',

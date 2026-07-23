@@ -7,6 +7,7 @@ import type {
 } from '@network/shared';
 import { logger } from '../../core/utils/logger.js';
 import { bullMqConnection } from '../../core/config/bullmq.js';
+import * as blockService from '../block/services/block.service.js';
 
 export interface NotificationJobData {
   type: NotificationType;
@@ -35,6 +36,11 @@ const notificationQueue = new Queue<NotificationJobData>(
 export const queueNotification = async (
   data: NotificationJobData
 ): Promise<void> => {
+  if (data.actorId) {
+    const blocked = await blockService.isBlocked(data.actorId, data.recipientId);
+    if (blocked) return;
+  }
+
   try {
     await notificationQueue.add(data.type, data);
   } catch (error) {

@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import type { IConversationSummary } from '@network/shared';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Ban } from 'lucide-react';
+import { CLIENT_ROUTES, type IConversationSummary } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
+import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import type { useSocket } from '../../../shared/hooks/useSocket';
 import { useGetMessagesQuery, useSendMessageMutation } from '../messageApi';
 import { useMarkConversationReadMutation } from '../conversationApi';
 import { useGetPublicKeysQuery } from '../keyBundleApi';
 import { useConversationRoom } from '../hooks/useConversationRoom';
 import { encryptForRecipients } from '../keyManager';
+import { useBlockUserMutation } from '../../block/blockApi';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import TypingIndicator from './TypingIndicator';
@@ -38,6 +41,9 @@ const MessageThread = ({
   onOpenGroupInfo,
   onBack,
 }: MessageThreadProps) => {
+  const navigate = useNavigate();
+  const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
+  const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
   const { emitTyping } = useConversationRoom(socketRef, conversation.id);
   const { data, isLoading } = useGetMessagesQuery({
     conversationId: conversation.id,
@@ -107,6 +113,13 @@ const MessageThread = ({
         }
       : { src: conversation.groupAvatarUrl, isOnline: undefined };
 
+  const handleBlock = async () => {
+    if (conversation.type !== 'direct') return;
+    await blockUser(conversation.otherParticipant.username).unwrap();
+    setIsBlockConfirmOpen(false);
+    navigate(CLIENT_ROUTES.MESSAGES, { replace: true });
+  };
+
   return (
     <div className="flex flex-1 flex-col">
       <div className="flex items-center gap-1 border-b border-border pb-3">
@@ -143,6 +156,17 @@ const MessageThread = ({
             )}
           </div>
         </button>
+
+        {conversation.type === 'direct' && (
+          <button
+            type="button"
+            onClick={() => setIsBlockConfirmOpen(true)}
+            aria-label={`Block ${conversation.otherParticipant.name}`}
+            className="shrink-0 rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover"
+          >
+            <Ban className="h-4.5 w-4.5" strokeWidth={1.75} />
+          </button>
+        )}
       </div>
 
       {isLoading ? (
@@ -174,6 +198,18 @@ const MessageThread = ({
       />
 
       <MessageInput onSend={handleSend} onTyping={emitTyping} isSending={isSending} />
+
+      {conversation.type === 'direct' && (
+        <ConfirmModal
+          isOpen={isBlockConfirmOpen}
+          onClose={() => setIsBlockConfirmOpen(false)}
+          onConfirm={handleBlock}
+          title={`Block ${conversation.otherParticipant.name}?`}
+          description="They won't be able to message you or see your content, and this conversation will be removed from your list. You can unblock them later from your Privacy settings."
+          confirmLabel="Block"
+          isLoading={isBlocking}
+        />
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import type {
   ContentVisibility,
 } from '@network/shared';
 import * as postRepository from '../post.repository.js';
+import type { IPostDocument } from '../post.model.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
 import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields.js';
@@ -14,6 +15,7 @@ import { logger } from '../../../core/utils/logger.js';
 import {
   resolveProfileAccess,
   getContentOwnerAccess,
+  getAccessibleAuthorIds,
 } from '../../user/services/user.profile.service.js';
 import { queueMentionDiffNotifications } from '../../notification/notification.mention.service.js';
 
@@ -77,23 +79,45 @@ export const getPostById = async (
   return toResponse(post);
 };
 
-export const getPublicFeed = async (cursor: string | null, limit: number) => {
+const filterByAuthorAccess = async (
+  docs: IPostDocument[],
+  viewerId: string | undefined
+): Promise<IPostDocument[]> => {
+  const accessibleAuthorIds = await getAccessibleAuthorIds(
+    docs.map((doc) => getOwnerId(doc.userId)),
+    viewerId
+  );
+  return docs.filter((doc) => accessibleAuthorIds.has(getOwnerId(doc.userId)));
+};
+
+export const getPublicFeed = async (
+  cursor: string | null,
+  limit: number,
+  viewerId?: string
+) => {
   const result = await postRepository.findPublicFeed(cursor, limit);
-  return { ...result, data: result.data.map(toResponseFromLean) };
+  const visible = await filterByAuthorAccess(result.data, viewerId);
+  return { ...result, data: visible.map(toResponseFromLean) };
 };
 
 export const searchPublic = async (
   q: string,
   cursor: string | null,
-  limit: number
+  limit: number,
+  viewerId?: string
 ) => {
   const result = await postRepository.searchPublic(q, cursor, limit);
-  return { ...result, data: result.data.map(toResponseFromLean) };
+  const visible = await filterByAuthorAccess(result.data, viewerId);
+  return { ...result, data: visible.map(toResponseFromLean) };
 };
 
-export const findByIds = async (ids: string[]): Promise<IPostResponse[]> => {
+export const findByIds = async (
+  ids: string[],
+  viewerId?: string
+): Promise<IPostResponse[]> => {
   const docs = await postRepository.findByIds(ids);
-  return docs.map(toResponse);
+  const visible = await filterByAuthorAccess(docs, viewerId);
+  return visible.map(toResponse);
 };
 
 export const getMyPosts = async (

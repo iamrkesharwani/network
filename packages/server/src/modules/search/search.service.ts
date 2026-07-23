@@ -19,7 +19,9 @@ import * as videoCrudService from '../video/services/video.crud.service.js';
 import * as shortCrudService from '../short/services/short.crud.service.js';
 import * as postCrudService from '../post/services/post.crud.service.js';
 import * as userRepository from '../user/user.repository.js';
+import type { IUserDocument } from '../user/user.model.js';
 import { getPublicProfiles } from '../user/services/user.profile.service.js';
+import * as blockService from '../block/services/block.service.js';
 
 const requireQuery = (q: string): string => {
   const trimmed = q.trim();
@@ -60,9 +62,15 @@ const orderById = <T extends { id: string }>(
 export const searchAll = async (
   q: string,
   cursors: MixCursors,
-  limit: number
+  limit: number,
+  viewerId?: string
 ): Promise<IMixedFeedBatch> =>
-  composeMixedBatch(cursors, limit, { mode: 'search', q: requireQuery(q) });
+  composeMixedBatch(
+    cursors,
+    limit,
+    { mode: 'search', q: requireQuery(q) },
+    viewerId
+  );
 
 type SearchByTypeItem = IVideoResponse | IShortResponse | IPostResponse;
 type SearchByTypeResult = Omit<
@@ -74,18 +82,28 @@ export const searchByType = (
   q: string,
   type: SearchType,
   cursor: string | null,
-  limit: number
+  limit: number,
+  viewerId?: string
 ): Promise<SearchByTypeResult> => {
   const query = requireQuery(q);
 
   switch (type) {
     case 'video':
-      return videoCrudService.searchPublic(query, cursor, limit);
+      return videoCrudService.searchPublic(query, cursor, limit, viewerId);
     case 'short':
-      return shortCrudService.searchPublic(query, cursor, limit);
+      return shortCrudService.searchPublic(query, cursor, limit, viewerId);
     case 'post':
-      return postCrudService.searchPublic(query, cursor, limit);
+      return postCrudService.searchPublic(query, cursor, limit, viewerId);
   }
+};
+
+const filterOutBlocked = async (
+  users: IUserDocument[],
+  viewerId: string | undefined
+): Promise<IUserDocument[]> => {
+  if (!viewerId || users.length === 0) return users;
+  const blockedSet = await blockService.getBlockedUserIds(viewerId);
+  return users.filter((user) => !blockedSet.has(user._id.toString()));
 };
 
 export const searchCreators = async (
@@ -101,9 +119,11 @@ export const searchCreators = async (
     viewerId
   );
 
+  const visibleUsers = await filterOutBlocked(result.data, viewerId);
+
   return {
     ...result,
-    data: await getPublicProfiles(result.data, viewerId),
+    data: await getPublicProfiles(visibleUsers, viewerId),
   };
 };
 
@@ -142,12 +162,13 @@ export const searchSuggestions = async (
 
   const [creators, videos, shorts, posts] = await Promise.all([
     userRepository.findByIds(creatorIds),
-    videoCrudService.findByIds(videoIds),
-    shortCrudService.findByIds(shortIds),
-    postCrudService.findByIds(postIds),
+    videoCrudService.findByIds(videoIds, viewerId),
+    shortCrudService.findByIds(shortIds, viewerId),
+    postCrudService.findByIds(postIds, viewerId),
   ]);
 
-  const creatorProfiles = await getPublicProfiles(creators, viewerId);
+  const visibleCreators = await filterOutBlocked(creators, viewerId);
+  const creatorProfiles = await getPublicProfiles(visibleCreators, viewerId);
 
   return {
     creators: orderById(creatorProfiles, creatorIds),

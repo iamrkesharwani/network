@@ -19,6 +19,7 @@ router.use(searchLimiter);
 
 router.get(
   '/',
+  optionalAuth,
   validate({ query: searchAllQuerySchema }),
   searchController.getSearchAll
 );
@@ -55,6 +56,7 @@ router.delete(
 
 router.get(
   '/:type',
+  optionalAuth,
   validate({ params: searchTypeParamSchema, query: searchByTypeQuerySchema }),
   searchController.getSearchByType
 );

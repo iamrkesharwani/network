@@ -101,7 +101,8 @@ export const incrementItemCount = (
 export const findByUserPaginated = async (
   userId: string,
   cursor: string | null,
-  limit: number
+  limit: number,
+  extraFilter: Record<string, unknown> = {}
 ): Promise<Omit<PaginatedResponse<IPlaylistDocument>, 'success' | 'message'>> => {
   const safeLimit = Math.min(Math.max(1, limit), MAX_PAGE_LIMIT);
   const decoded = cursor ? decodeCursor(cursor) : null;
@@ -120,6 +121,7 @@ export const findByUserPaginated = async (
 
   const data = (await PlaylistModel.find({
     userId: new mongoose.Types.ObjectId(userId),
+    ...extraFilter,
     ...cursorFilter,
   })
     .sort({ updatedAt: -1, _id: -1 })

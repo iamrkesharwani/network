@@ -15,6 +15,7 @@ import * as userRepository from '../../user/user.repository.js';
 import * as keyBundleService from './keyBundle.service.js';
 import * as preferencesService from '../../preferences/preferences.service.js';
 import * as followService from '../../follow/services/follow.crud.service.js';
+import * as blockService from '../../block/services/block.service.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import { toConversationSummary } from './conversation.mappers.js';
@@ -87,25 +88,32 @@ const assertCanAddToGroup = async (
 ): Promise<void> => {
   if (targetIds.length === 0) return;
 
+  const blockedWithActor = await blockService.getBlockedUserIds(actorId);
+
   const privacyByUserId = await preferencesService.getResolvedPrivacyByUserIds(
     targetIds
   );
 
   const nobodyIds = targetIds.filter(
-    (id) => privacyByUserId.get(id)?.whoCanAddToGroup === 'nobody'
+    (id) =>
+      !blockedWithActor.has(id) &&
+      privacyByUserId.get(id)?.whoCanAddToGroup === 'nobody'
   );
   const followersOnlyIds = targetIds.filter(
-    (id) => privacyByUserId.get(id)?.whoCanAddToGroup === 'followers'
+    (id) =>
+      !blockedWithActor.has(id) &&
+      privacyByUserId.get(id)?.whoCanAddToGroup === 'followers'
   );
 
   const followedSet = await followService.getFollowedSet(actorId, followersOnlyIds);
   const notFollowedIds = followersOnlyIds.filter((id) => !followedSet.has(id));
 
-  const blockedIds = [...nobodyIds, ...notFollowedIds];
-  if (blockedIds.length === 0) return;
+  const blockedIds = targetIds.filter((id) => blockedWithActor.has(id));
+  const restrictedIds = [...blockedIds, ...nobodyIds, ...notFollowedIds];
+  if (restrictedIds.length === 0) return;
 
-  const blockedUsers = await userRepository.findByIds(blockedIds);
-  const usernames = blockedUsers.map((user) => user.username).join(', ');
+  const restrictedUsers = await userRepository.findByIds(restrictedIds);
+  const usernames = restrictedUsers.map((user) => user.username).join(', ');
   throw new ApiError(
     403,
     'FORBIDDEN',
@@ -122,6 +130,11 @@ export const createDirectConversation = async (
   }
 
   await assertActiveUsersExist([participantId]);
+
+  const blocked = await blockService.isBlocked(userId, participantId);
+  if (blocked) {
+    throw new ApiError(403, 'FORBIDDEN', 'You cannot message this user.');
+  }
 
   const alreadyExists = await conversationRepository.directExists(
     userId,
@@ -152,6 +165,7 @@ export const createGroupConversation = async (
   data: GroupConversationCreateInput
 ): Promise<IConversationSummary> => {
   await assertActiveUsersExist(data.participantIds);
+  await assertCanAddToGroup(userId, data.participantIds);
   await keyBundleService.assertAllHaveKeyBundle([
     userId,
     ...data.participantIds,

@@ -3,6 +3,7 @@ import { composeMixedBatch, type MixCursors } from './mix.service.js';
 
 export const getUnifiedFeed = async (
   cursors: MixCursors,
-  limit: number
+  limit: number,
+  viewerId?: string
 ): Promise<IMixedFeedBatch> =>
-  composeMixedBatch(cursors, limit, { mode: 'global' });
+  composeMixedBatch(cursors, limit, { mode: 'global' }, viewerId);

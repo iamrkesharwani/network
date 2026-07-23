@@ -27,6 +27,8 @@ export * from './modules/feed/feed.constants.js';
 
 export * from './modules/follow/follow.schema.js';
 export * from './modules/follow/follow.types.js';
+export * from './modules/block/block.schema.js';
+export * from './modules/block/block.types.js';
 
 export * from './modules/history/history.schema.js';
 export * from './modules/history/history.types.js';

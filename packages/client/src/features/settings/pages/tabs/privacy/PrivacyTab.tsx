@@ -1,4 +1,9 @@
-import { PRIVACY_MESSAGE_AUDIENCES, PRIVACY_GROUP_ADD_AUDIENCES } from '@network/shared';
+import { Link } from 'react-router-dom';
+import {
+  CLIENT_ROUTES,
+  PRIVACY_MESSAGE_AUDIENCES,
+  PRIVACY_GROUP_ADD_AUDIENCES,
+} from '@network/shared';
 import { useAppSelector } from '../../../../../shared/hooks/useAppSelector';
 import { usePreference } from '../../../hooks/usePreference';
 import { usePatchAccountPrivacyMutation } from '../../../settingsApi';
@@ -151,6 +156,23 @@ const PrivacyTab = () => {
             checked={privacy.aboutVisibleInChat ?? true}
             onChange={(checked) => setPrivacy({ aboutVisibleInChat: checked })}
           />
+        </PreferenceOptionCard>
+      </div>
+
+      <h3 className="mb-2 text-sm font-semibold text-text-primary">
+        Blocked accounts
+      </h3>
+      <div className="mb-8 grid grid-cols-1 gap-3">
+        <PreferenceOptionCard
+          label="Blocked accounts"
+          description="Manage accounts you've blocked. They can't message you or see your content, and you won't see theirs."
+        >
+          <Link
+            to={CLIENT_ROUTES.SETTINGS_BLOCKED_ACCOUNTS}
+            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-text-primary transition-colors hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
+            Manage
+          </Link>
         </PreferenceOptionCard>
       </div>
     </div>

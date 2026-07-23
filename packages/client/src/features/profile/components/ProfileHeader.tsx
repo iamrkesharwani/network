@@ -13,6 +13,7 @@ import {
   buildFollowingPath,
 } from '../utils/buildProfilePath';
 import BioModal from './BioModal';
+import ProfileOptionsMenu from './ProfileOptionsMenu';
 
 export interface ProfileHeaderProps {
   profile: IPublicProfile;
@@ -54,6 +55,12 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
             'bg-surface-overlay/85'
           )}
         >
+          {!isOwner && (
+            <div className="absolute right-3 top-3">
+              <ProfileOptionsMenu username={profile.username} name={profile.name} />
+            </div>
+          )}
+
           <div className="mx-auto flex w-full max-w-sm flex-col gap-3">
             <div className="flex items-start gap-3">
               <Avatar

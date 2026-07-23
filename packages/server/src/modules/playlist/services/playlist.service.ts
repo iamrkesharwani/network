@@ -1,4 +1,5 @@
 import type {
+  ContentVisibility,
   IPlaylistContainingEntry,
   IPlaylistDetail,
   IPlaylistItemResponse,
@@ -11,11 +12,16 @@ import type {
 import * as playlistRepository from '../repository/playlist.repository.js';
 import * as playlistItemRepository from '../repository/playlistItem.repository.js';
 import { getModerationContentAdapter } from '../../../core/moderation/moderationContent.registry.js';
-import { resolveProfileAccess } from '../../user/services/user.profile.service.js';
+import {
+  resolveProfileAccess,
+  getContentOwnerAccess,
+} from '../../user/services/user.profile.service.js';
 import { imageProvider } from '../../../core/providers/provider.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
+import { getOwnerId } from '../../../core/utils/getOwnerId.js';
 import { toItemResponse, toPlaylistDetail, toPlaylistSummary } from './playlist.mappers.js';
 import type { IPlaylistDocument } from '../playlist.model.js';
+import type { Requester } from '../playlist.types.js';
 
 const requireOwnedPlaylist = async (
   playlistId: string,
@@ -46,12 +52,14 @@ export const createPlaylist = async (
 const listPlaylistsForUser = async (
   userId: string,
   cursor: string | null,
-  limit: number
+  limit: number,
+  extraFilter: Record<string, unknown> = {}
 ): Promise<Omit<PaginatedResponse<IPlaylistSummary>, 'success' | 'message'>> => {
   const { data, meta } = await playlistRepository.findByUserPaginated(
     userId,
     cursor,
-    limit
+    limit,
+    extraFilter
   );
 
   const thumbnailsByPlaylistId =
@@ -76,19 +84,49 @@ export const getMyPlaylists = (
 
 export const getUserPlaylists = async (
   username: string,
+  requesterId: string | undefined,
   cursor: string | null,
   limit: number
 ): Promise<Omit<PaginatedResponse<IPlaylistSummary>, 'success' | 'message'>> => {
-  const { userId } = await resolveProfileAccess(username, undefined);
-  return listPlaylistsForUser(userId, cursor, limit);
+  const { userId, isOwner, hasAccess } = await resolveProfileAccess(
+    username,
+    requesterId
+  );
+
+  if (!hasAccess) {
+    return { data: [], meta: { nextCursor: null, hasNextPage: false, limit } };
+  }
+
+  const extraFilter = isOwner ? {} : { visibility: 'public' as ContentVisibility };
+  return listPlaylistsForUser(userId, cursor, limit, extraFilter);
 };
 
 export const getPlaylistDetail = async (
-  playlistId: string
+  playlistId: string,
+  requester?: Requester
 ): Promise<IPlaylistDetail> => {
   const playlist = await playlistRepository.findByIdWithAuthor(playlistId);
   if (!playlist) {
     throw new ApiError(404, 'NOT_FOUND', 'Playlist not found.');
+  }
+
+  const isOwner = requester?.id === getOwnerId(playlist.userId);
+  const isAdmin = requester?.role === 'admin';
+  const canBypassRestrictions = isOwner || isAdmin;
+
+  if (!canBypassRestrictions && playlist.visibility !== 'public') {
+    throw new ApiError(404, 'NOT_FOUND', 'Playlist not found.');
+  }
+
+  if (!canBypassRestrictions) {
+    const access = await getContentOwnerAccess(
+      getOwnerId(playlist.userId),
+      requester?.id
+    );
+    if (access.blocked) throw new ApiError(404, 'NOT_FOUND', 'Playlist not found.');
+    if (access.isPrivate && !access.hasAccess) {
+      throw new ApiError(403, 'PRIVATE_ACCOUNT', 'This account is private.');
+    }
   }
 
   const thumbnailsByPlaylistId =

@@ -63,6 +63,7 @@ export const getByUsername = asyncHandler(
     const { cursor, limit } = getFeedQuery(req);
     const result = await playlistService.getUserPlaylists(
       getUsernameParam(req),
+      req.user?.id,
       cursor ?? null,
       limit
     );
@@ -81,7 +82,8 @@ export const getByUsername = asyncHandler(
 
 export const getOne = asyncHandler(async (req: Request, res: Response) => {
   const playlist = await playlistService.getPlaylistDetail(
-    getPlaylistIdParam(req)
+    getPlaylistIdParam(req),
+    req.user
   );
 
   res.status(200).json(new ApiResponse(playlist, 'Playlist fetched successfully'));

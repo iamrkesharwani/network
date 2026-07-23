@@ -34,6 +34,7 @@ export const CLIENT_ROUTES = {
   PROFILE_FOLLOWERS: '/profile/:username/followers',
   PROFILE_FOLLOWING: '/profile/:username/following',
   FOLLOW_REQUESTS: '/follow-requests',
+  SETTINGS_BLOCKED_ACCOUNTS: '/settings/blocked-accounts',
   SETTINGS: '/settings',
   SETTINGS_MY_INFO: '/settings/my-info',
   SETTINGS_MY_INFO_BASIC: '/settings/my-info/basic',

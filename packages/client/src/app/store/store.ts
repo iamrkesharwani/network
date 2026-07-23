@@ -17,6 +17,7 @@ import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
 import { juryApi } from '../../features/jury/juryApi';
 import { followApi } from '../../features/follow/followApi';
+import { blockApi } from '../../features/block/blockApi';
 import { likeApi } from '../../features/engagement/likeApi';
 import { shareApi } from '../../features/engagement/shareApi';
 import { commentApi } from '../../features/engagement/commentApi';
@@ -53,6 +54,7 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
         reportApi.middleware,
         juryApi.middleware,
         followApi.middleware,
+        blockApi.middleware,
         likeApi.middleware,
         shareApi.middleware,
         commentApi.middleware,

@@ -18,6 +18,7 @@ export interface IConversationDocument extends Document {
   mutedUntil: Map<string, Date>;
   archivedAt: Map<string, Date>;
   pinnedAt: Map<string, Date>;
+  hiddenByBlockAt: Map<string, Date>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -75,6 +76,11 @@ const conversationSchema = new Schema<IConversationDocument>(
       default: () => new Map(),
     },
     pinnedAt: {
+      type: Map,
+      of: Date,
+      default: () => new Map(),
+    },
+    hiddenByBlockAt: {
       type: Map,
       of: Date,
       default: () => new Map(),

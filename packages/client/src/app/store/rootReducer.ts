@@ -21,6 +21,7 @@ import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
 import { juryApi } from '../../features/jury/juryApi';
 import { followApi } from '../../features/follow/followApi';
+import { blockApi } from '../../features/block/blockApi';
 import { likeApi } from '../../features/engagement/likeApi';
 import { shareApi } from '../../features/engagement/shareApi';
 import { commentApi } from '../../features/engagement/commentApi';
@@ -54,6 +55,7 @@ const rootReducer = combineReducers({
   [reportApi.reducerPath]: reportApi.reducer,
   [juryApi.reducerPath]: juryApi.reducer,
   [followApi.reducerPath]: followApi.reducer,
+  [blockApi.reducerPath]: blockApi.reducer,
   [likeApi.reducerPath]: likeApi.reducer,
   [shareApi.reducerPath]: shareApi.reducer,
   [commentApi.reducerPath]: commentApi.reducer,

@@ -4,6 +4,7 @@ import type {
   ContentVisibility,
 } from '@network/shared';
 import * as shortRepository from '../short.repository.js';
+import type { IShortDocument } from '../short.model.js';
 import { logger } from '../../../core/utils/logger.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
@@ -14,6 +15,7 @@ import { recordViewIncrement } from '../../creator/services/creator.views.servic
 import {
   resolveProfileAccess,
   getContentOwnerAccess,
+  getAccessibleAuthorIds,
 } from '../../user/services/user.profile.service.js';
 import { queueMentionDiffNotifications } from '../../notification/notification.mention.service.js';
 
@@ -78,23 +80,45 @@ export const getShortById = async (
   return toResponse(short);
 };
 
-export const getPublicFeed = async (cursor: string | null, limit: number) => {
+const filterByAuthorAccess = async (
+  docs: IShortDocument[],
+  viewerId: string | undefined
+): Promise<IShortDocument[]> => {
+  const accessibleAuthorIds = await getAccessibleAuthorIds(
+    docs.map((doc) => getOwnerId(doc.userId)),
+    viewerId
+  );
+  return docs.filter((doc) => accessibleAuthorIds.has(getOwnerId(doc.userId)));
+};
+
+export const getPublicFeed = async (
+  cursor: string | null,
+  limit: number,
+  viewerId?: string
+) => {
   const result = await shortRepository.findPublicFeed(cursor, limit);
-  return { ...result, data: result.data.map(toResponseFromLean) };
+  const visible = await filterByAuthorAccess(result.data, viewerId);
+  return { ...result, data: visible.map(toResponseFromLean) };
 };
 
 export const searchPublic = async (
   q: string,
   cursor: string | null,
-  limit: number
+  limit: number,
+  viewerId?: string
 ) => {
   const result = await shortRepository.searchPublic(q, cursor, limit);
-  return { ...result, data: result.data.map(toResponseFromLean) };
+  const visible = await filterByAuthorAccess(result.data, viewerId);
+  return { ...result, data: visible.map(toResponseFromLean) };
 };
 
-export const findByIds = async (ids: string[]): Promise<IShortResponse[]> => {
+export const findByIds = async (
+  ids: string[],
+  viewerId?: string
+): Promise<IShortResponse[]> => {
   const docs = await shortRepository.findByIds(ids);
-  return docs.map(toResponse);
+  const visible = await filterByAuthorAccess(docs, viewerId);
+  return visible.map(toResponse);
 };
 
 export const getRelatedShorts = async (

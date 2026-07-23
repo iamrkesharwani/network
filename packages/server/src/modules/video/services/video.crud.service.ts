@@ -5,6 +5,7 @@ import type {
   VideoCategory,
 } from '@network/shared';
 import * as videoRepository from '../video.repository.js';
+import type { IVideoDocument } from '../video.model.js';
 import { logger } from '../../../core/utils/logger.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getOwnerId } from '../../../core/utils/getOwnerId.js';
@@ -15,6 +16,7 @@ import { recordViewIncrement } from '../../creator/services/creator.views.servic
 import {
   resolveProfileAccess,
   getContentOwnerAccess,
+  getAccessibleAuthorIds,
 } from '../../user/services/user.profile.service.js';
 import { queueMentionDiffNotifications } from '../../notification/notification.mention.service.js';
 
@@ -79,23 +81,45 @@ export const getVideoById = async (
   return toResponse(video);
 };
 
-export const getPublicFeed = async (cursor: string | null, limit: number) => {
+const filterByAuthorAccess = async (
+  docs: IVideoDocument[],
+  viewerId: string | undefined
+): Promise<IVideoDocument[]> => {
+  const accessibleAuthorIds = await getAccessibleAuthorIds(
+    docs.map((doc) => getOwnerId(doc.userId)),
+    viewerId
+  );
+  return docs.filter((doc) => accessibleAuthorIds.has(getOwnerId(doc.userId)));
+};
+
+export const getPublicFeed = async (
+  cursor: string | null,
+  limit: number,
+  viewerId?: string
+) => {
   const result = await videoRepository.findPublicFeed(cursor, limit);
-  return { ...result, data: result.data.map(toResponseFromLean) };
+  const visible = await filterByAuthorAccess(result.data, viewerId);
+  return { ...result, data: visible.map(toResponseFromLean) };
 };
 
 export const searchPublic = async (
   q: string,
   cursor: string | null,
-  limit: number
+  limit: number,
+  viewerId?: string
 ) => {
   const result = await videoRepository.searchPublic(q, cursor, limit);
-  return { ...result, data: result.data.map(toResponseFromLean) };
+  const visible = await filterByAuthorAccess(result.data, viewerId);
+  return { ...result, data: visible.map(toResponseFromLean) };
 };
 
-export const findByIds = async (ids: string[]): Promise<IVideoResponse[]> => {
+export const findByIds = async (
+  ids: string[],
+  viewerId?: string
+): Promise<IVideoResponse[]> => {
   const docs = await videoRepository.findByIds(ids);
-  return docs.map(toResponse);
+  const visible = await filterByAuthorAccess(docs, viewerId);
+  return visible.map(toResponse);
 };
 
 export const getRelatedVideos = async (

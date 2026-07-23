@@ -11,7 +11,8 @@ export const getFeed = asyncHandler(async (req: Request, res: Response) => {
   const { videoCursor, shortCursor, postCursor, limit } = getFeedQuery(req);
   const result = await getUnifiedFeed(
     { videoCursor, shortCursor, postCursor },
-    limit
+    limit,
+    req.user?.id
   );
 
   res.status(200).json(new ApiResponse(result, 'Feed fetched successfully'));

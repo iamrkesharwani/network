@@ -28,7 +28,8 @@ const computeQuota = (limit: number, ratio: number, minQuota: number): number =>
 export const composeMixedBatch = async (
   cursors: MixCursors,
   limit: number,
-  source: MixSource
+  source: MixSource,
+  viewerId?: string
 ): Promise<IMixedFeedBatch> => {
   const videoQuota = computeQuota(
     limit,
@@ -52,18 +53,18 @@ export const composeMixedBatch = async (
       throw new ApiError(400, 'BAD_REQUEST', 'Search query cannot be empty.');
 
     const [video, short, post] = await Promise.all([
-      searchPublicVideos(q, cursors.videoCursor ?? null, videoQuota),
-      searchPublicShorts(q, cursors.shortCursor ?? null, shortQuota),
-      searchPublicPosts(q, cursors.postCursor ?? null, postQuota),
+      searchPublicVideos(q, cursors.videoCursor ?? null, videoQuota, viewerId),
+      searchPublicShorts(q, cursors.shortCursor ?? null, shortQuota, viewerId),
+      searchPublicPosts(q, cursors.postCursor ?? null, postQuota, viewerId),
     ]);
 
     return { video, short, post };
   }
 
   const [video, short, post] = await Promise.all([
-    getGlobalVideoFeed(cursors.videoCursor ?? null, videoQuota),
-    getGlobalShortFeed(cursors.shortCursor ?? null, shortQuota),
-    getGlobalPostFeed(cursors.postCursor ?? null, postQuota),
+    getGlobalVideoFeed(cursors.videoCursor ?? null, videoQuota, viewerId),
+    getGlobalShortFeed(cursors.shortCursor ?? null, shortQuota, viewerId),
+    getGlobalPostFeed(cursors.postCursor ?? null, postQuota, viewerId),
   ]);
 
   return { video, short, post };

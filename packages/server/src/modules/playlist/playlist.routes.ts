@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { validate } from '../../core/middleware/validate.middleware.js';
-import { requireAuth } from '../../core/middleware/auth.middleware.js';
+import { requireAuth, optionalAuth } from '../../core/middleware/auth.middleware.js';
 import {
   playlistLimiter,
   uploadLimiter,
@@ -46,12 +46,14 @@ router.get(
 
 router.get(
   '/user/:username',
+  optionalAuth,
   validate({ params: usernameParamSchema, query: playlistFeedQuerySchema }),
   playlistController.getByUsername
 );
 
 router.get(
   '/:playlistId',
+  optionalAuth,
   validate({ params: playlistIdParamSchema }),
   playlistController.getOne
 );

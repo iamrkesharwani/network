@@ -85,6 +85,41 @@ export const resolveProfileAccess = async (
   };
 };
 
+export const getAccessibleAuthorIds = async (
+  authorIds: string[],
+  viewerId: string | undefined
+): Promise<Set<string>> => {
+  const uniqueIds = Array.from(new Set(authorIds));
+  if (uniqueIds.length === 0) return new Set();
+
+  const authors = await userRepository.findByIds(uniqueIds);
+  const isPrivateById = new Map(
+    authors.map((author) => [author._id.toString(), author.isPrivate])
+  );
+
+  if (!viewerId) {
+    return new Set(uniqueIds.filter((id) => !isPrivateById.get(id)));
+  }
+
+  const otherIds = uniqueIds.filter((id) => id !== viewerId);
+  const [blockedSet, followStates] = await Promise.all([
+    blockService.getBlockedUserIds(viewerId),
+    followCrudService.getFollowStatesBatch(viewerId, otherIds),
+  ]);
+
+  const accessible = new Set<string>();
+  for (const id of uniqueIds) {
+    if (id === viewerId) {
+      accessible.add(id);
+      continue;
+    }
+    if (blockedSet.has(id)) continue;
+    if (isPrivateById.get(id) && followStates.get(id) !== 'accepted') continue;
+    accessible.add(id);
+  }
+  return accessible;
+};
+
 export const getContentOwnerAccess = async (
   ownerId: string,
   viewerId: string | undefined
