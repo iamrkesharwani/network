@@ -5,7 +5,6 @@ import shortReducer from '../../features/short/shortSlice';
 import uploadReducer from '../../features/upload/uploadSlice';
 import playerReducer from '../../features/player/store/playerSlice';
 import preferencesReducer from '../../features/settings/preferencesSlice';
-import messageKeyReducer from '../../features/message/messageKeySlice';
 import { authApi } from '../../features/auth/authApi';
 import { videoApi } from '../../features/video/videoApi';
 import { shortApi } from '../../features/short/shortApi';
@@ -28,7 +27,6 @@ import { commentApi } from '../../features/engagement/commentApi';
 import { playlistApi } from '../../features/playlist/playlistApi';
 import { bookmarkApi } from '../../features/engagement/bookmarkApi';
 import { notificationApi } from '../../features/notification/notificationApi';
-import { keyBundleApi } from '../../features/message/keyBundleApi';
 import { conversationApi } from '../../features/message/conversationApi';
 import { messageApi } from '../../features/message/messageApi';
 
@@ -39,7 +37,6 @@ const rootReducer = combineReducers({
   upload: uploadReducer,
   player: playerReducer,
   preferences: preferencesReducer,
-  messageKey: messageKeyReducer,
   [authApi.reducerPath]: authApi.reducer,
   [videoApi.reducerPath]: videoApi.reducer,
   [shortApi.reducerPath]: shortApi.reducer,
@@ -62,7 +59,6 @@ const rootReducer = combineReducers({
   [playlistApi.reducerPath]: playlistApi.reducer,
   [bookmarkApi.reducerPath]: bookmarkApi.reducer,
   [notificationApi.reducerPath]: notificationApi.reducer,
-  [keyBundleApi.reducerPath]: keyBundleApi.reducer,
   [conversationApi.reducerPath]: conversationApi.reducer,
   [messageApi.reducerPath]: messageApi.reducer,
 });

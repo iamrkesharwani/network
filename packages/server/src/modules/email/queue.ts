@@ -7,7 +7,6 @@ import type {
   GenericEmailJob,
   OtpEmailJob,
   PasswordResetEmailJob,
-  KeyRecoveryEmailJob,
 } from './types.js';
 
 const emailQueue = new Queue<EmailJobData>(EMAIL_QUEUE_NAME, {
@@ -40,10 +39,6 @@ export const queueOtpEmail = (
 export const queuePasswordResetEmail = (
   payload: Omit<PasswordResetEmailJob, 'type'>
 ): Promise<void> => enqueue({ type: 'password-reset', ...payload });
-
-export const queueKeyRecoveryEmail = (
-  payload: Omit<KeyRecoveryEmailJob, 'type'>
-): Promise<void> => enqueue({ type: 'key-recovery', ...payload });
 
 export const queueGenericEmail = (
   payload: Omit<GenericEmailJob, 'type'>

@@ -17,7 +17,6 @@ import * as conversationRepository from '../repository/conversation.repository.j
 import * as messageColdOutreachRepository from '../repository/messageColdOutreach.repository.js';
 import * as userRepository from '../../user/user.repository.js';
 import * as creatorRepository from '../../creator/creator.repository.js';
-import * as keyBundleService from './keyBundle.service.js';
 import * as preferencesService from '../../preferences/preferences.service.js';
 import * as followService from '../../follow/services/follow.crud.service.js';
 import * as blockService from '../../block/services/block.service.js';
@@ -177,8 +176,6 @@ export const createDirectConversation = async (
     await assertColdOutreachAllowed(userId);
   }
 
-  await keyBundleService.assertAllHaveKeyBundle([userId, participantId]);
-
   const doc = await conversationRepository.findOrCreateDirect(
     userId,
     participantId
@@ -199,10 +196,6 @@ export const createGroupConversation = async (
 ): Promise<IConversationSummary> => {
   await assertActiveUsersExist(data.participantIds);
   await assertCanAddToGroup(userId, data.participantIds);
-  await keyBundleService.assertAllHaveKeyBundle([
-    userId,
-    ...data.participantIds,
-  ]);
 
   const doc = await conversationRepository.createGroup(
     userId,
@@ -292,7 +285,6 @@ export const addParticipants = async (
 
   await assertActiveUsersExist(newIds);
   await assertCanAddToGroup(userId, newIds);
-  await keyBundleService.assertAllHaveKeyBundle(newIds);
 
   const updated = await conversationRepository.addParticipants(
     conversationId,

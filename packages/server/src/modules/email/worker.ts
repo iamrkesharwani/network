@@ -42,20 +42,6 @@ const buildHtml = async (
     };
   }
 
-  if (data.type === 'key-recovery') {
-    const html = await getHtmlTemplate('key-recovery', {
-      SITE_NAME,
-      USER_NAME: data.userName,
-      RECOVERY_TOKEN: data.recoveryToken,
-      CURRENT_YEAR: year,
-      FIRST_LETTER: firstLetter,
-    });
-    return {
-      subject: `Your ${SITE_NAME} messaging recovery code`,
-      html,
-    };
-  }
-
   return { subject: data.subject, html: data.html };
 };
 

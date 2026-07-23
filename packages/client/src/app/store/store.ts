@@ -11,7 +11,6 @@ import { preferencesApi } from '../../features/settings/preferencesApi';
 import { settingsApi } from '../../features/settings/settingsApi';
 import { accountApi } from '../../features/settings/accountApi';
 import { preferencesSyncMiddleware } from '../../features/settings/preferencesSyncMiddleware';
-import { messageKeyLogoutMiddleware } from '../../features/message/messageKeyLogoutMiddleware';
 import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
@@ -24,7 +23,6 @@ import { commentApi } from '../../features/engagement/commentApi';
 import { playlistApi } from '../../features/playlist/playlistApi';
 import { bookmarkApi } from '../../features/engagement/bookmarkApi';
 import { notificationApi } from '../../features/notification/notificationApi';
-import { keyBundleApi } from '../../features/message/keyBundleApi';
 import { conversationApi } from '../../features/message/conversationApi';
 import { messageApi } from '../../features/message/messageApi';
 
@@ -33,12 +31,7 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
     reducer: rootReducer,
     preloadedState,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-        serializableCheck: {
-          ignoredActions: ['messageKey/setPrivateKey'],
-          ignoredPaths: ['messageKey.privateKey'],
-        },
-      }).concat(
+      getDefaultMiddleware().concat(
         authApi.middleware,
         videoApi.middleware,
         shortApi.middleware,
@@ -61,11 +54,9 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
         playlistApi.middleware,
         bookmarkApi.middleware,
         notificationApi.middleware,
-        keyBundleApi.middleware,
         conversationApi.middleware,
         messageApi.middleware,
-        preferencesSyncMiddleware,
-        messageKeyLogoutMiddleware
+        preferencesSyncMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',
   });

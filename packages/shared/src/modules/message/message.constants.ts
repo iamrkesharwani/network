@@ -1,13 +1,8 @@
 import {
-  THIRTY_MINUTES_SECONDS,
   ONE_HOUR_SECONDS,
-  SIX_HOURS_SECONDS,
   FIFTEEN_MINUTES_MS,
-  SEVENTY_TWO_HOURS_MS,
-  SEVEN_DAYS_MS,
   FIVE_MINUTES_SECONDS,
 } from '../general/constants/time.constants.js';
-import { OTP_MAX_ATTEMPTS } from '../auth/auth.constants.js';
 
 export const CONVERSATION_TYPES = ['direct', 'group'] as const;
 
@@ -27,26 +22,6 @@ export const MESSAGE_IV_MAX_LENGTH = 64;
 
 export const MESSAGE_DEK_CACHE_TTL_SECONDS = FIVE_MINUTES_SECONDS;
 export const MESSAGE_DEK_CACHE_KEY_PREFIX = 'message:dek:';
-
-export const KEY_BUNDLE_PBKDF2_MIN_ITERATIONS = 600000;
-export const KEY_BUNDLE_PUBLIC_KEY_MAX_LENGTH = 1024;
-export const KEY_BUNDLE_WRAPPED_PRIVATE_KEY_MAX_LENGTH = 8192;
-export const KEY_BUNDLE_WRAP_IV_MAX_LENGTH = 64;
-export const KEY_BUNDLE_WRAP_SALT_MAX_LENGTH = 64;
-
-export const KEY_OTP_VERIFIED_TTL_SECONDS = THIRTY_MINUTES_SECONDS;
-
-export const KEY_BUNDLE_RECOVERY_TOKEN_BYTES = 32;
-export const KEY_BUNDLE_RECOVERY_TOKEN_MAX_LENGTH = 128;
-export const KEY_RECOVERY_MAX_ATTEMPTS = OTP_MAX_ATTEMPTS;
-export const KEY_RECOVERY_ATTEMPTS_WINDOW_SECONDS = ONE_HOUR_SECONDS;
-
-export const MESSAGE_PIN_LENGTHS = [4, 6] as const;
-export const MESSAGE_PIN_NUDGE_THROTTLE_MS = SEVENTY_TWO_HOURS_MS;
-export const MESSAGE_PIN_REPROMPT_MS = SEVEN_DAYS_MS;
-
-export const MESSAGE_KEY_ROTATION_INTERVAL_MS = 90 * 24 * 60 * 60 * 1000;
-export const MESSAGE_KEY_ROTATION_NUDGE_THROTTLE_MS = SEVEN_DAYS_MS;
 
 export const MESSAGE_DELETE_SCOPES = ['me', 'everyone'] as const;
 
@@ -110,7 +85,6 @@ export const ALLOWED_MESSAGE_VOICE_MIME_TYPES = [
   'audio/mp4',
   'audio/mpeg',
 ] as const;
-export const MESSAGE_ATTACHMENT_ACCESS_URL_TTL_SECONDS = SIX_HOURS_SECONDS;
 
 export const MESSAGE_ATTACHMENT_REAPER_QUEUE_NAME = 'message-attachment-reaper';
 export const MESSAGE_ATTACHMENT_REAPER_JOB_ID = 'message-attachment-reaper';

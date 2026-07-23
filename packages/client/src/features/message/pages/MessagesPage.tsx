@@ -1,34 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
-import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
 import { cn } from '../../../shared/utils/cn';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import Button from '../../../shared/ui/primitives/Button';
-import {
-  getCachedPrivateKey,
-  clearCachedPrivateKey,
-  getCachedPinWrappedKey,
-  clearCachedPinWrappedKey,
-} from '../localKeyStore';
-import {
-  getPinConfig,
-  isPinConfigured,
-  clearPinConfig,
-  shouldShowPinNudge,
-  isPinReentryDue,
-} from '../pinLockStore';
-import { setPrivateKey } from '../messageKeySlice';
-import {
-  getLastRotatedAt,
-  recordKeyRotation,
-  dismissKeyRotationNudge,
-  shouldShowKeyRotationNudge,
-} from '../keyRotationStore';
-import { getApiErrorCode, getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
+import { getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
 import { buildConversationPath } from '../utils/buildMessagesPath';
 import {
   useGetConversationsQuery,
@@ -37,15 +16,7 @@ import {
   CONVERSATION_ARCHIVED_LIST_ARGS,
 } from '../conversationApi';
 import { useCreateDirectConversationMutation } from '../conversationApi';
-import { useGetMyKeyBundleQuery } from '../keyBundleApi';
 import { useSearchCreatorsQuery } from '../../search/searchApi';
-import KeySetupModal from '../components/KeySetupModal';
-import KeyOtpModal from '../components/KeyOtpModal';
-import KeyUnlockModal from '../components/KeyUnlockModal';
-import KeyResetModal from '../components/KeyResetModal';
-import PinEntryModal from '../components/PinEntryModal';
-import PinSetupModal from '../components/PinSetupModal';
-import KeyRotationModal from '../components/KeyRotationModal';
 import ConversationList from '../components/ConversationList';
 import ArchivedConversationList from '../components/ArchivedConversationList';
 import MessageThread from '../components/MessageThread';
@@ -56,21 +27,10 @@ import AddParticipantsModal from '../components/AddParticipantsModal';
 const MessagesPage = () => {
   usePageTitle('Messages');
   const user = useAppSelector((state) => state.auth.user);
-  const privateKey = useAppSelector((state) => state.messageKey.privateKey);
-  const dispatch = useAppDispatch();
   const socketRef = useSocketContext();
   const navigate = useNavigate();
   const { conversationId } = useParams<{ conversationId: string }>();
   const activeConversationId = conversationId ?? null;
-
-  const [isCacheChecked, setIsCacheChecked] = useState(false);
-  const [isSetupDismissed, setIsSetupDismissed] = useState(false);
-  const [isUnlockDismissed, setIsUnlockDismissed] = useState(false);
-  const [isResetOpen, setIsResetOpen] = useState(false);
-  const [hasPendingPinCache, setHasPendingPinCache] = useState(false);
-  const [isPinEntryOpen, setIsPinEntryOpen] = useState(false);
-  const [isPinSetupOpen, setIsPinSetupOpen] = useState(false);
-  const [isKeyRotationNudgeOpen, setIsKeyRotationNudgeOpen] = useState(false);
 
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [newChatQuery, setNewChatQuery] = useState('');
@@ -79,103 +39,6 @@ const MessagesPage = () => {
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
   const [isAddParticipantsOpen, setIsAddParticipantsOpen] = useState(false);
   const [isArchivedViewOpen, setIsArchivedViewOpen] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-
-    (async () => {
-      const pinConfig = getPinConfig(user.id);
-      if (pinConfig) {
-        if (!isPinReentryDue(user.id)) {
-          const rawKey = await getCachedPrivateKey(user.id);
-          if (cancelled) return;
-          if (rawKey) {
-            dispatch(setPrivateKey(rawKey));
-            setIsCacheChecked(true);
-            return;
-          }
-        }
-
-        const wrapped = await getCachedPinWrappedKey(user.id);
-        if (cancelled) return;
-        if (wrapped) {
-          setHasPendingPinCache(true);
-          setIsPinEntryOpen(true);
-          setIsCacheChecked(true);
-          return;
-        }
-        clearPinConfig(user.id);
-      }
-
-      const key = await getCachedPrivateKey(user.id);
-      if (cancelled) return;
-      if (key) dispatch(setPrivateKey(key));
-      setIsCacheChecked(true);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user, dispatch]);
-
-  const {
-    data: keyBundleData,
-    error: keyBundleError,
-    isError: hasKeyBundleError,
-    isSuccess: hasKeyBundleSuccess,
-    refetch: refetchKeyBundle,
-  } = useGetMyKeyBundleQuery(undefined, {
-    skip:
-      !user || !isCacheChecked || Boolean(privateKey) || hasPendingPinCache,
-  });
-
-  useEffect(() => {
-    if (!user || !privateKey) return;
-    if (!isPinConfigured(user.id) && shouldShowPinNudge(user.id)) {
-      setIsPinSetupOpen(true);
-    }
-  }, [user, privateKey]);
-
-  useEffect(() => {
-    if (!user || !privateKey) return;
-    if (isPinConfigured(user.id) && isPinReentryDue(user.id)) {
-      dispatch(setPrivateKey(null));
-      setHasPendingPinCache(true);
-      setIsPinEntryOpen(true);
-    }
-  }, [user, privateKey, dispatch]);
-
-  useEffect(() => {
-    if (!user || !privateKey) return;
-    if (getLastRotatedAt(user.id) === null) {
-      // No baseline yet (new key, or this device predates the rotation
-      // feature) - start the clock silently rather than nudging immediately.
-      recordKeyRotation(user.id);
-      return;
-    }
-    if (shouldShowKeyRotationNudge(user.id)) {
-      setIsKeyRotationNudgeOpen(true);
-    }
-  }, [user, privateKey]);
-
-  const handleForgotPin = () => {
-    if (!user) return;
-    clearPinConfig(user.id);
-    void clearCachedPinWrappedKey(user.id);
-    void clearCachedPrivateKey(user.id);
-    setIsPinEntryOpen(false);
-    setHasPendingPinCache(false);
-  };
-
-  const keyBundleErrorCode = hasKeyBundleError
-    ? getApiErrorCode(keyBundleError)
-    : undefined;
-  const needsSetup =
-    !privateKey && keyBundleErrorCode === 'NOT_FOUND' && !isSetupDismissed;
-  const needsOtp =
-    !privateKey && keyBundleErrorCode === 'OTP_VERIFICATION_REQUIRED';
-  const needsUnlock = !privateKey && hasKeyBundleSuccess && !isUnlockDismissed;
 
   const { data: conversationsData, isLoading: isLoadingConversations } =
     useGetConversationsQuery(CONVERSATION_LIST_ARGS);
@@ -344,64 +207,6 @@ const MessagesPage = () => {
         )}
       </div>
 
-      <KeySetupModal
-        isOpen={needsSetup}
-        onClose={() => setIsSetupDismissed(true)}
-        userId={user.id}
-        hasPassword={user.hasPassword}
-        onKeyReady={(key) => dispatch(setPrivateKey(key))}
-      />
-      <KeyOtpModal isOpen={needsOtp} onVerified={() => refetchKeyBundle()} />
-      <KeyUnlockModal
-        isOpen={needsUnlock}
-        onClose={() => setIsUnlockDismissed(true)}
-        userId={user.id}
-        hasPassword={user.hasPassword}
-        keyBundle={keyBundleData?.data}
-        onKeyReady={(key) => dispatch(setPrivateKey(key))}
-        onReset={() => setIsResetOpen(true)}
-      />
-      <KeyResetModal
-        isOpen={isResetOpen}
-        onClose={() => setIsResetOpen(false)}
-        userId={user.id}
-        hasPassword={user.hasPassword}
-        onKeyReady={(key) => dispatch(setPrivateKey(key))}
-      />
-      <PinEntryModal
-        isOpen={isPinEntryOpen}
-        userId={user.id}
-        pinLength={getPinConfig(user.id)?.length ?? 6}
-        onUnlocked={(key) => {
-          dispatch(setPrivateKey(key));
-          setHasPendingPinCache(false);
-          setIsPinEntryOpen(false);
-        }}
-        onForgotPin={handleForgotPin}
-      />
-      <PinSetupModal
-        isOpen={isPinSetupOpen}
-        userId={user.id}
-        privateKey={privateKey}
-        onClose={() => setIsPinSetupOpen(false)}
-        onConfigured={() => setIsPinSetupOpen(false)}
-      />
-      {privateKey && (
-        <KeyRotationModal
-          isOpen={isKeyRotationNudgeOpen}
-          onClose={() => {
-            dismissKeyRotationNudge(user.id);
-            setIsKeyRotationNudgeOpen(false);
-          }}
-          userId={user.id}
-          hasPassword={user.hasPassword}
-          currentPrivateKey={privateKey}
-          onKeyReady={(key) => {
-            dispatch(setPrivateKey(key));
-            setIsKeyRotationNudgeOpen(false);
-          }}
-        />
-      )}
       <CreateGroupModal
         isOpen={isCreateGroupOpen}
         onClose={() => setIsCreateGroupOpen(false)}

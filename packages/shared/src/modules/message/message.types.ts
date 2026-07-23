@@ -1,13 +1,6 @@
 import type { z } from 'zod';
 import type {
   conversationTypeSchema,
-  keyBundlePublicKeysQuerySchema,
-  keyBundlePublishSchema,
-  keyBundleUserIdParamSchema,
-  keyOtpConfirmSchema,
-  keyRecoveryConfirmSchema,
-  keyRotateSchema,
-  keyHistoryRewrapSchema,
   directConversationCreateSchema,
   groupConversationCreateSchema,
   groupUpdateSchema,
@@ -30,7 +23,6 @@ import type {
   CONVERSATION_TYPES,
   MESSAGE_DELETE_SCOPES,
   MESSAGE_MUTE_DURATIONS,
-  MESSAGE_PIN_LENGTHS,
   MESSAGE_DISAPPEARING_TTL_OPTIONS,
   MESSAGE_ATTACHMENT_TYPES,
 } from './message.constants.js';
@@ -38,21 +30,11 @@ import type {
 export type ConversationType = (typeof CONVERSATION_TYPES)[number];
 export type MessageDeleteScope = (typeof MESSAGE_DELETE_SCOPES)[number];
 export type ConversationMuteDuration = (typeof MESSAGE_MUTE_DURATIONS)[number];
-export type MessagePinLength = (typeof MESSAGE_PIN_LENGTHS)[number];
 export type ConversationDisappearingTtl =
   (typeof MESSAGE_DISAPPEARING_TTL_OPTIONS)[number];
 export type MessageAttachmentType = (typeof MESSAGE_ATTACHMENT_TYPES)[number];
 
 export type ConversationTypeInput = z.infer<typeof conversationTypeSchema>;
-export type KeyBundlePublicKeysQuery = z.infer<
-  typeof keyBundlePublicKeysQuerySchema
->;
-export type KeyBundlePublishInput = z.infer<typeof keyBundlePublishSchema>;
-export type KeyRotateInput = z.infer<typeof keyRotateSchema>;
-export type KeyHistoryRewrapInput = z.infer<typeof keyHistoryRewrapSchema>;
-export type KeyBundleUserIdParam = z.infer<typeof keyBundleUserIdParamSchema>;
-export type KeyOtpConfirmInput = z.infer<typeof keyOtpConfirmSchema>;
-export type KeyRecoveryConfirmInput = z.infer<typeof keyRecoveryConfirmSchema>;
 export type DirectConversationCreateInput = z.infer<
   typeof directConversationCreateSchema
 >;
@@ -80,45 +62,6 @@ export type MessageListQuery = z.infer<typeof messageListQuerySchema>;
 export type MessageAttachmentUploadInput = z.infer<
   typeof messageAttachmentUploadSchema
 >;
-
-export interface IKeyBundlePublicResponse {
-  userId: string;
-  publicKey: string;
-  keyVersion: number;
-}
-
-export interface IKeyBundleOwnResponse {
-  publicKey: string;
-  wrappedPrivateKey: string;
-  wrapIv: string;
-  wrapSalt: string;
-  pbkdf2Iterations: number;
-  keyVersion: number;
-}
-
-export interface IKeyBundleRecoveryResponse {
-  recoveryWrappedPrivateKey: string;
-  recoveryWrapIv: string;
-  recoveryWrapSalt: string;
-  recoveryPbkdf2Iterations: number;
-}
-
-/**
- * A retired keypair from a past rotation. Wrapped under the same
- * account-password/passphrase mechanism as the active key (kept in sync by
- * the password-change re-wrap flow) - deliberately has no separate
- * recovery-token wrap of its own, unlike the active bundle. A lost device
- * that never unlocked messaging before the loss won't recover history
- * predating that gap; this is a documented scope limit, not an oversight.
- */
-export interface IKeyBundleHistoryEntryResponse {
-  keyVersion: number;
-  wrappedPrivateKey: string;
-  wrapIv: string;
-  wrapSalt: string;
-  pbkdf2Iterations: number;
-  retiredAt: string;
-}
 
 export interface IParticipantSummary {
   id: string;

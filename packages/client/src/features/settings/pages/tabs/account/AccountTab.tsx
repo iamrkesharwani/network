@@ -9,7 +9,6 @@ import DeleteAccountDialog from '../../../components/account/DeleteAccountDialog
 import SignOutOtherDevicesDialog from '../../../components/account/SignOutOtherDevicesDialog';
 import ChangePasswordSection from './ChangePasswordSection';
 import AddPasswordSection from './AddPasswordSection';
-import KeyResetModal from '../../../../message/components/KeyResetModal';
 import { useLogoutMutation } from '../../../../auth/authApi';
 import { clearCredentials } from '../../../../auth/authSlice';
 import { setAccessToken } from '../../../../../shared/lib/axiosInstance';
@@ -21,7 +20,6 @@ const AccountTab = () => {
   const [isDeactivateOpen, setIsDeactivateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isSignOutOthersOpen, setIsSignOutOthersOpen] = useState(false);
-  const [isKeyResetOpen, setIsKeyResetOpen] = useState(false);
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   const handleLogout = async () => {
@@ -92,27 +90,6 @@ const AccountTab = () => {
         </div>
       </div>
 
-      <div className="mb-8 border-b border-border pb-8">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-          <div>
-            <h3 className="mb-2 text-sm font-semibold text-text-primary">
-              Reset messaging key
-            </h3>
-            <p className="text-sm text-text-secondary sm:max-w-md">
-              Set a new messaging passphrase. You'll permanently lose access
-              to your previous encrypted conversations.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => setIsKeyResetOpen(true)}
-            className="w-full shrink-0 sm:w-auto"
-          >
-            Reset messaging key
-          </Button>
-        </div>
-      </div>
-
       <div>
         <h3 className="mb-4 text-sm font-semibold text-error">Danger zone</h3>
 
@@ -156,12 +133,6 @@ const AccountTab = () => {
       <SignOutOtherDevicesDialog
         isOpen={isSignOutOthersOpen}
         onClose={() => setIsSignOutOthersOpen(false)}
-      />
-      <KeyResetModal
-        isOpen={isKeyResetOpen}
-        onClose={() => setIsKeyResetOpen(false)}
-        userId={user.id}
-        hasPassword={user.hasPassword}
       />
     </div>
   );
