@@ -10,7 +10,9 @@ import {
   type MessageAttachmentType,
 } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
+import Button from '../../../shared/ui/primitives/Button';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
+import { getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
 import type { useSocket } from '../../../shared/hooks/useSocket';
 import {
   useGetMessagesQuery,
@@ -76,7 +78,9 @@ const getParticipantLabel = (
     conversation.type === 'direct'
       ? [conversation.otherParticipant]
       : conversation.participants;
-  return participants.find((participant) => participant.id === userId)?.name ?? '';
+  return (
+    participants.find((participant) => participant.id === userId)?.name ?? ''
+  );
 };
 
 const MESSAGE_LIST_ARGS = { limit: 30 };
@@ -98,7 +102,7 @@ const MessageThread = ({
   const [replyTo, setReplyTo] = useState<IMessageResponse | null>(null);
   const [replyToPreview, setReplyToPreview] = useState<string | null>(null);
   const { emitTyping } = useConversationRoom(socketRef, conversation.id);
-  const { data, isLoading } = useGetMessagesQuery({
+  const { data, isLoading, isError, error, refetch } = useGetMessagesQuery({
     conversationId: conversation.id,
     ...MESSAGE_LIST_ARGS,
   });
@@ -141,9 +145,15 @@ const MessageThread = ({
   const participantNameById = useMemo(() => {
     const entries: [string, string][] =
       conversation.type === 'direct'
-        ? [[conversation.otherParticipant.id, conversation.otherParticipant.name]]
+        ? [
+            [
+              conversation.otherParticipant.id,
+              conversation.otherParticipant.name,
+            ],
+          ]
         : conversation.participants.map(
-            (participant) => [participant.id, participant.name] as [string, string]
+            (participant) =>
+              [participant.id, participant.name] as [string, string]
           );
     return Object.fromEntries(entries);
   }, [conversation]);
@@ -382,6 +392,13 @@ const MessageThread = ({
 
       {isLoading ? (
         <MessageThreadSkeleton />
+      ) : isError ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 px-2 py-4 text-center text-sm text-text-muted">
+          <p>{getApiErrorMessage(error, "Couldn't load this conversation.")}</p>
+          <Button size="sm" variant="outline" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </div>
       ) : (
         <div className="flex-1 overflow-y-auto py-3">
           {orderedMessages.map((message, index) => (
