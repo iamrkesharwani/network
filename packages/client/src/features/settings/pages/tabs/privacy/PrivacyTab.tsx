@@ -1,5 +1,7 @@
 import { PRIVACY_MESSAGE_AUDIENCES, PRIVACY_GROUP_ADD_AUDIENCES } from '@network/shared';
+import { useAppSelector } from '../../../../../shared/hooks/useAppSelector';
 import { usePreference } from '../../../hooks/usePreference';
+import { usePatchAccountPrivacyMutation } from '../../../settingsApi';
 import PreferenceOptionCard from '../../../components/preferences/PreferenceOptionCard';
 import PreferenceSwitch from '../../../components/preferences/PreferenceSwitch';
 import PreferenceSelect from '../../../components/preferences/PreferenceSelect';
@@ -25,12 +27,38 @@ const GROUP_ADD_AUDIENCE_OPTIONS = PRIVACY_GROUP_ADD_AUDIENCES.map((value) => ({
 
 const PrivacyTab = () => {
   const [privacy, setPrivacy] = usePreference('privacy');
+  const user = useAppSelector((state) => state.auth.user);
+  const [patchAccountPrivacy, { isLoading: isUpdatingAccountPrivacy }] =
+    usePatchAccountPrivacyMutation();
 
   return (
     <div>
       <h2 className="mb-6 font-display text-2xl font-bold text-text-primary sm:text-3xl">
         Privacy
       </h2>
+
+      <h3 className="mb-2 text-sm font-semibold text-text-primary">
+        Account visibility
+      </h3>
+      <div className="mb-8 grid grid-cols-1 gap-3">
+        <PreferenceOptionCard
+          label="Private account"
+          description="Only approved followers can see your posts, videos, and shorts. Your name, photo, and bio stay visible to everyone."
+        >
+          <PreferenceSwitch
+            label="Private account"
+            checked={user?.isPrivate ?? false}
+            onChange={(checked) => {
+              void patchAccountPrivacy({ isPrivate: checked });
+            }}
+          />
+        </PreferenceOptionCard>
+        {isUpdatingAccountPrivacy && (
+          <span className="sr-only" role="status">
+            Updating account visibility…
+          </span>
+        )}
+      </div>
 
       <h3 className="mb-2 text-sm font-semibold text-text-primary">Messaging</h3>
       <div className="mb-8 grid grid-cols-1 gap-3">

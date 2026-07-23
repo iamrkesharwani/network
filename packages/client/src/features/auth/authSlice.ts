@@ -79,6 +79,7 @@ const authSlice = createSlice({
           settingsApi.endpoints.uploadBanner.matchFulfilled,
           settingsApi.endpoints.selectBannerPreset.matchFulfilled,
           settingsApi.endpoints.captureLocation.matchFulfilled,
+          settingsApi.endpoints.patchAccountPrivacy.matchFulfilled,
           accountApi.endpoints.reactivateAccount.matchFulfilled,
           authApi.endpoints.confirmEmailChange.matchFulfilled
         ),

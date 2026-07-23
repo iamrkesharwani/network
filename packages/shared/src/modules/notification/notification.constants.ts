@@ -3,6 +3,8 @@ import type { PreferencesNotificationCategory } from '../preferences/preferences
 
 export const NOTIFICATION_TYPES = [
   'follow',
+  'follow_request',
+  'follow_request_accepted',
   'like',
   'comment',
   'comment_reply',
@@ -30,6 +32,8 @@ export const NOTIFICATION_TYPE_CATEGORY_MAP: Record<
   PreferencesNotificationCategory
 > = {
   follow: 'follows',
+  follow_request: 'follows',
+  follow_request_accepted: 'follows',
   like: 'likes',
   comment: 'comments',
   comment_reply: 'comments',

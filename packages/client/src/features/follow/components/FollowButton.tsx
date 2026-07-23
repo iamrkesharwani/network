@@ -1,20 +1,16 @@
 import { useNavigate } from 'react-router-dom';
-import { CLIENT_ROUTES } from '@network/shared';
+import { CLIENT_ROUTES, type FollowState } from '@network/shared';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import Button from '../../../shared/ui/primitives/Button';
 import { useFollowUserMutation, useUnfollowUserMutation } from '../followApi';
 
 export interface FollowButtonProps {
   username: string;
-  isFollowedByViewer: boolean;
+  followState: FollowState;
   className?: string;
 }
 
-const FollowButton = ({
-  username,
-  isFollowedByViewer,
-  className,
-}: FollowButtonProps) => {
+const FollowButton = ({ username, followState, className }: FollowButtonProps) => {
   const navigate = useNavigate();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const [followUser, { isLoading: isFollowing }] = useFollowUserMutation();
@@ -26,22 +22,26 @@ const FollowButton = ({
       return;
     }
 
-    if (isFollowedByViewer) {
-      unfollowUser(username);
-    } else {
+    if (followState === 'none') {
       followUser(username);
+    } else {
+      unfollowUser(username);
     }
   };
 
   return (
     <Button
-      variant={isFollowedByViewer ? 'outline' : 'primary'}
+      variant={followState === 'none' ? 'primary' : 'outline'}
       size="sm"
       isLoading={isFollowing || isUnfollowing}
       onClick={handleClick}
       className={className}
     >
-      {isFollowedByViewer ? 'Following' : 'Follow'}
+      {followState === 'accepted'
+        ? 'Following'
+        : followState === 'pending'
+          ? 'Requested'
+          : 'Follow'}
     </Button>
   );
 };

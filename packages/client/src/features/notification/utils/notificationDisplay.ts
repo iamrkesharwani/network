@@ -8,6 +8,8 @@ import { buildProfilePath } from '../../profile/utils/buildProfilePath';
 
 const SOCIAL_VERB_BY_TYPE: Partial<Record<string, string>> = {
   follow: 'started following you',
+  follow_request: 'requested to follow you',
+  follow_request_accepted: 'accepted your follow request',
   like: 'liked your post',
   comment: 'commented on your post',
   comment_reply: 'replied to your comment',
@@ -64,8 +66,12 @@ const withCommentParams = (
 export const getNotificationPath = (
   item: INotificationListItem
 ): string | null => {
-  if (item.type === 'follow') {
+  if (item.type === 'follow' || item.type === 'follow_request_accepted') {
     return item.actors[0] ? buildProfilePath(item.actors[0].username) : null;
+  }
+
+  if (item.type === 'follow_request') {
+    return CLIENT_ROUTES.FOLLOW_REQUESTS;
   }
 
   if (item.type === 'jury_case_assigned' && item.targetId) {

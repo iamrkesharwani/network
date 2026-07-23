@@ -99,6 +99,10 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       default: '',
     },
+    isPrivate: {
+      type: Boolean,
+      default: false,
+    },
     role: {
       type: String,
       enum: USER_ROLES,

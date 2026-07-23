@@ -36,7 +36,7 @@ const CreatorResultCard = ({ creator }: CreatorResultCardProps) => {
       {!isOwnProfile && (
         <FollowButton
           username={creator.username}
-          isFollowedByViewer={creator.isFollowedByViewer ?? false}
+          followState={creator.followState ?? 'none'}
           className="w-full"
         />
       )}

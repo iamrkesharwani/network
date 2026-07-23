@@ -12,6 +12,7 @@ import {
   contactLinksSchema,
   captureLocationSchema,
   bannerPresetSelectSchema,
+  accountPrivacySchema,
 } from '@network/shared';
 import * as profileController from './controllers/profile.controller.js';
 import * as locationController from './controllers/location.controller.js';
@@ -60,6 +61,13 @@ router.patch(
   requireAuth,
   validate({ body: bannerPresetSelectSchema }),
   profileController.selectBannerPreset
+);
+
+router.patch(
+  '/profile/privacy',
+  requireAuth,
+  validate({ body: accountPrivacySchema }),
+  profileController.patchAccountPrivacy
 );
 
 router.post(

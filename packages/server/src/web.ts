@@ -48,7 +48,10 @@ import { startAccountDeletionWorker } from './modules/account/account.deletion.w
 import { videoDeletionAdapter } from './modules/video/services/video.deletion.service.js';
 import { shortDeletionAdapter } from './modules/short/services/short.deletion.service.js';
 import { postDeletionAdapter } from './modules/post/services/post.deletion.service.js';
-import { followDeletionAdapter } from './modules/follow/follow.deletion.adapter.js';
+import {
+  followDeletionAdapter,
+  followRequestDeletionAdapter,
+} from './modules/follow/follow.deletion.adapter.js';
 import { startNotificationWorker } from './modules/notification/notification.worker.js';
 import { startNotificationReaperWorker } from './modules/notification/notification.reaper.worker.js';
 import { scheduleNotificationReaper } from './modules/notification/notification.reaper.queue.js';
@@ -100,6 +103,7 @@ const startWeb = async () => {
     registerAccountDeletionAdapter(shortDeletionAdapter);
     registerAccountDeletionAdapter(postDeletionAdapter);
     registerAccountDeletionAdapter(followDeletionAdapter);
+    registerAccountDeletionAdapter(followRequestDeletionAdapter);
     startAccountDeletionWorker();
 
     startNotificationWorker();

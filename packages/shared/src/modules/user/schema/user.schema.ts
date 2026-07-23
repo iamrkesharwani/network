@@ -198,6 +198,10 @@ const socialLinkSchema = z.object({
   url: z.url('Enter a valid URL.'),
 });
 
+export const accountPrivacySchema = z.object({
+  isPrivate: z.boolean(),
+});
+
 export const contactLinksSchema = z.object({
   phone: phoneSchema.optional(),
   website: z

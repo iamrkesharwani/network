@@ -11,6 +11,12 @@ import {
   getFollowing,
   removeFollower as removeFollowerService,
 } from './services/follow.crud.service.js';
+import {
+  listIncomingFollowRequests,
+  countIncomingFollowRequests,
+  approveFollowRequest,
+  denyFollowRequest,
+} from './services/followRequest.service.js';
 
 const getListQuery = (req: Request): FollowListQuery =>
   req.query as unknown as FollowListQuery;
@@ -21,9 +27,16 @@ export const followUser = asyncHandler(
       throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
     }
 
-    await follow(req.user.id, req.params['username'] as string);
+    const result = await follow(req.user.id, req.params['username'] as string);
 
-    res.status(200).json(new ApiResponse(null, 'Followed successfully'));
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          result,
+          result.state === 'pending' ? 'Follow request sent' : 'Followed successfully'
+        )
+      );
   }
 );
 
@@ -92,5 +105,68 @@ export const removeFollower = asyncHandler(
     await removeFollowerService(req.user.id, req.params['username'] as string);
 
     res.status(200).json(new ApiResponse(null, 'Follower removed successfully'));
+  }
+);
+
+export const listFollowRequests = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+    }
+
+    const { cursor, limit } = getListQuery(req);
+    const result = await listIncomingFollowRequests(
+      req.user.id,
+      cursor ?? null,
+      limit
+    );
+
+    res
+      .status(200)
+      .json(
+        new ApiPaginatedResponse(
+          result.data,
+          result.meta,
+          'Follow requests fetched successfully'
+        )
+      );
+  }
+);
+
+export const getFollowRequestCount = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+    }
+
+    const count = await countIncomingFollowRequests(req.user.id);
+
+    res
+      .status(200)
+      .json(new ApiResponse({ count }, 'Follow request count fetched successfully'));
+  }
+);
+
+export const approveFollowRequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+    }
+
+    await approveFollowRequest(req.user.id, req.params['requestId'] as string);
+
+    res.status(200).json(new ApiResponse(null, 'Follow request approved'));
+  }
+);
+
+export const denyFollowRequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+    }
+
+    await denyFollowRequest(req.user.id, req.params['requestId'] as string);
+
+    res.status(200).json(new ApiResponse(null, 'Follow request denied'));
   }
 );

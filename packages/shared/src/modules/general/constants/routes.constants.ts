@@ -33,6 +33,7 @@ export const CLIENT_ROUTES = {
   PROFILE_SAVED: '/profile/:username/saved',
   PROFILE_FOLLOWERS: '/profile/:username/followers',
   PROFILE_FOLLOWING: '/profile/:username/following',
+  FOLLOW_REQUESTS: '/follow-requests',
   SETTINGS: '/settings',
   SETTINGS_MY_INFO: '/settings/my-info',
   SETTINGS_MY_INFO_BASIC: '/settings/my-info/basic',

@@ -26,6 +26,7 @@ import PostWatch from '../../features/post/pages/PostWatch';
 import ProfilePage from '../../features/profile/pages/ProfilePage';
 import PlaylistPage from '../../features/playlist/pages/PlaylistPage';
 import FollowListPage from '../../features/follow/pages/FollowListPage';
+import FollowRequestsPage from '../../features/follow/pages/FollowRequestsPage';
 import SettingsPage from '../../features/settings/pages/SettingsPage';
 import SearchResultsPage from '../../features/search/pages/SearchResultsPage';
 import JuryQueuePage from '../../features/jury/pages/JuryQueuePage';
@@ -86,6 +87,7 @@ export const routes: RouteObject[] = [
               {
                 element: <RequireAuth />,
                 children: [
+                  { path: CLIENT_ROUTES.FOLLOW_REQUESTS, element: <FollowRequestsPage /> },
                   { path: CLIENT_ROUTES.UPLOAD, element: <UploadHub /> },
                   {
                     path: CLIENT_ROUTES.UPLOAD_VIDEO,

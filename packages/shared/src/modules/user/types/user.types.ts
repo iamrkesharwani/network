@@ -7,9 +7,11 @@ import {
   personalDetailsSchema,
   contactLinksSchema,
   bannerPresetSelectSchema,
+  accountPrivacySchema,
 } from '../schema/user.schema.js';
 import { captureLocationSchema } from '../../location/location.schema.js';
 import { AUTH_PROVIDERS } from '../../auth/auth.constants.js';
+import type { FollowState } from '../../follow/follow.types.js';
 import {
   GENDER_OPTIONS,
   MODERATION_STATUS,
@@ -27,6 +29,7 @@ export type PersonalDetailsInput = z.infer<typeof personalDetailsSchema>;
 export type ContactLinksInput = z.infer<typeof contactLinksSchema>;
 export type BannerPresetSelectInput = z.infer<typeof bannerPresetSelectSchema>;
 export type CaptureLocationInput = z.infer<typeof captureLocationSchema>;
+export type AccountPrivacyInput = z.infer<typeof accountPrivacySchema>;
 export type ProfileContentType = (typeof PROFILE_CONTENT_TYPES)[number];
 export type UserStatus = (typeof USER_STATUSES)[number];
 export type RelationshipStatus = (typeof RELATIONSHIP_STATUSES)[number];
@@ -74,6 +77,7 @@ export interface IUser {
   socialLinks?: IUserSocialLink[];
   phone?: IUserPhone;
   isMinor?: boolean;
+  isPrivate: boolean;
   status: UserStatus;
   deactivatedAt?: Date | null;
   reactivateAt?: Date | null;
@@ -93,5 +97,6 @@ export interface IPublicProfile {
   bannerUrl?: string;
   followerCount: number;
   followingCount: number;
-  isFollowedByViewer?: boolean;
+  isPrivate: boolean;
+  followState?: FollowState;
 }

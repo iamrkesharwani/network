@@ -5,7 +5,9 @@ import type {
   ApiResponse,
   PaginatedResponse,
   IFollowListItem,
+  IFollowRequestListItem,
   FollowListQuery,
+  FollowState,
 } from '@network/shared';
 
 interface FollowListArgs extends FollowListQuery {
@@ -17,13 +19,25 @@ interface RemoveFollowerArgs {
   ownUsername: string;
 }
 
-const patchViewerFollowState = (username: string, isFollowedByViewer: boolean) =>
+const patchViewerFollowState = (username: string, state: FollowState) =>
   creatorApi.util.updateQueryData(
     'getPublicProfileByUsername',
     username,
     (draft) => {
-      draft.data.isFollowedByViewer = isFollowedByViewer;
-      draft.data.followerCount += isFollowedByViewer ? 1 : -1;
+      draft.data.followState = state;
+      if (state === 'accepted') draft.data.followerCount += 1;
+    }
+  );
+
+const patchUnfollow = (username: string) =>
+  creatorApi.util.updateQueryData(
+    'getPublicProfileByUsername',
+    username,
+    (draft) => {
+      if (draft.data.followState === 'accepted') {
+        draft.data.followerCount = Math.max(0, draft.data.followerCount - 1);
+      }
+      draft.data.followState = 'none';
     }
   );
 
@@ -39,16 +53,16 @@ const patchOwnFollowerCount = (ownUsername: string) =>
 export const followApi = createApi({
   reducerPath: 'followApi',
   baseQuery: axiosBaseQuery({ baseUrl: '/follow' }),
-  tagTypes: ['Followers', 'Following'],
+  tagTypes: ['Followers', 'Following', 'FollowRequests'],
   endpoints: (builder) => ({
-    followUser: builder.mutation<ApiResponse<null>, string>({
+    followUser: builder.mutation<ApiResponse<{ state: FollowState }>, string>({
       query: (username) => ({ url: `/${username}`, method: 'PUT' }),
       onQueryStarted: async (username, { dispatch, queryFulfilled }) => {
-        const patch = dispatch(patchViewerFollowState(username, true));
         try {
-          await queryFulfilled;
+          const { data } = await queryFulfilled;
+          dispatch(patchViewerFollowState(username, data.data.state));
         } catch {
-          patch.undo();
+          // Nothing was optimistically changed, so there's nothing to undo.
         }
       },
     }),
@@ -56,7 +70,7 @@ export const followApi = createApi({
     unfollowUser: builder.mutation<ApiResponse<null>, string>({
       query: (username) => ({ url: `/${username}`, method: 'DELETE' }),
       onQueryStarted: async (username, { dispatch, queryFulfilled }) => {
-        const patch = dispatch(patchViewerFollowState(username, false));
+        const patch = dispatch(patchUnfollow(username));
         try {
           await queryFulfilled;
         } catch {
@@ -129,6 +143,50 @@ export const followApi = createApi({
         { type: 'Followers', id: ownUsername },
       ],
     }),
+
+    getFollowRequests: builder.query<
+      PaginatedResponse<IFollowRequestListItem>,
+      FollowListQuery
+    >({
+      query: ({ cursor, limit }) => ({
+        url: '/requests',
+        method: 'GET',
+        params: { ...(cursor && { cursor }), ...(limit && { limit }) },
+      }),
+      serializeQueryArgs: () => 'requests',
+      merge: (currentCache, newData, { arg }) => {
+        if (arg.cursor === undefined) {
+          currentCache.data = newData.data;
+          currentCache.meta = newData.meta;
+          return;
+        }
+        const byId = new Map(currentCache.data.map((item) => [item.id, item]));
+        for (const item of newData.data) byId.set(item.id, item);
+        currentCache.data = Array.from(byId.values());
+        currentCache.meta = newData.meta;
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        currentArg?.cursor !== previousArg?.cursor,
+      providesTags: ['FollowRequests'],
+    }),
+
+    getFollowRequestCount: builder.query<ApiResponse<{ count: number }>, void>({
+      query: () => ({ url: '/requests/count', method: 'GET' }),
+      providesTags: ['FollowRequests'],
+    }),
+
+    approveFollowRequest: builder.mutation<ApiResponse<null>, string>({
+      query: (requestId) => ({
+        url: `/requests/${requestId}/approve`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['FollowRequests'],
+    }),
+
+    denyFollowRequest: builder.mutation<ApiResponse<null>, string>({
+      query: (requestId) => ({ url: `/requests/${requestId}`, method: 'DELETE' }),
+      invalidatesTags: ['FollowRequests'],
+    }),
   }),
 });
 
@@ -138,4 +196,8 @@ export const {
   useGetFollowersQuery,
   useGetFollowingQuery,
   useRemoveFollowerMutation,
+  useGetFollowRequestsQuery,
+  useGetFollowRequestCountQuery,
+  useApproveFollowRequestMutation,
+  useDenyFollowRequestMutation,
 } = followApi;

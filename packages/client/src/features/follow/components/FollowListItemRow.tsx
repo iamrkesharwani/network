@@ -32,7 +32,7 @@ const FollowListItemRow = ({
 
     <FollowButton
       username={item.username}
-      isFollowedByViewer={item.isFollowedByViewer ?? false}
+      followState={item.followState ?? 'none'}
       className="shrink-0"
     />
 

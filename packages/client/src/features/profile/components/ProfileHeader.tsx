@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { IPublicProfile } from '@network/shared';
+import { CLIENT_ROUTES, type IPublicProfile } from '@network/shared';
 import { formatCount } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { useTheme } from '../../../shared/hooks/useTheme';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import TrustBadge from '../../creator/components/TrustBadge';
 import FollowButton from '../../follow/components/FollowButton';
+import { useGetFollowRequestCountQuery } from '../../follow/followApi';
 import {
   buildFollowersPath,
   buildFollowingPath,
@@ -21,6 +22,11 @@ export interface ProfileHeaderProps {
 const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
   const { isDark } = useTheme();
   const [isBioModalOpen, setIsBioModalOpen] = useState(false);
+  const showRequestsEntry = isOwner && profile.isPrivate;
+  const { data: requestCountData } = useGetFollowRequestCountQuery(undefined, {
+    skip: !showRequestsEntry,
+  });
+  const pendingRequestCount = requestCountData?.data.count ?? 0;
 
   const glassBorder = isDark ? 'border-white/15' : 'border-black/10';
   const glassRing = isDark ? 'ring-white/20' : 'ring-black/10';
@@ -109,7 +115,7 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
               ) : (
                 <FollowButton
                   username={profile.username}
-                  isFollowedByViewer={profile.isFollowedByViewer ?? false}
+                  followState={profile.followState ?? 'none'}
                   className="h-auto! flex-1 py-2! font-semibold!"
                 />
               )}
@@ -140,11 +146,25 @@ const ProfileHeader = ({ profile, isOwner }: ProfileHeaderProps) => {
               ) : (
                 <FollowButton
                   username={profile.username}
-                  isFollowedByViewer={profile.isFollowedByViewer ?? false}
+                  followState={profile.followState ?? 'none'}
                   className="h-9"
                 />
               )}
             </div>
+
+            {showRequestsEntry && (
+              <Link
+                to={CLIENT_ROUTES.FOLLOW_REQUESTS}
+                className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-text-primary"
+              >
+                Follow requests
+                {pendingRequestCount > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-white">
+                    {pendingRequestCount}
+                  </span>
+                )}
+              </Link>
+            )}
           </div>
         </div>
       </div>

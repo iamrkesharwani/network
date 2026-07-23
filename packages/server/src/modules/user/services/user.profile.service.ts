@@ -7,13 +7,17 @@ import {
   BANNER_PRESET_CATALOG,
   type IPublicProfile,
   type IUser,
+  type FollowState,
   type BasicProfileInput,
   type PersonalDetailsInput,
   type ContactLinksInput,
+  type AccountPrivacyInput,
 } from '@network/shared';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import * as userRepository from '../user.repository.js';
 import * as followRepository from '../../follow/follow.repository.js';
+import * as followCrudService from '../../follow/services/follow.crud.service.js';
+import * as followRequestService from '../../follow/services/followRequest.service.js';
 import { imageProvider } from '../../../core/providers/provider.js';
 import type { IUserDocument } from '../user.model.js';
 import { toUserResponse as toBaseUserResponse } from '../../../core/utils/toUserResponse.js';
@@ -54,7 +58,7 @@ const toPublicProfile = (
   user: IUserDocument,
   followerCount: number,
   followingCount: number,
-  isFollowedByViewer?: boolean
+  followState?: FollowState
 ): IPublicProfile => ({
   id: user._id.toString(),
   username: user.username,
@@ -64,7 +68,8 @@ const toPublicProfile = (
   ...(user.bannerUrl && { bannerUrl: user.bannerUrl }),
   followerCount,
   followingCount,
-  ...(isFollowedByViewer !== undefined && { isFollowedByViewer }),
+  isPrivate: user.isPrivate,
+  ...(followState !== undefined && { followState }),
 });
 
 export const getPublicProfile = async (
@@ -75,13 +80,17 @@ export const getPublicProfile = async (
   if (!user) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
 
   const userId = user._id.toString();
-  const [followerCount, followingCount, isFollowedByViewer] = await Promise.all([
+  const [followerCount, followingCount, followState] = await Promise.all([
     followRepository.countByFollowee(userId),
     followRepository.countByFollower(userId),
-    viewerId ? followRepository.exists(viewerId, userId) : Promise.resolve(undefined),
+    viewerId
+      ? followCrudService
+          .getFollowStatesBatch(viewerId, [userId])
+          .then((states) => states.get(userId))
+      : Promise.resolve(undefined),
   ]);
 
-  return toPublicProfile(user, followerCount, followingCount, isFollowedByViewer);
+  return toPublicProfile(user, followerCount, followingCount, followState);
 };
 
 export const getPublicProfiles = async (
@@ -91,11 +100,11 @@ export const getPublicProfiles = async (
   if (users.length === 0) return [];
 
   const userIds = users.map((user) => user._id.toString());
-  const [followerCounts, followingCounts, followedSet] = await Promise.all([
+  const [followerCounts, followingCounts, followStates] = await Promise.all([
     followRepository.countByFolloweeMany(userIds),
     followRepository.countByFollowerMany(userIds),
     viewerId
-      ? followRepository.findFollowedSet(viewerId, userIds)
+      ? followCrudService.getFollowStatesBatch(viewerId, userIds)
       : Promise.resolve(undefined),
   ]);
 
@@ -105,9 +114,23 @@ export const getPublicProfiles = async (
       user,
       followerCounts.get(userId) ?? 0,
       followingCounts.get(userId) ?? 0,
-      followedSet ? followedSet.has(userId) : undefined
+      followStates?.get(userId)
     );
   });
+};
+
+export const updateAccountPrivacy = async (
+  userId: string,
+  data: AccountPrivacyInput
+): Promise<IUser> => {
+  const updated = await userRepository.updateIsPrivate(userId, data.isPrivate);
+  if (!updated) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
+
+  if (!data.isPrivate) {
+    await followRequestService.convertPendingRequestsToFollows(userId);
+  }
+
+  return toUserResponse(updated);
 };
 
 export const updateBasicProfile = async (

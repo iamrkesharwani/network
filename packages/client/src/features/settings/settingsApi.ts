@@ -8,6 +8,7 @@ import type {
   ContactLinksInput,
   CaptureLocationInput,
   BannerPresetSelectInput,
+  AccountPrivacyInput,
 } from '@network/shared';
 
 export const settingsApi = createApi({
@@ -53,6 +54,9 @@ export const settingsApi = createApi({
         query: (data) => ({ url: '/location/capture', method: 'POST', data }),
       }
     ),
+    patchAccountPrivacy: builder.mutation<ApiResponse<IUser>, AccountPrivacyInput>({
+      query: (data) => ({ url: '/profile/privacy', method: 'PATCH', data }),
+    }),
   }),
 });
 
@@ -64,4 +68,5 @@ export const {
   useUploadBannerMutation,
   useSelectBannerPresetMutation,
   useCaptureLocationMutation,
+  usePatchAccountPrivacyMutation,
 } = settingsApi;

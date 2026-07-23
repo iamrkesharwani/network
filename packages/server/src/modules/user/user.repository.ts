@@ -130,6 +130,18 @@ export const updateBannerUrl = (
     .select('+password')
     .exec();
 
+export const updateIsPrivate = (
+  userId: string,
+  isPrivate: boolean
+): Promise<IUserDocument | null> =>
+  User.findByIdAndUpdate(
+    userId,
+    { $set: { isPrivate } },
+    { returnDocument: 'after', runValidators: true }
+  )
+    .select('+password')
+    .exec();
+
 export const setLastActiveAt = (
   userId: string,
   lastActiveAt: Date

@@ -1,6 +1,7 @@
-import type { IFollowListItem, PaginatedResponse } from '@network/shared';
+import type { FollowState, IFollowListItem, PaginatedResponse } from '@network/shared';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import * as followRepository from '../follow.repository.js';
+import * as followRequestRepository from '../followRequest.repository.js';
 import * as userRepository from '../../user/user.repository.js';
 import type { IUserDocument } from '../../user/user.model.js';
 import { toFollowListItem } from './follow.mappers.js';
@@ -17,7 +18,7 @@ const resolveActiveTarget = async (username: string): Promise<IUserDocument> => 
 export const follow = async (
   followerId: string,
   targetUsername: string
-): Promise<void> => {
+): Promise<{ state: FollowState }> => {
   const target = await resolveActiveTarget(targetUsername);
   const followeeId = target._id.toString();
 
@@ -30,6 +31,31 @@ export const follow = async (
     throw new ApiError(409, 'CONFLICT', 'You are already following this user.');
   }
 
+  if (target.isPrivate) {
+    const alreadyRequested = await followRequestRepository.exists(
+      followerId,
+      followeeId
+    );
+    if (alreadyRequested) {
+      throw new ApiError(
+        409,
+        'CONFLICT',
+        'You have already requested to follow this user.'
+      );
+    }
+
+    await followRequestRepository.create(followerId, followeeId);
+
+    await queueNotification({
+      type: 'follow_request',
+      recipientId: followeeId,
+      actorId: followerId,
+      targetType: 'none',
+    });
+
+    return { state: 'pending' };
+  }
+
   await followRepository.create(followerId, followeeId);
 
   await queueNotification({
@@ -38,6 +64,8 @@ export const follow = async (
     actorId: followerId,
     targetType: 'none',
   });
+
+  return { state: 'accepted' };
 };
 
 export const unfollow = async (
@@ -45,7 +73,35 @@ export const unfollow = async (
   targetUsername: string
 ): Promise<void> => {
   const target = await resolveActiveTarget(targetUsername);
-  await followRepository.deleteRelation(followerId, target._id.toString());
+  const followeeId = target._id.toString();
+
+  await Promise.all([
+    followRepository.deleteRelation(followerId, followeeId),
+    followRequestRepository.deleteRelation(followerId, followeeId),
+  ]);
+};
+
+export const getFollowStatesBatch = async (
+  viewerId: string,
+  targetIds: string[]
+): Promise<Map<string, FollowState>> => {
+  if (targetIds.length === 0) return new Map();
+
+  const [followedSet, requestedSet] = await Promise.all([
+    followRepository.findFollowedSet(viewerId, targetIds),
+    followRequestRepository.findRequestedSet(viewerId, targetIds),
+  ]);
+
+  return new Map(
+    targetIds.map((id) => [
+      id,
+      followedSet.has(id)
+        ? ('accepted' as const)
+        : requestedSet.has(id)
+          ? ('pending' as const)
+          : ('none' as const),
+    ])
+  );
 };
 
 const withViewerFollowState = async (
@@ -54,14 +110,14 @@ const withViewerFollowState = async (
 ): Promise<IFollowListItem[]> => {
   if (!viewerId || items.length === 0) return items;
 
-  const followedSet = await followRepository.findFollowedSet(
+  const statesById = await getFollowStatesBatch(
     viewerId,
     items.map((item) => item.id)
   );
 
   return items.map((item) => ({
     ...item,
-    isFollowedByViewer: followedSet.has(item.id),
+    followState: statesById.get(item.id) ?? 'none',
   }));
 };
 

@@ -15,10 +15,21 @@ export interface IFollowCounts {
   followingCount: number;
 }
 
+export type FollowState = 'none' | 'pending' | 'accepted';
+
 export interface IFollowListItem {
   id: string;
   username: string;
   name: string;
   avatarUrl?: string;
-  isFollowedByViewer?: boolean;
+  followState?: FollowState;
+}
+
+export interface IFollowRequestListItem {
+  id: string;
+  requesterId: string;
+  username: string;
+  name: string;
+  avatarUrl?: string;
+  requestedAt: string;
 }

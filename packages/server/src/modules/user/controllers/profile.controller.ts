@@ -6,6 +6,7 @@ import {
   type PersonalDetailsInput,
   type ContactLinksInput,
   type BannerPresetSelectInput,
+  type AccountPrivacyInput,
 } from '@network/shared';
 import { asyncHandler } from '../../../core/utils/asyncHandler.js';
 import { ApiResponse } from '../../../core/utils/ApiResponse.js';
@@ -92,6 +93,20 @@ export const uploadBanner = asyncHandler(
     );
 
     res.status(200).json(new ApiResponse(user, 'Banner updated successfully'));
+  }
+);
+
+export const patchAccountPrivacy = asyncHandler(
+  async (req: Request, res: Response) => {
+    if (!req.user)
+      throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
+
+    const user = await userProfileService.updateAccountPrivacy(
+      req.user.id,
+      req.body as AccountPrivacyInput
+    );
+
+    res.status(200).json(new ApiResponse(user, 'Privacy setting updated successfully'));
   }
 );
 
