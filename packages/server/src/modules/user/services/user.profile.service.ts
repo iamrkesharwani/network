@@ -18,13 +18,22 @@ import * as userRepository from '../user.repository.js';
 import * as followRepository from '../../follow/follow.repository.js';
 import * as followCrudService from '../../follow/services/follow.crud.service.js';
 import * as followRequestService from '../../follow/services/followRequest.service.js';
+import * as blockService from '../../block/services/block.service.js';
 import { imageProvider } from '../../../core/providers/provider.js';
 import type { IUserDocument } from '../user.model.js';
 import { toUserResponse as toBaseUserResponse } from '../../../core/utils/toUserResponse.js';
 
-export interface ProfileOwnerContext {
+export interface ProfileAccessContext {
   userId: string;
   isOwner: boolean;
+  isPrivate: boolean;
+  hasAccess: boolean;
+}
+
+export interface ContentOwnerAccess {
+  blocked: boolean;
+  isPrivate: boolean;
+  hasAccess: boolean;
 }
 
 const computeIsMinor = (dateOfBirth: Date | undefined): boolean | undefined => {
@@ -43,15 +52,66 @@ const toUserResponse = (user: IUserDocument): IUser => {
   };
 };
 
-export const resolveProfileOwner = async (
+export const resolveProfileAccess = async (
   username: string,
   requesterId: string | undefined
-): Promise<ProfileOwnerContext> => {
+): Promise<ProfileAccessContext> => {
   const user = await userRepository.findByUsername(username);
   if (!user) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
 
   const userId = user._id.toString();
-  return { userId, isOwner: requesterId === userId };
+  const isOwner = requesterId === userId;
+
+  if (!isOwner && requesterId) {
+    const blocked = await blockService.isBlocked(requesterId, userId);
+    if (blocked) throw new ApiError(404, 'NOT_FOUND', 'User not found.');
+  }
+
+  if (isOwner || !user.isPrivate) {
+    return { userId, isOwner, isPrivate: user.isPrivate, hasAccess: true };
+  }
+
+  const followState = requesterId
+    ? (await followCrudService.getFollowStatesBatch(requesterId, [userId])).get(
+        userId
+      )
+    : 'none';
+
+  return {
+    userId,
+    isOwner,
+    isPrivate: true,
+    hasAccess: followState === 'accepted',
+  };
+};
+
+export const getContentOwnerAccess = async (
+  ownerId: string,
+  viewerId: string | undefined
+): Promise<ContentOwnerAccess> => {
+  if (!viewerId || viewerId === ownerId) {
+    return { blocked: false, isPrivate: false, hasAccess: true };
+  }
+
+  const blocked = await blockService.isBlocked(viewerId, ownerId);
+  if (blocked) {
+    return { blocked: true, isPrivate: false, hasAccess: false };
+  }
+
+  const owner = await userRepository.findById(ownerId);
+  if (!owner || !owner.isPrivate) {
+    return { blocked: false, isPrivate: false, hasAccess: true };
+  }
+
+  const followState = (
+    await followCrudService.getFollowStatesBatch(viewerId, [ownerId])
+  ).get(ownerId);
+
+  return {
+    blocked: false,
+    isPrivate: true,
+    hasAccess: followState === 'accepted',
+  };
 };
 
 const toPublicProfile = (

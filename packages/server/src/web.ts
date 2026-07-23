@@ -52,6 +52,7 @@ import {
   followDeletionAdapter,
   followRequestDeletionAdapter,
 } from './modules/follow/follow.deletion.adapter.js';
+import { blockDeletionAdapter } from './modules/block/block.deletion.adapter.js';
 import { startNotificationWorker } from './modules/notification/notification.worker.js';
 import { startNotificationReaperWorker } from './modules/notification/notification.reaper.worker.js';
 import { scheduleNotificationReaper } from './modules/notification/notification.reaper.queue.js';
@@ -104,6 +105,7 @@ const startWeb = async () => {
     registerAccountDeletionAdapter(postDeletionAdapter);
     registerAccountDeletionAdapter(followDeletionAdapter);
     registerAccountDeletionAdapter(followRequestDeletionAdapter);
+    registerAccountDeletionAdapter(blockDeletionAdapter);
     startAccountDeletionWorker();
 
     startNotificationWorker();

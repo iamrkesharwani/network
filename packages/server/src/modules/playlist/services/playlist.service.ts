@@ -11,7 +11,7 @@ import type {
 import * as playlistRepository from '../repository/playlist.repository.js';
 import * as playlistItemRepository from '../repository/playlistItem.repository.js';
 import { getModerationContentAdapter } from '../../../core/moderation/moderationContent.registry.js';
-import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
+import { resolveProfileAccess } from '../../user/services/user.profile.service.js';
 import { imageProvider } from '../../../core/providers/provider.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { toItemResponse, toPlaylistDetail, toPlaylistSummary } from './playlist.mappers.js';
@@ -79,7 +79,7 @@ export const getUserPlaylists = async (
   cursor: string | null,
   limit: number
 ): Promise<Omit<PaginatedResponse<IPlaylistSummary>, 'success' | 'message'>> => {
-  const { userId } = await resolveProfileOwner(username, undefined);
+  const { userId } = await resolveProfileAccess(username, undefined);
   return listPlaylistsForUser(userId, cursor, limit);
 };
 

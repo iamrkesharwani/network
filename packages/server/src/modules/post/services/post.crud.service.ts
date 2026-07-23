@@ -11,14 +11,17 @@ import type { Requester } from '../post.types.js';
 import { toResponse, toResponseFromLean } from './post.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
 import { logger } from '../../../core/utils/logger.js';
-import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
+import {
+  resolveProfileAccess,
+  getContentOwnerAccess,
+} from '../../user/services/user.profile.service.js';
 import { queueMentionDiffNotifications } from '../../notification/notification.mention.service.js';
 
 export const getUserVisibilityCounts = async (
   username: string,
   requesterId: string | undefined
 ) => {
-  const { userId, isOwner } = await resolveProfileOwner(username, requesterId);
+  const { userId, isOwner } = await resolveProfileAccess(username, requesterId);
   if (!isOwner) {
     throw new ApiError(403, 'FORBIDDEN', 'You cannot view these counts.');
   }
@@ -40,6 +43,17 @@ export const getPostById = async (
 
   if (!canBypassRestrictions && post.visibility !== 'public')
     throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
+
+  if (!canBypassRestrictions) {
+    const access = await getContentOwnerAccess(
+      getOwnerId(post.userId),
+      requester?.id
+    );
+    if (access.blocked) throw new ApiError(404, 'NOT_FOUND', 'Post not found.');
+    if (access.isPrivate && !access.hasAccess) {
+      throw new ApiError(403, 'PRIVATE_ACCOUNT', 'This account is private.');
+    }
+  }
 
   if (!isOwner) {
     postRepository
@@ -98,7 +112,14 @@ export const getUserPosts = async (
   limit: number,
   visibilityQuery?: ContentVisibility
 ) => {
-  const { userId, isOwner } = await resolveProfileOwner(username, requesterId);
+  const { userId, isOwner, hasAccess } = await resolveProfileAccess(
+    username,
+    requesterId
+  );
+
+  if (!hasAccess) {
+    return { data: [], meta: { nextCursor: null, hasNextPage: false, limit } };
+  }
 
   const extraFilter = isOwner
     ? { ...(visibilityQuery !== undefined && { visibility: visibilityQuery }) }

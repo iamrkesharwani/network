@@ -12,14 +12,17 @@ import { buildVisibilityFields } from '../../../core/utils/buildVisibilityFields
 import type { Requester } from '../video.types.js';
 import { toResponse, toResponseFromLean } from './video.mappers.js';
 import { recordViewIncrement } from '../../creator/services/creator.views.service.js';
-import { resolveProfileOwner } from '../../user/services/user.profile.service.js';
+import {
+  resolveProfileAccess,
+  getContentOwnerAccess,
+} from '../../user/services/user.profile.service.js';
 import { queueMentionDiffNotifications } from '../../notification/notification.mention.service.js';
 
 export const getUserVisibilityCounts = async (
   username: string,
   requesterId: string | undefined
 ) => {
-  const { userId, isOwner } = await resolveProfileOwner(username, requesterId);
+  const { userId, isOwner } = await resolveProfileAccess(username, requesterId);
   if (!isOwner) {
     throw new ApiError(403, 'FORBIDDEN', 'You cannot view these counts.');
   }
@@ -42,6 +45,17 @@ export const getVideoById = async (
     throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
   if (!canBypassRestrictions && video.visibility !== 'public')
     throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
+
+  if (!canBypassRestrictions) {
+    const access = await getContentOwnerAccess(
+      getOwnerId(video.userId),
+      requester?.id
+    );
+    if (access.blocked) throw new ApiError(404, 'NOT_FOUND', 'Video not found.');
+    if (access.isPrivate && !access.hasAccess) {
+      throw new ApiError(403, 'PRIVATE_ACCOUNT', 'This account is private.');
+    }
+  }
 
   if (!isOwner) {
     videoRepository
@@ -117,7 +131,14 @@ export const getUserVideos = async (
   limit: number,
   visibilityQuery?: ContentVisibility
 ) => {
-  const { userId, isOwner } = await resolveProfileOwner(username, requesterId);
+  const { userId, isOwner, hasAccess } = await resolveProfileAccess(
+    username,
+    requesterId
+  );
+
+  if (!hasAccess) {
+    return { data: [], meta: { nextCursor: null, hasNextPage: false, limit } };
+  }
 
   const extraFilter = isOwner
     ? { ...(visibilityQuery !== undefined && { visibility: visibilityQuery }) }
