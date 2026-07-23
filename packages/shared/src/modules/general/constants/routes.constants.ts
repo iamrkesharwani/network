@@ -39,6 +39,7 @@ export const CLIENT_ROUTES = {
   SETTINGS_MY_INFO_PERSONAL: '/settings/my-info/personal',
   SETTINGS_MY_INFO_CONTACT: '/settings/my-info/contact',
   SETTINGS_PREFERENCES: '/settings/preferences',
+  SETTINGS_PRIVACY: '/settings/privacy',
   SETTINGS_ACCOUNT: '/settings/account',
   PLAYLIST: '/playlist/:playlistId',
   JURY_QUEUE: '/jury',

@@ -1,7 +1,7 @@
-import { UserRound, SlidersHorizontal, UserCog } from 'lucide-react';
+import { UserRound, SlidersHorizontal, ShieldCheck, UserCog } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
 
-export type SettingsTab = 'my-info' | 'preferences' | 'account';
+export type SettingsTab = 'my-info' | 'preferences' | 'privacy' | 'account';
 
 export interface SettingsTabDef {
   id: SettingsTab;
@@ -24,6 +24,12 @@ export const SETTINGS_TABS: SettingsTabDef[] = [
     path: CLIENT_ROUTES.SETTINGS_PREFERENCES,
   },
   {
+    id: 'privacy',
+    label: 'Privacy',
+    icon: ShieldCheck,
+    path: CLIENT_ROUTES.SETTINGS_PRIVACY,
+  },
+  {
     id: 'account',
     label: 'Account',
     icon: UserCog,
@@ -33,6 +39,7 @@ export const SETTINGS_TABS: SettingsTabDef[] = [
 
 export const getActiveSettingsTab = (pathname: string): SettingsTab | null => {
   if (pathname.endsWith('/preferences')) return 'preferences';
+  if (pathname.endsWith('/privacy')) return 'privacy';
   if (pathname.endsWith('/account')) return 'account';
   if (pathname.includes('/my-info')) return 'my-info';
   return null;

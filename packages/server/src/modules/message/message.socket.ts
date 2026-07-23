@@ -9,6 +9,7 @@ import { getIO } from '../../core/config/socket.js';
 import { logger } from '../../core/utils/logger.js';
 import * as conversationRepository from './repository/conversation.repository.js';
 import * as presenceService from './services/presence.service.js';
+import * as preferencesService from '../preferences/preferences.service.js';
 
 const conversationRoomName = (conversationId: string): string =>
   `conversation:${conversationId}`;
@@ -49,6 +50,11 @@ const handleConnection = (socket: Socket): void => {
       parsed.data.conversationId
     );
     if (!isMember) return;
+
+    const privacyByUserId = await preferencesService.getResolvedPrivacyByUserIds([
+      userId,
+    ]);
+    if (!privacyByUserId.get(userId)?.typingIndicator) return;
 
     socket
       .to(conversationRoomName(parsed.data.conversationId))

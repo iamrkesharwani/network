@@ -7,6 +7,8 @@ import {
   PREFERENCES_NOTIFICATION_CATEGORIES,
   PREFERENCES_DEFAULT_VOLUME,
   PREFERENCES_DEFAULT_PLAYBACK_RATE,
+  PRIVACY_MESSAGE_AUDIENCES,
+  PRIVACY_GROUP_ADD_AUDIENCES,
 } from '@network/shared';
 
 export interface IPreferencesDocument extends Document {
@@ -31,6 +33,15 @@ export interface IPreferencesDocument extends Document {
   notifications: {
     push?: Record<string, boolean>;
     email?: Record<string, boolean>;
+  };
+  privacy: {
+    whoCanMessageMe?: string;
+    whoCanAddToGroup?: string;
+    readReceipts?: boolean;
+    lastSeen?: boolean;
+    profilePhotoVisibleInChat?: boolean;
+    aboutVisibleInChat?: boolean;
+    typingIndicator?: boolean;
   };
   updatedAt: Date;
   createdAt: Date;
@@ -92,6 +103,19 @@ const notificationsSchema = new Schema(
   { _id: false }
 );
 
+const privacySchema = new Schema(
+  {
+    whoCanMessageMe: { type: String, enum: PRIVACY_MESSAGE_AUDIENCES },
+    whoCanAddToGroup: { type: String, enum: PRIVACY_GROUP_ADD_AUDIENCES },
+    readReceipts: { type: Boolean },
+    lastSeen: { type: Boolean },
+    profilePhotoVisibleInChat: { type: Boolean },
+    aboutVisibleInChat: { type: Boolean },
+    typingIndicator: { type: Boolean },
+  },
+  { _id: false }
+);
+
 const preferencesSchema = new Schema<IPreferencesDocument>(
   {
     userId: {
@@ -105,6 +129,7 @@ const preferencesSchema = new Schema<IPreferencesDocument>(
     layout: { type: layoutSchema, default: () => ({}) },
     playback: { type: playbackSchema, default: () => ({}) },
     notifications: { type: notificationsSchema, default: () => ({}) },
+    privacy: { type: privacySchema, default: () => ({}) },
   },
   {
     timestamps: true,

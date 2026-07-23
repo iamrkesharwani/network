@@ -6,6 +6,11 @@ export const findByUserId = (
 ): Promise<IPreferencesDocument | null> =>
   Preferences.findOne({ userId }).exec();
 
+export const findManyByUserIds = (
+  userIds: string[]
+): Promise<IPreferencesDocument[]> =>
+  Preferences.find({ userId: { $in: userIds } }).exec();
+
 const buildPreferencesSet = (
   data: PreferencesPatchInput
 ): Record<string, unknown> => {
@@ -46,6 +51,12 @@ const buildPreferencesSet = (
           set[`notifications.${channel}.${category}`] = enabled;
         }
       }
+    }
+  }
+
+  if (data.privacy) {
+    for (const [key, value] of Object.entries(data.privacy)) {
+      if (value !== undefined) set[`privacy.${key}`] = value;
     }
   }
 

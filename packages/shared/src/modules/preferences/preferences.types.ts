@@ -1,13 +1,20 @@
 import type { z } from 'zod';
 import type { preferencesPatchSchema } from './preferences.schema.js';
 import type { ProfileContentType } from '../user/types/user.types.js';
-import type { PREFERENCES_NOTIFICATION_CATEGORIES } from './preferences.constants.js';
+import type {
+  PREFERENCES_NOTIFICATION_CATEGORIES,
+  PRIVACY_MESSAGE_AUDIENCES,
+  PRIVACY_GROUP_ADD_AUDIENCES,
+} from './preferences.constants.js';
 import type { Theme, ViewMode } from '../general/types/general.types.js';
 
 export type PreferencesPatchInput = z.infer<typeof preferencesPatchSchema>;
 
 export type PreferencesNotificationCategory =
   (typeof PREFERENCES_NOTIFICATION_CATEGORIES)[number];
+
+export type PrivacyMessageAudience = (typeof PRIVACY_MESSAGE_AUDIENCES)[number];
+export type PrivacyGroupAddAudience = (typeof PRIVACY_GROUP_ADD_AUDIENCES)[number];
 
 export interface IPreferencesAppearance {
   theme?: Theme;
@@ -37,6 +44,16 @@ export interface IPreferencesNotifications {
   email?: IPreferencesNotificationChannel;
 }
 
+export interface IPreferencesPrivacy {
+  whoCanMessageMe?: PrivacyMessageAudience;
+  whoCanAddToGroup?: PrivacyGroupAddAudience;
+  readReceipts?: boolean;
+  lastSeen?: boolean;
+  profilePhotoVisibleInChat?: boolean;
+  aboutVisibleInChat?: boolean;
+  typingIndicator?: boolean;
+}
+
 export interface IPreferences {
   userId: string;
   version: number;
@@ -45,4 +62,5 @@ export interface IPreferences {
   layout: IPreferencesLayout;
   playback: IPreferencesPlayback;
   notifications: IPreferencesNotifications;
+  privacy: IPreferencesPrivacy;
 }

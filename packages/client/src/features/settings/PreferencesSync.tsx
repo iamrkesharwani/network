@@ -31,6 +31,7 @@ const PreferencesSync = () => {
             layout: response.data.layout,
             playback: response.data.playback,
             notifications: response.data.notifications,
+            privacy: response.data.privacy,
           })
         );
       })

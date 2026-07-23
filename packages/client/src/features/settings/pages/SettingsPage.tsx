@@ -11,12 +11,14 @@ import SettingsMobileMenu from '../components/general/SettingsMobileMenu';
 import SettingsMobileTabScreen from '../components/general/SettingsMobileTabScreen';
 import MyInfoTab from './tabs/myInfo/MyInfoTab';
 import PreferencesTab from './tabs/preference/PreferencesTab';
+import PrivacyTab from './tabs/privacy/PrivacyTab';
 import AccountTab from './tabs/account/AccountTab';
 
 const renderTabContent = (tab: SettingsTab) => (
   <>
     {tab === 'my-info' && <MyInfoTab />}
     {tab === 'preferences' && <PreferencesTab />}
+    {tab === 'privacy' && <PrivacyTab />}
     {tab === 'account' && <AccountTab />}
   </>
 );

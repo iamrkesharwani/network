@@ -7,6 +7,7 @@ import { redisClient } from '../../../core/config/redis.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import * as conversationRepository from '../repository/conversation.repository.js';
 import * as userRepository from '../../user/user.repository.js';
+import * as preferencesService from '../../preferences/preferences.service.js';
 
 const presenceKey = (userId: string): string =>
   `${PRESENCE_REDIS_KEY_PREFIX}${userId}`;
@@ -46,9 +47,16 @@ const notifyPartners = async (
   }
 };
 
+const isLastSeenSharingEnabled = async (userId: string): Promise<boolean> => {
+  const privacyByUserId = await preferencesService.getResolvedPrivacyByUserIds([
+    userId,
+  ]);
+  return privacyByUserId.get(userId)?.lastSeen ?? true;
+};
+
 export const handleUserConnected = async (userId: string): Promise<void> => {
   const count = await redisClient.incr(presenceKey(userId));
-  if (count === 1) {
+  if (count === 1 && (await isLastSeenSharingEnabled(userId))) {
     await notifyPartners(userId, PRESENCE_ONLINE_SOCKET_EVENT, {
       userId,
       isOnline: true,
@@ -64,10 +72,12 @@ export const handleUserDisconnected = async (userId: string): Promise<void> => {
     const lastActiveAt = new Date();
     await userRepository.setLastActiveAt(userId, lastActiveAt);
 
-    await notifyPartners(userId, PRESENCE_OFFLINE_SOCKET_EVENT, {
-      userId,
-      isOnline: false,
-      lastActiveAt: lastActiveAt.toISOString(),
-    });
+    if (await isLastSeenSharingEnabled(userId)) {
+      await notifyPartners(userId, PRESENCE_OFFLINE_SOCKET_EVENT, {
+        userId,
+        isOnline: false,
+        lastActiveAt: lastActiveAt.toISOString(),
+      });
+    }
   }
 };

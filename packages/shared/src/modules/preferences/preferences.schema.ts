@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import { THEMES, VIEW_MODES } from '../general/constants/general.constants.js';
 import { CAPTION_LANGUAGE_CODES } from '../caption/caption.constants.js';
-import { PREFERENCES_NOTIFICATION_CATEGORIES } from './preferences.constants.js';
+import {
+  PREFERENCES_NOTIFICATION_CATEGORIES,
+  PRIVACY_MESSAGE_AUDIENCES,
+  PRIVACY_GROUP_ADD_AUDIENCES,
+} from './preferences.constants.js';
 import type { PreferencesNotificationCategory } from './preferences.types.js';
 
 const appearancePatchSchema = z.object({
@@ -46,9 +50,20 @@ const notificationsPatchSchema = z.object({
   email: notificationChannelPatchSchema.optional(),
 });
 
+const privacyPatchSchema = z.object({
+  whoCanMessageMe: z.enum(PRIVACY_MESSAGE_AUDIENCES).optional(),
+  whoCanAddToGroup: z.enum(PRIVACY_GROUP_ADD_AUDIENCES).optional(),
+  readReceipts: z.boolean().optional(),
+  lastSeen: z.boolean().optional(),
+  profilePhotoVisibleInChat: z.boolean().optional(),
+  aboutVisibleInChat: z.boolean().optional(),
+  typingIndicator: z.boolean().optional(),
+});
+
 export const preferencesPatchSchema = z.object({
   appearance: appearancePatchSchema.optional(),
   layout: layoutPatchSchema.optional(),
   playback: playbackPatchSchema.optional(),
   notifications: notificationsPatchSchema.optional(),
+  privacy: privacyPatchSchema.optional(),
 });

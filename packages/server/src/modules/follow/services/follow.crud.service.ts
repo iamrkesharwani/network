@@ -105,6 +105,16 @@ export const getFollowing = async (
   return { ...result, data: await withViewerFollowState(items, viewerId) };
 };
 
+export const isFollowing = (
+  followerId: string,
+  followeeId: string
+): Promise<boolean> => followRepository.exists(followerId, followeeId);
+
+export const getFollowedSet = (
+  followerId: string,
+  followeeIds: string[]
+): Promise<Set<string>> => followRepository.findFollowedSet(followerId, followeeIds);
+
 export const removeFollower = async (
   followeeId: string,
   followerUsername: string

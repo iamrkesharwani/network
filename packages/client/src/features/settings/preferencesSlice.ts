@@ -4,6 +4,7 @@ import type {
   IPreferencesLayout,
   IPreferencesPlayback,
   IPreferencesNotifications,
+  IPreferencesPrivacy,
 } from '@network/shared';
 
 export interface PreferencesState {
@@ -13,6 +14,7 @@ export interface PreferencesState {
   layout: IPreferencesLayout;
   playback: IPreferencesPlayback;
   notifications: IPreferencesNotifications;
+  privacy: IPreferencesPrivacy;
 }
 
 export const preferencesInitialState: PreferencesState = {
@@ -22,6 +24,7 @@ export const preferencesInitialState: PreferencesState = {
   layout: {},
   playback: {},
   notifications: {},
+  privacy: {},
 };
 
 export const mergeWithPreferencesDefaults = (
@@ -36,13 +39,15 @@ export const mergeWithPreferencesDefaults = (
     ...preferencesInitialState.notifications,
     ...partial?.notifications,
   },
+  privacy: { ...preferencesInitialState.privacy, ...partial?.privacy },
 });
 
 export type SetPreferenceSectionAction =
   | { section: 'appearance'; patch: Partial<IPreferencesAppearance> }
   | { section: 'layout'; patch: Partial<IPreferencesLayout> }
   | { section: 'playback'; patch: Partial<IPreferencesPlayback> }
-  | { section: 'notifications'; patch: Partial<IPreferencesNotifications> };
+  | { section: 'notifications'; patch: Partial<IPreferencesNotifications> }
+  | { section: 'privacy'; patch: Partial<IPreferencesPrivacy> };
 
 const preferencesSlice = createSlice({
   name: 'preferences',
@@ -82,6 +87,9 @@ const preferencesSlice = createSlice({
               ...action.payload.patch.email,
             },
           };
+          break;
+        case 'privacy':
+          state.privacy = { ...state.privacy, ...action.payload.patch };
           break;
       }
     },

@@ -3,6 +3,7 @@ import type {
   IParticipantSummary,
 } from '@network/shared';
 import type { IConversationDocument } from '../models/conversation.model.js';
+import type { ResolvedPrivacy } from '../../preferences/preferences.service.js';
 
 interface PopulatedParticipant {
   _id: { toString(): string };
@@ -22,9 +23,14 @@ const getMapValue = (
 };
 
 const toParticipantReadState = (
-  lastReadAt: IConversationDocument['lastReadAt']
+  lastReadAt: IConversationDocument['lastReadAt'],
+  viewerId: string,
+  privacyByUserId: ReadonlyMap<string, ResolvedPrivacy>
 ): Record<string, string> => {
   if (!lastReadAt) return {};
+
+  const viewerReceiptsEnabled = privacyByUserId.get(viewerId)?.readReceipts ?? true;
+  if (!viewerReceiptsEnabled) return {};
 
   const entries =
     lastReadAt instanceof Map
@@ -33,24 +39,33 @@ const toParticipantReadState = (
 
   const readState: Record<string, string> = {};
   for (const [userId, date] of entries) {
-    if (date) readState[userId] = new Date(date).toISOString();
+    if (!date) continue;
+    const participantReceiptsEnabled = privacyByUserId.get(userId)?.readReceipts ?? true;
+    if (!participantReceiptsEnabled) continue;
+    readState[userId] = new Date(date).toISOString();
   }
   return readState;
 };
 
 const toParticipantSummary = (
   participant: PopulatedParticipant,
-  onlineUserIds: ReadonlySet<string>
+  onlineUserIds: ReadonlySet<string>,
+  viewerId: string,
+  privacyByUserId: ReadonlyMap<string, ResolvedPrivacy>
 ): IParticipantSummary => {
   const id = participant._id.toString();
+  const privacy = privacyByUserId.get(id);
+  const isSelf = id === viewerId;
+  const showLastSeen = isSelf || (privacy?.lastSeen ?? true);
+  const showPhoto = isSelf || (privacy?.profilePhotoVisibleInChat ?? true);
 
   return {
     id,
     username: participant.username,
     name: participant.name,
-    ...(participant.avatarUrl && { avatarUrl: participant.avatarUrl }),
-    isOnline: onlineUserIds.has(id),
-    ...(participant.lastActiveAt && {
+    ...(showPhoto && participant.avatarUrl && { avatarUrl: participant.avatarUrl }),
+    isOnline: showLastSeen && onlineUserIds.has(id),
+    ...(showLastSeen && participant.lastActiveAt && {
       lastActiveAt: participant.lastActiveAt.toISOString(),
     }),
   };
@@ -59,7 +74,8 @@ const toParticipantSummary = (
 export const toConversationSummary = (
   doc: IConversationDocument,
   viewerId: string,
-  onlineUserIds: ReadonlySet<string> = new Set()
+  onlineUserIds: ReadonlySet<string> = new Set(),
+  privacyByUserId: ReadonlyMap<string, ResolvedPrivacy> = new Map()
 ): IConversationSummary => {
   const participants = (
     doc.participantIds as unknown as PopulatedParticipant[]
@@ -80,7 +96,7 @@ export const toConversationSummary = (
     isMuted,
     isArchived,
     isPinned,
-    participantReadState: toParticipantReadState(doc.lastReadAt),
+    participantReadState: toParticipantReadState(doc.lastReadAt, viewerId, privacyByUserId),
   };
 
   if (doc.type === 'group') {
@@ -90,7 +106,7 @@ export const toConversationSummary = (
       groupName: doc.groupName ?? '',
       ...(doc.groupAvatarUrl && { groupAvatarUrl: doc.groupAvatarUrl }),
       participants: participants.map((participant) =>
-        toParticipantSummary(participant, onlineUserIds)
+        toParticipantSummary(participant, onlineUserIds, viewerId, privacyByUserId)
       ),
     };
   }
@@ -103,7 +119,7 @@ export const toConversationSummary = (
     ...base,
     type: 'direct',
     otherParticipant: otherParticipant
-      ? toParticipantSummary(otherParticipant, onlineUserIds)
+      ? toParticipantSummary(otherParticipant, onlineUserIds, viewerId, privacyByUserId)
       : {
           id: '',
           username: 'unknown',

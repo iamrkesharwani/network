@@ -133,6 +133,10 @@ export const routes: RouteObject[] = [
                     element: <SettingsPage />,
                   },
                   {
+                    path: CLIENT_ROUTES.SETTINGS_PRIVACY,
+                    element: <SettingsPage />,
+                  },
+                  {
                     path: CLIENT_ROUTES.SETTINGS_ACCOUNT,
                     element: <SettingsPage />,
                   },

@@ -13,6 +13,8 @@ import {
 import * as conversationRepository from '../repository/conversation.repository.js';
 import * as userRepository from '../../user/user.repository.js';
 import * as keyBundleService from './keyBundle.service.js';
+import * as preferencesService from '../../preferences/preferences.service.js';
+import * as followService from '../../follow/services/follow.crud.service.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import { toConversationSummary } from './conversation.mappers.js';
@@ -54,6 +56,63 @@ const assertMembership = (
   }
 };
 
+const assertCanMessage = async (
+  actorId: string,
+  targetId: string
+): Promise<void> => {
+  const privacyByUserId = await preferencesService.getResolvedPrivacyByUserIds([
+    targetId,
+  ]);
+  const audience = privacyByUserId.get(targetId)?.whoCanMessageMe;
+
+  if (!audience || audience === 'everyone') return;
+
+  if (audience === 'nobody') {
+    throw new ApiError(403, 'FORBIDDEN', 'This user is not accepting new messages.');
+  }
+
+  const isFollower = await followService.isFollowing(actorId, targetId);
+  if (!isFollower) {
+    throw new ApiError(
+      403,
+      'FORBIDDEN',
+      'This user only accepts messages from their followers.'
+    );
+  }
+};
+
+const assertCanAddToGroup = async (
+  actorId: string,
+  targetIds: string[]
+): Promise<void> => {
+  if (targetIds.length === 0) return;
+
+  const privacyByUserId = await preferencesService.getResolvedPrivacyByUserIds(
+    targetIds
+  );
+
+  const nobodyIds = targetIds.filter(
+    (id) => privacyByUserId.get(id)?.whoCanAddToGroup === 'nobody'
+  );
+  const followersOnlyIds = targetIds.filter(
+    (id) => privacyByUserId.get(id)?.whoCanAddToGroup === 'followers'
+  );
+
+  const followedSet = await followService.getFollowedSet(actorId, followersOnlyIds);
+  const notFollowedIds = followersOnlyIds.filter((id) => !followedSet.has(id));
+
+  const blockedIds = [...nobodyIds, ...notFollowedIds];
+  if (blockedIds.length === 0) return;
+
+  const blockedUsers = await userRepository.findByIds(blockedIds);
+  const usernames = blockedUsers.map((user) => user.username).join(', ');
+  throw new ApiError(
+    403,
+    'FORBIDDEN',
+    `Cannot add ${usernames} to this group due to their privacy settings.`
+  );
+};
+
 export const createDirectConversation = async (
   userId: string,
   participantId: string
@@ -63,6 +122,15 @@ export const createDirectConversation = async (
   }
 
   await assertActiveUsersExist([participantId]);
+
+  const alreadyExists = await conversationRepository.directExists(
+    userId,
+    participantId
+  );
+  if (!alreadyExists) {
+    await assertCanMessage(userId, participantId);
+  }
+
   await keyBundleService.assertAllHaveKeyBundle([userId, participantId]);
 
   const doc = await conversationRepository.findOrCreateDirect(
@@ -70,12 +138,13 @@ export const createDirectConversation = async (
     participantId
   );
   const participantIds = doc.participantIds.map((id) => id.toString());
-  const [withParticipants, onlineUserIds] = await Promise.all([
+  const [withParticipants, onlineUserIds, privacyByUserId] = await Promise.all([
     doc.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
     presenceService.getOnlineUserIds(participantIds),
+    preferencesService.getResolvedPrivacyByUserIds(participantIds),
   ]);
 
-  return toConversationSummary(withParticipants, userId, onlineUserIds);
+  return toConversationSummary(withParticipants, userId, onlineUserIds, privacyByUserId);
 };
 
 export const createGroupConversation = async (
@@ -94,12 +163,13 @@ export const createGroupConversation = async (
     data.participantIds
   );
   const participantIds = doc.participantIds.map((id) => id.toString());
-  const [withParticipants, onlineUserIds] = await Promise.all([
+  const [withParticipants, onlineUserIds, privacyByUserId] = await Promise.all([
     doc.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
     presenceService.getOnlineUserIds(participantIds),
+    preferencesService.getResolvedPrivacyByUserIds(participantIds),
   ]);
 
-  return toConversationSummary(withParticipants, userId, onlineUserIds);
+  return toConversationSummary(withParticipants, userId, onlineUserIds, privacyByUserId);
 };
 
 export const listConversations = async (
@@ -116,10 +186,13 @@ export const listConversations = async (
   const participantIds = Array.from(
     new Set(data.flatMap((doc) => doc.participantIds.map((id) => id.toString())))
   );
-  const onlineUserIds = await presenceService.getOnlineUserIds(participantIds);
+  const [onlineUserIds, privacyByUserId] = await Promise.all([
+    presenceService.getOnlineUserIds(participantIds),
+    preferencesService.getResolvedPrivacyByUserIds(participantIds),
+  ]);
 
   return {
-    data: data.map((doc) => toConversationSummary(doc, userId, onlineUserIds)),
+    data: data.map((doc) => toConversationSummary(doc, userId, onlineUserIds, privacyByUserId)),
     meta,
   };
 };
@@ -138,10 +211,13 @@ export const listArchivedConversations = async (
   const participantIds = Array.from(
     new Set(data.flatMap((doc) => doc.participantIds.map((id) => id.toString())))
   );
-  const onlineUserIds = await presenceService.getOnlineUserIds(participantIds);
+  const [onlineUserIds, privacyByUserId] = await Promise.all([
+    presenceService.getOnlineUserIds(participantIds),
+    preferencesService.getResolvedPrivacyByUserIds(participantIds),
+  ]);
 
   return {
-    data: data.map((doc) => toConversationSummary(doc, userId, onlineUserIds)),
+    data: data.map((doc) => toConversationSummary(doc, userId, onlineUserIds, privacyByUserId)),
     meta,
   };
 };
@@ -172,6 +248,7 @@ export const addParticipants = async (
   }
 
   await assertActiveUsersExist(newIds);
+  await assertCanAddToGroup(userId, newIds);
   await keyBundleService.assertAllHaveKeyBundle(newIds);
 
   const updated = await conversationRepository.addParticipants(
@@ -183,19 +260,20 @@ export const addParticipants = async (
   }
 
   const recipientIds = updated.participantIds.map((id) => id.toString());
-  const [withParticipants, onlineUserIds] = await Promise.all([
+  const [withParticipants, onlineUserIds, privacyByUserId] = await Promise.all([
     updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
     presenceService.getOnlineUserIds(recipientIds),
+    preferencesService.getResolvedPrivacyByUserIds(recipientIds),
   ]);
 
   for (const recipientId of recipientIds) {
     emitToUser(
       recipientId,
       CONVERSATION_UPDATED_SOCKET_EVENT,
-      toConversationSummary(withParticipants, recipientId, onlineUserIds)
+      toConversationSummary(withParticipants, recipientId, onlineUserIds, privacyByUserId)
     );
   }
-  return toConversationSummary(withParticipants, userId, onlineUserIds);
+  return toConversationSummary(withParticipants, userId, onlineUserIds, privacyByUserId);
 };
 
 export const updateGroupMeta = async (
@@ -219,19 +297,20 @@ export const updateGroupMeta = async (
   }
 
   const recipientIds = updated.participantIds.map((id) => id.toString());
-  const [withParticipants, onlineUserIds] = await Promise.all([
+  const [withParticipants, onlineUserIds, privacyByUserId] = await Promise.all([
     updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
     presenceService.getOnlineUserIds(recipientIds),
+    preferencesService.getResolvedPrivacyByUserIds(recipientIds),
   ]);
 
   for (const recipientId of recipientIds) {
     emitToUser(
       recipientId,
       CONVERSATION_UPDATED_SOCKET_EVENT,
-      toConversationSummary(withParticipants, recipientId, onlineUserIds)
+      toConversationSummary(withParticipants, recipientId, onlineUserIds, privacyByUserId)
     );
   }
-  return toConversationSummary(withParticipants, userId, onlineUserIds);
+  return toConversationSummary(withParticipants, userId, onlineUserIds, privacyByUserId);
 };
 
 export const uploadGroupAvatar = async (
@@ -262,19 +341,20 @@ export const uploadGroupAvatar = async (
   }
 
   const recipientIds = updated.participantIds.map((id) => id.toString());
-  const [withParticipants, onlineUserIds] = await Promise.all([
+  const [withParticipants, onlineUserIds, privacyByUserId] = await Promise.all([
     updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
     presenceService.getOnlineUserIds(recipientIds),
+    preferencesService.getResolvedPrivacyByUserIds(recipientIds),
   ]);
 
   for (const recipientId of recipientIds) {
     emitToUser(
       recipientId,
       CONVERSATION_UPDATED_SOCKET_EVENT,
-      toConversationSummary(withParticipants, recipientId, onlineUserIds)
+      toConversationSummary(withParticipants, recipientId, onlineUserIds, privacyByUserId)
     );
   }
-  return toConversationSummary(withParticipants, userId, onlineUserIds);
+  return toConversationSummary(withParticipants, userId, onlineUserIds, privacyByUserId);
 };
 
 export const leaveGroup = async (
@@ -291,16 +371,17 @@ export const leaveGroup = async (
   const updated = await conversationRepository.leaveGroup(conversationId, userId);
   if (updated) {
     const recipientIds = updated.participantIds.map((id) => id.toString());
-    const [withParticipants, onlineUserIds] = await Promise.all([
+    const [withParticipants, onlineUserIds, privacyByUserId] = await Promise.all([
       updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
       presenceService.getOnlineUserIds(recipientIds),
+      preferencesService.getResolvedPrivacyByUserIds(recipientIds),
     ]);
 
     for (const recipientId of recipientIds) {
       emitToUser(
         recipientId,
         CONVERSATION_UPDATED_SOCKET_EVENT,
-        toConversationSummary(withParticipants, recipientId, onlineUserIds)
+        toConversationSummary(withParticipants, recipientId, onlineUserIds, privacyByUserId)
       );
     }
   }
@@ -347,14 +428,14 @@ const applyParticipantFlagUpdate = async (
     throw new ApiError(404, 'NOT_FOUND', 'Conversation not found.');
   }
 
-  const [withParticipants, onlineUserIds] = await Promise.all([
+  const participantIds = updated.participantIds.map((id) => id.toString());
+  const [withParticipants, onlineUserIds, privacyByUserId] = await Promise.all([
     updated.populate('participantIds', 'username name avatarUrl lastActiveAt status'),
-    presenceService.getOnlineUserIds(
-      updated.participantIds.map((id) => id.toString())
-    ),
+    presenceService.getOnlineUserIds(participantIds),
+    preferencesService.getResolvedPrivacyByUserIds(participantIds),
   ]);
 
-  return toConversationSummary(withParticipants, userId, onlineUserIds);
+  return toConversationSummary(withParticipants, userId, onlineUserIds, privacyByUserId);
 };
 
 export const muteConversation = (

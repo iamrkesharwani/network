@@ -95,6 +95,14 @@ export const isParticipant = async (
     participantIds: userId,
   })) !== null;
 
+export const directExists = async (
+  userIdA: string,
+  userIdB: string
+): Promise<boolean> => {
+  const directKey = buildDirectKey(userIdA, userIdB);
+  return (await ConversationModel.exists({ directKey })) !== null;
+};
+
 export const findOrCreateDirect = async (
   userId: string,
   participantId: string
