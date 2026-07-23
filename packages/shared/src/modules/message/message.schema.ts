@@ -143,6 +143,7 @@ export const messageSendSchema = z.object({
   iv: z.string().min(1).max(MESSAGE_IV_MAX_LENGTH),
   encryptedKeys: z.array(encryptedKeyEntrySchema).min(1),
   replyToMessageId: mongoIdSchema.optional(),
+  ttlOverride: z.enum(MESSAGE_DISAPPEARING_TTL_OPTIONS).optional(),
 });
 
 export const messageDeleteSchema = z.object({

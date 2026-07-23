@@ -19,6 +19,9 @@ export const errorHandler = (
   let error = err;
 
   if (error instanceof mongoose.Error.CastError) {
+    logger.warn(
+      `CastError on path "${error.path}" (expected ${error.kind}), value: ${JSON.stringify(error.value)}`
+    );
     error = new ApiError(
       400,
       'BAD_REQUEST',

@@ -6,6 +6,7 @@ import Avatar from '../../../shared/ui/primitives/Avatar';
 import { cn } from '../../../shared/utils/cn';
 import { useGetMessagesQuery } from '../messageApi';
 import { decryptMessage } from '../keyManager';
+import { decodeMessagePayload } from '../messagePayload';
 import ConversationContextMenu from './ConversationContextMenu';
 
 const LONG_PRESS_DURATION_MS = 500;
@@ -112,7 +113,7 @@ const ConversationListItem = ({
     let cancelled = false;
     decryptMessage(latestMessage, privateKey, myUserId)
       .then((decrypted) => {
-        if (!cancelled) setPreview(decrypted);
+        if (!cancelled) setPreview(decodeMessagePayload(decrypted).text);
       })
       .catch(() => {
         if (!cancelled) setPreview('Unable to decrypt message');

@@ -89,7 +89,7 @@ export const sendMessage = async (
     }
   }
 
-  const ttl = conversation.disappearingMessagesTtl;
+  const ttl = input.ttlOverride ?? conversation.disappearingMessagesTtl;
   const expiresAt =
     ttl === 'off' ? undefined : new Date(Date.now() + DISAPPEARING_TTL_DURATIONS_MS[ttl]);
 

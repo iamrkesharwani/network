@@ -36,6 +36,17 @@ const assertActiveUsersExist = async (userIds: string[]): Promise<void> => {
   }
 };
 
+const toParticipantIds = (docs: IConversationDocument[]): string[] =>
+  Array.from(
+    new Set(
+      docs.flatMap((doc) =>
+        (
+          doc.participantIds as unknown as { _id: { toString(): string } }[]
+        ).map((participant) => participant._id.toString())
+      )
+    )
+  );
+
 const getConversationOrThrow = async (
   conversationId: string
 ): Promise<IConversationDocument> => {
@@ -198,9 +209,7 @@ export const listConversations = async (
     limit
   );
 
-  const participantIds = Array.from(
-    new Set(data.flatMap((doc) => doc.participantIds.map((id) => id.toString())))
-  );
+  const participantIds = toParticipantIds(data);
   const [onlineUserIds, privacyByUserId] = await Promise.all([
     presenceService.getOnlineUserIds(participantIds),
     preferencesService.getResolvedPrivacyByUserIds(participantIds),
@@ -223,9 +232,7 @@ export const listArchivedConversations = async (
     limit
   );
 
-  const participantIds = Array.from(
-    new Set(data.flatMap((doc) => doc.participantIds.map((id) => id.toString())))
-  );
+  const participantIds = toParticipantIds(data);
   const [onlineUserIds, privacyByUserId] = await Promise.all([
     presenceService.getOnlineUserIds(participantIds),
     preferencesService.getResolvedPrivacyByUserIds(participantIds),

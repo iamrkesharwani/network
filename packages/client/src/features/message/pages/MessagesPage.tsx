@@ -22,7 +22,7 @@ import {
   isPinReentryDue,
 } from '../pinLockStore';
 import { setPrivateKey } from '../messageKeySlice';
-import { getApiErrorCode } from '../../../shared/lib/getApiErrorMessage';
+import { getApiErrorCode, getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
 import { buildConversationPath } from '../utils/buildMessagesPath';
 import {
   useGetConversationsQuery,
@@ -66,6 +66,7 @@ const MessagesPage = () => {
 
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [newChatQuery, setNewChatQuery] = useState('');
+  const [newChatError, setNewChatError] = useState<string | null>(null);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
   const [isAddParticipantsOpen, setIsAddParticipantsOpen] = useState(false);
@@ -181,10 +182,17 @@ const MessagesPage = () => {
   const [createDirectConversation] = useCreateDirectConversationMutation();
 
   const handleStartChat = async (participantId: string) => {
-    const result = await createDirectConversation({ participantId }).unwrap();
-    navigate(buildConversationPath(result.data.id));
-    setIsNewChatOpen(false);
-    setNewChatQuery('');
+    setNewChatError(null);
+    try {
+      const result = await createDirectConversation({ participantId }).unwrap();
+      navigate(buildConversationPath(result.data.id));
+      setIsNewChatOpen(false);
+      setNewChatQuery('');
+    } catch (error) {
+      setNewChatError(
+        getApiErrorMessage(error, 'Could not start this conversation. Please try again.')
+      );
+    }
   };
 
   if (!user) return null;
@@ -221,7 +229,10 @@ const MessagesPage = () => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setIsNewChatOpen((open) => !open)}
+                onClick={() => {
+                  setIsNewChatOpen((open) => !open);
+                  setNewChatError(null);
+                }}
               >
                 New
               </Button>
@@ -240,10 +251,18 @@ const MessagesPage = () => {
           <div className="mb-4 rounded-lg border border-border p-2">
             <input
               value={newChatQuery}
-              onChange={(event) => setNewChatQuery(event.target.value)}
+              onChange={(event) => {
+                setNewChatQuery(event.target.value);
+                setNewChatError(null);
+              }}
               placeholder="Search by username..."
               className="mb-2 w-full rounded-md border border-border bg-surface-raised px-2.5 py-1.5 text-sm outline-none focus:border-primary"
             />
+            {newChatError && (
+              <p className="mb-2 text-sm text-error" role="alert">
+                {newChatError}
+              </p>
+            )}
             {searchResults?.data.map((result) => (
               <button
                 key={result.id}

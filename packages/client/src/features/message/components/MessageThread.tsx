@@ -4,6 +4,7 @@ import { ArrowLeft, Ban } from 'lucide-react';
 import {
   CLIENT_ROUTES,
   MESSAGE_EDIT_WINDOW_MS,
+  type ConversationDisappearingTtl,
   type IConversationSummary,
   type IMessageResponse,
 } from '@network/shared';
@@ -151,7 +152,10 @@ const MessageThread = ({
       publicKey: key.publicKey,
     })) ?? [];
 
-  const handleSend = async (text: string) => {
+  const handleSend = async (
+    text: string,
+    ttlOverride?: ConversationDisappearingTtl
+  ) => {
     const recipients = getRecipients();
     if (recipients.length === 0) return;
 
@@ -170,6 +174,7 @@ const MessageThread = ({
       iv,
       encryptedKeys,
       ...(replyTo && { replyToMessageId: replyTo.id }),
+      ...(ttlOverride && { ttlOverride }),
     }).unwrap();
     setReplyTo(null);
   };
