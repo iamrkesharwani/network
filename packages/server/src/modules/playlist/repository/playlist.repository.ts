@@ -42,7 +42,8 @@ export const create = (
 
 export const findById = (
   playlistId: string
-): Promise<IPlaylistDocument | null> => PlaylistModel.findById(playlistId).exec();
+): Promise<IPlaylistDocument | null> =>
+  PlaylistModel.findById(playlistId).exec();
 
 export interface PopulatedAuthor {
   _id: mongoose.Types.ObjectId;
@@ -61,7 +62,7 @@ export const setCoverImage = (
   PlaylistModel.findByIdAndUpdate(
     playlistId,
     { $set: { coverImageUrl } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const removeCoverImage = (
@@ -70,7 +71,7 @@ export const removeCoverImage = (
   PlaylistModel.findByIdAndUpdate(
     playlistId,
     { $unset: { coverImageUrl: 1 } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const update = (
@@ -80,7 +81,7 @@ export const update = (
   PlaylistModel.findByIdAndUpdate(
     playlistId,
     { $set: input },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const deleteById = (
@@ -95,7 +96,7 @@ export const incrementItemCount = (
   PlaylistModel.findByIdAndUpdate(
     playlistId,
     { $inc: { itemCount: delta } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const findByUserPaginated = async (
@@ -103,7 +104,9 @@ export const findByUserPaginated = async (
   cursor: string | null,
   limit: number,
   extraFilter: Record<string, unknown> = {}
-): Promise<Omit<PaginatedResponse<IPlaylistDocument>, 'success' | 'message'>> => {
+): Promise<
+  Omit<PaginatedResponse<IPlaylistDocument>, 'success' | 'message'>
+> => {
   const safeLimit = Math.min(Math.max(1, limit), MAX_PAGE_LIMIT);
   const decoded = cursor ? decodeCursor(cursor) : null;
 
