@@ -1,13 +1,11 @@
 import {
   MESSAGE_OEMBED_PROVIDERS,
   type IMessageLinkPreview,
-  type IMessageAttachmentPayload,
 } from '@network/shared';
 
 export interface IMessagePayload {
   text: string;
   linkPreview?: IMessageLinkPreview;
-  attachment?: IMessageAttachmentPayload;
 }
 
 export const encodeMessagePayload = (payload: IMessagePayload): string =>

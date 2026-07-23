@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import InfiniteScroll from '../../../shared/ui/list/InfiniteScroll';
 import { useGetConversationsQuery, CONVERSATION_LIST_ARGS } from '../conversationApi';
-import type { IMessageKeyRing } from '../keyManager';
 import { getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
 import Button from '../../../shared/ui/primitives/Button';
 import ConversationListItem from './ConversationListItem';
@@ -10,17 +9,11 @@ import ConversationListItemSkeleton from '../skeleton/ConversationListItemSkelet
 interface ConversationListProps {
   activeConversationId: string | null;
   onSelect: (conversationId: string) => void;
-  privateKey: CryptoKey;
-  keyRing?: IMessageKeyRing;
-  myUserId: string;
 }
 
 const ConversationList = ({
   activeConversationId,
   onSelect,
-  privateKey,
-  keyRing,
-  myUserId,
 }: ConversationListProps) => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const { data, isLoading, isFetching, isError, error, refetch } =
@@ -71,9 +64,6 @@ const ConversationList = ({
           key={conversation.id}
           conversation={conversation}
           isActive={conversation.id === activeConversationId}
-          privateKey={privateKey}
-          keyRing={keyRing}
-          myUserId={myUserId}
           onSelect={onSelect}
         />
       ))}

@@ -12,37 +12,21 @@ import {
   Flag,
 } from 'lucide-react';
 import ReportModal from '../../report/components/ReportModal';
-import type {
-  IConversationSummary,
-  IMessageAttachmentPayload,
-  IMessageLinkPreview,
-  IMessageResponse,
-} from '@network/shared';
+import type { IConversationSummary, IMessageResponse } from '@network/shared';
 import {
   getRelativeDate,
   formatDuration,
   MESSAGE_QUICK_REACTION_EMOJIS,
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
-import {
-  decryptMessage,
-  unwrapMessageKey,
-  decryptFile,
-  type IMessageKeyRing,
-} from '../keyManager';
+import { axiosInstance } from '../../../shared/lib/axiosInstance';
 import { decodeMessagePayload } from '../messagePayload';
 import { linkifyText } from '../utils/linkifyText';
-import {
-  useDeleteMessageMutation,
-  useGetMessageByIdQuery,
-  useLazyGetMessageAttachmentUrlQuery,
-} from '../messageApi';
+import { useDeleteMessageMutation, useGetMessageByIdQuery } from '../messageApi';
 import SeenByIndicator from './SeenByIndicator';
 
 interface MessageBubbleProps {
   message: IMessageResponse;
-  privateKey: CryptoKey;
-  keyRing?: IMessageKeyRing;
   myUserId: string;
   conversation: IConversationSummary;
   isLastFromSender: boolean;
@@ -53,27 +37,6 @@ interface MessageBubbleProps {
   onRemoveReaction: (messageId: string) => Promise<void>;
   onEdit: (messageId: string, text: string) => Promise<void>;
 }
-
-const getDecryptFailureMessage = (
-  message: IMessageResponse,
-  myUserId: string
-): string => {
-  const hasSenderEntry = message.encryptedKeys.some(
-    (entry) => entry.recipientId === message.senderId
-  );
-  if (!hasSenderEntry) {
-    return "The sender hadn't set up messaging yet when this was sent.";
-  }
-
-  const hasMyEntry = message.encryptedKeys.some(
-    (entry) => entry.recipientId === myUserId
-  );
-  if (!hasMyEntry) {
-    return "You didn't have access to this conversation when it was sent.";
-  }
-
-  return 'Unable to decrypt this message.';
-};
 
 const formatCountdown = (expiresAt: string): string => {
   const remainingMs = new Date(expiresAt).getTime() - Date.now();
@@ -112,8 +75,6 @@ interface ReplyPreviewProps {
   replyToMessageId: string;
   repliedToMessage: IMessageResponse | undefined;
   conversation: IConversationSummary;
-  privateKey: CryptoKey;
-  keyRing?: IMessageKeyRing;
   myUserId: string;
 }
 
@@ -121,8 +82,6 @@ const ReplyPreview = ({
   replyToMessageId,
   repliedToMessage,
   conversation,
-  privateKey,
-  keyRing,
   myUserId,
 }: ReplyPreviewProps) => {
   const { data, isFetching, isError } = useGetMessageByIdQuery(
@@ -130,25 +89,10 @@ const ReplyPreview = ({
     { skip: !!repliedToMessage }
   );
   const resolved = repliedToMessage ?? data?.data;
-  const [preview, setPreview] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!resolved || resolved.unsentAt || resolved.expiredAt) {
-      setPreview(null);
-      return;
-    }
-    let cancelled = false;
-    decryptMessage(resolved, privateKey, myUserId, keyRing)
-      .then((decrypted) => {
-        if (!cancelled) setPreview(decodeMessagePayload(decrypted).text);
-      })
-      .catch(() => {
-        if (!cancelled) setPreview(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [resolved, privateKey, keyRing, myUserId]);
+  const preview = useMemo(() => {
+    if (!resolved || resolved.unsentAt || resolved.expiredAt) return null;
+    return decodeMessagePayload(resolved.content).text;
+  }, [resolved]);
 
   if (!resolved && (isFetching || isError)) {
     return (
@@ -178,24 +122,12 @@ const ReplyPreview = ({
 
 interface MessageAttachmentViewProps {
   message: IMessageResponse;
-  attachment: IMessageAttachmentPayload;
-  privateKey: CryptoKey;
-  keyRing?: IMessageKeyRing;
-  myUserId: string;
   isOwn: boolean;
 }
 
-const MessageAttachmentView = ({
-  message,
-  attachment,
-  privateKey,
-  keyRing,
-  myUserId,
-  isOwn,
-}: MessageAttachmentViewProps) => {
+const MessageAttachmentView = ({ message, isOwn }: MessageAttachmentViewProps) => {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
-  const [fetchAttachmentUrl] = useLazyGetMessageAttachmentUrlQuery();
 
   useEffect(() => {
     let cancelled = false;
@@ -203,23 +135,11 @@ const MessageAttachmentView = ({
 
     const load = async () => {
       try {
-        const messageKey = await unwrapMessageKey(
-          message,
-          privateKey,
-          myUserId,
-          keyRing
+        const response = await axiosInstance.get(
+          `/messages/${message.id}/attachment`,
+          { responseType: 'blob' }
         );
-        const { data } = await fetchAttachmentUrl(message.id).unwrap();
-        const response = await fetch(data.url);
-        const ciphertextBuffer = await response.arrayBuffer();
-        const plaintextBuffer = await decryptFile(
-          messageKey,
-          ciphertextBuffer,
-          attachment.attachmentIv
-        );
-        createdUrl = URL.createObjectURL(
-          new Blob([plaintextBuffer], { type: attachment.mimeType })
-        );
+        createdUrl = URL.createObjectURL(response.data as Blob);
         if (!cancelled) setObjectUrl(createdUrl);
       } catch {
         if (!cancelled) setHasError(true);
@@ -231,7 +151,7 @@ const MessageAttachmentView = ({
       cancelled = true;
       if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
-  }, [message, attachment, privateKey, keyRing, myUserId, fetchAttachmentUrl]);
+  }, [message.id]);
 
   if (hasError) {
     return (
@@ -241,7 +161,7 @@ const MessageAttachmentView = ({
     );
   }
 
-  if (attachment.type === 'voice') {
+  if (message.attachmentType === 'voice') {
     return (
       <div className="mt-2 flex items-center gap-2">
         {objectUrl ? (
@@ -249,9 +169,9 @@ const MessageAttachmentView = ({
         ) : (
           <span className="text-xs opacity-70">Loading voice note…</span>
         )}
-        {attachment.duration !== undefined && (
+        {message.attachmentDuration !== undefined && (
           <span className="text-xs opacity-70">
-            {formatDuration(attachment.duration)}
+            {formatDuration(message.attachmentDuration)}
           </span>
         )}
       </div>
@@ -280,8 +200,6 @@ const MessageAttachmentView = ({
 
 const MessageBubble = ({
   message,
-  privateKey,
-  keyRing,
   myUserId,
   conversation,
   isLastFromSender,
@@ -292,86 +210,36 @@ const MessageBubble = ({
   onRemoveReaction,
   onEdit,
 }: MessageBubbleProps) => {
-  const [text, setText] = useState<string | null>(null);
-  const [linkPreview, setLinkPreview] = useState<IMessageLinkPreview | null>(null);
-  const [attachment, setAttachment] = useState<IMessageAttachmentPayload | null>(
-    null
-  );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editDraft, setEditDraft] = useState('');
-  const [reactionTexts, setReactionTexts] = useState<Record<string, string>>({});
   const [deleteMessage] = useDeleteMessageMutation();
   const isOwn = message.senderId === myUserId;
   const isRemoved = Boolean(
     message.unsentAt || message.expiredAt || message.moderationRemovedAt
   );
 
-  useEffect(() => {
-    if (isRemoved) return;
-
-    let cancelled = false;
-    decryptMessage(message, privateKey, myUserId, keyRing)
-      .then((decrypted) => {
-        if (cancelled) return;
-        const payload = decodeMessagePayload(decrypted);
-        setText(payload.text);
-        setLinkPreview(payload.linkPreview ?? null);
-        setAttachment(payload.attachment ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setText(getDecryptFailureMessage(message, myUserId));
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [message, privateKey, keyRing, myUserId]);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all(
-      message.reactions.map(async (reaction) => {
-        try {
-          const emoji = await decryptMessage(
-            reaction,
-            privateKey,
-            myUserId,
-            keyRing
-          );
-          return [reaction.userId, emoji] as const;
-        } catch {
-          return null;
-        }
-      })
-    ).then((results) => {
-      if (cancelled) return;
-      const map: Record<string, string> = {};
-      for (const entry of results) {
-        if (entry) map[entry[0]] = entry[1];
-      }
-      setReactionTexts(map);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [message.reactions, privateKey, keyRing, myUserId]);
+  const { text, linkPreview } = useMemo(() => {
+    if (isRemoved) return { text: null, linkPreview: null };
+    const payload = decodeMessagePayload(message.content);
+    return { text: payload.text, linkPreview: payload.linkPreview ?? null };
+  }, [message.content, isRemoved]);
 
   const reactionGroups = useMemo(() => {
     const groups = new Map<string, string[]>();
     for (const reaction of message.reactions) {
-      const emoji = reactionTexts[reaction.userId];
-      if (!emoji) continue;
-      const users = groups.get(emoji) ?? [];
+      const users = groups.get(reaction.content) ?? [];
       users.push(reaction.userId);
-      groups.set(emoji, users);
+      groups.set(reaction.content, users);
     }
     return Array.from(groups.entries());
-  }, [message.reactions, reactionTexts]);
+  }, [message.reactions]);
 
-  const myReactionEmoji = reactionTexts[myUserId];
+  const myReactionEmoji = message.reactions.find(
+    (reaction) => reaction.userId === myUserId
+  )?.content;
 
   const handleDeleteForMe = () => {
     deleteMessage({ messageId: message.id, scope: 'me' });
@@ -416,8 +284,6 @@ const MessageBubble = ({
             replyToMessageId={message.replyToMessageId}
             repliedToMessage={repliedToMessage}
             conversation={conversation}
-            privateKey={privateKey}
-            keyRing={keyRing}
             myUserId={myUserId}
           />
         )}
@@ -469,15 +335,8 @@ const MessageBubble = ({
                     ? linkifyText(text)
                     : '...'}
 
-            {!isRemoved && attachment && (
-              <MessageAttachmentView
-                message={message}
-                attachment={attachment}
-                privateKey={privateKey}
-                keyRing={keyRing}
-                myUserId={myUserId}
-                isOwn={isOwn}
-              />
+            {!isRemoved && message.attachmentType && (
+              <MessageAttachmentView message={message} isOwn={isOwn} />
             )}
 
             {linkPreview && (

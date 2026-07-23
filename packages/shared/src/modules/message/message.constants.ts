@@ -5,10 +5,13 @@ import {
   FIFTEEN_MINUTES_MS,
   SEVENTY_TWO_HOURS_MS,
   SEVEN_DAYS_MS,
+  FIVE_MINUTES_SECONDS,
 } from '../general/constants/time.constants.js';
 import { OTP_MAX_ATTEMPTS } from '../auth/auth.constants.js';
 
 export const CONVERSATION_TYPES = ['direct', 'group'] as const;
+
+export const MESSAGE_THREAD_PAGE_LIMIT = 30;
 
 export const MESSAGE_GROUP_MAX_PARTICIPANTS = 50;
 export const GROUP_NAME_MAX_LENGTH = 100;
@@ -17,9 +20,13 @@ export const GROUP_AVATAR_ASPECT_RATIO = 1;
 export const GROUP_AVATAR_WIDTH_PX = 512;
 export const GROUP_AVATAR_HEIGHT_PX = 512;
 
-export const MESSAGE_CIPHERTEXT_MAX_LENGTH = 20000;
-export const MESSAGE_ENCRYPTED_KEY_MAX_LENGTH = 512;
+export const MESSAGE_CONTENT_MAX_LENGTH = 15000;
+export const MESSAGE_CIPHERTEXT_MAX_LENGTH = 21000;
+export const MESSAGE_ENCRYPTED_DATA_KEY_MAX_LENGTH = 512;
 export const MESSAGE_IV_MAX_LENGTH = 64;
+
+export const MESSAGE_DEK_CACHE_TTL_SECONDS = FIVE_MINUTES_SECONDS;
+export const MESSAGE_DEK_CACHE_KEY_PREFIX = 'message:dek:';
 
 export const KEY_BUNDLE_PBKDF2_MIN_ITERATIONS = 600000;
 export const KEY_BUNDLE_PUBLIC_KEY_MAX_LENGTH = 1024;
@@ -59,7 +66,8 @@ export const PRESENCE_REDIS_KEY_PREFIX = 'presence:online:';
 export const MESSAGE_TYPING_DEBOUNCE_MS = 2000;
 export const MESSAGE_TYPING_AUTO_CLEAR_MS = 3000;
 
-export const MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH = 256;
+export const MESSAGE_REACTION_CONTENT_MAX_LENGTH = 32;
+export const MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH = 64;
 
 export const MESSAGE_QUICK_REACTION_EMOJIS = [
   '❤️',
@@ -86,6 +94,22 @@ export const MESSAGE_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
 export const MESSAGE_ATTACHMENT_MAX_VOICE_DURATION_MS = 5 * 60 * 1000;
 export const MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH = 256;
 export const MESSAGE_ATTACHMENT_UPLOAD_TTL_SECONDS = ONE_HOUR_SECONDS;
+
+export const ALLOWED_MESSAGE_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+] as const;
+// video/webm is included because browser MediaRecorder audio-only recordings
+// use a WebM container, and magic-byte sniffing can't distinguish an
+// audio-only WebM from a video one at the container level.
+export const ALLOWED_MESSAGE_VOICE_MIME_TYPES = [
+  'audio/webm',
+  'video/webm',
+  'audio/ogg',
+  'audio/mp4',
+  'audio/mpeg',
+] as const;
 export const MESSAGE_ATTACHMENT_ACCESS_URL_TTL_SECONDS = SIX_HOURS_SECONDS;
 
 export const MESSAGE_ATTACHMENT_REAPER_QUEUE_NAME = 'message-attachment-reaper';

@@ -4,14 +4,12 @@ import type {
   ApiResponse,
   PaginatedResponse,
   IMessageResponse,
-  IMessageAttachmentPresignResult,
-  IMessageAttachmentUrlResult,
+  IMessageAttachmentUploadResult,
   MessageListQuery,
   MessageSendInput,
   MessageDeleteInput,
   MessageReactionSetInput,
   MessageEditInput,
-  MessageAttachmentPresignInput,
 } from '@network/shared';
 
 export const messageApi = createApi({
@@ -28,7 +26,8 @@ export const messageApi = createApi({
         method: 'GET',
         params,
       }),
-      serializeQueryArgs: ({ queryArgs }) => queryArgs.conversationId,
+      serializeQueryArgs: ({ queryArgs }) =>
+        `${queryArgs.conversationId}:${queryArgs.limit}`,
       merge: (currentCache, newData, { arg }) => {
         if (arg.cursor === undefined) {
           currentCache.data = newData.data;
@@ -96,20 +95,15 @@ export const messageApi = createApi({
       }),
     }),
 
-    presignMessageAttachment: builder.mutation<
-      ApiResponse<IMessageAttachmentPresignResult>,
-      MessageAttachmentPresignInput
+    uploadMessageAttachment: builder.mutation<
+      ApiResponse<IMessageAttachmentUploadResult>,
+      FormData
     >({
-      query: (data) => ({ url: '/attachments/presign', method: 'POST', data }),
-    }),
-
-    getMessageAttachmentUrl: builder.query<
-      ApiResponse<IMessageAttachmentUrlResult>,
-      string
-    >({
-      query: (messageId) => ({
-        url: `/${messageId}/attachment`,
-        method: 'GET',
+      query: (data) => ({
+        url: '/attachments/upload',
+        method: 'POST',
+        data,
+        headers: { 'Content-Type': 'multipart/form-data' },
       }),
     }),
   }),
@@ -123,6 +117,5 @@ export const {
   useEditMessageMutation,
   useSetMessageReactionMutation,
   useRemoveMessageReactionMutation,
-  usePresignMessageAttachmentMutation,
-  useLazyGetMessageAttachmentUrlQuery,
+  useUploadMessageAttachmentMutation,
 } = messageApi;

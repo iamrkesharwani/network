@@ -1,7 +1,5 @@
 import type {
   ConversationDisappearingTtl,
-  EncryptedKeyEntryInput,
-  IMessageAttachmentUrlResult,
   IMessageResponse,
   MessageDeleteScope,
   MessageSendInput,
@@ -24,6 +22,7 @@ import * as messageAttachmentService from './messageAttachment.service.js';
 import { toConversationSummary } from './conversation.mappers.js';
 import * as presenceService from './presence.service.js';
 import { toMessageResponse } from './message.mappers.js';
+import { encryptContent, decryptBuffer } from './envelopeEncryption.service.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import { storageProvider } from '../../../core/providers/provider.js';
@@ -51,25 +50,6 @@ const emitToUserIds = (
   }
 };
 
-const assertRecipientCoverage = (
-  recipientIds: string[],
-  encryptedKeys: EncryptedKeyEntryInput[]
-): void => {
-  const encryptedRecipientIds = new Set(
-    encryptedKeys.map((entry) => entry.recipientId)
-  );
-  const missingRecipients = recipientIds.filter(
-    (id) => !encryptedRecipientIds.has(id)
-  );
-  if (missingRecipients.length > 0) {
-    throw new ApiError(
-      400,
-      'BAD_REQUEST',
-      'Message is missing an encrypted key for one or more participants.'
-    );
-  }
-};
-
 export const sendMessage = async (
   userId: string,
   input: MessageSendInput
@@ -89,8 +69,6 @@ export const sendMessage = async (
 
   const recipientIds = conversation.participantIds.map((id) => id.toString());
 
-  assertRecipientCoverage(recipientIds, input.encryptedKeys);
-
   if (input.replyToMessageId) {
     const repliedTo = await messageRepository.findById(input.replyToMessageId);
     if (!repliedTo || repliedTo.conversationId.toString() !== input.conversationId) {
@@ -102,26 +80,40 @@ export const sendMessage = async (
     }
   }
 
-  if (input.attachmentStorageKey) {
-    await messageAttachmentService.assertOwnedPendingAttachment(
-      userId,
-      input.attachmentStorageKey
-    );
-  }
+  const pendingAttachment = input.attachmentStorageKey
+    ? await messageAttachmentService.resolvePendingAttachment(
+        userId,
+        input.attachmentStorageKey
+      )
+    : undefined;
 
   const ttl = input.ttlOverride ?? conversation.disappearingMessagesTtl;
   const expiresAt =
     ttl === 'off' ? undefined : new Date(Date.now() + DISAPPEARING_TTL_DURATIONS_MS[ttl]);
 
+  const { ciphertext, iv, encryptedDataKey } = await encryptContent(
+    input.content
+  );
+
   const inserted = await messageRepository.insertMessage(
     input.conversationId,
     userId,
-    input.ciphertext,
-    input.iv,
-    input.encryptedKeys,
+    ciphertext,
+    iv,
+    encryptedDataKey,
     input.replyToMessageId,
     expiresAt,
-    input.attachmentStorageKey
+    pendingAttachment && {
+      storageKey: input.attachmentStorageKey!,
+      encryptedDataKey: pendingAttachment.encryptedDataKey,
+      iv: pendingAttachment.iv,
+      type: pendingAttachment.type,
+      mimeType: pendingAttachment.mimeType,
+      size: pendingAttachment.size,
+      ...(pendingAttachment.duration !== undefined && {
+        duration: pendingAttachment.duration,
+      }),
+    }
   );
 
   if (input.attachmentStorageKey) {
@@ -130,7 +122,7 @@ export const sendMessage = async (
     );
   }
 
-  const response = toMessageResponse(inserted);
+  const response = await toMessageResponse(inserted);
 
   if (expiresAt) {
     await scheduleMessageExpiry(response.id, expiresAt.getTime() - Date.now());
@@ -174,7 +166,7 @@ export const listMessages = async (
   );
 
   return {
-    data: data.map(toMessageResponse),
+    data: await Promise.all(data.map(toMessageResponse)),
     meta,
   };
 };
@@ -253,10 +245,10 @@ export const getMessageById = async (
   return toMessageResponse(message);
 };
 
-export const getMessageAttachmentUrl = async (
+export const getDecryptedAttachment = async (
   userId: string,
   messageId: string
-): Promise<IMessageAttachmentUrlResult> => {
+): Promise<{ buffer: Buffer; mimeType: string }> => {
   const message = await messageRepository.findById(messageId);
   if (!message) {
     throw new ApiError(404, 'NOT_FOUND', 'Message not found.');
@@ -267,12 +259,25 @@ export const getMessageAttachmentUrl = async (
     message.conversationId.toString()
   );
 
-  if (!message.attachmentStorageKey) {
+  if (
+    !message.attachmentStorageKey ||
+    !message.attachmentEncryptedDataKey ||
+    !message.attachmentIv ||
+    !message.attachmentMimeType
+  ) {
     throw new ApiError(404, 'NOT_FOUND', 'This message has no attachment.');
   }
 
-  const url = await storageProvider.buildAccessUrl(message.attachmentStorageKey);
-  return { url };
+  const ciphertext = await storageProvider.downloadObject(
+    message.attachmentStorageKey
+  );
+  const buffer = await decryptBuffer(
+    ciphertext,
+    message.attachmentEncryptedDataKey,
+    message.attachmentIv
+  );
+
+  return { buffer, mimeType: message.attachmentMimeType };
 };
 
 export const setReaction = async (
@@ -298,20 +303,24 @@ export const setReaction = async (
   );
   const recipientIds = conversation.participantIds.map((id) => id.toString());
 
-  assertRecipientCoverage(recipientIds, input.encryptedKeys);
+  const {
+    ciphertext,
+    iv,
+    encryptedDataKey,
+  } = await encryptContent(input.content);
 
   const updated = await messageRepository.setReaction(
     messageId,
     userId,
-    input.ciphertext,
-    input.iv,
-    input.encryptedKeys
+    ciphertext,
+    iv,
+    encryptedDataKey
   );
   if (!updated) {
     throw new ApiError(404, 'NOT_FOUND', 'Message not found.');
   }
 
-  const response = toMessageResponse(updated);
+  const response = await toMessageResponse(updated);
   const reaction = response.reactions.find((entry) => entry.userId === userId);
 
   emitToUserIds(recipientIds, MESSAGE_REACTION_UPDATED_SOCKET_EVENT, {
@@ -386,26 +395,28 @@ export const editMessage = async (
   );
   const recipientIds = conversation.participantIds.map((id) => id.toString());
 
-  assertRecipientCoverage(recipientIds, input.encryptedKeys);
+  const {
+    ciphertext,
+    iv,
+    encryptedDataKey,
+  } = await encryptContent(input.content);
 
   const updated = await messageRepository.editMessage(
     messageId,
-    input.ciphertext,
-    input.iv,
-    input.encryptedKeys
+    ciphertext,
+    iv,
+    encryptedDataKey
   );
   if (!updated) {
     throw new ApiError(404, 'NOT_FOUND', 'Message not found.');
   }
 
-  const response = toMessageResponse(updated);
+  const response = await toMessageResponse(updated);
 
   emitToUserIds(recipientIds, MESSAGE_EDITED_SOCKET_EVENT, {
     conversationId: response.conversationId,
     messageId,
-    ciphertext: response.ciphertext,
-    iv: response.iv,
-    encryptedKeys: response.encryptedKeys,
+    content: response.content,
     editedAt: response.editedAt,
   });
 

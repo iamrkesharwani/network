@@ -1,50 +1,63 @@
 import { randomUUID } from 'node:crypto';
 import type {
-  IMessageAttachmentPresignResult,
-  MessageAttachmentPresignInput,
+  IMessageAttachmentUploadResult,
+  MessageAttachmentType,
 } from '@network/shared';
 import { storageProvider } from '../../../core/providers/provider.js';
+import { encryptBuffer } from './envelopeEncryption.service.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { logger } from '../../../core/utils/logger.js';
 import * as conversationService from './conversation.service.js';
 import * as messageAttachmentRepository from '../repository/messageAttachment.repository.js';
+import type { IPendingAttachment } from '../repository/messageAttachment.repository.js';
 
-export const presignAttachmentUpload = async (
+export const uploadAttachment = async (
   userId: string,
-  input: MessageAttachmentPresignInput
-): Promise<IMessageAttachmentPresignResult> => {
-  await conversationService.assertConversationMembership(
-    userId,
-    input.conversationId
-  );
+  conversationId: string,
+  file: { buffer: Buffer; mimetype: string; size: number },
+  type: MessageAttachmentType,
+  duration?: number
+): Promise<IMessageAttachmentUploadResult> => {
+  await conversationService.assertConversationMembership(userId, conversationId);
 
   const attachmentId = randomUUID();
-  const { url, key } = await storageProvider.presignUpload(
+  const { key } = await storageProvider.presignUpload(
     'message-attachment',
     userId,
     attachmentId,
     'application/octet-stream',
-    input.contentLength
+    file.size
   );
 
-  await messageAttachmentRepository.createPendingAttachment(key, userId);
+  const { ciphertext, encryptedDataKey, iv } = await encryptBuffer(file.buffer);
+  await storageProvider.uploadObject(key, ciphertext, 'application/octet-stream');
 
-  return { storageKey: key, uploadUrl: url };
+  await messageAttachmentRepository.createPendingAttachment(key, {
+    ownerId: userId,
+    encryptedDataKey,
+    iv,
+    type,
+    mimeType: file.mimetype,
+    size: file.size,
+    ...(duration !== undefined && { duration }),
+  });
+
+  return { storageKey: key };
 };
 
-export const assertOwnedPendingAttachment = async (
+export const resolvePendingAttachment = async (
   userId: string,
   storageKey: string
-): Promise<void> => {
-  const owner =
-    await messageAttachmentRepository.getPendingAttachmentOwner(storageKey);
-  if (owner !== userId) {
+): Promise<IPendingAttachment> => {
+  const pending = await messageAttachmentRepository.getPendingAttachment(storageKey);
+  if (!pending || pending.ownerId !== userId) {
     throw new ApiError(
       403,
       'FORBIDDEN',
       'This attachment upload does not belong to you or has expired.'
     );
   }
+  return pending;
 };
 
 export const confirmPendingAttachment = (storageKey: string): Promise<void> =>

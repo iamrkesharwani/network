@@ -4,6 +4,7 @@ import { ArrowLeft, Ban, Flag } from 'lucide-react';
 import {
   CLIENT_ROUTES,
   MESSAGE_EDIT_WINDOW_MS,
+  MESSAGE_THREAD_PAGE_LIMIT,
   type ConversationDisappearingTtl,
   type IConversationSummary,
   type IMessageResponse,
@@ -20,27 +21,11 @@ import {
   useSetMessageReactionMutation,
   useRemoveMessageReactionMutation,
   useEditMessageMutation,
-  usePresignMessageAttachmentMutation,
+  useUploadMessageAttachmentMutation,
 } from '../messageApi';
 import { useMarkConversationReadMutation } from '../conversationApi';
-import { useGetPublicKeysQuery } from '../keyBundleApi';
 import { useConversationRoom } from '../hooks/useConversationRoom';
-import {
-  encryptForRecipients,
-  decryptMessage,
-  generateMessageKey,
-  encryptFile,
-  encryptTextWithKey,
-  wrapMessageKeyForRecipients,
-  type IMessageKeyRing,
-} from '../keyManager';
-import {
-  encodeMessagePayload,
-  decodeMessagePayload,
-  fetchLinkPreview,
-  type IMessagePayload,
-} from '../messagePayload';
-import { uploadEncryptedAttachment } from '../utils/uploadAttachment';
+import { encodeMessagePayload, decodeMessagePayload, fetchLinkPreview } from '../messagePayload';
 import ReportModal from '../../report/components/ReportModal';
 import { useBlockUserMutation } from '../../block/blockApi';
 import { usePreference } from '../../settings/hooks/usePreference';
@@ -49,14 +34,10 @@ import MessageInput from './MessageInput';
 import TypingIndicator from './TypingIndicator';
 import PresenceDot from './PresenceDot';
 import DisappearingMessagesMenu from './DisappearingMessagesMenu';
-import SafetyNumberBadge from './SafetyNumberBadge';
-import VerifyContactModal from './VerifyContactModal';
 import MessageThreadSkeleton from '../skeleton/MessageThreadSkeleton';
 
 interface MessageThreadProps {
   conversation: IConversationSummary;
-  privateKey: CryptoKey;
-  keyRing?: IMessageKeyRing;
   myUserId: string;
   socketRef: ReturnType<typeof useSocket>;
   onOpenGroupInfo?: () => void;
@@ -83,12 +64,10 @@ const getParticipantLabel = (
   );
 };
 
-const MESSAGE_LIST_ARGS = { limit: 30 };
+const MESSAGE_LIST_ARGS = { limit: MESSAGE_THREAD_PAGE_LIMIT };
 
 const MessageThread = ({
   conversation,
-  privateKey,
-  keyRing,
   myUserId,
   socketRef,
   onOpenGroupInfo,
@@ -96,11 +75,9 @@ const MessageThread = ({
 }: MessageThreadProps) => {
   const navigate = useNavigate();
   const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
-  const [isVerifyOpen, setIsVerifyOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
   const [replyTo, setReplyTo] = useState<IMessageResponse | null>(null);
-  const [replyToPreview, setReplyToPreview] = useState<string | null>(null);
   const { emitTyping } = useConversationRoom(socketRef, conversation.id);
   const { data, isLoading, isError, error, refetch } = useGetMessagesQuery({
     conversationId: conversation.id,
@@ -118,29 +95,14 @@ const MessageThread = ({
   const [editMessage] = useEditMessageMutation();
   const [privacy] = usePreference('privacy');
 
-  const recipientIds = useMemo(
-    () =>
-      conversation.type === 'direct'
-        ? [conversation.otherParticipant.id, myUserId]
-        : conversation.participants.map((participant) => participant.id),
-    [conversation, myUserId]
-  );
-
-  const { data: publicKeysData } = useGetPublicKeysQuery(recipientIds, {
-    skip: recipientIds.length === 0,
-  });
-  const myPublicKey = publicKeysData?.data.find(
-    (key) => key.userId === myUserId
-  )?.publicKey;
-  const otherParticipantPublicKey =
-    conversation.type === 'direct'
-      ? publicKeysData?.data.find(
-          (key) => key.userId === conversation.otherParticipant.id
-        )?.publicKey
-      : undefined;
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
-  const [presignAttachment] = usePresignMessageAttachmentMutation();
+  const [uploadAttachment] = useUploadMessageAttachmentMutation();
   const [markConversationRead] = useMarkConversationReadMutation();
+
+  const replyToPreview = useMemo(() => {
+    if (!replyTo || replyTo.unsentAt) return null;
+    return decodeMessagePayload(replyTo.content).text;
+  }, [replyTo]);
 
   const participantNameById = useMemo(() => {
     const entries: [string, string][] =
@@ -167,52 +129,17 @@ const MessageThread = ({
     bottomRef.current?.scrollIntoView({ block: 'end' });
   }, [orderedMessages.length]);
 
-  useEffect(() => {
-    if (!replyTo || replyTo.unsentAt) {
-      setReplyToPreview(null);
-      return;
-    }
-    let cancelled = false;
-    decryptMessage(replyTo, privateKey, myUserId, keyRing)
-      .then((decrypted) => {
-        if (!cancelled) setReplyToPreview(decodeMessagePayload(decrypted).text);
-      })
-      .catch(() => {
-        if (!cancelled) setReplyToPreview(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [replyTo, privateKey, keyRing, myUserId]);
-
-  const getRecipients = () =>
-    publicKeysData?.data.map((key) => ({
-      userId: key.userId,
-      publicKey: key.publicKey,
-      keyVersion: key.keyVersion,
-    })) ?? [];
-
   const handleSend = async (
     text: string,
     ttlOverride?: ConversationDisappearingTtl
   ) => {
-    const recipients = getRecipients();
-    if (recipients.length === 0) return;
-
     const linkPreview = privacy.linkPreviewsEnabled
       ? await fetchLinkPreview(text)
       : undefined;
 
-    const { ciphertext, iv, encryptedKeys } = await encryptForRecipients(
-      encodeMessagePayload({ text, ...(linkPreview && { linkPreview }) }),
-      recipients
-    );
-
     await sendMessage({
       conversationId: conversation.id,
-      ciphertext,
-      iv,
-      encryptedKeys,
+      content: encodeMessagePayload({ text, ...(linkPreview && { linkPreview }) }),
       ...(replyTo && { replyToMessageId: replyTo.id }),
       ...(ttlOverride && { ttlOverride }),
     }).unwrap();
@@ -224,64 +151,25 @@ const MessageThread = ({
     type: MessageAttachmentType,
     duration?: number
   ) => {
-    const recipients = getRecipients();
-    if (recipients.length === 0) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('conversationId', conversation.id);
+    formData.append('type', type);
+    if (duration !== undefined) formData.append('duration', String(duration));
 
-    const messageKey = await generateMessageKey();
-    const fileBuffer = await file.arrayBuffer();
-    const { ciphertext: attachmentCiphertext, iv: attachmentIv } =
-      await encryptFile(messageKey, fileBuffer);
-
-    const presigned = await presignAttachment({
-      conversationId: conversation.id,
-      contentLength: attachmentCiphertext.byteLength,
-    }).unwrap();
-
-    await uploadEncryptedAttachment(
-      presigned.data.uploadUrl,
-      attachmentCiphertext
-    );
-
-    const payload: IMessagePayload = {
-      text: '',
-      attachment: {
-        type,
-        storageKey: presigned.data.storageKey,
-        attachmentIv,
-        mimeType: file.type,
-        size: file.size,
-        ...(duration !== undefined && { duration }),
-      },
-    };
-
-    const { ciphertext, iv } = await encryptTextWithKey(
-      messageKey,
-      encodeMessagePayload(payload)
-    );
-    const encryptedKeys = await wrapMessageKeyForRecipients(
-      messageKey,
-      recipients
-    );
+    const uploaded = await uploadAttachment(formData).unwrap();
 
     await sendMessage({
       conversationId: conversation.id,
-      ciphertext,
-      iv,
-      encryptedKeys,
-      attachmentStorageKey: presigned.data.storageKey,
+      content: encodeMessagePayload({ text: '' }),
+      attachmentStorageKey: uploaded.data.storageKey,
       ...(replyTo && { replyToMessageId: replyTo.id }),
     }).unwrap();
     setReplyTo(null);
   };
 
   const handleReact = async (messageId: string, emoji: string) => {
-    const recipients = getRecipients();
-    if (recipients.length === 0) return;
-    const { ciphertext, iv, encryptedKeys } = await encryptForRecipients(
-      emoji,
-      recipients
-    );
-    await setReaction({ messageId, ciphertext, iv, encryptedKeys }).unwrap();
+    await setReaction({ messageId, content: emoji }).unwrap();
   };
 
   const handleRemoveReaction = async (messageId: string) => {
@@ -289,13 +177,10 @@ const MessageThread = ({
   };
 
   const handleEdit = async (messageId: string, text: string) => {
-    const recipients = getRecipients();
-    if (recipients.length === 0) return;
-    const { ciphertext, iv, encryptedKeys } = await encryptForRecipients(
-      encodeMessagePayload({ text }),
-      recipients
-    );
-    await editMessage({ messageId, ciphertext, iv, encryptedKeys }).unwrap();
+    await editMessage({
+      messageId,
+      content: encodeMessagePayload({ text }),
+    }).unwrap();
   };
 
   const headerAvatar =
@@ -358,16 +243,6 @@ const MessageThread = ({
         />
 
         {conversation.type === 'direct' && (
-          <SafetyNumberBadge
-            myUserId={myUserId}
-            myPublicKey={myPublicKey}
-            contactUserId={conversation.otherParticipant.id}
-            contactPublicKey={otherParticipantPublicKey}
-            onClick={() => setIsVerifyOpen(true)}
-          />
-        )}
-
-        {conversation.type === 'direct' && (
           <button
             type="button"
             onClick={() => setIsReportOpen(true)}
@@ -405,8 +280,6 @@ const MessageThread = ({
             <MessageBubble
               key={message.id}
               message={message}
-              privateKey={privateKey}
-              keyRing={keyRing}
               myUserId={myUserId}
               conversation={conversation}
               isLastFromSender={
@@ -462,16 +335,6 @@ const MessageThread = ({
           description="They won't be able to message you or see your content, and this conversation will be removed from your list. You can unblock them later from your Privacy settings."
           confirmLabel="Block"
           isLoading={isBlocking}
-        />
-      )}
-
-      {conversation.type === 'direct' && (
-        <VerifyContactModal
-          isOpen={isVerifyOpen}
-          onClose={() => setIsVerifyOpen(false)}
-          myUserId={myUserId}
-          contactUserId={conversation.otherParticipant.id}
-          contactName={conversation.otherParticipant.name}
         />
       )}
 

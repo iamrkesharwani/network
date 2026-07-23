@@ -4,6 +4,7 @@ import { conversationApi, CONVERSATION_LIST_ARGS } from '../conversationApi';
 import { messageApi } from '../messageApi';
 import type { useSocket } from '../../../shared/hooks/useSocket';
 import {
+  MESSAGE_THREAD_PAGE_LIMIT,
   MESSAGE_NEW_SOCKET_EVENT,
   CONVERSATION_UPDATED_SOCKET_EVENT,
   CONVERSATION_READ_SOCKET_EVENT,
@@ -47,7 +48,7 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
       dispatch(
         messageApi.util.updateQueryData(
           'getMessages',
-          { conversationId: event.conversationId, limit: 20 },
+          { conversationId: event.conversationId, limit: MESSAGE_THREAD_PAGE_LIMIT },
           (draft) => {
             if (draft.data.some((message) => message.id === event.id)) return;
             draft.data.unshift(event);
@@ -89,7 +90,7 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
       dispatch(
         messageApi.util.updateQueryData(
           'getMessages',
-          { conversationId: event.conversationId, limit: 20 },
+          { conversationId: event.conversationId, limit: MESSAGE_THREAD_PAGE_LIMIT },
           (draft) => {
             if (event.scope === 'me') {
               draft.data = draft.data.filter((m) => m.id !== event.messageId);
@@ -97,8 +98,7 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
             }
             const message = draft.data.find((m) => m.id === event.messageId);
             if (message) {
-              message.ciphertext = '';
-              message.iv = '';
+              message.content = '';
               message.unsentAt = new Date().toISOString();
             }
           }
@@ -110,7 +110,7 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
       dispatch(
         messageApi.util.updateQueryData(
           'getMessages',
-          { conversationId: event.conversationId, limit: 20 },
+          { conversationId: event.conversationId, limit: MESSAGE_THREAD_PAGE_LIMIT },
           (draft) => {
             const message = draft.data.find((m) => m.id === event.messageId);
             if (!message) return;
@@ -129,13 +129,11 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
       dispatch(
         messageApi.util.updateQueryData(
           'getMessages',
-          { conversationId: event.conversationId, limit: 20 },
+          { conversationId: event.conversationId, limit: MESSAGE_THREAD_PAGE_LIMIT },
           (draft) => {
             const message = draft.data.find((m) => m.id === event.messageId);
             if (!message) return;
-            message.ciphertext = event.ciphertext;
-            message.iv = event.iv;
-            message.encryptedKeys = event.encryptedKeys;
+            message.content = event.content;
             message.editedAt = event.editedAt;
           }
         )
@@ -146,13 +144,11 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
       dispatch(
         messageApi.util.updateQueryData(
           'getMessages',
-          { conversationId: event.conversationId, limit: 20 },
+          { conversationId: event.conversationId, limit: MESSAGE_THREAD_PAGE_LIMIT },
           (draft) => {
             const message = draft.data.find((m) => m.id === event.messageId);
             if (!message) return;
-            message.ciphertext = '';
-            message.iv = '';
-            message.encryptedKeys = [];
+            message.content = '';
             message.reactions = [];
             message.expiredAt = event.expiredAt;
           }

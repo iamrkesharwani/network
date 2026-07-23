@@ -5,11 +5,13 @@ import { R2StorageProvider } from './storage/r2.provider.js';
 import { LocalFfmpegVideoProvider } from './video/localFfmpeg.provider.js';
 import { CloudflareImagesProvider } from './image/cloudflareImage.provider.js';
 import { S3ImageProvider } from './image/s3Image.provider.js';
+import { AwsKmsProvider } from './kms/awsKms.provider.js';
 
 import type { IStorageProvider } from './types.js';
 import type { IPublicUrlStorageProvider } from './types.js';
 import type { IVideoProvider } from './types.js';
 import type { IImageProvider } from './types.js';
+import type { IKmsProvider } from './types.js';
 
 function buildStorageProvider(): IStorageProvider {
   const name = env.STORAGE_PROVIDER;
@@ -92,6 +94,24 @@ function buildImageProvider(): IImageProvider {
   }
 }
 
+function buildKmsProvider(): IKmsProvider {
+  const name = env.KMS_PROVIDER;
+  logger.info(`KMS provider: ${name}`);
+
+  switch (name) {
+    case 'aws':
+      return new AwsKmsProvider({
+        region: env.AWS_REGION!,
+        accessKeyId: env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: env.AWS_SECRET_ACCESS_KEY!,
+        keyId: env.MESSAGE_KMS_KEY_ID!,
+      });
+
+    default:
+      throw new Error(`Unknown KMS_PROVIDER "${name}". Valid values: aws`);
+  }
+}
+
 export const storageProvider: IStorageProvider = buildStorageProvider();
 export const processedStorageProvider: IPublicUrlStorageProvider =
   buildProcessedStorageProvider();
@@ -99,3 +119,4 @@ export const videoProvider: IVideoProvider = buildVideoProvider(
   processedStorageProvider
 );
 export const imageProvider: IImageProvider = buildImageProvider();
+export const kmsProvider: IKmsProvider = buildKmsProvider();

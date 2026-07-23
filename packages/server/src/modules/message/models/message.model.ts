@@ -2,22 +2,18 @@ import mongoose, { Schema, type Document, type Types } from 'mongoose';
 import {
   MESSAGE_CIPHERTEXT_MAX_LENGTH,
   MESSAGE_IV_MAX_LENGTH,
-  MESSAGE_ENCRYPTED_KEY_MAX_LENGTH,
+  MESSAGE_ENCRYPTED_DATA_KEY_MAX_LENGTH,
   MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH,
   MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH,
+  MESSAGE_ATTACHMENT_TYPES,
+  type MessageAttachmentType,
 } from '@network/shared';
-
-export interface IEncryptedKeyEntry {
-  recipientId: Types.ObjectId;
-  encryptedKey: string;
-  keyVersion: number;
-}
 
 export interface IMessageReactionEntry {
   userId: Types.ObjectId;
   ciphertext: string;
   iv: string;
-  encryptedKeys: IEncryptedKeyEntry[];
+  encryptedDataKey: string;
   createdAt: Date;
 }
 
@@ -26,10 +22,16 @@ export interface IMessageDocument extends Document {
   senderId: Types.ObjectId;
   ciphertext: string;
   iv: string;
-  encryptedKeys: IEncryptedKeyEntry[];
+  encryptedDataKey: string;
   reactions: IMessageReactionEntry[];
   replyToMessageId?: Types.ObjectId;
   attachmentStorageKey?: string;
+  attachmentEncryptedDataKey?: string;
+  attachmentIv?: string;
+  attachmentType?: MessageAttachmentType;
+  attachmentMimeType?: string;
+  attachmentSize?: number;
+  attachmentDuration?: number;
   deletedFor: Types.ObjectId[];
   unsentAt?: Date;
   editedAt?: Date;
@@ -39,27 +41,6 @@ export interface IMessageDocument extends Document {
   deliveredAt?: Date;
   createdAt: Date;
 }
-
-const encryptedKeyEntrySchema = new Schema<IEncryptedKeyEntry>(
-  {
-    recipientId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    encryptedKey: {
-      type: String,
-      required: true,
-      maxlength: MESSAGE_ENCRYPTED_KEY_MAX_LENGTH,
-    },
-    keyVersion: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-  },
-  { _id: false }
-);
 
 const messageReactionEntrySchema = new Schema<IMessageReactionEntry>(
   {
@@ -78,9 +59,10 @@ const messageReactionEntrySchema = new Schema<IMessageReactionEntry>(
       required: true,
       maxlength: MESSAGE_IV_MAX_LENGTH,
     },
-    encryptedKeys: {
-      type: [encryptedKeyEntrySchema],
+    encryptedDataKey: {
+      type: String,
       required: true,
+      maxlength: MESSAGE_ENCRYPTED_DATA_KEY_MAX_LENGTH,
     },
     createdAt: {
       type: Date,
@@ -112,9 +94,10 @@ const messageSchema = new Schema<IMessageDocument>(
       required: true,
       maxlength: MESSAGE_IV_MAX_LENGTH,
     },
-    encryptedKeys: {
-      type: [encryptedKeyEntrySchema],
+    encryptedDataKey: {
+      type: String,
       required: true,
+      maxlength: MESSAGE_ENCRYPTED_DATA_KEY_MAX_LENGTH,
     },
     reactions: {
       type: [messageReactionEntrySchema],
@@ -127,6 +110,27 @@ const messageSchema = new Schema<IMessageDocument>(
     attachmentStorageKey: {
       type: String,
       maxlength: MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH,
+    },
+    attachmentEncryptedDataKey: {
+      type: String,
+      maxlength: MESSAGE_ENCRYPTED_DATA_KEY_MAX_LENGTH,
+    },
+    attachmentIv: {
+      type: String,
+      maxlength: MESSAGE_IV_MAX_LENGTH,
+    },
+    attachmentType: {
+      type: String,
+      enum: MESSAGE_ATTACHMENT_TYPES,
+    },
+    attachmentMimeType: {
+      type: String,
+    },
+    attachmentSize: {
+      type: Number,
+    },
+    attachmentDuration: {
+      type: Number,
     },
     deletedFor: {
       type: [{ type: Schema.Types.ObjectId, ref: 'User' }],
@@ -157,7 +161,6 @@ const messageSchema = new Schema<IMessageDocument>(
 );
 
 messageSchema.index({ conversationId: 1, createdAt: -1 });
-messageSchema.index({ conversationId: 1, 'encryptedKeys.recipientId': 1 });
 
 export const MessageModel = mongoose.model<IMessageDocument>(
   'Message',

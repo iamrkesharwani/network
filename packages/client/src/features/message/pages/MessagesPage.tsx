@@ -22,7 +22,6 @@ import {
   isPinReentryDue,
 } from '../pinLockStore';
 import { setPrivateKey } from '../messageKeySlice';
-import { useMessageKeyRing } from '../hooks/useMessageKeyRing';
 import {
   getLastRotatedAt,
   recordKeyRotation,
@@ -38,7 +37,7 @@ import {
   CONVERSATION_ARCHIVED_LIST_ARGS,
 } from '../conversationApi';
 import { useCreateDirectConversationMutation } from '../conversationApi';
-import { useGetMyKeyBundleQuery, useGetPublicKeyQuery } from '../keyBundleApi';
+import { useGetMyKeyBundleQuery } from '../keyBundleApi';
 import { useSearchCreatorsQuery } from '../../search/searchApi';
 import KeySetupModal from '../components/KeySetupModal';
 import KeyOtpModal from '../components/KeyOtpModal';
@@ -131,14 +130,6 @@ const MessagesPage = () => {
       !user || !isCacheChecked || Boolean(privateKey) || hasPendingPinCache,
   });
 
-  // Not OTP-gated (unlike GET /keys/me), so this stays available for the
-  // whole session to resolve which key version is currently active - needed
-  // to pick the right key out of the ring when decrypting.
-  const { data: myPublicKeyData } = useGetPublicKeyQuery(user?.id ?? '', {
-    skip: !user,
-  });
-  const keyRing = useMessageKeyRing(user?.id, myPublicKeyData?.data.keyVersion);
-
   useEffect(() => {
     if (!user || !privateKey) return;
     if (!isPinConfigured(user.id) && shouldShowPinNudge(user.id)) {
@@ -187,13 +178,11 @@ const MessagesPage = () => {
   const needsUnlock = !privateKey && hasKeyBundleSuccess && !isUnlockDismissed;
 
   const { data: conversationsData, isLoading: isLoadingConversations } =
-    useGetConversationsQuery(CONVERSATION_LIST_ARGS, { skip: !privateKey });
+    useGetConversationsQuery(CONVERSATION_LIST_ARGS);
   const {
     data: archivedConversationsData,
     isLoading: isLoadingArchivedConversations,
-  } = useGetArchivedConversationsQuery(CONVERSATION_ARCHIVED_LIST_ARGS, {
-    skip: !privateKey,
-  });
+  } = useGetArchivedConversationsQuery(CONVERSATION_ARCHIVED_LIST_ARGS);
   const conversations = conversationsData?.data ?? [];
   const archivedConversations = archivedConversationsData?.data ?? [];
   const activeConversation =
@@ -310,22 +299,16 @@ const MessagesPage = () => {
           </div>
         )}
 
-        {privateKey && isArchivedViewOpen && (
+        {isArchivedViewOpen && (
           <ArchivedConversationList
             activeConversationId={activeConversationId}
             onSelect={(id) => navigate(buildConversationPath(id))}
-            privateKey={privateKey}
-            keyRing={keyRing}
-            myUserId={user.id}
           />
         )}
-        {privateKey && !isArchivedViewOpen && (
+        {!isArchivedViewOpen && (
           <ConversationList
             activeConversationId={activeConversationId}
             onSelect={(id) => navigate(buildConversationPath(id))}
-            privateKey={privateKey}
-            keyRing={keyRing}
-            myUserId={user.id}
           />
         )}
       </div>
@@ -336,7 +319,7 @@ const MessagesPage = () => {
           activeConversationId ? 'flex' : 'hidden md:flex'
         )}
       >
-        {!privateKey ? null : isLoadingActiveConversation ? (
+        {isLoadingActiveConversation ? (
           <div className="flex flex-1 items-center justify-center text-sm text-text-muted">
             Loading conversation…
           </div>
@@ -349,8 +332,6 @@ const MessagesPage = () => {
         ) : (
           <MessageThread
             conversation={activeConversation}
-            privateKey={privateKey}
-            keyRing={keyRing}
             myUserId={user.id}
             socketRef={socketRef}
             onBack={() => navigate(CLIENT_ROUTES.MESSAGES)}

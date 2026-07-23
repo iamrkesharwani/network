@@ -73,19 +73,17 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json(new ApiResponse(result, 'Message fetched successfully'));
 });
 
-export const getAttachmentUrl = asyncHandler(
+export const getAttachment = asyncHandler(
   async (req: Request, res: Response) => {
     const user = requireUser(req);
     const { messageId } = req.params as unknown as MessageIdParam;
 
-    const result = await messageService.getMessageAttachmentUrl(
+    const { buffer, mimeType } = await messageService.getDecryptedAttachment(
       user.id,
       messageId
     );
 
-    res
-      .status(200)
-      .json(new ApiResponse(result, 'Attachment URL fetched successfully'));
+    res.status(200).type(mimeType).send(buffer);
   }
 );
 

@@ -15,6 +15,9 @@ import {
   MAX_CAPTION_SIZE_BYTES,
   ALLOWED_PLAYLIST_COVER_MIME_TYPES,
   MAX_PLAYLIST_COVER_SIZE_BYTES,
+  ALLOWED_MESSAGE_IMAGE_MIME_TYPES,
+  ALLOWED_MESSAGE_VOICE_MIME_TYPES,
+  MESSAGE_ATTACHMENT_MAX_BYTES,
 } from '@network/shared';
 
 const memStorage = multer.memoryStorage();
@@ -91,3 +94,8 @@ export const uploadGroupAvatar = createMemUploadMiddleware(
   ALLOWED_AVATAR_MIME_TYPES,
   MAX_AVATAR_SIZE_BYTES
 ).single('avatar');
+
+export const uploadMessageAttachment = createMemUploadMiddleware(
+  [...ALLOWED_MESSAGE_IMAGE_MIME_TYPES, ...ALLOWED_MESSAGE_VOICE_MIME_TYPES],
+  MESSAGE_ATTACHMENT_MAX_BYTES
+).single('file');

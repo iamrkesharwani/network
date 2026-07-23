@@ -12,7 +12,6 @@ import type {
   groupConversationCreateSchema,
   groupUpdateSchema,
   participantAddSchema,
-  encryptedKeyEntrySchema,
   messageSendSchema,
   messageDeleteSchema,
   messageReactionSetSchema,
@@ -25,7 +24,7 @@ import type {
   conversationDisappearingTtlSchema,
   conversationListQuerySchema,
   messageListQuerySchema,
-  messageAttachmentPresignSchema,
+  messageAttachmentUploadSchema,
 } from './message.schema.js';
 import type {
   CONVERSATION_TYPES,
@@ -62,7 +61,6 @@ export type GroupConversationCreateInput = z.infer<
 >;
 export type GroupUpdateInput = z.infer<typeof groupUpdateSchema>;
 export type ParticipantAddInput = z.infer<typeof participantAddSchema>;
-export type EncryptedKeyEntryInput = z.infer<typeof encryptedKeyEntrySchema>;
 export type MessageSendInput = z.infer<typeof messageSendSchema>;
 export type MessageDeleteInput = z.infer<typeof messageDeleteSchema>;
 export type MessageReactionSetInput = z.infer<typeof messageReactionSetSchema>;
@@ -79,8 +77,8 @@ export type ConversationDisappearingTtlInput = z.infer<
 >;
 export type ConversationListQuery = z.infer<typeof conversationListQuerySchema>;
 export type MessageListQuery = z.infer<typeof messageListQuerySchema>;
-export type MessageAttachmentPresignInput = z.infer<
-  typeof messageAttachmentPresignSchema
+export type MessageAttachmentUploadInput = z.infer<
+  typeof messageAttachmentUploadSchema
 >;
 
 export interface IKeyBundlePublicResponse {
@@ -173,36 +171,13 @@ export interface IMessageLinkPreview {
   thumbnailUrl?: string;
 }
 
-/**
- * Client-side-only shape: bundled into the encrypted message payload's
- * plaintext, never sent to the server as a separate field — except
- * `storageKey`, which is duplicated as a plaintext top-level field on
- * `Message` purely so the server can manage the R2 object's lifecycle
- * (delete on unsend/expiry/orphan sweep) without decrypting anything.
- */
-export interface IMessageAttachmentPayload {
-  type: MessageAttachmentType;
+export interface IMessageAttachmentUploadResult {
   storageKey: string;
-  attachmentIv: string;
-  mimeType: string;
-  size: number;
-  duration?: number;
-}
-
-export interface IMessageAttachmentPresignResult {
-  storageKey: string;
-  uploadUrl: string;
-}
-
-export interface IMessageAttachmentUrlResult {
-  url: string;
 }
 
 export interface IMessageReactionEntry {
   userId: string;
-  ciphertext: string;
-  iv: string;
-  encryptedKeys: EncryptedKeyEntryInput[];
+  content: string;
   createdAt: string;
 }
 
@@ -210,9 +185,7 @@ export interface IMessageResponse {
   id: string;
   conversationId: string;
   senderId: string;
-  ciphertext: string;
-  iv: string;
-  encryptedKeys: EncryptedKeyEntryInput[];
+  content: string;
   reactions: IMessageReactionEntry[];
   replyToMessageId?: string;
   createdAt: string;
@@ -222,4 +195,8 @@ export interface IMessageResponse {
   moderationRemovedAt?: string;
   deliveredAt?: string;
   unsentAt?: string;
+  attachmentType?: MessageAttachmentType;
+  attachmentMimeType?: string;
+  attachmentSize?: number;
+  attachmentDuration?: number;
 }

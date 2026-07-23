@@ -9,15 +9,12 @@ import {
   CONVERSATION_TYPES,
   GROUP_NAME_MAX_LENGTH,
   MESSAGE_GROUP_MAX_PARTICIPANTS,
-  MESSAGE_CIPHERTEXT_MAX_LENGTH,
-  MESSAGE_ENCRYPTED_KEY_MAX_LENGTH,
-  MESSAGE_IV_MAX_LENGTH,
+  MESSAGE_CONTENT_MAX_LENGTH,
+  MESSAGE_REACTION_CONTENT_MAX_LENGTH,
   MESSAGE_DELETE_SCOPES,
   MESSAGE_MUTE_DURATIONS,
-  MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH,
   MESSAGE_DISAPPEARING_TTL_OPTIONS,
   MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH,
-  MESSAGE_ATTACHMENT_MAX_BYTES,
   KEY_BUNDLE_PBKDF2_MIN_ITERATIONS,
   KEY_BUNDLE_PUBLIC_KEY_MAX_LENGTH,
   KEY_BUNDLE_WRAPPED_PRIVATE_KEY_MAX_LENGTH,
@@ -150,17 +147,9 @@ export const participantAddSchema = z.object({
     .max(MESSAGE_GROUP_MAX_PARTICIPANTS - 1),
 });
 
-export const encryptedKeyEntrySchema = z.object({
-  recipientId: mongoIdSchema,
-  encryptedKey: z.string().min(1).max(MESSAGE_ENCRYPTED_KEY_MAX_LENGTH),
-  keyVersion: z.number().int().nonnegative(),
-});
-
 export const messageSendSchema = z.object({
   conversationId: mongoIdSchema,
-  ciphertext: z.string().min(1).max(MESSAGE_CIPHERTEXT_MAX_LENGTH),
-  iv: z.string().min(1).max(MESSAGE_IV_MAX_LENGTH),
-  encryptedKeys: z.array(encryptedKeyEntrySchema).min(1),
+  content: z.string().min(1).max(MESSAGE_CONTENT_MAX_LENGTH),
   replyToMessageId: mongoIdSchema.optional(),
   ttlOverride: z.enum(MESSAGE_DISAPPEARING_TTL_OPTIONS).optional(),
   attachmentStorageKey: z
@@ -170,9 +159,8 @@ export const messageSendSchema = z.object({
     .optional(),
 });
 
-export const messageAttachmentPresignSchema = z.object({
+export const messageAttachmentUploadSchema = z.object({
   conversationId: mongoIdSchema,
-  contentLength: z.number().int().positive().max(MESSAGE_ATTACHMENT_MAX_BYTES),
 });
 
 export const messageDeleteSchema = z.object({
@@ -180,15 +168,11 @@ export const messageDeleteSchema = z.object({
 });
 
 export const messageReactionSetSchema = z.object({
-  ciphertext: z.string().min(1).max(MESSAGE_REACTION_CIPHERTEXT_MAX_LENGTH),
-  iv: z.string().min(1).max(MESSAGE_IV_MAX_LENGTH),
-  encryptedKeys: z.array(encryptedKeyEntrySchema).min(1),
+  content: z.string().min(1).max(MESSAGE_REACTION_CONTENT_MAX_LENGTH),
 });
 
 export const messageEditSchema = z.object({
-  ciphertext: z.string().min(1).max(MESSAGE_CIPHERTEXT_MAX_LENGTH),
-  iv: z.string().min(1).max(MESSAGE_IV_MAX_LENGTH),
-  encryptedKeys: z.array(encryptedKeyEntrySchema).min(1),
+  content: z.string().min(1).max(MESSAGE_CONTENT_MAX_LENGTH),
 });
 
 export const messageIdParamSchema = z.object({

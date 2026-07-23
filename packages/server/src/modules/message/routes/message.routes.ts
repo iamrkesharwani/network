@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { validate } from '../../../core/middleware/validate.middleware.js';
 import { requireAuth } from '../../../core/middleware/auth.middleware.js';
 import { messageLimiter } from '../../../core/middleware/rateLimit.middleware.js';
+import { uploadMessageAttachment } from '../../../core/middleware/upload.middleware.js';
 import {
   messageSendSchema,
   messageDeleteSchema,
@@ -10,7 +11,6 @@ import {
   messageIdParamSchema,
   conversationIdParamSchema,
   messageListQuerySchema,
-  messageAttachmentPresignSchema,
 } from '@network/shared';
 import * as messageController from '../controllers/message.controller.js';
 import * as messageAttachmentController from '../controllers/messageAttachment.controller.js';
@@ -26,11 +26,11 @@ router.post(
 );
 
 router.post(
-  '/attachments/presign',
+  '/attachments/upload',
   requireAuth,
   messageLimiter,
-  validate({ body: messageAttachmentPresignSchema }),
-  messageAttachmentController.presign
+  uploadMessageAttachment,
+  messageAttachmentController.upload
 );
 
 router.get(
@@ -44,7 +44,7 @@ router.get(
   '/:messageId/attachment',
   requireAuth,
   validate({ params: messageIdParamSchema }),
-  messageController.getAttachmentUrl
+  messageController.getAttachment
 );
 
 router.get(

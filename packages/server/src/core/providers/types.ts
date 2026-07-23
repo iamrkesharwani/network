@@ -35,6 +35,8 @@ export interface IStorageProvider {
 
   uploadObject(key: string, body: Buffer, contentType: string): Promise<void>;
 
+  downloadObject(key: string): Promise<Buffer>;
+
   deleteObject(key: string): Promise<void>;
 
   isOwnedKey(
@@ -116,4 +118,15 @@ export interface IImageProvider {
   uploadImage(buffer: Buffer, mimeType: string): Promise<string>;
 
   deleteImage(urlOrKey: string): Promise<void>;
+}
+
+export interface GenerateDataKeyResult {
+  plaintextKey: Buffer;
+  encryptedDataKey: string;
+}
+
+export interface IKmsProvider {
+  generateDataKey(): Promise<GenerateDataKeyResult>;
+
+  decryptDataKey(encryptedDataKey: string): Promise<Buffer>;
 }

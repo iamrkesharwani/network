@@ -68,9 +68,7 @@ export interface IMessageReactionEvent {
 export interface IMessageEditedEvent {
   conversationId: string;
   messageId: string;
-  ciphertext: string;
-  iv: string;
-  encryptedKeys: IMessageResponse['encryptedKeys'];
+  content: string;
   editedAt: string;
 }
 

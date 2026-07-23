@@ -1,5 +1,16 @@
+import type { MessageAttachmentType } from '@network/shared';
 import { MESSAGE_ATTACHMENT_UPLOAD_TTL_SECONDS } from '@network/shared';
 import { redisClient } from '../../../core/config/redis.js';
+
+export interface IPendingAttachment {
+  ownerId: string;
+  encryptedDataKey: string;
+  iv: string;
+  type: MessageAttachmentType;
+  mimeType: string;
+  size: number;
+  duration?: number;
+}
 
 export const pendingAttachmentKey = (storageKey: string): string =>
   `message-attachment:pending:${storageKey}`;
@@ -11,12 +22,12 @@ const indexScore = (): number =>
 
 export const createPendingAttachment = async (
   storageKey: string,
-  userId: string
+  attachment: IPendingAttachment
 ): Promise<void> => {
   await Promise.all([
     redisClient.set(
       pendingAttachmentKey(storageKey),
-      userId,
+      JSON.stringify(attachment),
       'EX',
       MESSAGE_ATTACHMENT_UPLOAD_TTL_SECONDS
     ),
@@ -24,9 +35,12 @@ export const createPendingAttachment = async (
   ]);
 };
 
-export const getPendingAttachmentOwner = (
+export const getPendingAttachment = async (
   storageKey: string
-): Promise<string | null> => redisClient.get(pendingAttachmentKey(storageKey));
+): Promise<IPendingAttachment | null> => {
+  const raw = await redisClient.get(pendingAttachmentKey(storageKey));
+  return raw ? (JSON.parse(raw) as IPendingAttachment) : null;
+};
 
 export const confirmPendingAttachment = async (
   storageKey: string

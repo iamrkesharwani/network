@@ -1,7 +1,17 @@
 import mongoose from 'mongoose';
-import type { EncryptedKeyEntryInput, PaginatedResponse } from '@network/shared';
+import type { MessageAttachmentType, PaginatedResponse } from '@network/shared';
 import { MAX_PAGE_LIMIT } from '@network/shared';
 import { MessageModel, type IMessageDocument } from '../models/message.model.js';
+
+export interface InsertMessageAttachment {
+  storageKey: string;
+  encryptedDataKey: string;
+  iv: string;
+  type: MessageAttachmentType;
+  mimeType: string;
+  size: number;
+  duration?: number;
+}
 
 const encodeCursor = (doc: IMessageDocument): string =>
   Buffer.from(`${doc.createdAt.getTime()}_${doc._id.toString()}`).toString(
@@ -35,20 +45,30 @@ export const insertMessage = (
   senderId: string,
   ciphertext: string,
   iv: string,
-  encryptedKeys: EncryptedKeyEntryInput[],
+  encryptedDataKey: string,
   replyToMessageId?: string,
   expiresAt?: Date,
-  attachmentStorageKey?: string
+  attachment?: InsertMessageAttachment
 ): Promise<IMessageDocument> =>
   MessageModel.create({
     conversationId,
     senderId,
     ciphertext,
     iv,
-    encryptedKeys,
+    encryptedDataKey,
     ...(replyToMessageId && { replyToMessageId }),
     ...(expiresAt && { expiresAt }),
-    ...(attachmentStorageKey && { attachmentStorageKey }),
+    ...(attachment && {
+      attachmentStorageKey: attachment.storageKey,
+      attachmentEncryptedDataKey: attachment.encryptedDataKey,
+      attachmentIv: attachment.iv,
+      attachmentType: attachment.type,
+      attachmentMimeType: attachment.mimeType,
+      attachmentSize: attachment.size,
+      ...(attachment.duration !== undefined && {
+        attachmentDuration: attachment.duration,
+      }),
+    }),
   });
 
 export const listByConversation = async (
@@ -74,7 +94,6 @@ export const listByConversation = async (
 
   const data = (await MessageModel.find({
     conversationId,
-    'encryptedKeys.recipientId': callerId,
     deletedFor: { $ne: callerId },
     ...cursorFilter,
   })
@@ -102,7 +121,7 @@ export const softDeleteForUser = (
   MessageModel.findByIdAndUpdate(
     messageId,
     { $addToSet: { deletedFor: userId } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const unsendForEveryone = (
@@ -110,26 +129,8 @@ export const unsendForEveryone = (
 ): Promise<IMessageDocument | null> =>
   MessageModel.findByIdAndUpdate(
     messageId,
-    [
-      {
-        $set: {
-          ciphertext: '',
-          iv: '',
-          unsentAt: '$$NOW',
-          encryptedKeys: {
-            $map: {
-              input: '$encryptedKeys',
-              as: 'entry',
-              in: {
-                recipientId: '$$entry.recipientId',
-                encryptedKey: '',
-              },
-            },
-          },
-        },
-      },
-    ],
-    { new: true }
+    { $set: { ciphertext: '', iv: '', encryptedDataKey: '', unsentAt: new Date() } },
+    { returnDocument: 'after' }
   ).exec();
 
 export const setReaction = (
@@ -137,16 +138,9 @@ export const setReaction = (
   userId: string,
   ciphertext: string,
   iv: string,
-  encryptedKeys: EncryptedKeyEntryInput[]
+  encryptedDataKey: string
 ): Promise<IMessageDocument | null> => {
   const userObjectId = new mongoose.Types.ObjectId(userId);
-  // Pipeline-form updates bypass Mongoose's schema casting, so recipientId
-  // must be cast to ObjectId here to match how insertMessage stores it.
-  const castEncryptedKeys = encryptedKeys.map((entry) => ({
-    recipientId: new mongoose.Types.ObjectId(entry.recipientId),
-    encryptedKey: entry.encryptedKey,
-    keyVersion: entry.keyVersion,
-  }));
 
   return MessageModel.findByIdAndUpdate(
     messageId,
@@ -167,7 +161,7 @@ export const setReaction = (
                   userId: userObjectId,
                   ciphertext,
                   iv,
-                  encryptedKeys: castEncryptedKeys,
+                  encryptedDataKey,
                   createdAt: '$$NOW',
                 },
               ],
@@ -176,7 +170,7 @@ export const setReaction = (
         },
       },
     ],
-    { new: true }
+    { returnDocument: 'after', updatePipeline: true }
   ).exec();
 };
 
@@ -187,7 +181,7 @@ export const removeReaction = (
   MessageModel.findByIdAndUpdate(
     messageId,
     { $pull: { reactions: { userId } } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const expireMessage = (
@@ -195,27 +189,16 @@ export const expireMessage = (
 ): Promise<IMessageDocument | null> =>
   MessageModel.findByIdAndUpdate(
     messageId,
-    [
-      {
-        $set: {
-          ciphertext: '',
-          iv: '',
-          expiredAt: '$$NOW',
-          encryptedKeys: {
-            $map: {
-              input: '$encryptedKeys',
-              as: 'entry',
-              in: {
-                recipientId: '$$entry.recipientId',
-                encryptedKey: '',
-              },
-            },
-          },
-          reactions: [],
-        },
+    {
+      $set: {
+        ciphertext: '',
+        iv: '',
+        encryptedDataKey: '',
+        expiredAt: new Date(),
+        reactions: [],
       },
-    ],
-    { new: true }
+    },
+    { returnDocument: 'after' }
   ).exec();
 
 export const setModerationRemoved = (
@@ -223,26 +206,15 @@ export const setModerationRemoved = (
 ): Promise<IMessageDocument | null> =>
   MessageModel.findByIdAndUpdate(
     messageId,
-    [
-      {
-        $set: {
-          ciphertext: '',
-          iv: '',
-          moderationRemovedAt: '$$NOW',
-          encryptedKeys: {
-            $map: {
-              input: '$encryptedKeys',
-              as: 'entry',
-              in: {
-                recipientId: '$$entry.recipientId',
-                encryptedKey: '',
-              },
-            },
-          },
-        },
+    {
+      $set: {
+        ciphertext: '',
+        iv: '',
+        encryptedDataKey: '',
+        moderationRemovedAt: new Date(),
       },
-    ],
-    { new: true }
+    },
+    { returnDocument: 'after' }
   ).exec();
 
 export const clearModerationRemoved = (
@@ -251,17 +223,17 @@ export const clearModerationRemoved = (
   MessageModel.findByIdAndUpdate(
     messageId,
     { $unset: { moderationRemovedAt: '' } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const editMessage = (
   messageId: string,
   ciphertext: string,
   iv: string,
-  encryptedKeys: EncryptedKeyEntryInput[]
+  encryptedDataKey: string
 ): Promise<IMessageDocument | null> =>
   MessageModel.findByIdAndUpdate(
     messageId,
-    { $set: { ciphertext, iv, encryptedKeys, editedAt: new Date() } },
-    { new: true }
+    { $set: { ciphertext, iv, encryptedDataKey, editedAt: new Date() } },
+    { returnDocument: 'after' }
   ).exec();

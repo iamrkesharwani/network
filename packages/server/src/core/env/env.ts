@@ -10,6 +10,7 @@ import { storageEnvSchema } from './storage.env.js';
 import { videoEnvSchema } from './video.env.js';
 import { typesenseEnvSchema } from './typesense.env.js';
 import { webPushEnvSchema } from './webPush.env.js';
+import { kmsEnvSchema } from './kms.env.js';
 import { withCrossFieldRules } from './validators.js';
 
 const mergedEnvSchema = z.object({
@@ -22,6 +23,7 @@ const mergedEnvSchema = z.object({
   ...videoEnvSchema.shape,
   ...typesenseEnvSchema.shape,
   ...webPushEnvSchema.shape,
+  ...kmsEnvSchema.shape,
 });
 
 const envSchema = withCrossFieldRules(mergedEnvSchema);

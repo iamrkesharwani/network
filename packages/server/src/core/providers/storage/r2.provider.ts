@@ -135,6 +135,22 @@ export class R2StorageProvider implements IStorageProvider {
     );
   }
 
+  async downloadObject(key: string): Promise<Buffer> {
+    const result = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucketName, Key: key })
+    );
+
+    if (!result.Body) {
+      throw new Error(`R2: object "${key}" has no body.`);
+    }
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of result.Body as AsyncIterable<Buffer>) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
+  }
+
   async deleteObject(key: string): Promise<void> {
     try {
       await this.client.send(

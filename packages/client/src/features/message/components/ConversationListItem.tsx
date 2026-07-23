@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { BellOff, Pin } from 'lucide-react';
 import type { IConversationSummary } from '@network/shared';
 import { getRelativeDate } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import { cn } from '../../../shared/utils/cn';
 import { useGetMessagesQuery } from '../messageApi';
-import { decryptMessage, type IMessageKeyRing } from '../keyManager';
 import { decodeMessagePayload } from '../messagePayload';
 import ConversationContextMenu from './ConversationContextMenu';
 
@@ -15,9 +14,6 @@ const LONG_PRESS_MOVE_TOLERANCE_PX = 10;
 interface ConversationListItemProps {
   conversation: IConversationSummary;
   isActive: boolean;
-  privateKey: CryptoKey;
-  keyRing?: IMessageKeyRing;
-  myUserId: string;
   onSelect: (conversationId: string) => void;
 }
 
@@ -37,9 +33,6 @@ const getAvatarProps = (conversation: IConversationSummary) =>
 const ConversationListItem = ({
   conversation,
   isActive,
-  privateKey,
-  keyRing,
-  myUserId,
   onSelect,
 }: ConversationListItemProps) => {
   const { data } = useGetMessagesQuery({
@@ -47,7 +40,11 @@ const ConversationListItem = ({
     limit: 1,
   });
   const latestMessage = data?.data[0];
-  const [preview, setPreview] = useState('');
+  const preview = useMemo(() => {
+    if (!latestMessage) return '';
+    if (latestMessage.unsentAt) return 'This message was removed';
+    return decodeMessagePayload(latestMessage.content).text;
+  }, [latestMessage]);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(
     null
   );
@@ -101,30 +98,6 @@ const ConversationListItem = ({
     }
     onSelect(conversation.id);
   };
-
-  useEffect(() => {
-    if (!latestMessage) {
-      setPreview('');
-      return;
-    }
-    if (latestMessage.unsentAt) {
-      setPreview('This message was removed');
-      return;
-    }
-
-    let cancelled = false;
-    decryptMessage(latestMessage, privateKey, myUserId, keyRing)
-      .then((decrypted) => {
-        if (!cancelled) setPreview(decodeMessagePayload(decrypted).text);
-      })
-      .catch(() => {
-        if (!cancelled) setPreview('Unable to decrypt message');
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [latestMessage, privateKey, keyRing, myUserId]);
 
   const avatarProps = getAvatarProps(conversation);
 

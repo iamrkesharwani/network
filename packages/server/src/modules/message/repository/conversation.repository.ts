@@ -97,7 +97,7 @@ export const setModeratorLocked = (
   ConversationModel.findByIdAndUpdate(
     conversationId,
     { $set: { isModeratorLocked } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const isParticipant = async (
@@ -276,7 +276,7 @@ export const addParticipants = (
   ConversationModel.findByIdAndUpdate(
     conversationId,
     { $addToSet: { participantIds: { $each: participantIds } } },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).exec();
 
 export const updateGroupMeta = (
@@ -292,7 +292,7 @@ export const updateGroupMeta = (
   return ConversationModel.findByIdAndUpdate(
     conversationId,
     { $set: set },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).exec();
 };
 
@@ -306,7 +306,7 @@ export const leaveGroup = (
       $pull: { participantIds: userId },
       $unset: { [`lastReadAt.${userId}`]: '' },
     },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const updateLastReadAt = (
@@ -316,7 +316,7 @@ export const updateLastReadAt = (
   ConversationModel.findByIdAndUpdate(
     conversationId,
     { $set: { [`lastReadAt.${userId}`]: new Date() } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const setMuted = (
@@ -329,7 +329,7 @@ export const setMuted = (
     mutedUntil
       ? { $set: { [`mutedUntil.${userId}`]: mutedUntil } }
       : { $unset: { [`mutedUntil.${userId}`]: '' } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const setArchived = (
@@ -342,7 +342,7 @@ export const setArchived = (
     archived
       ? { $set: { [`archivedAt.${userId}`]: new Date() } }
       : { $unset: { [`archivedAt.${userId}`]: '' } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const setPinned = (
@@ -355,7 +355,7 @@ export const setPinned = (
     pinned
       ? { $set: { [`pinnedAt.${userId}`]: new Date() } }
       : { $unset: { [`pinnedAt.${userId}`]: '' } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const setHiddenByBlock = (
@@ -368,7 +368,7 @@ export const setHiddenByBlock = (
     hidden
       ? { $set: { [`hiddenByBlockAt.${userId}`]: new Date() } }
       : { $unset: { [`hiddenByBlockAt.${userId}`]: '' } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const setDisappearingTtl = (
@@ -378,7 +378,7 @@ export const setDisappearingTtl = (
   ConversationModel.findByIdAndUpdate(
     conversationId,
     { $set: { disappearingMessagesTtl: ttl } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const touchLastMessageAt = (
@@ -387,7 +387,7 @@ export const touchLastMessageAt = (
   ConversationModel.findByIdAndUpdate(
     conversationId,
     { $set: { lastMessageAt: new Date() } },
-    { new: true }
+    { returnDocument: 'after' }
   ).exec();
 
 export const findDistinctPartnerIds = async (
