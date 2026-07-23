@@ -4,8 +4,10 @@ import {
   REPORT_REASON_CODES,
   REPORT_STATUS,
   REPORT_NOTE_MAX_LENGTH,
-  CONTENT_MODEL_BY_TYPE,
+  REPORT_DISCLOSED_CONTENT_MAX_LENGTH,
+  REPORT_CONTENT_MODEL_BY_TYPE,
   type ReportableContentType,
+  type ReportContentModel,
   type ReportReasonCode,
   type ReportStatus,
 } from '@network/shared';
@@ -13,11 +15,12 @@ import {
 export interface IReportDocument extends Document {
   reporterId: mongoose.Types.ObjectId;
   contentType: ReportableContentType;
-  contentModel: 'Video' | 'Short' | 'Post' | 'Comment';
+  contentModel: ReportContentModel;
   contentId: mongoose.Types.ObjectId;
   reasonCode: ReportReasonCode;
   status: ReportStatus;
   note?: string;
+  disclosedContent?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,7 +39,7 @@ const reportSchema = new Schema<IReportDocument>(
     },
     contentModel: {
       type: String,
-      enum: ['Video', 'Short', 'Post', 'Comment'],
+      enum: ['Video', 'Short', 'Post', 'Comment', 'Message', 'Conversation'],
       required: true,
     },
     contentId: {
@@ -59,6 +62,11 @@ const reportSchema = new Schema<IReportDocument>(
       trim: true,
       maxlength: REPORT_NOTE_MAX_LENGTH,
     },
+    disclosedContent: {
+      type: String,
+      trim: true,
+      maxlength: REPORT_DISCLOSED_CONTENT_MAX_LENGTH,
+    },
   },
   {
     timestamps: true,
@@ -66,7 +74,7 @@ const reportSchema = new Schema<IReportDocument>(
 );
 
 reportSchema.pre('validate', function setContentModel() {
-  this.contentModel = CONTENT_MODEL_BY_TYPE[this.contentType];
+  this.contentModel = REPORT_CONTENT_MODEL_BY_TYPE[this.contentType];
 });
 
 reportSchema.index(

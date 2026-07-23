@@ -66,6 +66,34 @@ const JuryCaseDetailPage = () => {
         Content ID: {juryCase.contentId}
       </p>
 
+      {(juryCase.contentType === 'message' ||
+        juryCase.contentType === 'conversation') && (
+        <div className="rounded-lg border border-border bg-surface-raised p-4">
+          <p className="mb-1 text-xs font-medium uppercase tracking-wide text-text-muted">
+            Reported content
+          </p>
+          <p className="mb-3 text-xs text-text-muted">
+            This conversation is end-to-end encrypted, so we can't fetch it
+            directly — this is what the reporter said they saw.
+          </p>
+          {juryCase.disclosedContent ? (
+            <p className="whitespace-pre-wrap text-sm text-text-primary">
+              {juryCase.disclosedContent}
+            </p>
+          ) : (
+            <p className="text-sm italic text-text-muted">
+              No content was disclosed with this report.
+            </p>
+          )}
+          {juryCase.reporterNote && (
+            <p className="mt-3 text-sm text-text-secondary">
+              <span className="font-medium">Reporter's note:</span>{' '}
+              {juryCase.reporterNote}
+            </p>
+          )}
+        </div>
+      )}
+
       {hasVoted ? (
         <p className="text-sm font-medium capitalize text-primary">
           You voted: {juryCase.myVote?.replace('_', ' ')}

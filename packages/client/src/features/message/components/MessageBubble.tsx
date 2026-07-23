@@ -9,7 +9,9 @@ import {
   Clock,
   Link2,
   ImageOff,
+  Flag,
 } from 'lucide-react';
+import ReportModal from '../../report/components/ReportModal';
 import type {
   IConversationSummary,
   IMessageAttachmentPayload,
@@ -22,8 +24,14 @@ import {
   MESSAGE_QUICK_REACTION_EMOJIS,
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
-import { decryptMessage, unwrapMessageKey, decryptFile } from '../keyManager';
+import {
+  decryptMessage,
+  unwrapMessageKey,
+  decryptFile,
+  type IMessageKeyRing,
+} from '../keyManager';
 import { decodeMessagePayload } from '../messagePayload';
+import { linkifyText } from '../utils/linkifyText';
 import {
   useDeleteMessageMutation,
   useGetMessageByIdQuery,
@@ -34,6 +42,7 @@ import SeenByIndicator from './SeenByIndicator';
 interface MessageBubbleProps {
   message: IMessageResponse;
   privateKey: CryptoKey;
+  keyRing?: IMessageKeyRing;
   myUserId: string;
   conversation: IConversationSummary;
   isLastFromSender: boolean;
@@ -88,11 +97,23 @@ const getParticipantName = (
   return participants.find((participant) => participant.id === userId)?.name ?? '';
 };
 
+const getParticipant = (
+  conversation: IConversationSummary,
+  userId: string
+) => {
+  const participants =
+    conversation.type === 'direct'
+      ? [conversation.otherParticipant]
+      : conversation.participants;
+  return participants.find((participant) => participant.id === userId);
+};
+
 interface ReplyPreviewProps {
   replyToMessageId: string;
   repliedToMessage: IMessageResponse | undefined;
   conversation: IConversationSummary;
   privateKey: CryptoKey;
+  keyRing?: IMessageKeyRing;
   myUserId: string;
 }
 
@@ -101,6 +122,7 @@ const ReplyPreview = ({
   repliedToMessage,
   conversation,
   privateKey,
+  keyRing,
   myUserId,
 }: ReplyPreviewProps) => {
   const { data, isFetching, isError } = useGetMessageByIdQuery(
@@ -116,7 +138,7 @@ const ReplyPreview = ({
       return;
     }
     let cancelled = false;
-    decryptMessage(resolved, privateKey, myUserId)
+    decryptMessage(resolved, privateKey, myUserId, keyRing)
       .then((decrypted) => {
         if (!cancelled) setPreview(decodeMessagePayload(decrypted).text);
       })
@@ -126,7 +148,7 @@ const ReplyPreview = ({
     return () => {
       cancelled = true;
     };
-  }, [resolved, privateKey, myUserId]);
+  }, [resolved, privateKey, keyRing, myUserId]);
 
   if (!resolved && (isFetching || isError)) {
     return (
@@ -158,6 +180,7 @@ interface MessageAttachmentViewProps {
   message: IMessageResponse;
   attachment: IMessageAttachmentPayload;
   privateKey: CryptoKey;
+  keyRing?: IMessageKeyRing;
   myUserId: string;
   isOwn: boolean;
 }
@@ -166,6 +189,7 @@ const MessageAttachmentView = ({
   message,
   attachment,
   privateKey,
+  keyRing,
   myUserId,
   isOwn,
 }: MessageAttachmentViewProps) => {
@@ -179,7 +203,12 @@ const MessageAttachmentView = ({
 
     const load = async () => {
       try {
-        const messageKey = await unwrapMessageKey(message, privateKey, myUserId);
+        const messageKey = await unwrapMessageKey(
+          message,
+          privateKey,
+          myUserId,
+          keyRing
+        );
         const { data } = await fetchAttachmentUrl(message.id).unwrap();
         const response = await fetch(data.url);
         const ciphertextBuffer = await response.arrayBuffer();
@@ -202,7 +231,7 @@ const MessageAttachmentView = ({
       cancelled = true;
       if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
-  }, [message, attachment, privateKey, myUserId, fetchAttachmentUrl]);
+  }, [message, attachment, privateKey, keyRing, myUserId, fetchAttachmentUrl]);
 
   if (hasError) {
     return (
@@ -252,6 +281,7 @@ const MessageAttachmentView = ({
 const MessageBubble = ({
   message,
   privateKey,
+  keyRing,
   myUserId,
   conversation,
   isLastFromSender,
@@ -268,19 +298,22 @@ const MessageBubble = ({
     null
   );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editDraft, setEditDraft] = useState('');
   const [reactionTexts, setReactionTexts] = useState<Record<string, string>>({});
   const [deleteMessage] = useDeleteMessageMutation();
   const isOwn = message.senderId === myUserId;
-  const isRemoved = Boolean(message.unsentAt || message.expiredAt);
+  const isRemoved = Boolean(
+    message.unsentAt || message.expiredAt || message.moderationRemovedAt
+  );
 
   useEffect(() => {
     if (isRemoved) return;
 
     let cancelled = false;
-    decryptMessage(message, privateKey, myUserId)
+    decryptMessage(message, privateKey, myUserId, keyRing)
       .then((decrypted) => {
         if (cancelled) return;
         const payload = decodeMessagePayload(decrypted);
@@ -295,14 +328,19 @@ const MessageBubble = ({
     return () => {
       cancelled = true;
     };
-  }, [message, privateKey, myUserId]);
+  }, [message, privateKey, keyRing, myUserId]);
 
   useEffect(() => {
     let cancelled = false;
     Promise.all(
       message.reactions.map(async (reaction) => {
         try {
-          const emoji = await decryptMessage(reaction, privateKey, myUserId);
+          const emoji = await decryptMessage(
+            reaction,
+            privateKey,
+            myUserId,
+            keyRing
+          );
           return [reaction.userId, emoji] as const;
         } catch {
           return null;
@@ -319,7 +357,7 @@ const MessageBubble = ({
     return () => {
       cancelled = true;
     };
-  }, [message.reactions, privateKey, myUserId]);
+  }, [message.reactions, privateKey, keyRing, myUserId]);
 
   const reactionGroups = useMemo(() => {
     const groups = new Map<string, string[]>();
@@ -379,6 +417,7 @@ const MessageBubble = ({
             repliedToMessage={repliedToMessage}
             conversation={conversation}
             privateKey={privateKey}
+            keyRing={keyRing}
             myUserId={myUserId}
           />
         )}
@@ -424,13 +463,18 @@ const MessageBubble = ({
               ? 'This message was removed.'
               : message.expiredAt
                 ? 'This message has expired.'
-                : (text ?? '...')}
+                : message.moderationRemovedAt
+                  ? 'This message was removed for violating community guidelines.'
+                  : text !== null
+                    ? linkifyText(text)
+                    : '...'}
 
             {!isRemoved && attachment && (
               <MessageAttachmentView
                 message={message}
                 attachment={attachment}
                 privateKey={privateKey}
+                keyRing={keyRing}
                 myUserId={myUserId}
                 isOwn={isOwn}
               />
@@ -604,6 +648,18 @@ const MessageBubble = ({
                     <Trash2 className="h-3.5 w-3.5" /> Unsend for everyone
                   </button>
                 )}
+                {!isOwn && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsReportOpen(true);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-error hover:bg-surface-raised"
+                  >
+                    <Flag className="h-3.5 w-3.5" /> Report message
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -617,6 +673,23 @@ const MessageBubble = ({
           />
         )}
       </div>
+
+      {!isOwn && (
+        <ReportModal
+          isOpen={isReportOpen}
+          onClose={() => setIsReportOpen(false)}
+          contentType="message"
+          contentId={message.id}
+          authorId={message.senderId}
+          initialDisclosedContent={text ?? ''}
+          blockTarget={(() => {
+            const sender = getParticipant(conversation, message.senderId);
+            return sender
+              ? { username: sender.username, name: sender.name }
+              : undefined;
+          })()}
+        />
+      )}
     </div>
   );
 };

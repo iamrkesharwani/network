@@ -33,6 +33,8 @@ import { videoModerationAdapter } from './modules/video/services/video.moderatio
 import { shortModerationAdapter } from './modules/short/services/short.moderation.adapter.js';
 import { postModerationAdapter } from './modules/post/services/post.moderation.adapter.js';
 import { commentModerationAdapter } from './modules/comment/services/comment.moderation.adapter.js';
+import { messageModerationAdapter } from './modules/message/services/message.moderation.adapter.js';
+import { conversationModerationAdapter } from './modules/message/services/conversation.moderation.adapter.js';
 import { registerContentCounterAdapter } from './core/contentRef/contentCounter.registry.js';
 import { videoCounterAdapter } from './modules/video/services/video.counter.adapter.js';
 import { shortCounterAdapter } from './modules/short/services/short.counter.adapter.js';
@@ -90,6 +92,8 @@ const startWeb = async () => {
     registerModerationContentAdapter(shortModerationAdapter);
     registerModerationContentAdapter(postModerationAdapter);
     registerModerationContentAdapter(commentModerationAdapter);
+    registerModerationContentAdapter(messageModerationAdapter);
+    registerModerationContentAdapter(conversationModerationAdapter);
 
     registerContentCounterAdapter(videoCounterAdapter);
     registerContentCounterAdapter(shortCounterAdapter);

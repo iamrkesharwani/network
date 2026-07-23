@@ -1,11 +1,15 @@
 import type { IKeyBundleOwnResponse } from '@network/shared';
 import { unwrapPrivateKey } from '../keyManager';
-import { setCachedPrivateKey } from '../localKeyStore';
-import { useConfirmKeyRecoveryMutation } from '../keyBundleApi';
+import { setCachedPrivateKey, setCachedHistoricalPrivateKey } from '../localKeyStore';
+import {
+  useConfirmKeyRecoveryMutation,
+  useLazyGetKeyHistoryQuery,
+} from '../keyBundleApi';
 
 export const useKeyBundleUnlock = (userId: string) => {
   const [confirmRecovery, { isLoading: isRecovering }] =
     useConfirmKeyRecoveryMutation();
+  const [fetchKeyHistory] = useLazyGetKeyHistoryQuery();
 
   const unlockWithPassphrase = async (
     keyBundle: IKeyBundleOwnResponse,
@@ -21,6 +25,34 @@ export const useKeyBundleUnlock = (userId: string) => {
       passphrase
     );
     await setCachedPrivateKey(userId, privateKey);
+
+    // Best-effort: retired keys are wrapped under this same passphrase (see
+    // ChangePasswordSection's rewrap cascade), so this is the one moment we
+    // can unwrap and cache all of them on this device. Not the end of the
+    // world if it fails - just means history from before this device's last
+    // sync stays unreadable here until the next passphrase unlock.
+    try {
+      const history = await fetchKeyHistory().unwrap();
+      for (const entry of history.data) {
+        const historicalKey = await unwrapPrivateKey(
+          {
+            wrappedPrivateKey: entry.wrappedPrivateKey,
+            wrapIv: entry.wrapIv,
+            wrapSalt: entry.wrapSalt,
+            pbkdf2Iterations: entry.pbkdf2Iterations,
+          },
+          passphrase
+        );
+        await setCachedHistoricalPrivateKey(
+          userId,
+          entry.keyVersion,
+          historicalKey
+        );
+      }
+    } catch {
+      // See comment above - non-fatal.
+    }
+
     return privateKey;
   };
 

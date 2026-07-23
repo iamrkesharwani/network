@@ -6,6 +6,8 @@ import type {
   keyBundleUserIdParamSchema,
   keyOtpConfirmSchema,
   keyRecoveryConfirmSchema,
+  keyRotateSchema,
+  keyHistoryRewrapSchema,
   directConversationCreateSchema,
   groupConversationCreateSchema,
   groupUpdateSchema,
@@ -47,6 +49,8 @@ export type KeyBundlePublicKeysQuery = z.infer<
   typeof keyBundlePublicKeysQuerySchema
 >;
 export type KeyBundlePublishInput = z.infer<typeof keyBundlePublishSchema>;
+export type KeyRotateInput = z.infer<typeof keyRotateSchema>;
+export type KeyHistoryRewrapInput = z.infer<typeof keyHistoryRewrapSchema>;
 export type KeyBundleUserIdParam = z.infer<typeof keyBundleUserIdParamSchema>;
 export type KeyOtpConfirmInput = z.infer<typeof keyOtpConfirmSchema>;
 export type KeyRecoveryConfirmInput = z.infer<typeof keyRecoveryConfirmSchema>;
@@ -99,6 +103,23 @@ export interface IKeyBundleRecoveryResponse {
   recoveryWrapIv: string;
   recoveryWrapSalt: string;
   recoveryPbkdf2Iterations: number;
+}
+
+/**
+ * A retired keypair from a past rotation. Wrapped under the same
+ * account-password/passphrase mechanism as the active key (kept in sync by
+ * the password-change re-wrap flow) - deliberately has no separate
+ * recovery-token wrap of its own, unlike the active bundle. A lost device
+ * that never unlocked messaging before the loss won't recover history
+ * predating that gap; this is a documented scope limit, not an oversight.
+ */
+export interface IKeyBundleHistoryEntryResponse {
+  keyVersion: number;
+  wrappedPrivateKey: string;
+  wrapIv: string;
+  wrapSalt: string;
+  pbkdf2Iterations: number;
+  retiredAt: string;
 }
 
 export interface IParticipantSummary {
@@ -198,6 +219,7 @@ export interface IMessageResponse {
   editedAt?: string;
   expiresAt?: string;
   expiredAt?: string;
+  moderationRemovedAt?: string;
   deliveredAt?: string;
   unsentAt?: string;
 }

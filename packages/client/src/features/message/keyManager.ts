@@ -35,11 +35,13 @@ export interface IWrappedPrivateKey {
 export interface IRecipientPublicKey {
   userId: string;
   publicKey: string;
+  keyVersion: number;
 }
 
 export interface IEncryptedKeyEntry {
   recipientId: string;
   encryptedKey: string;
+  keyVersion: number;
 }
 
 export interface IEncryptedPayload {
@@ -52,6 +54,18 @@ export interface IEncryptedMessageInput {
   ciphertext: string;
   iv: string;
   encryptedKeys: IEncryptedKeyEntry[];
+}
+
+/**
+ * Everything needed to decrypt a message regardless of when it was sent:
+ * the currently active private key plus every retired one this device has
+ * cached, keyed by the version they were wrapped under. A message's
+ * encryptedKeys entry records which version it was wrapped to, so decrypt
+ * picks the right key instead of always assuming the active one.
+ */
+export interface IMessageKeyRing {
+  activeKeyVersion: number;
+  historicalKeys: Map<number, CryptoKey>;
 }
 
 const bufferToBase64 = (buffer: ArrayBuffer): string => {
@@ -216,6 +230,7 @@ export const wrapMessageKeyForRecipients = async (
       return {
         recipientId: recipient.userId,
         encryptedKey: bufferToBase64(wrappedKey),
+        keyVersion: recipient.keyVersion,
       };
     })
   );
@@ -282,7 +297,8 @@ export const decryptFile = async (
 export const unwrapMessageKey = async (
   message: IEncryptedMessageInput,
   myPrivateKey: CryptoKey,
-  myUserId: string
+  myUserId: string,
+  keyRing?: IMessageKeyRing
 ): Promise<CryptoKey> => {
   const myEntry = message.encryptedKeys.find(
     (entry) => entry.recipientId === myUserId
@@ -291,9 +307,14 @@ export const unwrapMessageKey = async (
     throw new Error('No encrypted key found for this user.');
   }
 
+  const unwrapWith =
+    keyRing && myEntry.keyVersion !== keyRing.activeKeyVersion
+      ? (keyRing.historicalKeys.get(myEntry.keyVersion) ?? myPrivateKey)
+      : myPrivateKey;
+
   const rawMessageKey = await crypto.subtle.decrypt(
     { name: RSA_OAEP_ALGORITHM },
-    myPrivateKey,
+    unwrapWith,
     base64ToBuffer(myEntry.encryptedKey)
   );
 
@@ -353,9 +374,15 @@ export const computeSafetyNumber = async (
 export const decryptMessage = async (
   message: IEncryptedMessageInput,
   myPrivateKey: CryptoKey,
-  myUserId: string
+  myUserId: string,
+  keyRing?: IMessageKeyRing
 ): Promise<string> => {
-  const messageKey = await unwrapMessageKey(message, myPrivateKey, myUserId);
+  const messageKey = await unwrapMessageKey(
+    message,
+    myPrivateKey,
+    myUserId,
+    keyRing
+  );
 
   const iv = new Uint8Array(base64ToBuffer(message.iv));
   const plaintextBuffer = await crypto.subtle.decrypt(

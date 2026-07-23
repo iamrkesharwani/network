@@ -8,10 +8,12 @@ import type {
 import type { IJuryCaseDocument } from '../models/jury-case.model.js';
 import type { IJuryAssignmentDocument } from '../models/jury-assignment.model.js';
 import type { IJuryAppealDocument } from '../models/jury-appeal.model.js';
+import type { IReportDocument } from '../../report/report.model.js';
 
 export const toCaseResponse = (
   doc: IJuryCaseDocument,
-  votesCast: number
+  votesCast: number,
+  report?: IReportDocument | null
 ): IJuryCaseResponse => ({
   id: doc._id.toString(),
   contentType: doc.contentType,
@@ -25,14 +27,19 @@ export const toCaseResponse = (
   ...(doc.resolvedAt !== null && {
     resolvedAt: doc.resolvedAt.toISOString(),
   }),
+  ...(report?.disclosedContent && {
+    disclosedContent: report.disclosedContent,
+  }),
+  ...(report?.note && { reporterNote: report.note }),
 });
 
 export const toAssignmentResponse = (
   doc: IJuryCaseDocument,
   votesCast: number,
-  assignment: IJuryAssignmentDocument | null
+  assignment: IJuryAssignmentDocument | null,
+  report?: IReportDocument | null
 ): IJuryAssignmentResponse => ({
-  ...toCaseResponse(doc, votesCast),
+  ...toCaseResponse(doc, votesCast, report),
   ...(assignment?.vote != null && { myVote: assignment.vote }),
   ...(assignment?.votedAt != null && {
     votedAt: assignment.votedAt.toISOString(),

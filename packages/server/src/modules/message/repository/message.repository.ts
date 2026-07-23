@@ -145,6 +145,7 @@ export const setReaction = (
   const castEncryptedKeys = encryptedKeys.map((entry) => ({
     recipientId: new mongoose.Types.ObjectId(entry.recipientId),
     encryptedKey: entry.encryptedKey,
+    keyVersion: entry.keyVersion,
   }));
 
   return MessageModel.findByIdAndUpdate(
@@ -194,15 +195,62 @@ export const expireMessage = (
 ): Promise<IMessageDocument | null> =>
   MessageModel.findByIdAndUpdate(
     messageId,
-    {
-      $set: {
-        ciphertext: '',
-        iv: '',
-        encryptedKeys: [],
-        reactions: [],
-        expiredAt: new Date(),
+    [
+      {
+        $set: {
+          ciphertext: '',
+          iv: '',
+          expiredAt: '$$NOW',
+          encryptedKeys: {
+            $map: {
+              input: '$encryptedKeys',
+              as: 'entry',
+              in: {
+                recipientId: '$$entry.recipientId',
+                encryptedKey: '',
+              },
+            },
+          },
+          reactions: [],
+        },
       },
-    },
+    ],
+    { new: true }
+  ).exec();
+
+export const setModerationRemoved = (
+  messageId: string
+): Promise<IMessageDocument | null> =>
+  MessageModel.findByIdAndUpdate(
+    messageId,
+    [
+      {
+        $set: {
+          ciphertext: '',
+          iv: '',
+          moderationRemovedAt: '$$NOW',
+          encryptedKeys: {
+            $map: {
+              input: '$encryptedKeys',
+              as: 'entry',
+              in: {
+                recipientId: '$$entry.recipientId',
+                encryptedKey: '',
+              },
+            },
+          },
+        },
+      },
+    ],
+    { new: true }
+  ).exec();
+
+export const clearModerationRemoved = (
+  messageId: string
+): Promise<IMessageDocument | null> =>
+  MessageModel.findByIdAndUpdate(
+    messageId,
+    { $unset: { moderationRemovedAt: '' } },
     { new: true }
   ).exec();
 

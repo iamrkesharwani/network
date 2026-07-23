@@ -10,6 +10,7 @@ import {
 export interface IEncryptedKeyEntry {
   recipientId: Types.ObjectId;
   encryptedKey: string;
+  keyVersion: number;
 }
 
 export interface IMessageReactionEntry {
@@ -34,6 +35,7 @@ export interface IMessageDocument extends Document {
   editedAt?: Date;
   expiresAt?: Date;
   expiredAt?: Date;
+  moderationRemovedAt?: Date;
   deliveredAt?: Date;
   createdAt: Date;
 }
@@ -49,6 +51,11 @@ const encryptedKeyEntrySchema = new Schema<IEncryptedKeyEntry>(
       type: String,
       required: true,
       maxlength: MESSAGE_ENCRYPTED_KEY_MAX_LENGTH,
+    },
+    keyVersion: {
+      type: Number,
+      required: true,
+      default: 0,
     },
   },
   { _id: false }
@@ -135,6 +142,9 @@ const messageSchema = new Schema<IMessageDocument>(
       type: Date,
     },
     expiredAt: {
+      type: Date,
+    },
+    moderationRemovedAt: {
       type: Date,
     },
     deliveredAt: {

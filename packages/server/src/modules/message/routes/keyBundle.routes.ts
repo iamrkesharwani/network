@@ -8,6 +8,8 @@ import {
   keyBundleUserIdParamSchema,
   keyOtpConfirmSchema,
   keyRecoveryConfirmSchema,
+  keyRotateSchema,
+  keyHistoryRewrapSchema,
 } from '@network/shared';
 import * as keyBundleController from '../controllers/keyBundle.controller.js';
 import * as keyOtpController from '../controllers/keyOtp.controller.js';
@@ -23,6 +25,24 @@ router.post(
 );
 
 router.get('/me', requireAuth, keyBundleController.getMine);
+
+router.post(
+  '/rotate',
+  requireAuth,
+  otpLimiter,
+  validate({ body: keyRotateSchema }),
+  keyBundleController.rotate
+);
+
+router.get('/history', requireAuth, otpLimiter, keyBundleController.getHistory);
+
+router.patch(
+  '/history/rewrap',
+  requireAuth,
+  otpLimiter,
+  validate({ body: keyHistoryRewrapSchema }),
+  keyBundleController.rewrapHistory
+);
 
 router.post(
   '/otp/request',

@@ -34,7 +34,8 @@ export const create = (
   contentType: ReportableContentType,
   contentId: string,
   reasonCode: ReportReasonCode,
-  note?: string
+  note?: string,
+  disclosedContent?: string
 ): Promise<IReportDocument> => {
   return ReportModel.create({
     reporterId: new mongoose.Types.ObjectId(reporterId),
@@ -42,6 +43,7 @@ export const create = (
     contentId: new mongoose.Types.ObjectId(contentId),
     reasonCode,
     ...(note !== undefined && { note }),
+    ...(disclosedContent !== undefined && { disclosedContent }),
   });
 };
 
@@ -108,6 +110,18 @@ export const markDismissedForContent = async (
     },
     { $set: { status: 'dismissed' } }
   ).exec();
+};
+
+export const findLatestByContentAnyStatus = (
+  contentType: ReportableContentType,
+  contentId: string
+): Promise<IReportDocument | null> => {
+  return ReportModel.findOne({
+    contentType,
+    contentId: new mongoose.Types.ObjectId(contentId),
+  })
+    .sort({ createdAt: -1 })
+    .exec();
 };
 
 export const findLatestForContent = (

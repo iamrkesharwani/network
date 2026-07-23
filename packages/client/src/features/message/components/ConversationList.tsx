@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import InfiniteScroll from '../../../shared/ui/list/InfiniteScroll';
 import { useGetConversationsQuery, CONVERSATION_LIST_ARGS } from '../conversationApi';
+import type { IMessageKeyRing } from '../keyManager';
 import ConversationListItem from './ConversationListItem';
 import ConversationListItemSkeleton from '../skeleton/ConversationListItemSkeleton';
 
@@ -8,6 +9,7 @@ interface ConversationListProps {
   activeConversationId: string | null;
   onSelect: (conversationId: string) => void;
   privateKey: CryptoKey;
+  keyRing?: IMessageKeyRing;
   myUserId: string;
 }
 
@@ -15,6 +17,7 @@ const ConversationList = ({
   activeConversationId,
   onSelect,
   privateKey,
+  keyRing,
   myUserId,
 }: ConversationListProps) => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
@@ -55,6 +58,7 @@ const ConversationList = ({
           conversation={conversation}
           isActive={conversation.id === activeConversationId}
           privateKey={privateKey}
+          keyRing={keyRing}
           myUserId={myUserId}
           onSelect={onSelect}
         />

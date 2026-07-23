@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CLIENT_ROUTES,
@@ -5,8 +6,12 @@ import {
   PRIVACY_GROUP_ADD_AUDIENCES,
 } from '@network/shared';
 import { useAppSelector } from '../../../../../shared/hooks/useAppSelector';
+import { useAppDispatch } from '../../../../../shared/hooks/useAppDispatch';
 import { usePreference } from '../../../hooks/usePreference';
 import { usePatchAccountPrivacyMutation } from '../../../settingsApi';
+import { setPrivateKey } from '../../../../message/messageKeySlice';
+import KeyRotationModal from '../../../../message/components/KeyRotationModal';
+import Button from '../../../../../shared/ui/primitives/Button';
 import PreferenceOptionCard from '../../../components/preferences/PreferenceOptionCard';
 import PreferenceSwitch from '../../../components/preferences/PreferenceSwitch';
 import PreferenceSelect from '../../../components/preferences/PreferenceSelect';
@@ -33,8 +38,11 @@ const GROUP_ADD_AUDIENCE_OPTIONS = PRIVACY_GROUP_ADD_AUDIENCES.map((value) => ({
 const PrivacyTab = () => {
   const [privacy, setPrivacy] = usePreference('privacy');
   const user = useAppSelector((state) => state.auth.user);
+  const privateKey = useAppSelector((state) => state.messageKey.privateKey);
+  const dispatch = useAppDispatch();
   const [patchAccountPrivacy, { isLoading: isUpdatingAccountPrivacy }] =
     usePatchAccountPrivacyMutation();
+  const [isRotationOpen, setIsRotationOpen] = useState(false);
 
   return (
     <div>
@@ -191,6 +199,36 @@ const PrivacyTab = () => {
           </Link>
         </PreferenceOptionCard>
       </div>
+
+      <h3 className="mb-2 text-sm font-semibold text-text-primary">
+        Encryption
+      </h3>
+      <div className="mb-8 grid grid-cols-1 gap-3">
+        <PreferenceOptionCard
+          label="Rotate encryption key"
+          description="Issue a fresh encryption key so a future key leak can only expose messages sent since your last rotation, not your entire history. Your existing conversations stay readable. Happens automatically every 90 days, or you can do it manually here."
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!privateKey}
+            onClick={() => setIsRotationOpen(true)}
+          >
+            {privateKey ? 'Rotate now' : 'Open Messages to unlock first'}
+          </Button>
+        </PreferenceOptionCard>
+      </div>
+
+      {user && privateKey && (
+        <KeyRotationModal
+          isOpen={isRotationOpen}
+          onClose={() => setIsRotationOpen(false)}
+          userId={user.id}
+          hasPassword={user.hasPassword}
+          currentPrivateKey={privateKey}
+          onKeyReady={(key) => dispatch(setPrivateKey(key))}
+        />
+      )}
     </div>
   );
 };

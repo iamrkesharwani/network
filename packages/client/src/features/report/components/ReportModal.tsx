@@ -4,11 +4,13 @@ import { useToast } from '../../../shared/hooks/useToast';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import { cn } from '../../../shared/utils/cn';
 import { useCreateReportMutation } from '../reportApi';
+import { useBlockUserMutation } from '../../block/blockApi';
 import Modal from '../../../shared/ui/overlay/Modal';
 import Button from '../../../shared/ui/primitives/Button';
 import {
   REPORT_REASON_CATALOG,
   REPORT_NOTE_MAX_LENGTH,
+  REPORT_DISCLOSED_CONTENT_MAX_LENGTH,
   type ReportableContentType,
   type ReportReasonCode,
 } from '@network/shared';
@@ -17,6 +19,14 @@ export interface ReportModalProps {
   contentType: ReportableContentType;
   contentId: string;
   authorId: string;
+  /** Overrides the authorId-based "is this your own content" check - needed
+   * for conversation reports, which have no single clean authorId. */
+  isOwnContent?: boolean;
+  /** Pre-fills the required disclosure field for message reports, typically
+   * the message text already decrypted client-side for display. */
+  initialDisclosedContent?: string;
+  /** When set, offers a "Also block this person" checkbox alongside the report. */
+  blockTarget?: { username: string; name: string };
   isOpen: boolean;
   onClose: () => void;
 }
@@ -30,27 +40,40 @@ const ReportModal = ({
   contentType,
   contentId,
   authorId,
+  isOwnContent: isOwnContentOverride,
+  initialDisclosedContent,
+  blockTarget,
   isOpen,
   onClose,
 }: ReportModalProps) => {
   const currentUserId = useAppSelector((state) => state.auth.user?.id);
-  const isOwnContent = !!currentUserId && currentUserId === authorId;
+  const isOwnContent =
+    isOwnContentOverride ?? (!!currentUserId && currentUserId === authorId);
+  const needsDisclosedContent = contentType === 'message';
 
   const [reasonCode, setReasonCode] = useState<ReportReasonCode | null>(null);
   const [note, setNote] = useState('');
+  const [disclosedContent, setDisclosedContent] = useState(
+    initialDisclosedContent ?? ''
+  );
+  const [alsoBlock, setAlsoBlock] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [createReport, { isLoading }] = useCreateReportMutation();
+  const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
   const { addToast } = useToast();
 
   const handleClose = () => {
     setReasonCode(null);
     setNote('');
+    setDisclosedContent(initialDisclosedContent ?? '');
+    setAlsoBlock(false);
     setSubmitted(false);
     onClose();
   };
 
   const handleSubmit = async () => {
     if (!reasonCode) return;
+    if (needsDisclosedContent && !disclosedContent.trim()) return;
 
     try {
       await createReport({
@@ -58,7 +81,15 @@ const ReportModal = ({
         contentId,
         reasonCode,
         ...(note.trim() && { note: note.trim() }),
+        ...(needsDisclosedContent && {
+          disclosedContent: disclosedContent.trim(),
+        }),
       }).unwrap();
+
+      if (alsoBlock && blockTarget) {
+        await blockUser(blockTarget.username).catch(() => undefined);
+      }
+
       setSubmitted(true);
     } catch (error) {
       const message =
@@ -142,6 +173,26 @@ const ReportModal = ({
           ))}
         </div>
 
+        {needsDisclosedContent && (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-text-secondary">
+              What did the message say? Messages are end-to-end encrypted, so
+              we can only review what you tell us you saw.
+            </label>
+            <textarea
+              value={disclosedContent}
+              onChange={(e) =>
+                setDisclosedContent(
+                  e.target.value.slice(0, REPORT_DISCLOSED_CONTENT_MAX_LENGTH)
+                )
+              }
+              placeholder="Paste or describe the message content"
+              rows={3}
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        )}
+
         <textarea
           value={note}
           onChange={(e) =>
@@ -152,12 +203,24 @@ const ReportModal = ({
           className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
         />
 
+        {blockTarget && (
+          <label className="flex items-center gap-2.5 text-sm text-text-secondary">
+            <input
+              type="checkbox"
+              className="accent-primary"
+              checked={alsoBlock}
+              onChange={(e) => setAlsoBlock(e.target.checked)}
+            />
+            Also block {blockTarget.name}
+          </label>
+        )}
+
         <div className="flex justify-end gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClose}
-            disabled={isLoading}
+            disabled={isLoading || isBlocking}
           >
             Cancel
           </Button>
@@ -165,8 +228,11 @@ const ReportModal = ({
             variant="primary"
             size="sm"
             onClick={handleSubmit}
-            isLoading={isLoading}
-            disabled={!reasonCode}
+            isLoading={isLoading || isBlocking}
+            disabled={
+              !reasonCode ||
+              (needsDisclosedContent && !disclosedContent.trim())
+            }
           >
             Submit report
           </Button>

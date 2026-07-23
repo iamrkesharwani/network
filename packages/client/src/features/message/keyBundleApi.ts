@@ -2,11 +2,14 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from '../../shared/lib/axiosBaseQuery';
 import type {
   ApiResponse,
+  IKeyBundleHistoryEntryResponse,
   IKeyBundleOwnResponse,
   IKeyBundlePublicResponse,
   IKeyBundleRecoveryResponse,
   KeyBundlePublishInput,
+  KeyHistoryRewrapInput,
   KeyRecoveryConfirmInput,
+  KeyRotateInput,
 } from '@network/shared';
 
 export const keyBundleApi = createApi({
@@ -56,6 +59,25 @@ export const keyBundleApi = createApi({
     >({
       query: (data) => ({ url: '/recovery/confirm', method: 'POST', data }),
     }),
+
+    rotateKeyBundle: builder.mutation<
+      ApiResponse<IKeyBundleOwnResponse>,
+      KeyRotateInput
+    >({
+      query: (data) => ({ url: '/rotate', method: 'POST', data }),
+      invalidatesTags: ['KeyBundle'],
+    }),
+
+    getKeyHistory: builder.query<
+      ApiResponse<IKeyBundleHistoryEntryResponse[]>,
+      void
+    >({
+      query: () => ({ url: '/history', method: 'GET' }),
+    }),
+
+    rewrapKeyHistory: builder.mutation<ApiResponse<null>, KeyHistoryRewrapInput>({
+      query: (data) => ({ url: '/history/rewrap', method: 'PATCH', data }),
+    }),
   }),
 });
 
@@ -68,4 +90,7 @@ export const {
   useRequestKeyOtpMutation,
   useConfirmKeyOtpMutation,
   useConfirmKeyRecoveryMutation,
+  useRotateKeyBundleMutation,
+  useLazyGetKeyHistoryQuery,
+  useRewrapKeyHistoryMutation,
 } = keyBundleApi;

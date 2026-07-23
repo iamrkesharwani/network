@@ -22,6 +22,7 @@ export interface IConversationDocument extends Document {
   pinnedAt: Map<string, Date>;
   hiddenByBlockAt: Map<string, Date>;
   disappearingMessagesTtl: ConversationDisappearingTtl;
+  isModeratorLocked: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -92,6 +93,10 @@ const conversationSchema = new Schema<IConversationDocument>(
       type: String,
       enum: MESSAGE_DISAPPEARING_TTL_OPTIONS,
       default: 'off',
+    },
+    isModeratorLocked: {
+      type: Boolean,
+      default: false,
     },
   },
   {

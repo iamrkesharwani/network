@@ -1,4 +1,8 @@
-import type { ModerationStatus, ReportableContentType } from '@network/shared';
+import type {
+  ModerationStatus,
+  ReportableContentType,
+  ReportContentModel,
+} from '@network/shared';
 
 export interface ModerationContentLookup {
   exists: boolean;
@@ -7,7 +11,7 @@ export interface ModerationContentLookup {
 
 export interface ModerationContentAdapter {
   contentType: ReportableContentType;
-  contentModel: 'Video' | 'Short' | 'Post' | 'Comment';
+  contentModel: ReportContentModel;
   lookup(contentId: string): Promise<ModerationContentLookup>;
   setModerationStatus(
     contentId: string,

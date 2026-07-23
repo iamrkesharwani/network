@@ -78,6 +78,15 @@ export const sendMessage = async (
     userId,
     input.conversationId
   );
+
+  if (conversation.isModeratorLocked) {
+    throw new ApiError(
+      403,
+      'FORBIDDEN',
+      'This conversation has been locked following a moderation review.'
+    );
+  }
+
   const recipientIds = conversation.participantIds.map((id) => id.toString());
 
   assertRecipientCoverage(recipientIds, input.encryptedKeys);

@@ -10,14 +10,16 @@ export const toMessageResponse = (doc: IMessageDocument): IMessageResponse => ({
   encryptedKeys: doc.encryptedKeys.map((entry) => ({
     recipientId: entry.recipientId.toString(),
     encryptedKey: entry.encryptedKey,
+    keyVersion: entry.keyVersion,
   })),
-  reactions: doc.reactions.map((reaction) => ({
+  reactions: (doc.reactions ?? []).map((reaction) => ({
     userId: reaction.userId.toString(),
     ciphertext: reaction.ciphertext,
     iv: reaction.iv,
     encryptedKeys: reaction.encryptedKeys.map((entry) => ({
       recipientId: entry.recipientId.toString(),
       encryptedKey: entry.encryptedKey,
+      keyVersion: entry.keyVersion,
     })),
     createdAt: reaction.createdAt.toISOString(),
   })),
@@ -28,6 +30,9 @@ export const toMessageResponse = (doc: IMessageDocument): IMessageResponse => ({
   ...(doc.editedAt && { editedAt: doc.editedAt.toISOString() }),
   ...(doc.expiresAt && { expiresAt: doc.expiresAt.toISOString() }),
   ...(doc.expiredAt && { expiredAt: doc.expiredAt.toISOString() }),
+  ...(doc.moderationRemovedAt && {
+    moderationRemovedAt: doc.moderationRemovedAt.toISOString(),
+  }),
   ...(doc.deliveredAt && { deliveredAt: doc.deliveredAt.toISOString() }),
   ...(doc.unsentAt && { unsentAt: doc.unsentAt.toISOString() }),
 });

@@ -22,6 +22,8 @@ export const NOTIFICATION_TARGET_TYPES = [
   'short',
   'video',
   'comment',
+  'message',
+  'conversation',
   'juryCase',
   'appeal',
   'none',

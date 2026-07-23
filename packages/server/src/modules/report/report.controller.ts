@@ -14,15 +14,16 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, 'UNAUTHORIZED', 'Authentication required.');
   }
 
-  const { contentType, contentId, reasonCode, note } =
+  const { contentType, contentId, reasonCode, note, disclosedContent } =
     req.body as ReportCreateInput;
-    
+
   const report = await createReport(
     req.user.id,
     contentType,
     contentId,
     reasonCode,
-    note
+    note,
+    disclosedContent
   );
 
   res

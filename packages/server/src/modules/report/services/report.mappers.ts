@@ -8,5 +8,8 @@ export const toResponse = (doc: IReportDocument): IReportResponse => ({
   reasonCode: doc.reasonCode,
   status: doc.status,
   ...(doc.note !== undefined && { note: doc.note }),
+  ...(doc.disclosedContent !== undefined && {
+    disclosedContent: doc.disclosedContent,
+  }),
   createdAt: doc.createdAt.toISOString(),
 });

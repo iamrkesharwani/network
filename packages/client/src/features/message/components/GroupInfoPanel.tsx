@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, LogOut, UserPlus, Ban } from 'lucide-react';
+import { Camera, LogOut, UserPlus, Ban, Flag } from 'lucide-react';
 import {
   GROUP_NAME_MAX_LENGTH,
   type IGroupConversationSummary,
@@ -12,6 +12,7 @@ import Avatar from '../../../shared/ui/primitives/Avatar';
 import GroupAvatarPickerModal from './GroupAvatarPickerModal';
 import SafetyNumberBadge from './SafetyNumberBadge';
 import VerifyContactModal from './VerifyContactModal';
+import ReportModal from '../../report/components/ReportModal';
 import { useUpdateGroupMutation, useLeaveGroupMutation } from '../conversationApi';
 import { useGetPublicKeysQuery } from '../keyBundleApi';
 import { useBlockUserMutation } from '../../block/blockApi';
@@ -40,6 +41,7 @@ const GroupInfoPanel = ({
   const [verifyTarget, setVerifyTarget] = useState<IParticipantSummary | null>(
     null
   );
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   const [updateGroup, { isLoading: isRenaming }] = useUpdateGroupMutation();
   const [leaveGroup, { isLoading: isLeaving }] = useLeaveGroupMutation();
@@ -162,13 +164,22 @@ const GroupInfoPanel = ({
           </div>
         </div>
 
-        <Button
-          variant="danger"
-          className="w-full"
-          onClick={() => setIsLeaveConfirmOpen(true)}
-        >
-          <LogOut className="mr-1.5 h-4 w-4" /> Leave group
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => setIsReportOpen(true)}
+          >
+            <Flag className="mr-1.5 h-4 w-4" /> Report group
+          </Button>
+          <Button
+            variant="danger"
+            className="flex-1"
+            onClick={() => setIsLeaveConfirmOpen(true)}
+          >
+            <LogOut className="mr-1.5 h-4 w-4" /> Leave group
+          </Button>
+        </div>
       </Modal>
 
       <ConfirmModal
@@ -206,6 +217,15 @@ const GroupInfoPanel = ({
           contactName={verifyTarget.name}
         />
       )}
+
+      <ReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        contentType="conversation"
+        contentId={conversation.id}
+        authorId=""
+        isOwnContent={conversation.isOwnedByViewer}
+      />
     </>
   );
 };

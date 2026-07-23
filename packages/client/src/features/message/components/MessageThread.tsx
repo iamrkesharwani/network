@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Ban } from 'lucide-react';
+import { ArrowLeft, Ban, Flag } from 'lucide-react';
 import {
   CLIENT_ROUTES,
   MESSAGE_EDIT_WINDOW_MS,
@@ -30,6 +30,7 @@ import {
   encryptFile,
   encryptTextWithKey,
   wrapMessageKeyForRecipients,
+  type IMessageKeyRing,
 } from '../keyManager';
 import {
   encodeMessagePayload,
@@ -38,6 +39,7 @@ import {
   type IMessagePayload,
 } from '../messagePayload';
 import { uploadEncryptedAttachment } from '../utils/uploadAttachment';
+import ReportModal from '../../report/components/ReportModal';
 import { useBlockUserMutation } from '../../block/blockApi';
 import { usePreference } from '../../settings/hooks/usePreference';
 import MessageBubble from './MessageBubble';
@@ -52,6 +54,7 @@ import MessageThreadSkeleton from '../skeleton/MessageThreadSkeleton';
 interface MessageThreadProps {
   conversation: IConversationSummary;
   privateKey: CryptoKey;
+  keyRing?: IMessageKeyRing;
   myUserId: string;
   socketRef: ReturnType<typeof useSocket>;
   onOpenGroupInfo?: () => void;
@@ -81,6 +84,7 @@ const MESSAGE_LIST_ARGS = { limit: 30 };
 const MessageThread = ({
   conversation,
   privateKey,
+  keyRing,
   myUserId,
   socketRef,
   onOpenGroupInfo,
@@ -89,6 +93,7 @@ const MessageThread = ({
   const navigate = useNavigate();
   const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
   const [isVerifyOpen, setIsVerifyOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
   const [replyTo, setReplyTo] = useState<IMessageResponse | null>(null);
   const [replyToPreview, setReplyToPreview] = useState<string | null>(null);
@@ -158,7 +163,7 @@ const MessageThread = ({
       return;
     }
     let cancelled = false;
-    decryptMessage(replyTo, privateKey, myUserId)
+    decryptMessage(replyTo, privateKey, myUserId, keyRing)
       .then((decrypted) => {
         if (!cancelled) setReplyToPreview(decodeMessagePayload(decrypted).text);
       })
@@ -168,12 +173,13 @@ const MessageThread = ({
     return () => {
       cancelled = true;
     };
-  }, [replyTo, privateKey, myUserId]);
+  }, [replyTo, privateKey, keyRing, myUserId]);
 
   const getRecipients = () =>
     publicKeysData?.data.map((key) => ({
       userId: key.userId,
       publicKey: key.publicKey,
+      keyVersion: key.keyVersion,
     })) ?? [];
 
   const handleSend = async (
@@ -354,6 +360,17 @@ const MessageThread = ({
         {conversation.type === 'direct' && (
           <button
             type="button"
+            onClick={() => setIsReportOpen(true)}
+            aria-label="Report this conversation"
+            className="shrink-0 rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover"
+          >
+            <Flag className="h-4.5 w-4.5" strokeWidth={1.75} />
+          </button>
+        )}
+
+        {conversation.type === 'direct' && (
+          <button
+            type="button"
             onClick={() => setIsBlockConfirmOpen(true)}
             aria-label={`Block ${conversation.otherParticipant.name}`}
             className="shrink-0 rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover"
@@ -372,6 +389,7 @@ const MessageThread = ({
               key={message.id}
               message={message}
               privateKey={privateKey}
+              keyRing={keyRing}
               myUserId={myUserId}
               conversation={conversation}
               isLastFromSender={
@@ -437,6 +455,17 @@ const MessageThread = ({
           myUserId={myUserId}
           contactUserId={conversation.otherParticipant.id}
           contactName={conversation.otherParticipant.name}
+        />
+      )}
+
+      {conversation.type === 'direct' && (
+        <ReportModal
+          isOpen={isReportOpen}
+          onClose={() => setIsReportOpen(false)}
+          contentType="conversation"
+          contentId={conversation.id}
+          authorId=""
+          isOwnContent={false}
         />
       )}
     </div>

@@ -10,11 +10,13 @@ import { useAppSelector } from '../../../../../shared/hooks/useAppSelector';
 import {
   useLazyGetMyKeyBundleQuery,
   usePublishKeyBundleMutation,
+  useRewrapKeyHistoryMutation,
 } from '../../../../message/keyBundleApi';
 import {
   wrapPrivateKey,
   generateRecoveryToken,
 } from '../../../../message/keyManager';
+import { getCachedHistoricalKeyRing } from '../../../../message/localKeyStore';
 import { useState } from 'react';
 
 const ChangePasswordSection = () => {
@@ -23,6 +25,7 @@ const ChangePasswordSection = () => {
   const [changePassword, { isLoading }] = useChangePasswordMutation();
   const [fetchKeyBundle] = useLazyGetMyKeyBundleQuery();
   const [publishKeyBundle] = usePublishKeyBundleMutation();
+  const [rewrapKeyHistory] = useRewrapKeyHistoryMutation();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const {
@@ -58,6 +61,23 @@ const ChangePasswordSection = () => {
         recoveryPbkdf2Iterations: recoveryWrapped.pbkdf2Iterations,
         recoveryToken,
       }).unwrap();
+
+      // Retired keys from past rotations are wrapped the same way the
+      // active key is - if this device has any cached, re-wrap them under
+      // the new password too so they don't go stale and become undecryptable
+      // on this device after the password changes.
+      const historicalKeys = await getCachedHistoricalKeyRing(user.id);
+      if (historicalKeys.size > 0) {
+        const entries = await Promise.all(
+          Array.from(historicalKeys.entries()).map(
+            async ([keyVersion, historicalKey]) => {
+              const rewrapped = await wrapPrivateKey(historicalKey, newPassword);
+              return { keyVersion, ...rewrapped };
+            }
+          )
+        );
+        await rewrapKeyHistory({ entries }).unwrap();
+      }
     } catch {
       // Best-effort only — messaging isn't unlocked/reachable right now.
       // The account password change must never be blocked by this; if it's

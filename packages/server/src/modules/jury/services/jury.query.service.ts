@@ -3,11 +3,26 @@ import type {
   IJuryCaseResponse,
   ReportableContentType,
 } from '@network/shared';
+import type { IJuryCaseDocument } from '../models/jury-case.model.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { getModerationContentAdapter } from '../../../core/moderation/moderationContent.registry.js';
 import * as juryCaseRepository from '../repository/jury-case.repository.js';
 import * as juryAssignmentRepository from '../repository/jury-assignment.repository.js';
+import * as reportRepository from '../../report/report.repository.js';
 import { toAssignmentResponse, toCaseResponse } from './jury.mappers.js';
+
+const DISCLOSED_CONTENT_TYPES: ReportableContentType[] = [
+  'message',
+  'conversation',
+];
+
+const findDisclosingReport = (juryCase: IJuryCaseDocument) =>
+  DISCLOSED_CONTENT_TYPES.includes(juryCase.contentType)
+    ? reportRepository.findLatestByContentAnyStatus(
+        juryCase.contentType,
+        juryCase.contentId.toString()
+      )
+    : Promise.resolve(null);
 
 export const listAssignedForJuror = async (
   jurorId: string
@@ -22,10 +37,13 @@ export const listAssignedForJuror = async (
     );
     if (!juryCase) continue;
 
-    const counts = await juryAssignmentRepository.countVotes(
-      juryCase._id.toString()
+    const [counts, report] = await Promise.all([
+      juryAssignmentRepository.countVotes(juryCase._id.toString()),
+      findDisclosingReport(juryCase),
+    ]);
+    responses.push(
+      toAssignmentResponse(juryCase, counts.total, assignment, report)
     );
-    responses.push(toAssignmentResponse(juryCase, counts.total, assignment));
   }
 
   return responses;
@@ -52,8 +70,11 @@ export const getCaseForViewer = async (
     );
   }
 
-  const counts = await juryAssignmentRepository.countVotes(caseId);
-  return toAssignmentResponse(juryCase, counts.total, assignment);
+  const [counts, report] = await Promise.all([
+    juryAssignmentRepository.countVotes(caseId),
+    findDisclosingReport(juryCase),
+  ]);
+  return toAssignmentResponse(juryCase, counts.total, assignment, report);
 };
 
 export const getCaseForContentOwner = async (
@@ -74,8 +95,9 @@ export const getCaseForContentOwner = async (
   );
   if (!juryCase) return null;
 
-  const counts = await juryAssignmentRepository.countVotes(
-    juryCase._id.toString()
-  );
-  return toCaseResponse(juryCase, counts.total);
+  const [counts, report] = await Promise.all([
+    juryAssignmentRepository.countVotes(juryCase._id.toString()),
+    findDisclosingReport(juryCase),
+  ]);
+  return toCaseResponse(juryCase, counts.total, report);
 };

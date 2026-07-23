@@ -10,9 +10,13 @@ import {
   CONVERSATION_READ_SOCKET_EVENT,
   CONVERSATION_UPDATED_SOCKET_EVENT,
   MESSAGE_GROUP_MAX_PARTICIPANTS,
+  MESSAGE_COLD_OUTREACH_MAX_PER_HOUR,
+  getTrustTier,
 } from '@network/shared';
 import * as conversationRepository from '../repository/conversation.repository.js';
+import * as messageColdOutreachRepository from '../repository/messageColdOutreach.repository.js';
 import * as userRepository from '../../user/user.repository.js';
+import * as creatorRepository from '../../creator/creator.repository.js';
 import * as keyBundleService from './keyBundle.service.js';
 import * as preferencesService from '../../preferences/preferences.service.js';
 import * as followService from '../../follow/services/follow.crud.service.js';
@@ -133,6 +137,22 @@ const assertCanAddToGroup = async (
   );
 };
 
+const assertColdOutreachAllowed = async (userId: string): Promise<void> => {
+  const creatorDoc = await creatorRepository.findByUserId(userId);
+  const tier = getTrustTier(creatorDoc?.trustScore ?? 0);
+  if (tier.id !== 'NEWCOMER') return;
+
+  const count =
+    await messageColdOutreachRepository.incrementColdOutreachCount(userId);
+  if (count > MESSAGE_COLD_OUTREACH_MAX_PER_HOUR) {
+    throw new ApiError(
+      429,
+      'RATE_LIMIT_EXCEEDED',
+      'New accounts can only start a limited number of new conversations per hour. Please try again later.'
+    );
+  }
+};
+
 export const createDirectConversation = async (
   userId: string,
   participantId: string
@@ -154,6 +174,7 @@ export const createDirectConversation = async (
   );
   if (!alreadyExists) {
     await assertCanMessage(userId, participantId);
+    await assertColdOutreachAllowed(userId);
   }
 
   await keyBundleService.assertAllHaveKeyBundle([userId, participantId]);

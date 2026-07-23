@@ -2,30 +2,22 @@ import mongoose, { Schema, type Document } from 'mongoose';
 import {
   REPORTABLE_CONTENT_TYPES,
   REPORT_REASON_CODES,
+  REPORT_CONTENT_MODEL_BY_TYPE,
   JURY_CASE_STATUS,
   JURY_VERDICT,
   JURY_POOL_SIZE,
   JURY_CONSENSUS_THRESHOLD,
   JURY_CASE_TIMEOUT_MS,
   type ReportableContentType,
+  type ReportContentModel,
   type ReportReasonCode,
   type JuryCaseStatus,
   type JuryVerdict,
 } from '@network/shared';
 
-const CONTENT_MODEL_BY_TYPE: Record<
-  ReportableContentType,
-  'Video' | 'Short' | 'Post' | 'Comment'
-> = {
-  video: 'Video',
-  short: 'Short',
-  post: 'Post',
-  comment: 'Comment',
-};
-
 export interface IJuryCaseDocument extends Document {
   contentType: ReportableContentType;
-  contentModel: 'Video' | 'Short' | 'Post' | 'Comment';
+  contentModel: ReportContentModel;
   contentId: mongoose.Types.ObjectId;
   reasonCode: ReportReasonCode | null;
   status: JuryCaseStatus;
@@ -49,7 +41,7 @@ const juryCaseSchema = new Schema<IJuryCaseDocument>(
     },
     contentModel: {
       type: String,
-      enum: ['Video', 'Short', 'Post', 'Comment'],
+      enum: ['Video', 'Short', 'Post', 'Comment', 'Message', 'Conversation'],
       required: true,
     },
     contentId: {
@@ -105,7 +97,7 @@ const juryCaseSchema = new Schema<IJuryCaseDocument>(
 );
 
 juryCaseSchema.pre('validate', function setContentModel() {
-  this.contentModel = CONTENT_MODEL_BY_TYPE[this.contentType];
+  this.contentModel = REPORT_CONTENT_MODEL_BY_TYPE[this.contentType];
 });
 
 juryCaseSchema.index({ contentType: 1, contentId: 1, status: 1 });

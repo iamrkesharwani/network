@@ -35,6 +35,14 @@ export interface IJuryCaseResponse {
   deadline: string;
   createdAt: string;
   resolvedAt?: string;
+  /**
+   * Only present for message/conversation cases - since that content is
+   * end-to-end encrypted, the server can't fetch/decrypt it for jurors like
+   * it can for public content, so the reporter's voluntarily-disclosed
+   * plaintext (and note) stand in as the reviewable evidence instead.
+   */
+  disclosedContent?: string;
+  reporterNote?: string;
 }
 
 export interface IJuryVoteResponse {

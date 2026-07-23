@@ -5,7 +5,7 @@ import { getRelativeDate } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import { cn } from '../../../shared/utils/cn';
 import { useGetMessagesQuery } from '../messageApi';
-import { decryptMessage } from '../keyManager';
+import { decryptMessage, type IMessageKeyRing } from '../keyManager';
 import { decodeMessagePayload } from '../messagePayload';
 import ConversationContextMenu from './ConversationContextMenu';
 
@@ -16,6 +16,7 @@ interface ConversationListItemProps {
   conversation: IConversationSummary;
   isActive: boolean;
   privateKey: CryptoKey;
+  keyRing?: IMessageKeyRing;
   myUserId: string;
   onSelect: (conversationId: string) => void;
 }
@@ -37,6 +38,7 @@ const ConversationListItem = ({
   conversation,
   isActive,
   privateKey,
+  keyRing,
   myUserId,
   onSelect,
 }: ConversationListItemProps) => {
@@ -111,7 +113,7 @@ const ConversationListItem = ({
     }
 
     let cancelled = false;
-    decryptMessage(latestMessage, privateKey, myUserId)
+    decryptMessage(latestMessage, privateKey, myUserId, keyRing)
       .then((decrypted) => {
         if (!cancelled) setPreview(decodeMessagePayload(decrypted).text);
       })
@@ -122,7 +124,7 @@ const ConversationListItem = ({
     return () => {
       cancelled = true;
     };
-  }, [latestMessage, privateKey, myUserId]);
+  }, [latestMessage, privateKey, keyRing, myUserId]);
 
   const avatarProps = getAvatarProps(conversation);
 

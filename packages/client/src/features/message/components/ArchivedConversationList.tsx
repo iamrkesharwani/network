@@ -4,6 +4,7 @@ import {
   useGetArchivedConversationsQuery,
   CONVERSATION_ARCHIVED_LIST_ARGS,
 } from '../conversationApi';
+import type { IMessageKeyRing } from '../keyManager';
 import ConversationListItem from './ConversationListItem';
 import ConversationListItemSkeleton from '../skeleton/ConversationListItemSkeleton';
 
@@ -11,6 +12,7 @@ interface ArchivedConversationListProps {
   activeConversationId: string | null;
   onSelect: (conversationId: string) => void;
   privateKey: CryptoKey;
+  keyRing?: IMessageKeyRing;
   myUserId: string;
 }
 
@@ -18,6 +20,7 @@ const ArchivedConversationList = ({
   activeConversationId,
   onSelect,
   privateKey,
+  keyRing,
   myUserId,
 }: ArchivedConversationListProps) => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
@@ -58,6 +61,7 @@ const ArchivedConversationList = ({
           conversation={conversation}
           isActive={conversation.id === activeConversationId}
           privateKey={privateKey}
+          keyRing={keyRing}
           myUserId={myUserId}
           onSelect={onSelect}
         />

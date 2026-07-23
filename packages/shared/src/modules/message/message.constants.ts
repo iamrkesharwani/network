@@ -38,6 +38,9 @@ export const MESSAGE_PIN_LENGTHS = [4, 6] as const;
 export const MESSAGE_PIN_NUDGE_THROTTLE_MS = SEVENTY_TWO_HOURS_MS;
 export const MESSAGE_PIN_REPROMPT_MS = SEVEN_DAYS_MS;
 
+export const MESSAGE_KEY_ROTATION_INTERVAL_MS = 90 * 24 * 60 * 60 * 1000;
+export const MESSAGE_KEY_ROTATION_NUDGE_THROTTLE_MS = SEVEN_DAYS_MS;
+
 export const MESSAGE_DELETE_SCOPES = ['me', 'everyone'] as const;
 
 export const MESSAGE_MUTE_DURATIONS = ['8h', '1d', '1w', 'forever'] as const;
@@ -88,6 +91,9 @@ export const MESSAGE_ATTACHMENT_ACCESS_URL_TTL_SECONDS = SIX_HOURS_SECONDS;
 export const MESSAGE_ATTACHMENT_REAPER_QUEUE_NAME = 'message-attachment-reaper';
 export const MESSAGE_ATTACHMENT_REAPER_JOB_ID = 'message-attachment-reaper';
 export const MESSAGE_ATTACHMENT_REAPER_INTERVAL_MS = FIFTEEN_MINUTES_MS;
+
+export const MESSAGE_COLD_OUTREACH_MAX_PER_HOUR = 5;
+export const MESSAGE_COLD_OUTREACH_WINDOW_SECONDS = ONE_HOUR_SECONDS;
 
 export const MESSAGE_OEMBED_PROVIDERS = [
   {

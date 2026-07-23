@@ -22,6 +22,13 @@ import {
   isPinReentryDue,
 } from '../pinLockStore';
 import { setPrivateKey } from '../messageKeySlice';
+import { useMessageKeyRing } from '../hooks/useMessageKeyRing';
+import {
+  getLastRotatedAt,
+  recordKeyRotation,
+  dismissKeyRotationNudge,
+  shouldShowKeyRotationNudge,
+} from '../keyRotationStore';
 import { getApiErrorCode, getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
 import { buildConversationPath } from '../utils/buildMessagesPath';
 import {
@@ -31,7 +38,7 @@ import {
   CONVERSATION_ARCHIVED_LIST_ARGS,
 } from '../conversationApi';
 import { useCreateDirectConversationMutation } from '../conversationApi';
-import { useGetMyKeyBundleQuery } from '../keyBundleApi';
+import { useGetMyKeyBundleQuery, useGetPublicKeyQuery } from '../keyBundleApi';
 import { useSearchCreatorsQuery } from '../../search/searchApi';
 import KeySetupModal from '../components/KeySetupModal';
 import KeyOtpModal from '../components/KeyOtpModal';
@@ -39,6 +46,7 @@ import KeyUnlockModal from '../components/KeyUnlockModal';
 import KeyResetModal from '../components/KeyResetModal';
 import PinEntryModal from '../components/PinEntryModal';
 import PinSetupModal from '../components/PinSetupModal';
+import KeyRotationModal from '../components/KeyRotationModal';
 import ConversationList from '../components/ConversationList';
 import ArchivedConversationList from '../components/ArchivedConversationList';
 import MessageThread from '../components/MessageThread';
@@ -63,6 +71,7 @@ const MessagesPage = () => {
   const [hasPendingPinCache, setHasPendingPinCache] = useState(false);
   const [isPinEntryOpen, setIsPinEntryOpen] = useState(false);
   const [isPinSetupOpen, setIsPinSetupOpen] = useState(false);
+  const [isKeyRotationNudgeOpen, setIsKeyRotationNudgeOpen] = useState(false);
 
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [newChatQuery, setNewChatQuery] = useState('');
@@ -122,6 +131,14 @@ const MessagesPage = () => {
       !user || !isCacheChecked || Boolean(privateKey) || hasPendingPinCache,
   });
 
+  // Not OTP-gated (unlike GET /keys/me), so this stays available for the
+  // whole session to resolve which key version is currently active - needed
+  // to pick the right key out of the ring when decrypting.
+  const { data: myPublicKeyData } = useGetPublicKeyQuery(user?.id ?? '', {
+    skip: !user,
+  });
+  const keyRing = useMessageKeyRing(user?.id, myPublicKeyData?.data.keyVersion);
+
   useEffect(() => {
     if (!user || !privateKey) return;
     if (!isPinConfigured(user.id) && shouldShowPinNudge(user.id)) {
@@ -137,6 +154,19 @@ const MessagesPage = () => {
       setIsPinEntryOpen(true);
     }
   }, [user, privateKey, dispatch]);
+
+  useEffect(() => {
+    if (!user || !privateKey) return;
+    if (getLastRotatedAt(user.id) === null) {
+      // No baseline yet (new key, or this device predates the rotation
+      // feature) - start the clock silently rather than nudging immediately.
+      recordKeyRotation(user.id);
+      return;
+    }
+    if (shouldShowKeyRotationNudge(user.id)) {
+      setIsKeyRotationNudgeOpen(true);
+    }
+  }, [user, privateKey]);
 
   const handleForgotPin = () => {
     if (!user) return;
@@ -285,6 +315,7 @@ const MessagesPage = () => {
             activeConversationId={activeConversationId}
             onSelect={(id) => navigate(buildConversationPath(id))}
             privateKey={privateKey}
+            keyRing={keyRing}
             myUserId={user.id}
           />
         )}
@@ -293,6 +324,7 @@ const MessagesPage = () => {
             activeConversationId={activeConversationId}
             onSelect={(id) => navigate(buildConversationPath(id))}
             privateKey={privateKey}
+            keyRing={keyRing}
             myUserId={user.id}
           />
         )}
@@ -318,6 +350,7 @@ const MessagesPage = () => {
           <MessageThread
             conversation={activeConversation}
             privateKey={privateKey}
+            keyRing={keyRing}
             myUserId={user.id}
             socketRef={socketRef}
             onBack={() => navigate(CLIENT_ROUTES.MESSAGES)}
@@ -372,6 +405,22 @@ const MessagesPage = () => {
         onClose={() => setIsPinSetupOpen(false)}
         onConfigured={() => setIsPinSetupOpen(false)}
       />
+      {privateKey && (
+        <KeyRotationModal
+          isOpen={isKeyRotationNudgeOpen}
+          onClose={() => {
+            dismissKeyRotationNudge(user.id);
+            setIsKeyRotationNudgeOpen(false);
+          }}
+          userId={user.id}
+          hasPassword={user.hasPassword}
+          currentPrivateKey={privateKey}
+          onKeyReady={(key) => {
+            dispatch(setPrivateKey(key));
+            setIsKeyRotationNudgeOpen(false);
+          }}
+        />
+      )}
       <CreateGroupModal
         isOpen={isCreateGroupOpen}
         onClose={() => setIsCreateGroupOpen(false)}

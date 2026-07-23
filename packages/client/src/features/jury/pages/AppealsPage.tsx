@@ -22,6 +22,8 @@ const CONTENT_TYPE_LABELS: Record<ReportableContentType, string> = {
   short: 'Short',
   post: 'Post',
   comment: 'Comment',
+  message: 'Message',
+  conversation: 'Conversation',
 };
 
 const APPEALABLE_CONTENT_TYPES = REPORTABLE_CONTENT_TYPES.filter(

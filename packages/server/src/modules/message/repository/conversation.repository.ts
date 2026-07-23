@@ -90,6 +90,16 @@ export const findById = (
 ): Promise<IConversationDocument | null> =>
   ConversationModel.findById(conversationId).exec();
 
+export const setModeratorLocked = (
+  conversationId: string,
+  isModeratorLocked: boolean
+): Promise<IConversationDocument | null> =>
+  ConversationModel.findByIdAndUpdate(
+    conversationId,
+    { $set: { isModeratorLocked } },
+    { new: true }
+  ).exec();
+
 export const isParticipant = async (
   userId: string,
   conversationId: string

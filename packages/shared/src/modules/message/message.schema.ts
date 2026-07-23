@@ -77,6 +77,22 @@ export const keyBundlePublishSchema = z
     { message: 'Recovery fields must all be provided together.' }
   );
 
+// Rotating publishes a new active key the exact same way setup/reset does -
+// the server tells them apart by which endpoint was hit, not by wire shape.
+export const keyRotateSchema = keyBundlePublishSchema;
+
+const keyHistoryRewrapEntrySchema = z.object({
+  keyVersion: z.number().int().nonnegative(),
+  wrappedPrivateKey: wrappedPrivateKeySchema,
+  wrapIv: wrapIvSchema,
+  wrapSalt: wrapSaltSchema,
+  pbkdf2Iterations: pbkdf2IterationsSchema,
+});
+
+export const keyHistoryRewrapSchema = z.object({
+  entries: z.array(keyHistoryRewrapEntrySchema),
+});
+
 export const keyRecoveryConfirmSchema = z.object({
   recoveryToken: z.string().min(1).max(KEY_BUNDLE_RECOVERY_TOKEN_MAX_LENGTH),
 });
@@ -137,6 +153,7 @@ export const participantAddSchema = z.object({
 export const encryptedKeyEntrySchema = z.object({
   recipientId: mongoIdSchema,
   encryptedKey: z.string().min(1).max(MESSAGE_ENCRYPTED_KEY_MAX_LENGTH),
+  keyVersion: z.number().int().nonnegative(),
 });
 
 export const messageSendSchema = z.object({

@@ -1,15 +1,20 @@
 import type {
+  IKeyBundleHistoryEntryResponse,
   IKeyBundleOwnResponse,
   IKeyBundlePublicResponse,
   KeyBundlePublishInput,
+  KeyHistoryRewrapInput,
+  KeyRotateInput,
 } from '@network/shared';
 import * as keyBundleRepository from '../repository/keyBundle.repository.js';
+import * as keyBundleHistoryRepository from '../repository/keyBundleHistory.repository.js';
 import * as keyOtpService from './keyOtp.service.js';
 import * as authRepository from '../../auth/auth.repository.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { hashPassword } from '../../../core/utils/hash.js';
 import { queueKeyRecoveryEmail } from '../../email/email.js';
 import type { IKeyBundleDocument } from '../models/keyBundle.model.js';
+import type { IKeyBundleHistoryDocument } from '../models/keyBundleHistory.model.js';
 
 const toOwnResponse = (doc: IKeyBundleDocument): IKeyBundleOwnResponse => ({
   publicKey: doc.publicKey,
@@ -26,6 +31,17 @@ const toPublicResponse = (
   userId: doc.userId.toString(),
   publicKey: doc.publicKey,
   keyVersion: doc.keyVersion,
+});
+
+const toHistoryResponse = (
+  doc: IKeyBundleHistoryDocument
+): IKeyBundleHistoryEntryResponse => ({
+  keyVersion: doc.keyVersion,
+  wrappedPrivateKey: doc.wrappedPrivateKey,
+  wrapIv: doc.wrapIv,
+  wrapSalt: doc.wrapSalt,
+  pbkdf2Iterations: doc.pbkdf2Iterations,
+  retiredAt: doc.retiredAt.toISOString(),
 });
 
 export const publishKeyBundle = async (
@@ -103,6 +119,70 @@ export const getPublicKeys = async (
 ): Promise<IKeyBundlePublicResponse[]> => {
   const docs = await keyBundleRepository.findPublicByUserIds(userIds);
   return docs.map(toPublicResponse);
+};
+
+export const rotateKeyBundle = async (
+  userId: string,
+  data: KeyRotateInput
+): Promise<IKeyBundleOwnResponse> => {
+  const existing = await keyBundleRepository.findByUserId(userId);
+  if (!existing) {
+    throw new ApiError(
+      404,
+      'NOT_FOUND',
+      'No messaging key found for this account to rotate.'
+    );
+  }
+
+  await keyBundleHistoryRepository.archiveCurrent(existing);
+
+  const recoveryTokenHash = data.recoveryToken
+    ? await hashPassword(data.recoveryToken)
+    : undefined;
+
+  const doc = await keyBundleRepository.upsertKeyBundle(
+    userId,
+    data,
+    recoveryTokenHash
+  );
+
+  if (data.recoveryToken) {
+    const user = await authRepository.findById(userId);
+    if (user) {
+      await queueKeyRecoveryEmail({
+        to: user.email,
+        userName: user.name,
+        recoveryToken: data.recoveryToken,
+      });
+    }
+  }
+
+  return toOwnResponse(doc);
+};
+
+export const rewrapKeyHistory = async (
+  userId: string,
+  data: KeyHistoryRewrapInput
+): Promise<void> => {
+  await Promise.all(
+    data.entries.map((entry) =>
+      keyBundleHistoryRepository.updateWrapForVersion(userId, entry.keyVersion, {
+        wrappedPrivateKey: entry.wrappedPrivateKey,
+        wrapIv: entry.wrapIv,
+        wrapSalt: entry.wrapSalt,
+        pbkdf2Iterations: entry.pbkdf2Iterations,
+      })
+    )
+  );
+};
+
+export const getOwnKeyHistory = async (
+  userId: string
+): Promise<IKeyBundleHistoryEntryResponse[]> => {
+  await keyOtpService.requireKeyOtpVerified(userId);
+
+  const docs = await keyBundleHistoryRepository.findByUserId(userId);
+  return docs.map(toHistoryResponse);
 };
 
 export const assertAllHaveKeyBundle = async (

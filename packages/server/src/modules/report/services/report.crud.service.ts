@@ -16,7 +16,8 @@ export const createReport = async (
   contentType: ReportableContentType,
   contentId: string,
   reasonCode: ReportReasonCode,
-  note?: string
+  note?: string,
+  disclosedContent?: string
 ): Promise<IReportResponse> => {
   const adapter = getModerationContentAdapter(contentType);
   if (!adapter) {
@@ -58,7 +59,8 @@ export const createReport = async (
     contentType,
     contentId,
     reasonCode,
-    note
+    note,
+    disclosedContent
   );
 
   if (!REPORT_REASON_CODES_BYPASSING_JURY.includes(reasonCode)) {

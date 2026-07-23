@@ -4,6 +4,7 @@ import {
   MESSAGE_KEY_STORE_DB_VERSION,
   MESSAGE_KEY_STORE_NAME,
   MESSAGE_PIN_KEY_STORE_NAME,
+  MESSAGE_HISTORICAL_KEY_STORE_NAME,
 } from '@network/shared';
 import type { IWrappedPrivateKey } from './keyManager';
 
@@ -19,11 +20,17 @@ const getDb = (): Promise<IDBPDatabase> => {
         if (!db.objectStoreNames.contains(MESSAGE_PIN_KEY_STORE_NAME)) {
           db.createObjectStore(MESSAGE_PIN_KEY_STORE_NAME);
         }
+        if (!db.objectStoreNames.contains(MESSAGE_HISTORICAL_KEY_STORE_NAME)) {
+          db.createObjectStore(MESSAGE_HISTORICAL_KEY_STORE_NAME);
+        }
       },
     });
   }
   return dbPromise;
 };
+
+const historicalKeyId = (userId: string, keyVersion: number): string =>
+  `${userId}:${keyVersion}`;
 
 export const getCachedPrivateKey = async (
   userId: string
@@ -67,4 +74,57 @@ export const clearCachedPinWrappedKey = async (
 ): Promise<void> => {
   const db = await getDb();
   await db.delete(MESSAGE_PIN_KEY_STORE_NAME, userId);
+};
+
+export const setCachedHistoricalPrivateKey = async (
+  userId: string,
+  keyVersion: number,
+  privateKey: CryptoKey
+): Promise<void> => {
+  const db = await getDb();
+  await db.put(
+    MESSAGE_HISTORICAL_KEY_STORE_NAME,
+    privateKey,
+    historicalKeyId(userId, keyVersion)
+  );
+};
+
+const userHistoricalKeyIds = async (
+  db: IDBPDatabase,
+  userId: string
+): Promise<string[]> => {
+  const allKeys = await db.getAllKeys(MESSAGE_HISTORICAL_KEY_STORE_NAME);
+  const prefix = `${userId}:`;
+  return allKeys.filter(
+    (key): key is string => typeof key === 'string' && key.startsWith(prefix)
+  );
+};
+
+export const getCachedHistoricalKeyRing = async (
+  userId: string
+): Promise<Map<number, CryptoKey>> => {
+  const db = await getDb();
+  const ids = await userHistoricalKeyIds(db, userId);
+  const ring = new Map<number, CryptoKey>();
+
+  for (const id of ids) {
+    const value = (await db.get(MESSAGE_HISTORICAL_KEY_STORE_NAME, id)) as
+      | CryptoKey
+      | undefined;
+    if (!value) continue;
+    const keyVersion = Number(id.slice(userId.length + 1));
+    ring.set(keyVersion, value);
+  }
+
+  return ring;
+};
+
+export const clearCachedHistoricalPrivateKeys = async (
+  userId: string
+): Promise<void> => {
+  const db = await getDb();
+  const ids = await userHistoricalKeyIds(db, userId);
+  const tx = db.transaction(MESSAGE_HISTORICAL_KEY_STORE_NAME, 'readwrite');
+  await Promise.all(ids.map((id) => tx.store.delete(id)));
+  await tx.done;
 };
