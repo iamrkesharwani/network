@@ -5,6 +5,8 @@ import {
   CONVERSATION_ARCHIVED_LIST_ARGS,
 } from '../conversationApi';
 import type { IMessageKeyRing } from '../keyManager';
+import { getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
+import Button from '../../../shared/ui/primitives/Button';
 import ConversationListItem from './ConversationListItem';
 import ConversationListItemSkeleton from '../skeleton/ConversationListItemSkeleton';
 
@@ -24,10 +26,11 @@ const ArchivedConversationList = ({
   myUserId,
 }: ArchivedConversationListProps) => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
-  const { data, isLoading, isFetching } = useGetArchivedConversationsQuery({
-    ...CONVERSATION_ARCHIVED_LIST_ARGS,
-    ...(cursor !== undefined && { cursor }),
-  });
+  const { data, isLoading, isFetching, isError, error, refetch } =
+    useGetArchivedConversationsQuery({
+      ...CONVERSATION_ARCHIVED_LIST_ARGS,
+      ...(cursor !== undefined && { cursor }),
+    });
 
   const conversations = data?.data ?? [];
 
@@ -37,6 +40,17 @@ const ArchivedConversationList = ({
         {Array.from({ length: 5 }).map((_, i) => (
           <ConversationListItemSkeleton key={i} />
         ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center gap-2 px-2 py-4 text-center text-sm text-text-muted">
+        <p>{getApiErrorMessage(error, "Couldn't load your archived chats.")}</p>
+        <Button size="sm" variant="outline" onClick={() => refetch()}>
+          Retry
+        </Button>
       </div>
     );
   }
