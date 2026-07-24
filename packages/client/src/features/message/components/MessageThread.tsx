@@ -33,6 +33,10 @@ import {
 } from '../conversationApi';
 import { useConversationRoom } from '../hooks/useConversationRoom';
 import { encodeMessagePayload, decodeMessagePayload, fetchLinkPreview } from '../messagePayload';
+import {
+  getConversationLabel,
+  getConversationAvatarProps,
+} from '../utils/conversationDisplay';
 import ReportModal from '../../report/components/ReportModal';
 import { useBlockUserMutation } from '../../block/blockApi';
 import { usePreference } from '../../settings/hooks/usePreference';
@@ -51,11 +55,6 @@ interface MessageThreadProps {
   onOpenGroupInfo?: () => void;
   onBack: () => void;
 }
-
-const getLabel = (conversation: IConversationSummary): string =>
-  conversation.type === 'direct'
-    ? conversation.otherParticipant.name
-    : conversation.groupName;
 
 const getParticipantLabel = (
   conversation: IConversationSummary,
@@ -285,13 +284,7 @@ const MessageThread = ({
     }).unwrap();
   };
 
-  const headerAvatar =
-    conversation.type === 'direct'
-      ? {
-          src: conversation.otherParticipant.avatarUrl,
-          isOnline: conversation.otherParticipant.isOnline,
-        }
-      : { src: conversation.groupAvatarUrl, isOnline: undefined };
+  const headerAvatar = getConversationAvatarProps(conversation);
 
   const handleBlock = async () => {
     if (conversation.type !== 'direct') return;
@@ -321,11 +314,11 @@ const MessageThread = ({
           <Avatar
             src={headerAvatar.src}
             isOnline={headerAvatar.isOnline}
-            fallback={getLabel(conversation)}
+            fallback={getConversationLabel(conversation)}
           />
           <div>
             <p className="font-semibold text-text-primary">
-              {getLabel(conversation)}
+              {getConversationLabel(conversation)}
             </p>
             {conversation.type === 'direct' && (
               <PresenceDot

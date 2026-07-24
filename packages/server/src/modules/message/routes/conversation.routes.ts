@@ -9,6 +9,7 @@ import {
   groupUpdateSchema,
   participantAddSchema,
   conversationListQuerySchema,
+  conversationSearchQuerySchema,
   conversationIdParamSchema,
   conversationMuteSchema,
   conversationDisappearingTtlSchema,
@@ -29,6 +30,20 @@ router.get(
   requireAuth,
   validate({ query: conversationListQuerySchema }),
   conversationController.listArchived
+);
+
+router.get(
+  '/search',
+  requireAuth,
+  validate({ query: conversationSearchQuerySchema }),
+  conversationController.search
+);
+
+router.post(
+  '/mark-all-read',
+  requireAuth,
+  conversationLimiter,
+  conversationController.markAllAsRead
 );
 
 router.post(

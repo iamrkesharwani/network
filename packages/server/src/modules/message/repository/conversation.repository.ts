@@ -22,6 +22,9 @@ const isDuplicateKeyError = (error: unknown): boolean =>
 const buildDirectKey = (userIdA: string, userIdB: string): string =>
   [userIdA, userIdB].sort().join('_');
 
+const escapeRegex = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const encodeCursor = (doc: IConversationDocument): string =>
   Buffer.from(`${doc.lastMessageAt.getTime()}_${doc._id.toString()}`).toString(
     'base64url'
@@ -388,6 +391,66 @@ export const touchLastMessageAt = (
     conversationId,
     { $set: { lastMessageAt: new Date() } },
     { returnDocument: 'after' }
+  ).exec();
+
+export const searchByUser = async (
+  userId: string,
+  query: string,
+  limit: number
+): Promise<IConversationDocument[]> => {
+  const pattern = new RegExp(escapeRegex(query), 'i');
+  const objectId = new mongoose.Types.ObjectId(userId);
+
+  const rawDocs = await ConversationModel.aggregate([
+    {
+      $match: {
+        participantIds: objectId,
+        [`archivedAt.${userId}`]: { $exists: false },
+        [`hiddenByBlockAt.${userId}`]: { $exists: false },
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'participantIds',
+        foreignField: '_id',
+        as: 'participantDocs',
+      },
+    },
+    {
+      $addFields: {
+        otherParticipantDocs: {
+          $filter: {
+            input: '$participantDocs',
+            as: 'participant',
+            cond: { $ne: ['$$participant._id', objectId] },
+          },
+        },
+      },
+    },
+    {
+      $match: {
+        $or: [
+          { groupName: pattern },
+          { 'otherParticipantDocs.name': pattern },
+          { 'otherParticipantDocs.username': pattern },
+        ],
+      },
+    },
+    { $sort: { lastMessageAt: -1 } },
+    { $limit: limit },
+  ]).exec();
+
+  return ConversationModel.populate(rawDocs, {
+    path: 'participantIds',
+    select: 'username name avatarUrl lastActiveAt status',
+  }) as unknown as Promise<IConversationDocument[]>;
+};
+
+export const markAllRead = (userId: string): Promise<unknown> =>
+  ConversationModel.updateMany(
+    { participantIds: userId },
+    { $set: { [`lastReadAt.${userId}`]: new Date() } }
   ).exec();
 
 export const findDistinctPartnerIds = async (

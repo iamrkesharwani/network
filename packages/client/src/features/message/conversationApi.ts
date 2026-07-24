@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   IConversationSummary,
   ConversationListQuery,
+  ConversationSearchQuery,
   ConversationMuteDuration,
   ConversationDisappearingTtl,
   DirectConversationCreateInput,
@@ -63,6 +64,54 @@ export const conversationApi = createApi({
       forceRefetch: ({ currentArg, previousArg }) =>
         currentArg?.cursor !== previousArg?.cursor,
       providesTags: ['Conversation'],
+    }),
+
+    searchConversations: builder.query<
+      ApiResponse<IConversationSummary[]>,
+      ConversationSearchQuery
+    >({
+      query: (params) => ({ url: '/search', method: 'GET', params }),
+    }),
+
+    markAllRead: builder.mutation<ApiResponse<null>, void>({
+      query: () => ({ url: '/mark-all-read', method: 'POST' }),
+      async onQueryStarted(_arg, { dispatch, getState, queryFulfilled }) {
+        const state = getState();
+        const patches = [
+          ...conversationApi.util
+            .selectCachedArgsForQuery(state, 'getConversations')
+            .map((args) =>
+              dispatch(
+                conversationApi.util.updateQueryData(
+                  'getConversations',
+                  args,
+                  (draft) => {
+                    for (const item of draft.data) item.isUnread = false;
+                  }
+                )
+              )
+            ),
+          ...conversationApi.util
+            .selectCachedArgsForQuery(state, 'getArchivedConversations')
+            .map((args) =>
+              dispatch(
+                conversationApi.util.updateQueryData(
+                  'getArchivedConversations',
+                  args,
+                  (draft) => {
+                    for (const item of draft.data) item.isUnread = false;
+                  }
+                )
+              )
+            ),
+        ];
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
     }),
 
     createDirectConversation: builder.mutation<
@@ -202,6 +251,8 @@ export const conversationApi = createApi({
 export const {
   useGetConversationsQuery,
   useGetArchivedConversationsQuery,
+  useSearchConversationsQuery,
+  useMarkAllReadMutation,
   useCreateDirectConversationMutation,
   useCreateGroupConversationMutation,
   useAddParticipantsMutation,

@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import {
   ALLOWED_AVATAR_MIME_TYPES,
   type ConversationListQuery,
+  type ConversationSearchQuery,
   type ConversationMuteInput,
   type ConversationDisappearingTtlInput,
   type DirectConversationCreateInput,
@@ -66,6 +67,23 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
         'Conversations fetched successfully'
       )
     );
+});
+
+export const search = asyncHandler(async (req: Request, res: Response) => {
+  const user = requireUser(req);
+  const { q, limit } = req.query as unknown as ConversationSearchQuery;
+
+  const result = await conversationService.searchConversations(user.id, q, limit);
+
+  res.status(200).json(new ApiResponse(result, 'Conversations found'));
+});
+
+export const markAllAsRead = asyncHandler(async (req: Request, res: Response) => {
+  const user = requireUser(req);
+
+  await conversationService.markAllAsRead(user.id);
+
+  res.status(200).json(new ApiResponse(null, 'All conversations marked as read'));
 });
 
 export const listArchived = asyncHandler(async (req: Request, res: Response) => {

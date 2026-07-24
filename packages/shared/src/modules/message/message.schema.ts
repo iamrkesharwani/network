@@ -14,6 +14,8 @@ import {
   MESSAGE_MUTE_DURATIONS,
   MESSAGE_DISAPPEARING_TTL_OPTIONS,
   MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH,
+  CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+  CONVERSATION_SEARCH_RESULT_LIMIT,
 } from './message.constants.js';
 
 export const conversationTypeSchema = z.enum(CONVERSATION_TYPES);
@@ -126,3 +128,13 @@ export const conversationListQuerySchema = z.object({
 });
 
 export const messageListQuerySchema = conversationListQuerySchema;
+
+export const conversationSearchQuerySchema = z.object({
+  q: z.string().trim().min(1).max(CONVERSATION_SEARCH_QUERY_MAX_LENGTH),
+  limit: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(MAX_PAGE_LIMIT)
+    .default(CONVERSATION_SEARCH_RESULT_LIMIT),
+});

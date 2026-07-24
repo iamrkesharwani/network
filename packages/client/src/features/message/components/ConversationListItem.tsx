@@ -6,6 +6,10 @@ import Avatar from '../../../shared/ui/primitives/Avatar';
 import { cn } from '../../../shared/utils/cn';
 import { useGetMessagesQuery } from '../messageApi';
 import { decodeMessagePayload } from '../messagePayload';
+import {
+  getConversationLabel,
+  getConversationAvatarProps,
+} from '../utils/conversationDisplay';
 import ConversationContextMenu from './ConversationContextMenu';
 
 const LONG_PRESS_DURATION_MS = 500;
@@ -16,19 +20,6 @@ interface ConversationListItemProps {
   isActive: boolean;
   onSelect: (conversationId: string) => void;
 }
-
-const getLabel = (conversation: IConversationSummary): string =>
-  conversation.type === 'direct'
-    ? conversation.otherParticipant.name
-    : conversation.groupName;
-
-const getAvatarProps = (conversation: IConversationSummary) =>
-  conversation.type === 'direct'
-    ? {
-        src: conversation.otherParticipant.avatarUrl,
-        isOnline: conversation.otherParticipant.isOnline,
-      }
-    : { src: conversation.groupAvatarUrl, isOnline: undefined };
 
 const ConversationListItem = ({
   conversation,
@@ -99,7 +90,7 @@ const ConversationListItem = ({
     onSelect(conversation.id);
   };
 
-  const avatarProps = getAvatarProps(conversation);
+  const avatarProps = getConversationAvatarProps(conversation);
 
   return (
     <button
@@ -117,14 +108,14 @@ const ConversationListItem = ({
       <Avatar
         src={avatarProps.src}
         isOnline={avatarProps.isOnline}
-        fallback={getLabel(conversation)}
+        fallback={getConversationLabel(conversation)}
       />
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-1 truncate text-sm font-medium text-text-primary">
           {conversation.isPinned && (
             <Pin className="h-3 w-3 shrink-0 text-text-muted" strokeWidth={1.75} />
           )}
-          <span className="truncate">{getLabel(conversation)}</span>
+          <span className="truncate">{getConversationLabel(conversation)}</span>
         </p>
         <p className="truncate text-xs text-text-muted">
           {preview || ' '}

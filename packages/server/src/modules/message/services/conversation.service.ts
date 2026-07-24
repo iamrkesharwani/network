@@ -235,6 +235,24 @@ export const listConversations = async (
   };
 };
 
+export const searchConversations = async (
+  userId: string,
+  query: string,
+  limit: number
+): Promise<IConversationSummary[]> => {
+  const docs = await conversationRepository.searchByUser(userId, query, limit);
+
+  const participantIds = toParticipantIds(docs);
+  const [onlineUserIds, privacyByUserId] = await Promise.all([
+    presenceService.getOnlineUserIds(participantIds),
+    preferencesService.getResolvedPrivacyByUserIds(participantIds),
+  ]);
+
+  return docs.map((doc) =>
+    toConversationSummary(doc, userId, onlineUserIds, privacyByUserId)
+  );
+};
+
 export const listArchivedConversations = async (
   userId: string,
   cursor: string | null,
@@ -436,6 +454,10 @@ export const markRead = async (
     userId,
     lastReadAt: new Date().toISOString(),
   });
+};
+
+export const markAllAsRead = async (userId: string): Promise<void> => {
+  await conversationRepository.markAllRead(userId);
 };
 
 const MUTE_DURATION_MS: Record<Exclude<ConversationMuteDuration, 'forever'>, number> = {
