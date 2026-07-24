@@ -32,7 +32,7 @@ const buildMediaPatch = (event: IMediaStatusEvent): MediaCachePatch => ({
 });
 
 export const useMediaStatusSocket = (
-  socketRef: ReturnType<typeof useSocket>
+  socket: ReturnType<typeof useSocket>
 ): void => {
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
@@ -40,7 +40,6 @@ export const useMediaStatusSocket = (
   const navigate = useNavigate();
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket) return;
 
     const handleMediaStatus = (event: IMediaStatusEvent) => {
@@ -125,5 +124,5 @@ export const useMediaStatusSocket = (
     return () => {
       socket.off(MEDIA_STATUS_SOCKET_EVENT, handleMediaStatus);
     };
-  }, [dispatch, addToast, navigate, socketRef, store]);
+  }, [dispatch, addToast, navigate, socket, store]);
 };

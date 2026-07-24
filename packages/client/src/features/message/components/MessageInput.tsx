@@ -20,7 +20,6 @@ interface MessageInputProps {
     duration?: number
   ) => Promise<void>;
   onTyping: () => void;
-  isSending: boolean;
   replyToLabel?: string;
   onCancelReply?: () => void;
 }
@@ -39,7 +38,6 @@ const MessageInput = ({
   onSend,
   onSendAttachment,
   onTyping,
-  isSending,
   replyToLabel,
   onCancelReply,
 }: MessageInputProps) => {
@@ -196,7 +194,7 @@ const MessageInput = ({
     setIsRecording(false);
   };
 
-  const isBusy = isSending || isUploadingAttachment;
+  const isBusy = isUploadingAttachment;
 
   return (
     <div className="border-t border-border pt-3">

@@ -37,11 +37,10 @@ const patchParticipantPresence = (
       }
     : participant;
 
-export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void => {
+export const useMessageSocket = (socket: ReturnType<typeof useSocket>): void => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket) return;
 
     const handleMessageNew = (event: IMessageEvent) => {
@@ -52,6 +51,15 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
           (draft) => {
             if (draft.data.some((message) => message.id === event.id)) return;
             draft.data.unshift(event);
+          }
+        )
+      );
+      dispatch(
+        messageApi.util.updateQueryData(
+          'getMessages',
+          { conversationId: event.conversationId, limit: 1 },
+          (draft) => {
+            draft.data = [event];
           }
         )
       );
@@ -200,5 +208,5 @@ export const useMessageSocket = (socketRef: ReturnType<typeof useSocket>): void 
       socket.off(PRESENCE_ONLINE_SOCKET_EVENT, handlePresence);
       socket.off(PRESENCE_OFFLINE_SOCKET_EVENT, handlePresence);
     };
-  }, [dispatch, socketRef]);
+  }, [dispatch, socket]);
 };

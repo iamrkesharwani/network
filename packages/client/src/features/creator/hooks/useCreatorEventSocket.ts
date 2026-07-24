@@ -7,12 +7,11 @@ import {
 } from '@network/shared';
 
 export const useCreatorEventSocket = (
-  socketRef: ReturnType<typeof useSocket>
+  socket: ReturnType<typeof useSocket>
 ) => {
   const { current, celebrate, dismiss } = useCreatorCelebration();
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket) return;
 
     const handleCreatorEvent = (event: ICreatorEvent) => celebrate(event);
@@ -22,7 +21,7 @@ export const useCreatorEventSocket = (
     return () => {
       socket.off(CREATOR_EVENT_SOCKET_EVENT, handleCreatorEvent);
     };
-  }, [socketRef, celebrate]);
+  }, [socket, celebrate]);
 
   return { current, dismiss };
 };

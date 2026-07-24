@@ -15,8 +15,10 @@ import Avatar from '../../../shared/ui/primitives/Avatar';
 import Button from '../../../shared/ui/primitives/Button';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import { getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
+import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
 import type { useSocket } from '../../../shared/hooks/useSocket';
 import {
+  messageApi,
   useGetMessagesQuery,
   useSendMessageMutation,
   useSetMessageReactionMutation,
@@ -24,7 +26,11 @@ import {
   useEditMessageMutation,
   useUploadMessageAttachmentMutation,
 } from '../messageApi';
-import { useMarkConversationReadMutation } from '../conversationApi';
+import {
+  conversationApi,
+  CONVERSATION_LIST_ARGS,
+  useMarkConversationReadMutation,
+} from '../conversationApi';
 import { useConversationRoom } from '../hooks/useConversationRoom';
 import { encodeMessagePayload, decodeMessagePayload, fetchLinkPreview } from '../messagePayload';
 import ReportModal from '../../report/components/ReportModal';
@@ -32,6 +38,7 @@ import { useBlockUserMutation } from '../../block/blockApi';
 import { usePreference } from '../../settings/hooks/usePreference';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
+import PendingMessageBubble, { type PendingMessage } from './PendingMessageBubble';
 import TypingIndicator from './TypingIndicator';
 import PresenceDot from './PresenceDot';
 import DisappearingMessagesMenu from './DisappearingMessagesMenu';
@@ -40,7 +47,7 @@ import MessageThreadSkeleton from '../skeleton/MessageThreadSkeleton';
 interface MessageThreadProps {
   conversation: IConversationSummary;
   myUserId: string;
-  socketRef: ReturnType<typeof useSocket>;
+  socket: ReturnType<typeof useSocket>;
   onOpenGroupInfo?: () => void;
   onBack: () => void;
 }
@@ -79,16 +86,17 @@ const isSameMessageGroup = (
 const MessageThread = ({
   conversation,
   myUserId,
-  socketRef,
+  socket,
   onOpenGroupInfo,
   onBack,
 }: MessageThreadProps) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [isBlockConfirmOpen, setIsBlockConfirmOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
   const [replyTo, setReplyTo] = useState<IMessageResponse | null>(null);
-  const { emitTyping } = useConversationRoom(socketRef, conversation.id);
+  const { emitTyping } = useConversationRoom(socket, conversation.id);
   const { data, isLoading, isError, error, refetch } = useGetMessagesQuery({
     conversationId: conversation.id,
     ...MESSAGE_LIST_ARGS,
@@ -105,9 +113,24 @@ const MessageThread = ({
   const [editMessage] = useEditMessageMutation();
   const [privacy] = usePreference('privacy');
 
-  const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
+  const [sendMessage] = useSendMessageMutation();
   const [uploadAttachment] = useUploadMessageAttachmentMutation();
   const [markConversationRead] = useMarkConversationReadMutation();
+  const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([]);
+  const visiblePendingMessages = useMemo(
+    () =>
+      pendingMessages.filter((pending) => {
+        if (pending.status === 'failed') return true;
+        const alreadyLanded = messages.some(
+          (message) =>
+            message.senderId === myUserId &&
+            message.content === pending.content &&
+            new Date(message.createdAt).getTime() >= pending.startedAt
+        );
+        return !alreadyLanded;
+      }),
+    [pendingMessages, messages, myUserId]
+  );
 
   const replyToPreview = useMemo(() => {
     if (!replyTo || replyTo.unsentAt) return null;
@@ -134,10 +157,73 @@ const MessageThread = ({
     if (conversation.isUnread) markConversationRead(conversation.id);
   }, [conversation.id, conversation.isUnread, markConversationRead]);
 
+  useEffect(() => {
+    setPendingMessages([]);
+  }, [conversation.id]);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' });
-  }, [orderedMessages.length]);
+  }, [orderedMessages.length, visiblePendingMessages.length]);
+
+  const sendWithPendingState = async (
+    content: string,
+    replyToMessageId?: string,
+    ttlOverride?: ConversationDisappearingTtl
+  ) => {
+    const clientId = crypto.randomUUID();
+    setPendingMessages((prev) => [
+      ...prev,
+      { clientId, content, replyToMessageId, status: 'sending', startedAt: Date.now() },
+    ]);
+
+    try {
+      const result = await sendMessage({
+        conversationId: conversation.id,
+        content,
+        ...(replyToMessageId && { replyToMessageId }),
+        ...(ttlOverride && { ttlOverride }),
+      }).unwrap();
+
+      dispatch(
+        messageApi.util.updateQueryData(
+          'getMessages',
+          { conversationId: conversation.id, ...MESSAGE_LIST_ARGS },
+          (draft) => {
+            if (draft.data.some((message) => message.id === result.data.id)) return;
+            draft.data.unshift(result.data);
+          }
+        )
+      );
+      dispatch(
+        messageApi.util.updateQueryData(
+          'getMessages',
+          { conversationId: conversation.id, limit: 1 },
+          (draft) => {
+            draft.data = [result.data];
+          }
+        )
+      );
+      dispatch(
+        conversationApi.util.updateQueryData(
+          'getConversations',
+          CONVERSATION_LIST_ARGS,
+          (draft) => {
+            const index = draft.data.findIndex((item) => item.id === conversation.id);
+            if (index === -1) return;
+            const [existing] = draft.data.splice(index, 1);
+            existing.lastMessageAt = result.data.createdAt;
+            draft.data.unshift(existing);
+          }
+        )
+      );
+      setPendingMessages((prev) => prev.filter((m) => m.clientId !== clientId));
+    } catch {
+      setPendingMessages((prev) =>
+        prev.map((m) => (m.clientId === clientId ? { ...m, status: 'failed' } : m))
+      );
+    }
+  };
 
   const handleSend = async (
     text: string,
@@ -146,14 +232,20 @@ const MessageThread = ({
     const linkPreview = privacy.linkPreviewsEnabled
       ? await fetchLinkPreview(text)
       : undefined;
-
-    await sendMessage({
-      conversationId: conversation.id,
-      content: encodeMessagePayload({ text, ...(linkPreview && { linkPreview }) }),
-      ...(replyTo && { replyToMessageId: replyTo.id }),
-      ...(ttlOverride && { ttlOverride }),
-    }).unwrap();
+    const content = encodeMessagePayload({
+      text,
+      ...(linkPreview && { linkPreview }),
+    });
+    const replyToMessageId = replyTo?.id;
     setReplyTo(null);
+    await sendWithPendingState(content, replyToMessageId, ttlOverride);
+  };
+
+  const handleRetryPendingMessage = (clientId: string) => {
+    const pending = pendingMessages.find((m) => m.clientId === clientId);
+    if (!pending) return;
+    setPendingMessages((prev) => prev.filter((m) => m.clientId !== clientId));
+    sendWithPendingState(pending.content, pending.replyToMessageId);
   };
 
   const handleSendAttachment = async (
@@ -319,13 +411,20 @@ const MessageThread = ({
                 onEdit={handleEdit}
               />
             ))}
+            {visiblePendingMessages.map((pending) => (
+              <PendingMessageBubble
+                key={pending.clientId}
+                pending={pending}
+                onRetry={handleRetryPendingMessage}
+              />
+            ))}
             <div ref={bottomRef} />
           </div>
         </div>
       )}
 
       <TypingIndicator
-        socketRef={socketRef}
+        socket={socket}
         conversationId={conversation.id}
         participantNameById={participantNameById}
         myUserId={myUserId}
@@ -335,7 +434,6 @@ const MessageThread = ({
         onSend={handleSend}
         onSendAttachment={handleSendAttachment}
         onTyping={emitTyping}
-        isSending={isSending}
         replyToLabel={
           replyTo
             ? `${getParticipantLabel(conversation, replyTo.senderId, myUserId)}: ${replyToPreview ?? '…'}`

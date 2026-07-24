@@ -10,12 +10,11 @@ import {
 } from '@network/shared';
 
 export const useNotificationSocket = (
-  socketRef: ReturnType<typeof useSocket>
+  socket: ReturnType<typeof useSocket>
 ): void => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket) return;
 
     const handleNewNotification = (event: INotificationEvent) => {
@@ -55,5 +54,5 @@ export const useNotificationSocket = (
       socket.off(NOTIFICATION_NEW_SOCKET_EVENT, handleNewNotification);
       socket.off(NOTIFICATION_UNREAD_COUNT_SOCKET_EVENT, handleUnreadCount);
     };
-  }, [dispatch, socketRef]);
+  }, [dispatch, socket]);
 };

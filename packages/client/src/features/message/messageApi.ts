@@ -1,15 +1,16 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from '../../shared/lib/axiosBaseQuery';
-import type {
-  ApiResponse,
-  PaginatedResponse,
-  IMessageResponse,
-  IMessageAttachmentUploadResult,
-  MessageListQuery,
-  MessageSendInput,
-  MessageDeleteInput,
-  MessageReactionSetInput,
-  MessageEditInput,
+import type { RootState } from '../../app/store/store';
+import {
+  type ApiResponse,
+  type PaginatedResponse,
+  type IMessageResponse,
+  type IMessageAttachmentUploadResult,
+  type MessageListQuery,
+  type MessageSendInput,
+  type MessageDeleteInput,
+  type MessageReactionSetInput,
+  type MessageEditInput,
 } from '@network/shared';
 
 export const messageApi = createApi({
@@ -72,6 +73,41 @@ export const messageApi = createApi({
         method: 'PATCH',
         data,
       }),
+      async onQueryStarted(
+        { messageId, content },
+        { dispatch, getState, queryFulfilled }
+      ) {
+        const editedAt = new Date().toISOString();
+        const cachedArgs = messageApi.util.selectCachedArgsForQuery(
+          getState(),
+          'getMessages'
+        );
+        const patches = cachedArgs.map((args) =>
+          dispatch(
+            messageApi.util.updateQueryData('getMessages', args, (draft) => {
+              const message = draft.data.find((m) => m.id === messageId);
+              if (message) {
+                message.content = content;
+                message.editedAt = editedAt;
+              }
+            })
+          )
+        );
+
+        try {
+          const result = await queryFulfilled;
+          for (const args of cachedArgs) {
+            dispatch(
+              messageApi.util.updateQueryData('getMessages', args, (draft) => {
+                const message = draft.data.find((m) => m.id === messageId);
+                if (message) Object.assign(message, result.data.data);
+              })
+            );
+          }
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
     }),
 
     setMessageReaction: builder.mutation<
@@ -83,6 +119,49 @@ export const messageApi = createApi({
         method: 'PUT',
         data,
       }),
+      async onQueryStarted(
+        { messageId, content },
+        { dispatch, getState, queryFulfilled }
+      ) {
+        const state = getState() as unknown as RootState;
+        const myUserId = state.auth.user?.id;
+        if (!myUserId) return;
+
+        const createdAt = new Date().toISOString();
+        const cachedArgs = messageApi.util.selectCachedArgsForQuery(
+          state,
+          'getMessages'
+        );
+        const patches = cachedArgs.map((args) =>
+          dispatch(
+            messageApi.util.updateQueryData('getMessages', args, (draft) => {
+              const message = draft.data.find((m) => m.id === messageId);
+              if (!message) return;
+              const withoutMine = message.reactions.filter(
+                (reaction) => reaction.userId !== myUserId
+              );
+              message.reactions = [
+                ...withoutMine,
+                { userId: myUserId, content, createdAt },
+              ];
+            })
+          )
+        );
+
+        try {
+          const result = await queryFulfilled;
+          for (const args of cachedArgs) {
+            dispatch(
+              messageApi.util.updateQueryData('getMessages', args, (draft) => {
+                const message = draft.data.find((m) => m.id === messageId);
+                if (message) message.reactions = result.data.data.reactions;
+              })
+            );
+          }
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
     }),
 
     removeMessageReaction: builder.mutation<
@@ -93,6 +172,33 @@ export const messageApi = createApi({
         url: `/${messageId}/reactions`,
         method: 'DELETE',
       }),
+      async onQueryStarted({ messageId }, { dispatch, getState, queryFulfilled }) {
+        const state = getState() as unknown as RootState;
+        const myUserId = state.auth.user?.id;
+        if (!myUserId) return;
+
+        const cachedArgs = messageApi.util.selectCachedArgsForQuery(
+          state,
+          'getMessages'
+        );
+        const patches = cachedArgs.map((args) =>
+          dispatch(
+            messageApi.util.updateQueryData('getMessages', args, (draft) => {
+              const message = draft.data.find((m) => m.id === messageId);
+              if (!message) return;
+              message.reactions = message.reactions.filter(
+                (reaction) => reaction.userId !== myUserId
+              );
+            })
+          )
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patches.forEach((patch) => patch.undo());
+        }
+      },
     }),
 
     uploadMessageAttachment: builder.mutation<

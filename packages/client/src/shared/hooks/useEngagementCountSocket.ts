@@ -13,13 +13,12 @@ import {
 } from '@network/shared';
 
 export const useEngagementCountSocket = (
-  socketRef: ReturnType<typeof useSocket>
+  socket: ReturnType<typeof useSocket>
 ): void => {
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket) return;
 
     const handleEngagementCount = (event: IEngagementCountEvent) => {
@@ -122,5 +121,5 @@ export const useEngagementCountSocket = (
     return () => {
       socket.off(ENGAGEMENT_COUNT_SOCKET_EVENT, handleEngagementCount);
     };
-  }, [dispatch, socketRef, store]);
+  }, [dispatch, socket, store]);
 };

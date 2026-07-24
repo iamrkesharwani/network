@@ -8,7 +8,7 @@ import { useIntersectionObserver } from '../../../shared/hooks/useIntersectionOb
 import type { useSocket } from '../../../shared/hooks/useSocket';
 
 export const useContentRoom = (
-  socketRef: ReturnType<typeof useSocket>,
+  socket: ReturnType<typeof useSocket>,
   contentType: EngageableContentType,
   contentId: string,
   elementRef: RefObject<Element | null>
@@ -17,7 +17,6 @@ export const useContentRoom = (
   const isVisible = Boolean(entry?.isIntersecting);
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket || !isVisible) return;
 
     socket.emit(CONTENT_ROOM_JOIN_EVENT, { contentType, contentId });
@@ -25,5 +24,5 @@ export const useContentRoom = (
     return () => {
       socket.emit(CONTENT_ROOM_LEAVE_EVENT, { contentType, contentId });
     };
-  }, [socketRef, isVisible, contentType, contentId]);
+  }, [socket, isVisible, contentType, contentId]);
 };

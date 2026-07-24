@@ -1,5 +1,4 @@
 import type { IConversationSummary, IMessageResponse } from '@network/shared';
-import Avatar from '../../../shared/ui/primitives/Avatar';
 
 interface SeenByIndicatorProps {
   message: IMessageResponse;
@@ -30,17 +29,7 @@ const SeenByIndicator = ({
   if (seenBy.length === 0) return null;
 
   return (
-    <div className="mt-1 flex items-center justify-end gap-1.5">
-      <div className="flex -space-x-1.5">
-        {seenBy.slice(0, 3).map((participant) => (
-          <Avatar
-            key={participant.id}
-            src={participant.avatarUrl}
-            fallback={participant.name}
-            size="sm"
-          />
-        ))}
-      </div>
+    <div className="mt-1 flex items-center justify-end">
       <span className="text-[0.65rem] text-text-muted">
         {seenBy.length === 1
           ? 'Seen'

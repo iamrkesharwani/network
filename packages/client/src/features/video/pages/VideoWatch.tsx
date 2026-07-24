@@ -86,8 +86,8 @@ const VideoWatch = () => {
     );
   }, [playlistId, nextPlaylistItem, navigate]);
 
-  const socketRef = useSocketContext();
-  useContentRoom(socketRef, 'video', videoId ?? '', rootRef);
+  const socket = useSocketContext();
+  useContentRoom(socket, 'video', videoId ?? '', rootRef);
 
   usePageTitle(video ? video.title : 'Video');
 

@@ -54,8 +54,8 @@ const PostGridTile = ({
   );
 
   const cardRef = useRef<HTMLDivElement>(null);
-  const socketRef = useSocketContext();
-  useContentRoom(socketRef, 'post', post.id, cardRef);
+  const socket = useSocketContext();
+  useContentRoom(socket, 'post', post.id, cardRef);
 
   const { data: likeStatusData } = useGetLikeStatusesQuery({
     contentType: 'post',

@@ -19,8 +19,8 @@ const ShortRailCard = ({ short, onClick }: ShortRailCardProps) => {
   const isReady = short.status === 'READY';
 
   const cardRef = useRef<HTMLDivElement>(null);
-  const socketRef = useSocketContext();
-  useContentRoom(socketRef, 'short', short.id, cardRef);
+  const socket = useSocketContext();
+  useContentRoom(socket, 'short', short.id, cardRef);
 
   return (
     <div

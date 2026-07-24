@@ -11,6 +11,7 @@ import { preferencesApi } from '../../features/settings/preferencesApi';
 import { settingsApi } from '../../features/settings/settingsApi';
 import { accountApi } from '../../features/settings/accountApi';
 import { preferencesSyncMiddleware } from '../../features/settings/preferencesSyncMiddleware';
+import { apiCacheResetMiddleware } from './apiCacheResetMiddleware';
 import { searchApi } from '../../features/search/searchApi';
 import { historyApi } from '../../features/history/historyApi';
 import { reportApi } from '../../features/report/reportApi';
@@ -56,7 +57,8 @@ export const createAppStore =(preloadedState?: Partial<RootReducerState>) =>
         notificationApi.middleware,
         conversationApi.middleware,
         messageApi.middleware,
-        preferencesSyncMiddleware
+        preferencesSyncMiddleware,
+        apiCacheResetMiddleware
       ),
     devTools: import.meta.env.MODE !== 'production',
   });

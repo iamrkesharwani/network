@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { CLIENT_ROUTES } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
@@ -27,7 +28,7 @@ import AddParticipantsModal from '../components/AddParticipantsModal';
 const MessagesPage = () => {
   usePageTitle('Messages');
   const user = useAppSelector((state) => state.auth.user);
-  const socketRef = useSocketContext();
+  const socket = useSocketContext();
   const navigate = useNavigate();
   const { conversationId } = useParams<{ conversationId: string }>();
   const activeConversationId = conversationId ?? null;
@@ -80,7 +81,7 @@ const MessagesPage = () => {
   if (!user) return null;
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-4 pt-4 md:pt-0">
+    <div className="flex h-[calc(100vh-4.5rem)] gap-4 pt-4 md:h-[calc(100vh-8rem)] md:pt-0">
       <div
         className={cn(
           'w-full flex-col overflow-y-auto md:max-w-xs md:shrink-0 md:border-r md:border-border md:pr-3',
@@ -88,9 +89,19 @@ const MessagesPage = () => {
         )}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-xl font-bold text-text-primary">
-            {isArchivedViewOpen ? 'Archived' : 'Messages'}
-          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate(CLIENT_ROUTES.FEED)}
+              aria-label="Leave Messages"
+              className="-ml-1.5 rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover md:hidden"
+            >
+              <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
+            </button>
+            <h2 className="font-display text-xl font-bold text-text-primary">
+              {isArchivedViewOpen ? 'Archived' : 'Messages'}
+            </h2>
+          </div>
           {isArchivedViewOpen ? (
             <Button
               size="sm"
@@ -164,12 +175,14 @@ const MessagesPage = () => {
 
         {isArchivedViewOpen && (
           <ArchivedConversationList
+            key={user.id}
             activeConversationId={activeConversationId}
             onSelect={(id) => navigate(buildConversationPath(id))}
           />
         )}
         {!isArchivedViewOpen && (
           <ConversationList
+            key={user.id}
             activeConversationId={activeConversationId}
             onSelect={(id) => navigate(buildConversationPath(id))}
           />
@@ -194,9 +207,10 @@ const MessagesPage = () => {
           </div>
         ) : (
           <MessageThread
+            key={user.id}
             conversation={activeConversation}
             myUserId={user.id}
-            socketRef={socketRef}
+            socket={socket}
             onBack={() => navigate(CLIENT_ROUTES.MESSAGES)}
             onOpenGroupInfo={
               activeConversation.type === 'group'

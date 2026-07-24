@@ -45,8 +45,8 @@ const VideoCard = ({
   );
 
   const cardRef = useRef<HTMLDivElement>(null);
-  const socketRef = useSocketContext();
-  useContentRoom(socketRef, 'video', video.id, cardRef);
+  const socket = useSocketContext();
+  useContentRoom(socket, 'video', video.id, cardRef);
 
   const isRemoved = isOwner && video.moderationStatus === 'jury_removed';
   const isReady = video.status === 'READY';

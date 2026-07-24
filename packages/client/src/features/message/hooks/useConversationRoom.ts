@@ -8,13 +8,12 @@ import {
 import type { useSocket } from '../../../shared/hooks/useSocket';
 
 export const useConversationRoom = (
-  socketRef: ReturnType<typeof useSocket>,
+  socket: ReturnType<typeof useSocket>,
   conversationId: string | null
 ) => {
   const lastTypingEmitAt = useRef(0);
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket || !conversationId) return;
 
     socket.emit(CONVERSATION_ROOM_JOIN_EVENT, { conversationId });
@@ -22,10 +21,9 @@ export const useConversationRoom = (
     return () => {
       socket.emit(CONVERSATION_ROOM_LEAVE_EVENT, { conversationId });
     };
-  }, [socketRef, conversationId]);
+  }, [socket, conversationId]);
 
   const emitTyping = useCallback(() => {
-    const socket = socketRef.current;
     if (!socket || !conversationId) return;
 
     const now = Date.now();
@@ -33,7 +31,7 @@ export const useConversationRoom = (
     lastTypingEmitAt.current = now;
 
     socket.emit(MESSAGE_TYPING_SOCKET_EVENT, { conversationId });
-  }, [socketRef, conversationId]);
+  }, [socket, conversationId]);
 
   return { emitTyping };
 };

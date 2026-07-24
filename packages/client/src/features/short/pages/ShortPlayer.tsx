@@ -66,8 +66,8 @@ const ShortPlayer = ({
   const { user } = useAuth();
   const isShortOwner = Boolean(user) && user?.id === short?.author.id;
 
-  const socketRef = useSocketContext();
-  useContentRoom(socketRef, 'short', short?.id ?? '', containerRef);
+  const socket = useSocketContext();
+  useContentRoom(socket, 'short', short?.id ?? '', containerRef);
 
   const { data: likeStatusData } = useGetLikeStatusesQuery(
     { contentType: 'short', contentIds: short ? [short.id] : [] },

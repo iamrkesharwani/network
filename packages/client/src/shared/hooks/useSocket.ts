@@ -1,37 +1,33 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { DEFAULT_API_URL } from '@network/shared';
 
-export const useSocket = (token: string | null) => {
-  const socket = useRef<Socket | null>(null);
+export const useSocket = (token: string | null): Socket | null => {
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     if (!token) {
-      if (socket.current) {
-        socket.current.disconnect();
-        socket.current = null;
-      }
+      setSocket(null);
       return;
     }
 
     const apiUrl = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
     const socketUrl = new URL(apiUrl).origin;
 
-    socket.current = io(socketUrl, {
+    const instance = io(socketUrl, {
       auth: { token },
       transports: ['websocket'],
       autoConnect: true,
     });
 
-    socket.current.on('connect_error', (err) => {
+    instance.on('connect_error', (err) => {
       console.error('Socket connection error:', err.message);
     });
 
+    setSocket(instance);
+
     return () => {
-      if (socket.current) {
-        socket.current.disconnect();
-        socket.current = null;
-      }
+      instance.disconnect();
     };
   }, [token]);
 

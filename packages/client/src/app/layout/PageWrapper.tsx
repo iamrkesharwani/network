@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { CLIENT_ROUTES } from '@network/shared';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { useSocket } from '../../shared/hooks/useSocket';
 import { useAppSelector } from '../../shared/hooks/useAppSelector';
+import { useIsMobileLayout } from '../../shared/hooks/useIsMobileLayout';
 import { useMediaStatusSocket } from '../../shared/hooks/useMediaStatusSocket';
 import { useEngagementCountSocket } from '../../shared/hooks/useEngagementCountSocket';
 import { SocketProvider } from '../../shared/hooks/SocketContext';
@@ -16,13 +18,13 @@ import DeactivatedAccountBanner from '../../features/settings/components/account
 
 const PageWrapper = () => {
   const { accessToken } = useAppSelector((state) => state.auth);
-  const socketRef = useSocket(accessToken);
-  useMediaStatusSocket(socketRef);
-  useEngagementCountSocket(socketRef);
-  useNotificationSocket(socketRef);
-  useMessageSocket(socketRef);
+  const socket = useSocket(accessToken);
+  useMediaStatusSocket(socket);
+  useEngagementCountSocket(socket);
+  useNotificationSocket(socket);
+  useMessageSocket(socket);
   const { current: creatorCelebration, dismiss: dismissCreatorCelebration } =
-    useCreatorEventSocket(socketRef);
+    useCreatorEventSocket(socket);
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [appearance, setAppearance] = usePreference('appearance');
@@ -30,15 +32,20 @@ const PageWrapper = () => {
 
   const mainRef = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
+  const isMobile = useIsMobileLayout();
+  const isMessagesRoute = pathname.startsWith(CLIENT_ROUTES.MESSAGES);
+  const hideNavbar = isMobile && isMessagesRoute;
 
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 
   return (
-    <SocketProvider socketRef={socketRef}>
+    <SocketProvider socket={socket}>
       <div className="h-screen bg-surface-alt flex flex-col overflow-hidden">
-        <Navbar onMobileMenuClick={() => setIsMobileSidebarOpen(true)} />
+        {!hideNavbar && (
+          <Navbar onMobileMenuClick={() => setIsMobileSidebarOpen(true)} />
+        )}
         <DeactivatedAccountBanner />
         <BadgeToast
           item={creatorCelebration}

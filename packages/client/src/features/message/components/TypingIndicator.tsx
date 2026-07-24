@@ -11,14 +11,14 @@ interface TypingPayload {
 }
 
 interface TypingIndicatorProps {
-  socketRef: ReturnType<typeof useSocket>;
+  socket: ReturnType<typeof useSocket>;
   conversationId: string;
   participantNameById: Record<string, string>;
   myUserId: string;
 }
 
 const TypingIndicator = ({
-  socketRef,
+  socket,
   conversationId,
   participantNameById,
   myUserId,
@@ -30,7 +30,6 @@ const TypingIndicator = ({
   }, [conversationId]);
 
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket) return;
 
     const timers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -62,7 +61,7 @@ const TypingIndicator = ({
       socket.off(MESSAGE_TYPING_SOCKET_EVENT, handleTyping);
       timers.forEach(clearTimeout);
     };
-  }, [socketRef, conversationId, myUserId]);
+  }, [socket, conversationId, myUserId]);
 
   if (typingUserIds.length === 0) return null;
 

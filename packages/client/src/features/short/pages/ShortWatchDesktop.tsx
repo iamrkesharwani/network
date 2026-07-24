@@ -49,8 +49,8 @@ const ShortWatchDesktop = ({
     if (highlightCommentId) setLayout({ shortsCommentsOpen: true });
   }, [highlightCommentId, setLayout]);
 
-  const socketRef = useSocketContext();
-  useContentRoom(socketRef, 'short', short?.id ?? '', rootRef);
+  const socket = useSocketContext();
+  useContentRoom(socket, 'short', short?.id ?? '', rootRef);
 
   const handleNext = () => onIndexChange(Math.min(index + 1, shorts.length - 1));
   const handlePrev = () => onIndexChange(Math.max(index - 1, 0));

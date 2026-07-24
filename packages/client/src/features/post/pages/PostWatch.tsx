@@ -28,8 +28,8 @@ const PostWatch = () => {
   });
   const post = data?.data;
 
-  const socketRef = useSocketContext();
-  useContentRoom(socketRef, 'post', postId ?? '', rootRef);
+  const socket = useSocketContext();
+  useContentRoom(socket, 'post', postId ?? '', rootRef);
 
   usePageTitle(post ? `Post by @${post.author.username}` : 'Post');
 
