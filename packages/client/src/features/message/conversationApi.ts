@@ -218,6 +218,22 @@ export const conversationApi = createApi({
       invalidatesTags: ['Conversation'],
     }),
 
+    deleteConversation: builder.mutation<ApiResponse<IConversationSummary>, string>({
+      query: (conversationId) => ({
+        url: `/${conversationId}/delete`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
+
+    undeleteConversation: builder.mutation<ApiResponse<IConversationSummary>, string>({
+      query: (conversationId) => ({
+        url: `/${conversationId}/undelete`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversation'],
+    }),
+
     pinConversation: builder.mutation<ApiResponse<IConversationSummary>, string>({
       query: (conversationId) => ({
         url: `/${conversationId}/pin`,
@@ -264,6 +280,8 @@ export const {
   useUnmuteConversationMutation,
   useArchiveConversationMutation,
   useUnarchiveConversationMutation,
+  useDeleteConversationMutation,
+  useUndeleteConversationMutation,
   usePinConversationMutation,
   useUnpinConversationMutation,
   useSetDisappearingTtlMutation,

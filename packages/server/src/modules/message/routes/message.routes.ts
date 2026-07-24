@@ -11,6 +11,7 @@ import {
   messageIdParamSchema,
   conversationIdParamSchema,
   messageListQuerySchema,
+  messageSearchQuerySchema,
 } from '@network/shared';
 import * as messageController from '../controllers/message.controller.js';
 import * as messageAttachmentController from '../controllers/messageAttachment.controller.js';
@@ -45,6 +46,13 @@ router.get(
   requireAuth,
   validate({ params: messageIdParamSchema }),
   messageController.getAttachment
+);
+
+router.get(
+  '/:conversationId/search',
+  requireAuth,
+  validate({ params: conversationIdParamSchema, query: messageSearchQuerySchema }),
+  messageController.search
 );
 
 router.get(

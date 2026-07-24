@@ -1,6 +1,14 @@
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Plus, Search, UserPlus, Users } from 'lucide-react';
+import {
+  ArrowLeft,
+  MoreVertical,
+  Plus,
+  Search,
+  UserPlus,
+  Users,
+  CheckSquare,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
 import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
@@ -13,6 +21,7 @@ interface MessagesListHeaderProps {
   onFocusChange: (focused: boolean) => void;
   onOpenArchived: () => void;
   onCreateGroup: () => void;
+  onEnterSelectMode: () => void;
 }
 
 const COLLAPSIBLE_TRANSITION = { duration: 0.2 };
@@ -24,6 +33,7 @@ const MessagesListHeader = ({
   onFocusChange,
   onOpenArchived,
   onCreateGroup,
+  onEnterSelectMode,
 }: MessagesListHeaderProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobileLayout();
@@ -188,6 +198,17 @@ const MessagesListHeader = ({
                 className="flex w-full items-center px-3 py-2 text-left text-sm text-text-primary hover:bg-surface-raised"
               >
                 Mark all as read
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMoreMenuOpen(false);
+                  onEnterSelectMode();
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-primary hover:bg-surface-raised"
+              >
+                <CheckSquare className="h-4 w-4" strokeWidth={1.75} />
+                Select conversations
               </button>
             </div>
           </>

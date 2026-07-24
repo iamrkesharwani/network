@@ -26,6 +26,7 @@ import { useDeleteMessageMutation, useGetMessageByIdQuery } from '../messageApi'
 import SeenByIndicator from './SeenByIndicator';
 
 interface MessageBubbleProps {
+  id?: string;
   message: IMessageResponse;
   myUserId: string;
   conversation: IConversationSummary;
@@ -200,6 +201,7 @@ const MessageAttachmentView = ({ message, isOwn }: MessageAttachmentViewProps) =
 };
 
 const MessageBubble = ({
+  id,
   message,
   myUserId,
   conversation,
@@ -290,8 +292,9 @@ const MessageBubble = ({
 
   return (
     <div
+      id={id}
       className={cn(
-        'group flex',
+        'group flex scroll-mt-3',
         isLastFromSender ? 'mb-2' : 'mb-0.5',
         isOwn ? 'justify-end' : 'justify-start'
       )}

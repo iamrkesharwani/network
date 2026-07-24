@@ -528,6 +528,22 @@ export const unarchiveConversation = (
     conversationRepository.setArchived(conversationId, userId, false)
   );
 
+export const deleteConversation = (
+  userId: string,
+  conversationId: string
+): Promise<IConversationSummary> =>
+  applyParticipantFlagUpdate(userId, conversationId, () =>
+    conversationRepository.setDeleted(conversationId, userId, true)
+  );
+
+export const undeleteConversation = (
+  userId: string,
+  conversationId: string
+): Promise<IConversationSummary> =>
+  applyParticipantFlagUpdate(userId, conversationId, () =>
+    conversationRepository.setDeleted(conversationId, userId, false)
+  );
+
 export const pinConversation = (
   userId: string,
   conversationId: string

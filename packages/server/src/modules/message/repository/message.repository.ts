@@ -114,6 +114,20 @@ export const listByConversation = async (
   };
 };
 
+export const listRecentByConversation = (
+  conversationId: string,
+  callerId: string,
+  scanLimit: number
+): Promise<IMessageDocument[]> =>
+  MessageModel.find({
+    conversationId,
+    deletedFor: { $ne: callerId },
+  })
+    .sort({ createdAt: -1, _id: -1 })
+    .limit(scanLimit)
+    .lean()
+    .exec() as Promise<IMessageDocument[]>;
+
 export const softDeleteForUser = (
   messageId: string,
   userId: string

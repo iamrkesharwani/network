@@ -2,7 +2,7 @@ import type { IMessageResponse } from '@network/shared';
 import type { IMessageDocument } from '../models/message.model.js';
 import { decryptContent } from './envelopeEncryption.service.js';
 
-const isRedacted = (doc: IMessageDocument): boolean =>
+export const isRedacted = (doc: IMessageDocument): boolean =>
   Boolean(doc.unsentAt || doc.expiredAt || doc.moderationRemovedAt);
 
 const decryptMessageContent = (doc: IMessageDocument): Promise<string> =>

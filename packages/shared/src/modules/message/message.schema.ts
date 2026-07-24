@@ -16,6 +16,7 @@ import {
   MESSAGE_ATTACHMENT_STORAGE_KEY_MAX_LENGTH,
   CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
   CONVERSATION_SEARCH_RESULT_LIMIT,
+  MESSAGE_SEARCH_QUERY_MAX_LENGTH,
 } from './message.constants.js';
 
 export const conversationTypeSchema = z.enum(CONVERSATION_TYPES);
@@ -137,4 +138,8 @@ export const conversationSearchQuerySchema = z.object({
     .positive()
     .max(MAX_PAGE_LIMIT)
     .default(CONVERSATION_SEARCH_RESULT_LIMIT),
+});
+
+export const messageSearchQuerySchema = z.object({
+  q: z.string().trim().min(1).max(MESSAGE_SEARCH_QUERY_MAX_LENGTH),
 });

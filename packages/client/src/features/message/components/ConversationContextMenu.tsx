@@ -1,7 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Pin, PinOff, Bell, BellOff, Archive, ArchiveRestore } from 'lucide-react';
-import type { IConversationSummary, ConversationMuteDuration } from '@network/shared';
+import { Pin, PinOff, Bell, BellOff, Archive, ArchiveRestore, Trash2 } from 'lucide-react';
+import {
+  CONVERSATION_DELETE_UNDO_WINDOW_MS,
+  type IConversationSummary,
+  type ConversationMuteDuration,
+} from '@network/shared';
+import { useToast } from '../../../shared/hooks/useToast';
+import { cn } from '../../../shared/utils/cn';
 import {
   usePinConversationMutation,
   useUnpinConversationMutation,
@@ -9,6 +15,8 @@ import {
   useUnmuteConversationMutation,
   useArchiveConversationMutation,
   useUnarchiveConversationMutation,
+  useDeleteConversationMutation,
+  useUndeleteConversationMutation,
 } from '../conversationApi';
 
 interface ConversationContextMenuProps {
@@ -34,12 +42,15 @@ const ConversationContextMenu = ({
   position,
   onClose,
 }: ConversationContextMenuProps) => {
+  const { addToast } = useToast();
   const [pinConversation] = usePinConversationMutation();
   const [unpinConversation] = useUnpinConversationMutation();
   const [muteConversation] = useMuteConversationMutation();
   const [unmuteConversation] = useUnmuteConversationMutation();
   const [archiveConversation] = useArchiveConversationMutation();
   const [unarchiveConversation] = useUnarchiveConversationMutation();
+  const [deleteConversation] = useDeleteConversationMutation();
+  const [undeleteConversation] = useUndeleteConversationMutation();
 
   const menuRef = useRef<HTMLDivElement>(null);
   const [clampedPosition, setClampedPosition] = useState<{
@@ -74,6 +85,17 @@ const ConversationContextMenu = ({
   const runAndClose = (action: () => void) => {
     action();
     onClose();
+  };
+
+  const handleDelete = () => {
+    onClose();
+    deleteConversation(conversation.id);
+    addToast(
+      'Conversation deleted',
+      'info',
+      CONVERSATION_DELETE_UNDO_WINDOW_MS,
+      { label: 'Undo', onClick: () => undeleteConversation(conversation.id) }
+    );
   };
 
   return createPortal(
@@ -152,6 +174,15 @@ const ConversationContextMenu = ({
             <Archive className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
           )}
           {conversation.isArchived ? 'Unarchive' : 'Archive'}
+        </button>
+
+        <button
+          type="button"
+          className={cn(menuItemClasses, 'text-error hover:text-error')}
+          onClick={handleDelete}
+        >
+          <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+          Delete
         </button>
       </div>
     </>,

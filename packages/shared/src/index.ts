@@ -55,6 +55,7 @@ export * from './modules/location/location.constants.js';
 export * from './modules/message/message.schema.js';
 export * from './modules/message/message.types.js';
 export * from './modules/message/message.constants.js';
+export * from './modules/message/message.payload.js';
 
 export * from './modules/notification/notification.schema.js';
 export * from './modules/notification/notification.types.js';

@@ -136,6 +136,22 @@ router.post(
 );
 
 router.post(
+  '/:conversationId/delete',
+  requireAuth,
+  conversationLimiter,
+  validate({ params: conversationIdParamSchema }),
+  conversationController.deleteConversation
+);
+
+router.post(
+  '/:conversationId/undelete',
+  requireAuth,
+  conversationLimiter,
+  validate({ params: conversationIdParamSchema }),
+  conversationController.undeleteConversation
+);
+
+router.post(
   '/:conversationId/pin',
   requireAuth,
   conversationLimiter,

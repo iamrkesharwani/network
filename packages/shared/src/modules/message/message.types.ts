@@ -19,6 +19,7 @@ import type {
   messageListQuerySchema,
   messageAttachmentUploadSchema,
   conversationSearchQuerySchema,
+  messageSearchQuerySchema,
 } from './message.schema.js';
 import type {
   CONVERSATION_TYPES,
@@ -61,6 +62,7 @@ export type ConversationDisappearingTtlInput = z.infer<
 export type ConversationListQuery = z.infer<typeof conversationListQuerySchema>;
 export type ConversationSearchQuery = z.infer<typeof conversationSearchQuerySchema>;
 export type MessageListQuery = z.infer<typeof messageListQuerySchema>;
+export type MessageSearchQuery = z.infer<typeof messageSearchQuerySchema>;
 export type MessageAttachmentUploadInput = z.infer<
   typeof messageAttachmentUploadSchema
 >;

@@ -14,6 +14,9 @@ import {
   MESSAGE_REACTION_UPDATED_SOCKET_EVENT,
   MESSAGE_EDITED_SOCKET_EVENT,
   MESSAGE_EDIT_WINDOW_MS,
+  MESSAGE_SEARCH_SCAN_LIMIT,
+  MESSAGE_SEARCH_RESULT_LIMIT,
+  decodeMessagePayload,
 } from '@network/shared';
 import * as messageRepository from '../repository/message.repository.js';
 import * as conversationRepository from '../repository/conversation.repository.js';
@@ -21,8 +24,12 @@ import * as conversationService from './conversation.service.js';
 import * as messageAttachmentService from './messageAttachment.service.js';
 import { toConversationSummary } from './conversation.mappers.js';
 import * as presenceService from './presence.service.js';
-import { toMessageResponse } from './message.mappers.js';
-import { encryptContent, decryptBuffer } from './envelopeEncryption.service.js';
+import { toMessageResponse, isRedacted } from './message.mappers.js';
+import {
+  encryptContent,
+  decryptContent,
+  decryptBuffer,
+} from './envelopeEncryption.service.js';
 import { ApiError } from '../../../core/utils/ApiError.js';
 import { emitToUser } from '../../../core/config/socket.js';
 import { storageProvider } from '../../../core/providers/provider.js';
@@ -169,6 +176,39 @@ export const listMessages = async (
     data: await Promise.all(data.map(toMessageResponse)),
     meta,
   };
+};
+
+export const searchMessages = async (
+  userId: string,
+  conversationId: string,
+  query: string
+): Promise<IMessageResponse[]> => {
+  await conversationService.assertConversationMembership(userId, conversationId);
+
+  const candidates = await messageRepository.listRecentByConversation(
+    conversationId,
+    userId,
+    MESSAGE_SEARCH_SCAN_LIMIT
+  );
+
+  const normalizedQuery = query.toLowerCase();
+  const decoded = await Promise.all(
+    candidates
+      .filter((doc) => !isRedacted(doc))
+      .map(async (doc) => ({
+        doc,
+        text: decodeMessagePayload(
+          await decryptContent(doc.ciphertext, doc.encryptedDataKey, doc.iv)
+        ).text,
+      }))
+  );
+
+  const matches = decoded
+    .filter(({ text }) => text.toLowerCase().includes(normalizedQuery))
+    .slice(0, MESSAGE_SEARCH_RESULT_LIMIT)
+    .map(({ doc }) => doc);
+
+  return Promise.all(matches.map(toMessageResponse));
 };
 
 export const deleteMessage = async (

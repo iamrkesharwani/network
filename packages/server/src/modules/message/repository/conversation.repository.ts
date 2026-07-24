@@ -180,6 +180,7 @@ export const listByUser = async (
         participantIds: new mongoose.Types.ObjectId(userId),
         [`archivedAt.${userId}`]: { $exists: false },
         [`hiddenByBlockAt.${userId}`]: { $exists: false },
+        [`deletedAt.${userId}`]: { $exists: false },
       },
     },
     { $addFields: { isPinnedForViewer: isPinnedForViewerExpr(userId) } },
@@ -252,6 +253,7 @@ export const listArchivedByUser = async (
   const data = (await ConversationModel.find({
     participantIds: userId,
     [`archivedAt.${userId}`]: { $exists: true },
+    [`deletedAt.${userId}`]: { $exists: false },
     ...cursorFilter,
   })
     .sort({ lastMessageAt: -1, _id: -1 })
@@ -361,6 +363,19 @@ export const setPinned = (
     { returnDocument: 'after' }
   ).exec();
 
+export const setDeleted = (
+  conversationId: string,
+  userId: string,
+  deleted: boolean
+): Promise<IConversationDocument | null> =>
+  ConversationModel.findByIdAndUpdate(
+    conversationId,
+    deleted
+      ? { $set: { [`deletedAt.${userId}`]: new Date() } }
+      : { $unset: { [`deletedAt.${userId}`]: '' } },
+    { returnDocument: 'after' }
+  ).exec();
+
 export const setHiddenByBlock = (
   conversationId: string,
   userId: string,
@@ -389,7 +404,7 @@ export const touchLastMessageAt = (
 ): Promise<IConversationDocument | null> =>
   ConversationModel.findByIdAndUpdate(
     conversationId,
-    { $set: { lastMessageAt: new Date() } },
+    { $set: { lastMessageAt: new Date(), deletedAt: {} } },
     { returnDocument: 'after' }
   ).exec();
 
@@ -407,6 +422,7 @@ export const searchByUser = async (
         participantIds: objectId,
         [`archivedAt.${userId}`]: { $exists: false },
         [`hiddenByBlockAt.${userId}`]: { $exists: false },
+        [`deletedAt.${userId}`]: { $exists: false },
       },
     },
     {

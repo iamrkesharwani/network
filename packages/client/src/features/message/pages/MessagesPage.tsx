@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { CLIENT_ROUTES } from '@network/shared';
+import { CLIENT_ROUTES, CONVERSATION_DELETE_UNDO_WINDOW_MS } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
@@ -11,13 +11,17 @@ import {
   useGetConversationsQuery,
   useGetArchivedConversationsQuery,
   useCreateDirectConversationMutation,
+  useDeleteConversationMutation,
+  useUndeleteConversationMutation,
   CONVERSATION_LIST_ARGS,
   CONVERSATION_ARCHIVED_LIST_ARGS,
 } from '../conversationApi';
 import { useUnifiedConversationSearch } from '../hooks/useUnifiedConversationSearch';
+import { useToast } from '../../../shared/hooks/useToast';
 import ConversationList from '../components/ConversationList';
 import ArchivedConversationList from '../components/ArchivedConversationList';
 import MessagesListHeader from '../components/MessagesListHeader';
+import ConversationSelectModeHeader from '../components/ConversationSelectModeHeader';
 import MessagesSearchResultsList from '../components/MessagesSearchResultsList';
 import MessageThread from '../components/MessageThread';
 import CreateGroupModal from '../components/CreateGroupModal';
@@ -41,6 +45,50 @@ const MessagesPage = () => {
   const { isActive: isSearchActive, matchedConversations, matchedPeople } =
     useUnifiedConversationSearch(searchQuery);
   const [createDirectConversation] = useCreateDirectConversationMutation();
+  const [deleteConversation] = useDeleteConversationMutation();
+  const [undeleteConversation] = useUndeleteConversationMutation();
+  const { addToast } = useToast();
+
+  const [isSelectModeOn, setIsSelectModeOn] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const handleEnterSelectMode = () => {
+    setIsArchivedViewOpen(false);
+    setSearchQuery('');
+    setIsSearchFocused(false);
+    setSelectedIds(new Set());
+    setIsSelectModeOn(true);
+  };
+
+  const handleCancelSelectMode = () => {
+    setIsSelectModeOn(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    ids.forEach((id) => deleteConversation(id));
+    setIsSelectModeOn(false);
+    setSelectedIds(new Set());
+
+    addToast(
+      `${ids.length} conversation${ids.length === 1 ? '' : 's'} deleted`,
+      'info',
+      CONVERSATION_DELETE_UNDO_WINDOW_MS,
+      { label: 'Undo', onClick: () => ids.forEach((id) => undeleteConversation(id)) }
+    );
+  };
 
   const { data: conversationsData, isLoading: isLoadingConversations } =
     useGetConversationsQuery(CONVERSATION_LIST_ARGS);
@@ -82,7 +130,13 @@ const MessagesPage = () => {
           activeConversationId ? 'hidden md:flex' : 'flex'
         )}
       >
-        {isArchivedViewOpen ? (
+        {isSelectModeOn ? (
+          <ConversationSelectModeHeader
+            selectedCount={selectedIds.size}
+            onCancel={handleCancelSelectMode}
+            onDeleteSelected={handleDeleteSelected}
+          />
+        ) : isArchivedViewOpen ? (
           <div className="mb-3 flex shrink-0 items-center gap-2">
             <button
               type="button"
@@ -104,6 +158,7 @@ const MessagesPage = () => {
             onFocusChange={setIsSearchFocused}
             onOpenArchived={() => setIsArchivedViewOpen(true)}
             onCreateGroup={() => setIsCreateGroupOpen(true)}
+            onEnterSelectMode={handleEnterSelectMode}
           />
         )}
 
@@ -114,7 +169,7 @@ const MessagesPage = () => {
               activeConversationId={activeConversationId}
               onSelect={(id) => navigate(buildConversationPath(id))}
             />
-          ) : isSearchActive ? (
+          ) : isSearchActive && !isSelectModeOn ? (
             <MessagesSearchResultsList
               matchedConversations={matchedConversations}
               matchedPeople={matchedPeople}
@@ -126,6 +181,9 @@ const MessagesPage = () => {
               key={user.id}
               activeConversationId={activeConversationId}
               onSelect={(id) => navigate(buildConversationPath(id))}
+              isSelectModeOn={isSelectModeOn}
+              selectedIds={selectedIds}
+              onToggleSelect={handleToggleSelect}
             />
           )}
         </div>

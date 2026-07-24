@@ -239,6 +239,34 @@ export const unarchiveConversation = asyncHandler(
   }
 );
 
+export const deleteConversation = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+
+    const result = await conversationService.deleteConversation(
+      user.id,
+      conversationId
+    );
+
+    res.status(200).json(new ApiResponse(result, 'Conversation deleted'));
+  }
+);
+
+export const undeleteConversation = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = requireUser(req);
+    const { conversationId } = req.params as { conversationId: string };
+
+    const result = await conversationService.undeleteConversation(
+      user.id,
+      conversationId
+    );
+
+    res.status(200).json(new ApiResponse(result, 'Conversation restored'));
+  }
+);
+
 export const pinConversation = asyncHandler(
   async (req: Request, res: Response) => {
     const user = requireUser(req);

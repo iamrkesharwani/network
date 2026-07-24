@@ -9,11 +9,17 @@ import ConversationListItemSkeleton from '../skeleton/ConversationListItemSkelet
 interface ConversationListProps {
   activeConversationId: string | null;
   onSelect: (conversationId: string) => void;
+  isSelectModeOn?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (conversationId: string) => void;
 }
 
 const ConversationList = ({
   activeConversationId,
   onSelect,
+  isSelectModeOn = false,
+  selectedIds,
+  onToggleSelect,
 }: ConversationListProps) => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const { data, isLoading, isFetching, isError, error, refetch } =
@@ -65,6 +71,9 @@ const ConversationList = ({
           conversation={conversation}
           isActive={conversation.id === activeConversationId}
           onSelect={onSelect}
+          isSelectModeOn={isSelectModeOn}
+          isSelected={selectedIds?.has(conversation.id) ?? false}
+          onToggleSelect={onToggleSelect}
         />
       ))}
     </InfiniteScroll>

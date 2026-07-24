@@ -4,6 +4,7 @@ import type {
   MessageDeleteInput,
   MessageIdParam,
   MessageListQuery,
+  MessageSearchQuery,
   MessageSendInput,
   MessageReactionSetInput,
   MessageEditInput,
@@ -52,6 +53,16 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
         'Messages fetched successfully'
       )
     );
+});
+
+export const search = asyncHandler(async (req: Request, res: Response) => {
+  const user = requireUser(req);
+  const { conversationId } = req.params as unknown as ConversationIdParam;
+  const { q } = req.query as unknown as MessageSearchQuery;
+
+  const result = await messageService.searchMessages(user.id, conversationId, q);
+
+  res.status(200).json(new ApiResponse(result, 'Messages searched successfully'));
 });
 
 export const remove = asyncHandler(async (req: Request, res: Response) => {

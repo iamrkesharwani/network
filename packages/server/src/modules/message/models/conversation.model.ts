@@ -20,6 +20,7 @@ export interface IConversationDocument extends Document {
   mutedUntil: Map<string, Date>;
   archivedAt: Map<string, Date>;
   pinnedAt: Map<string, Date>;
+  deletedAt: Map<string, Date>;
   hiddenByBlockAt: Map<string, Date>;
   disappearingMessagesTtl: ConversationDisappearingTtl;
   isModeratorLocked: boolean;
@@ -80,6 +81,11 @@ const conversationSchema = new Schema<IConversationDocument>(
       default: () => new Map(),
     },
     pinnedAt: {
+      type: Map,
+      of: Date,
+      default: () => new Map(),
+    },
+    deletedAt: {
       type: Map,
       of: Date,
       default: () => new Map(),

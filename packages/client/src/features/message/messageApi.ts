@@ -7,6 +7,7 @@ import {
   type IMessageResponse,
   type IMessageAttachmentUploadResult,
   type MessageListQuery,
+  type MessageSearchQuery,
   type MessageSendInput,
   type MessageDeleteInput,
   type MessageReactionSetInput,
@@ -212,6 +213,17 @@ export const messageApi = createApi({
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
     }),
+
+    searchMessages: builder.query<
+      ApiResponse<IMessageResponse[]>,
+      { conversationId: string } & MessageSearchQuery
+    >({
+      query: ({ conversationId, ...params }) => ({
+        url: `/${conversationId}/search`,
+        method: 'GET',
+        params,
+      }),
+    }),
   }),
 });
 
@@ -224,4 +236,5 @@ export const {
   useSetMessageReactionMutation,
   useRemoveMessageReactionMutation,
   useUploadMessageAttachmentMutation,
+  useSearchMessagesQuery,
 } = messageApi;

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Ban, Flag } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Search, X } from 'lucide-react';
 import {
   CLIENT_ROUTES,
   MESSAGE_EDIT_WINDOW_MS,
@@ -13,6 +14,7 @@ import {
 } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
 import Button from '../../../shared/ui/primitives/Button';
+import Spinner from '../../../shared/ui/primitives/Spinner';
 import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import { getApiErrorMessage } from '../../../shared/lib/getApiErrorMessage';
 import { useAppDispatch } from '../../../shared/hooks/useAppDispatch';
@@ -32,6 +34,7 @@ import {
   useMarkConversationReadMutation,
 } from '../conversationApi';
 import { useConversationRoom } from '../hooks/useConversationRoom';
+import { useThreadMessageSearch } from '../hooks/useThreadMessageSearch';
 import { encodeMessagePayload, decodeMessagePayload, fetchLinkPreview } from '../messagePayload';
 import {
   getConversationLabel,
@@ -40,12 +43,14 @@ import {
 import ReportModal from '../../report/components/ReportModal';
 import { useBlockUserMutation } from '../../block/blockApi';
 import { usePreference } from '../../settings/hooks/usePreference';
+import { buildProfilePath } from '../../profile/utils/buildProfilePath';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import PendingMessageBubble, { type PendingMessage } from './PendingMessageBubble';
 import TypingIndicator from './TypingIndicator';
 import PresenceDot from './PresenceDot';
-import DisappearingMessagesMenu from './DisappearingMessagesMenu';
+import ThreadOverflowMenu from './ThreadOverflowMenu';
+import ThreadSearchResultsList from './ThreadSearchResultsList';
 import MessageThreadSkeleton from '../skeleton/MessageThreadSkeleton';
 
 interface MessageThreadProps {
@@ -72,6 +77,8 @@ const getParticipantLabel = (
 };
 
 const MESSAGE_LIST_ARGS = { limit: MESSAGE_THREAD_PAGE_LIMIT };
+const LOAD_OLDER_SCROLL_THRESHOLD_PX = 100;
+const HEADER_COLLAPSIBLE_TRANSITION = { duration: 0.2 };
 
 const isSameMessageGroup = (
   a: IMessageResponse,
@@ -96,9 +103,11 @@ const MessageThread = ({
   const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
   const [replyTo, setReplyTo] = useState<IMessageResponse | null>(null);
   const { emitTyping } = useConversationRoom(socket, conversation.id);
-  const { data, isLoading, isError, error, refetch } = useGetMessagesQuery({
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const { data, isLoading, isFetching, isError, error, refetch } = useGetMessagesQuery({
     conversationId: conversation.id,
     ...MESSAGE_LIST_ARGS,
+    ...(cursor !== undefined && { cursor }),
   });
   const messages = data?.data ?? [];
   const orderedMessages = useMemo(() => [...messages].reverse(), [messages]);
@@ -106,6 +115,31 @@ const MessageThread = ({
     () => new Map(messages.map((message) => [message.id, message])),
     [messages]
   );
+
+  const [isThreadSearchOpen, setIsThreadSearchOpen] = useState(false);
+  const [threadSearchQuery, setThreadSearchQuery] = useState('');
+  const {
+    matches: threadSearchMatches,
+    isSearching: isThreadSearching,
+  } = useThreadMessageSearch(conversation.id, threadSearchQuery, messages);
+
+  const closeThreadSearch = () => {
+    setThreadSearchQuery('');
+    setIsThreadSearchOpen(false);
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: 'end' });
+    });
+  };
+
+  const handleSelectSearchResult = (messageId: string) => {
+    setThreadSearchQuery('');
+    setIsThreadSearchOpen(false);
+    requestAnimationFrame(() => {
+      document
+        .getElementById(`message-${messageId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  };
 
   const [setReaction] = useSetMessageReactionMutation();
   const [removeReaction] = useRemoveMessageReactionMutation();
@@ -158,12 +192,33 @@ const MessageThread = ({
 
   useEffect(() => {
     setPendingMessages([]);
+    setCursor(undefined);
   }, [conversation.id]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const prevScrollHeightRef = useRef<number | null>(null);
+  const isLoadingOlderRef = useRef(false);
+
+  useLayoutEffect(() => {
+    const container = scrollContainerRef.current;
+    if (isLoadingOlderRef.current && container && prevScrollHeightRef.current !== null) {
+      container.scrollTop += container.scrollHeight - prevScrollHeightRef.current;
+      prevScrollHeightRef.current = null;
+      isLoadingOlderRef.current = false;
+      return;
+    }
     bottomRef.current?.scrollIntoView({ block: 'end' });
   }, [orderedMessages.length, visiblePendingMessages.length]);
+
+  const handleThreadScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const container = event.currentTarget;
+    if (isFetching || !data?.meta.hasNextPage || !data.meta.nextCursor) return;
+    if (container.scrollTop > LOAD_OLDER_SCROLL_THRESHOLD_PX) return;
+    prevScrollHeightRef.current = container.scrollHeight;
+    isLoadingOlderRef.current = true;
+    setCursor(data.meta.nextCursor);
+  };
 
   const sendWithPendingState = async (
     content: string,
@@ -296,68 +351,106 @@ const MessageThread = ({
   return (
     <div className="flex flex-1 flex-col">
       <div className="flex items-center gap-1 border-b border-border pb-3">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="Back to conversations"
-          className="shrink-0 rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover md:hidden"
+        <motion.div
+          className="shrink-0 overflow-hidden md:!w-auto md:!opacity-100"
+          animate={{
+            width: isThreadSearchOpen ? 0 : 'auto',
+            opacity: isThreadSearchOpen ? 0 : 1,
+          }}
+          transition={HEADER_COLLAPSIBLE_TRANSITION}
         >
-          <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
-        </button>
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back to conversations"
+            className="rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover md:hidden"
+          >
+            <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
+          </button>
+        </motion.div>
 
-        <button
-          type="button"
-          onClick={onOpenGroupInfo}
-          disabled={conversation.type !== 'group'}
-          className="flex flex-1 items-center gap-3 text-left disabled:cursor-default"
-        >
-          <Avatar
-            src={headerAvatar.src}
-            isOnline={headerAvatar.isOnline}
-            fallback={getConversationLabel(conversation)}
-          />
-          <div>
-            <p className="font-semibold text-text-primary">
-              {getConversationLabel(conversation)}
-            </p>
-            {conversation.type === 'direct' && (
-              <PresenceDot
-                isOnline={conversation.otherParticipant.isOnline}
-                lastActiveAt={conversation.otherParticipant.lastActiveAt}
-                showLabel
-              />
-            )}
+        {isThreadSearchOpen ? (
+          <div className="relative flex flex-1 items-center">
+            <input
+              autoFocus
+              value={threadSearchQuery}
+              onChange={(event) => setThreadSearchQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') closeThreadSearch();
+              }}
+              placeholder="Search this conversation..."
+              className="w-full rounded-lg border border-border bg-surface-raised py-1.5 pl-3 pr-8 text-sm outline-none focus:border-primary"
+            />
+            <button
+              type="button"
+              onClick={closeThreadSearch}
+              aria-label="Close search"
+              className="absolute right-2 rounded p-0.5 text-icon hover:text-icon-hover"
+            >
+              <X className="h-4 w-4" strokeWidth={1.75} />
+            </button>
           </div>
-        </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() =>
+              conversation.type === 'group'
+                ? onOpenGroupInfo?.()
+                : navigate(buildProfilePath(conversation.otherParticipant.username))
+            }
+            className="flex flex-1 items-center gap-3 text-left"
+          >
+            <Avatar
+              src={headerAvatar.src}
+              isOnline={headerAvatar.isOnline}
+              fallback={getConversationLabel(conversation)}
+            />
+            <div>
+              <p className="font-semibold text-text-primary">
+                {getConversationLabel(conversation)}
+              </p>
+              {conversation.type === 'direct' && (
+                <PresenceDot
+                  isOnline={conversation.otherParticipant.isOnline}
+                  lastActiveAt={conversation.otherParticipant.lastActiveAt}
+                  showLabel
+                />
+              )}
+            </div>
+          </button>
+        )}
 
-        <DisappearingMessagesMenu
+        <motion.div
+          className="shrink-0 overflow-hidden md:!w-auto md:!opacity-100"
+          animate={{
+            width: isThreadSearchOpen ? 0 : 'auto',
+            opacity: isThreadSearchOpen ? 0 : 1,
+          }}
+          transition={HEADER_COLLAPSIBLE_TRANSITION}
+        >
+          <button
+            type="button"
+            onClick={() => setIsThreadSearchOpen(true)}
+            aria-label="Search this conversation"
+            className="rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover"
+          >
+            <Search className="h-4.5 w-4.5" strokeWidth={1.75} />
+          </button>
+        </motion.div>
+
+        <ThreadOverflowMenu
           conversation={conversation}
-          canEdit={
+          canEditDisappearing={
             conversation.type === 'direct' || conversation.isOwnedByViewer
           }
+          isCollapsed={isThreadSearchOpen}
+          onOpenGroupInfo={conversation.type === 'group' ? onOpenGroupInfo : undefined}
+          onOpenReport={conversation.type === 'direct' ? () => setIsReportOpen(true) : undefined}
+          onOpenBlockConfirm={
+            conversation.type === 'direct' ? () => setIsBlockConfirmOpen(true) : undefined
+          }
+          onNavigateBack={onBack}
         />
-
-        {conversation.type === 'direct' && (
-          <button
-            type="button"
-            onClick={() => setIsReportOpen(true)}
-            aria-label="Report this conversation"
-            className="shrink-0 rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover"
-          >
-            <Flag className="h-4.5 w-4.5" strokeWidth={1.75} />
-          </button>
-        )}
-
-        {conversation.type === 'direct' && (
-          <button
-            type="button"
-            onClick={() => setIsBlockConfirmOpen(true)}
-            aria-label={`Block ${conversation.otherParticipant.name}`}
-            className="shrink-0 rounded-lg p-1.5 text-icon hover:bg-surface-raised hover:text-icon-hover"
-          >
-            <Ban className="h-4.5 w-4.5" strokeWidth={1.75} />
-          </button>
-        )}
       </div>
 
       {isLoading ? (
@@ -373,46 +466,69 @@ const MessageThread = ({
       ) : (
         <div className="relative flex-1">
           <div className="chat-thread-bg" />
-          <div className="absolute inset-0 overflow-y-auto py-3">
-            {orderedMessages.map((message, index) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
+          {isThreadSearchOpen ? (
+            <div className="absolute inset-0 overflow-y-auto py-3">
+              <ThreadSearchResultsList
+                query={threadSearchQuery}
+                matches={threadSearchMatches}
+                isSearching={isThreadSearching}
+                participantNameById={participantNameById}
                 myUserId={myUserId}
-                conversation={conversation}
-                isFirstFromSender={
-                  index === 0 ||
-                  !isSameMessageGroup(orderedMessages[index - 1], message)
-                }
-                isLastFromSender={
-                  index === orderedMessages.length - 1 ||
-                  !isSameMessageGroup(message, orderedMessages[index + 1])
-                }
-                canEdit={
-                  message.senderId === myUserId &&
-                  Date.now() - new Date(message.createdAt).getTime() <
-                    MESSAGE_EDIT_WINDOW_MS
-                }
-                repliedToMessage={
-                  message.replyToMessageId
-                    ? messagesById.get(message.replyToMessageId)
-                    : undefined
-                }
-                onReply={setReplyTo}
-                onReact={handleReact}
-                onRemoveReaction={handleRemoveReaction}
-                onEdit={handleEdit}
+                onSelect={handleSelectSearchResult}
               />
-            ))}
-            {visiblePendingMessages.map((pending) => (
-              <PendingMessageBubble
-                key={pending.clientId}
-                pending={pending}
-                onRetry={handleRetryPendingMessage}
-              />
-            ))}
-            <div ref={bottomRef} />
-          </div>
+            </div>
+          ) : (
+            <div
+              ref={scrollContainerRef}
+              onScroll={handleThreadScroll}
+              className="absolute inset-0 overflow-y-auto py-3"
+            >
+              {isFetching && cursor !== undefined && (
+                <div className="flex justify-center py-2">
+                  <Spinner size="sm" className="text-text-muted" />
+                </div>
+              )}
+              {orderedMessages.map((message, index) => (
+                <MessageBubble
+                  key={message.id}
+                  id={`message-${message.id}`}
+                  message={message}
+                  myUserId={myUserId}
+                  conversation={conversation}
+                  isFirstFromSender={
+                    index === 0 ||
+                    !isSameMessageGroup(orderedMessages[index - 1], message)
+                  }
+                  isLastFromSender={
+                    index === orderedMessages.length - 1 ||
+                    !isSameMessageGroup(message, orderedMessages[index + 1])
+                  }
+                  canEdit={
+                    message.senderId === myUserId &&
+                    Date.now() - new Date(message.createdAt).getTime() <
+                      MESSAGE_EDIT_WINDOW_MS
+                  }
+                  repliedToMessage={
+                    message.replyToMessageId
+                      ? messagesById.get(message.replyToMessageId)
+                      : undefined
+                  }
+                  onReply={setReplyTo}
+                  onReact={handleReact}
+                  onRemoveReaction={handleRemoveReaction}
+                  onEdit={handleEdit}
+                />
+              ))}
+              {visiblePendingMessages.map((pending) => (
+                <PendingMessageBubble
+                  key={pending.clientId}
+                  pending={pending}
+                  onRetry={handleRetryPendingMessage}
+                />
+              ))}
+              <div ref={bottomRef} />
+            </div>
+          )}
         </div>
       )}
 

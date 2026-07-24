@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { BellOff, Pin } from 'lucide-react';
+import { BellOff, Pin, CheckSquare, Square } from 'lucide-react';
 import type { IConversationSummary } from '@network/shared';
 import { getRelativeDate } from '@network/shared';
 import Avatar from '../../../shared/ui/primitives/Avatar';
@@ -19,12 +19,18 @@ interface ConversationListItemProps {
   conversation: IConversationSummary;
   isActive: boolean;
   onSelect: (conversationId: string) => void;
+  isSelectModeOn?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (conversationId: string) => void;
 }
 
 const ConversationListItem = ({
   conversation,
   isActive,
   onSelect,
+  isSelectModeOn = false,
+  isSelected = false,
+  onToggleSelect,
 }: ConversationListItemProps) => {
   const { data } = useGetMessagesQuery({
     conversationId: conversation.id,
@@ -87,6 +93,10 @@ const ConversationListItem = ({
       longPressFiredRef.current = false;
       return;
     }
+    if (isSelectModeOn) {
+      onToggleSelect?.(conversation.id);
+      return;
+    }
     onSelect(conversation.id);
   };
 
@@ -96,15 +106,22 @@ const ConversationListItem = ({
     <button
       type="button"
       onClick={handleClick}
-      onContextMenu={handleContextMenu}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      onContextMenu={isSelectModeOn ? undefined : handleContextMenu}
+      onTouchStart={isSelectModeOn ? undefined : handleTouchStart}
+      onTouchMove={isSelectModeOn ? undefined : handleTouchMove}
+      onTouchEnd={isSelectModeOn ? undefined : handleTouchEnd}
       className={cn(
         'flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-surface-raised',
         isActive && 'bg-surface-raised'
       )}
     >
+      {isSelectModeOn &&
+        (isSelected ? (
+          <CheckSquare className="h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} />
+        ) : (
+          <Square className="h-5 w-5 shrink-0 text-icon" strokeWidth={1.75} />
+        ))}
+
       <Avatar
         src={avatarProps.src}
         isOnline={avatarProps.isOnline}

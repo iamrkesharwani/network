@@ -9,11 +9,20 @@ export const CONVERSATION_TYPES = ['direct', 'group'] as const;
 
 export const MESSAGE_THREAD_PAGE_LIMIT = 30;
 
+export const MESSAGE_SEARCH_QUERY_MAX_LENGTH = 100;
+export const MESSAGE_SEARCH_RESULT_LIMIT = 30;
+// Server decrypts each scanned message to match it against the query, since
+// content search over envelope-encrypted text can't be done at the DB layer -
+// this bounds the per-request decrypt cost to the conversation's recent history.
+export const MESSAGE_SEARCH_SCAN_LIMIT = 2000;
+
 export const MESSAGE_GROUP_MAX_PARTICIPANTS = 50;
 export const GROUP_NAME_MAX_LENGTH = 100;
 
 export const CONVERSATION_SEARCH_QUERY_MAX_LENGTH = 100;
 export const CONVERSATION_SEARCH_RESULT_LIMIT = 10;
+
+export const CONVERSATION_DELETE_UNDO_WINDOW_MS = 5000;
 
 export const GROUP_AVATAR_ASPECT_RATIO = 1;
 export const GROUP_AVATAR_WIDTH_PX = 512;
