@@ -120,7 +120,7 @@ const ThreadOverflowMenu = ({
   return (
     <div className="relative shrink-0">
       <motion.div
-        className="overflow-hidden md:!w-auto md:!opacity-100"
+        className="overflow-hidden md:w-auto! md:opacity-100!"
         animate={{
           width: isCollapsed ? 0 : 'auto',
           opacity: isCollapsed ? 0 : 1,
