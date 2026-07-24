@@ -10,6 +10,7 @@ import type {
 import {
   CONVERSATION_UPDATED_SOCKET_EVENT,
   MESSAGE_DELETED_SOCKET_EVENT,
+  MESSAGE_RESTORED_SOCKET_EVENT,
   MESSAGE_NEW_SOCKET_EVENT,
   MESSAGE_REACTION_UPDATED_SOCKET_EVENT,
   MESSAGE_EDITED_SOCKET_EVENT,
@@ -266,6 +267,28 @@ export const deleteMessage = async (
     messageId,
     scope,
   });
+};
+
+export const undeleteMessageForMe = async (
+  userId: string,
+  messageId: string
+): Promise<void> => {
+  const message = await messageRepository.findById(messageId);
+  if (!message) {
+    throw new ApiError(404, 'NOT_FOUND', 'Message not found.');
+  }
+
+  await conversationService.assertConversationMembership(
+    userId,
+    message.conversationId.toString()
+  );
+
+  const restored = await messageRepository.undoSoftDeleteForUser(messageId, userId);
+  if (!restored) {
+    throw new ApiError(404, 'NOT_FOUND', 'Message not found.');
+  }
+
+  emitToUser(userId, MESSAGE_RESTORED_SOCKET_EVENT, await toMessageResponse(restored));
 };
 
 export const getMessageById = async (

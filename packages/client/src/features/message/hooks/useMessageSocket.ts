@@ -9,6 +9,7 @@ import {
   CONVERSATION_UPDATED_SOCKET_EVENT,
   CONVERSATION_READ_SOCKET_EVENT,
   MESSAGE_DELETED_SOCKET_EVENT,
+  MESSAGE_RESTORED_SOCKET_EVENT,
   MESSAGE_REACTION_UPDATED_SOCKET_EVENT,
   MESSAGE_EDITED_SOCKET_EVENT,
   MESSAGE_EXPIRED_SOCKET_EVENT,
@@ -114,6 +115,23 @@ export const useMessageSocket = (socket: ReturnType<typeof useSocket>): void => 
       );
     };
 
+    const handleMessageRestored = (event: IMessageEvent) => {
+      dispatch(
+        messageApi.util.updateQueryData(
+          'getMessages',
+          { conversationId: event.conversationId, limit: MESSAGE_THREAD_PAGE_LIMIT },
+          (draft) => {
+            if (draft.data.some((m) => m.id === event.id)) return;
+            const insertIndex = draft.data.findIndex(
+              (m) => new Date(m.createdAt).getTime() < new Date(event.createdAt).getTime()
+            );
+            if (insertIndex === -1) draft.data.push(event);
+            else draft.data.splice(insertIndex, 0, event);
+          }
+        )
+      );
+    };
+
     const handleMessageReaction = (event: IMessageReactionEvent) => {
       dispatch(
         messageApi.util.updateQueryData(
@@ -191,6 +209,7 @@ export const useMessageSocket = (socket: ReturnType<typeof useSocket>): void => 
     socket.on(CONVERSATION_UPDATED_SOCKET_EVENT, handleConversationUpdated);
     socket.on(CONVERSATION_READ_SOCKET_EVENT, handleConversationRead);
     socket.on(MESSAGE_DELETED_SOCKET_EVENT, handleMessageDeleted);
+    socket.on(MESSAGE_RESTORED_SOCKET_EVENT, handleMessageRestored);
     socket.on(MESSAGE_REACTION_UPDATED_SOCKET_EVENT, handleMessageReaction);
     socket.on(MESSAGE_EDITED_SOCKET_EVENT, handleMessageEdited);
     socket.on(MESSAGE_EXPIRED_SOCKET_EVENT, handleMessageExpired);
@@ -202,6 +221,7 @@ export const useMessageSocket = (socket: ReturnType<typeof useSocket>): void => 
       socket.off(CONVERSATION_UPDATED_SOCKET_EVENT, handleConversationUpdated);
       socket.off(CONVERSATION_READ_SOCKET_EVENT, handleConversationRead);
       socket.off(MESSAGE_DELETED_SOCKET_EVENT, handleMessageDeleted);
+      socket.off(MESSAGE_RESTORED_SOCKET_EVENT, handleMessageRestored);
       socket.off(MESSAGE_REACTION_UPDATED_SOCKET_EVENT, handleMessageReaction);
       socket.off(MESSAGE_EDITED_SOCKET_EVENT, handleMessageEdited);
       socket.off(MESSAGE_EXPIRED_SOCKET_EVENT, handleMessageExpired);

@@ -22,7 +22,11 @@ export const GROUP_NAME_MAX_LENGTH = 100;
 export const CONVERSATION_SEARCH_QUERY_MAX_LENGTH = 100;
 export const CONVERSATION_SEARCH_RESULT_LIMIT = 10;
 
-export const CONVERSATION_DELETE_UNDO_WINDOW_MS = 5000;
+// Applies to any "delete for me" action (conversation or message) - these are
+// per-user soft-delete flags, fully reversible, so the undo window is generous.
+// "Delete for everyone" (message unsend) destroys the ciphertext server-side
+// and has no undo window at all.
+export const DELETE_FOR_ME_UNDO_WINDOW_MS = 8000;
 
 export const GROUP_AVATAR_ASPECT_RATIO = 1;
 export const GROUP_AVATAR_WIDTH_PX = 512;
@@ -44,6 +48,7 @@ export const MESSAGE_NEW_SOCKET_EVENT = 'message:new';
 export const CONVERSATION_UPDATED_SOCKET_EVENT = 'conversation:updated';
 export const CONVERSATION_READ_SOCKET_EVENT = 'conversation:read';
 export const MESSAGE_DELETED_SOCKET_EVENT = 'message:deleted';
+export const MESSAGE_RESTORED_SOCKET_EVENT = 'message:restored';
 export const CONVERSATION_ROOM_JOIN_EVENT = 'conversation:join';
 export const CONVERSATION_ROOM_LEAVE_EVENT = 'conversation:leave';
 export const MESSAGE_TYPING_SOCKET_EVENT = 'conversation:typing';

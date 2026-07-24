@@ -138,6 +138,16 @@ export const softDeleteForUser = (
     { returnDocument: 'after' }
   ).exec();
 
+export const undoSoftDeleteForUser = (
+  messageId: string,
+  userId: string
+): Promise<IMessageDocument | null> =>
+  MessageModel.findByIdAndUpdate(
+    messageId,
+    { $pull: { deletedFor: userId } },
+    { returnDocument: 'after' }
+  ).exec();
+
 export const unsendForEveryone = (
   messageId: string
 ): Promise<IMessageDocument | null> =>

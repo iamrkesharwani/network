@@ -15,13 +15,14 @@ import {
   Flag,
 } from 'lucide-react';
 import {
-  CONVERSATION_DELETE_UNDO_WINDOW_MS,
+  DELETE_FOR_ME_UNDO_WINDOW_MS,
   type ConversationDisappearingTtl,
   type ConversationMuteDuration,
   type IConversationSummary,
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { useToast } from '../../../shared/hooks/useToast';
+import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import {
   usePinConversationMutation,
   useUnpinConversationMutation,
@@ -72,13 +73,14 @@ const ThreadOverflowMenu = ({
   onNavigateBack,
 }: ThreadOverflowMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'archive' | 'delete' | null>(null);
   const { addToast } = useToast();
 
   const [pinConversation] = usePinConversationMutation();
   const [unpinConversation] = useUnpinConversationMutation();
   const [muteConversation] = useMuteConversationMutation();
   const [unmuteConversation] = useUnmuteConversationMutation();
-  const [archiveConversation] = useArchiveConversationMutation();
+  const [archiveConversation, { isLoading: isArchiving }] = useArchiveConversationMutation();
   const [unarchiveConversation] = useUnarchiveConversationMutation();
   const [deleteConversation] = useDeleteConversationMutation();
   const [undeleteConversation] = useUndeleteConversationMutation();
@@ -89,24 +91,34 @@ const ThreadOverflowMenu = ({
     setIsOpen(false);
   };
 
-  const handleArchiveToggle = async () => {
+  const handleArchiveToggle = () => {
     setIsOpen(false);
     if (conversation.isArchived) {
-      await unarchiveConversation(conversation.id).unwrap();
+      unarchiveConversation(conversation.id);
     } else {
-      await archiveConversation(conversation.id).unwrap();
-      onNavigateBack();
+      setPendingAction('archive');
     }
   };
 
-  const handleDelete = () => {
+  const handleDeleteClick = () => {
     setIsOpen(false);
+    setPendingAction('delete');
+  };
+
+  const confirmArchive = async () => {
+    await archiveConversation(conversation.id).unwrap();
+    setPendingAction(null);
+    onNavigateBack();
+  };
+
+  const confirmDelete = () => {
+    setPendingAction(null);
     deleteConversation(conversation.id);
     onNavigateBack();
     addToast(
       'Conversation deleted',
       'info',
-      CONVERSATION_DELETE_UNDO_WINDOW_MS,
+      DELETE_FOR_ME_UNDO_WINDOW_MS,
       { label: 'Undo', onClick: () => undeleteConversation(conversation.id) }
     );
   };
@@ -257,7 +269,7 @@ const ThreadOverflowMenu = ({
             <button
               type="button"
               className={cn(menuItemClasses, 'text-error hover:text-error')}
-              onClick={handleDelete}
+              onClick={handleDeleteClick}
             >
               <Trash2 className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
               Delete conversation
@@ -287,6 +299,25 @@ const ThreadOverflowMenu = ({
           </div>
         </>
       )}
+
+      <ConfirmModal
+        isOpen={pendingAction !== null}
+        onClose={() => setPendingAction(null)}
+        onConfirm={pendingAction === 'delete' ? confirmDelete : confirmArchive}
+        title={
+          pendingAction === 'delete'
+            ? 'Delete this conversation?'
+            : 'Archive this conversation?'
+        }
+        description={
+          pendingAction === 'delete'
+            ? "It'll disappear from your list. You'll have a few seconds to undo right after."
+            : "It'll move out of your main list into Archived. You can bring it back anytime."
+        }
+        confirmLabel={pendingAction === 'delete' ? 'Delete' : 'Archive'}
+        intent={pendingAction === 'delete' ? 'danger' : 'warning'}
+        isLoading={pendingAction === 'archive' && isArchiving}
+      />
     </div>
   );
 };

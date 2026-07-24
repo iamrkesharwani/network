@@ -61,6 +61,13 @@ export const messageApi = createApi({
       }),
     }),
 
+    undeleteMessage: builder.mutation<ApiResponse<null>, string>({
+      query: (messageId) => ({
+        url: `/${messageId}/undelete`,
+        method: 'POST',
+      }),
+    }),
+
     getMessageById: builder.query<ApiResponse<IMessageResponse>, string>({
       query: (messageId) => ({ url: `/single/${messageId}`, method: 'GET' }),
     }),
@@ -231,6 +238,7 @@ export const {
   useGetMessagesQuery,
   useSendMessageMutation,
   useDeleteMessageMutation,
+  useUndeleteMessageMutation,
   useGetMessageByIdQuery,
   useEditMessageMutation,
   useSetMessageReactionMutation,

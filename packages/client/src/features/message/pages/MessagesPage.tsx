@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { CLIENT_ROUTES, CONVERSATION_DELETE_UNDO_WINDOW_MS } from '@network/shared';
+import { CLIENT_ROUTES, DELETE_FOR_ME_UNDO_WINDOW_MS } from '@network/shared';
 import usePageTitle from '../../../shared/hooks/usePageTitle';
 import { useAppSelector } from '../../../shared/hooks/useAppSelector';
 import { useSocketContext } from '../../../shared/hooks/SocketContext';
@@ -18,6 +18,7 @@ import {
 } from '../conversationApi';
 import { useUnifiedConversationSearch } from '../hooks/useUnifiedConversationSearch';
 import { useToast } from '../../../shared/hooks/useToast';
+import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import ConversationList from '../components/ConversationList';
 import ArchivedConversationList from '../components/ArchivedConversationList';
 import MessagesListHeader from '../components/MessagesListHeader';
@@ -51,6 +52,7 @@ const MessagesPage = () => {
 
   const [isSelectModeOn, setIsSelectModeOn] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
 
   const handleEnterSelectMode = () => {
     setIsArchivedViewOpen(false);
@@ -75,8 +77,13 @@ const MessagesPage = () => {
   };
 
   const handleDeleteSelected = () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteSelected = () => {
     const ids = Array.from(selectedIds);
-    if (ids.length === 0) return;
+    setIsBulkDeleteConfirmOpen(false);
 
     ids.forEach((id) => deleteConversation(id));
     setIsSelectModeOn(false);
@@ -85,7 +92,7 @@ const MessagesPage = () => {
     addToast(
       `${ids.length} conversation${ids.length === 1 ? '' : 's'} deleted`,
       'info',
-      CONVERSATION_DELETE_UNDO_WINDOW_MS,
+      DELETE_FOR_ME_UNDO_WINDOW_MS,
       { label: 'Undo', onClick: () => ids.forEach((id) => undeleteConversation(id)) }
     );
   };
@@ -249,6 +256,16 @@ const MessagesPage = () => {
           />
         </>
       )}
+
+      <ConfirmModal
+        isOpen={isBulkDeleteConfirmOpen}
+        onClose={() => setIsBulkDeleteConfirmOpen(false)}
+        onConfirm={confirmDeleteSelected}
+        title={`Delete ${selectedIds.size} conversation${selectedIds.size === 1 ? '' : 's'}?`}
+        description="They'll disappear from your list. You'll have a few seconds to undo right after."
+        confirmLabel="Delete"
+        intent="danger"
+      />
     </div>
   );
 };

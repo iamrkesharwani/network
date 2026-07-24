@@ -8,10 +8,10 @@ import {
   UserPlus,
   Users,
   CheckSquare,
+  X,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CLIENT_ROUTES } from '@network/shared';
-import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { useMarkAllReadMutation } from '../conversationApi';
 
 interface MessagesListHeaderProps {
@@ -36,14 +36,14 @@ const MessagesListHeader = ({
   onEnterSelectMode,
 }: MessagesListHeaderProps) => {
   const navigate = useNavigate();
-  const isMobile = useIsMobileLayout();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
 
-  const isSearchActive = isFocused || query.trim().length > 0;
-  const shouldCollapse = isMobile && isSearchActive;
+  const hasQuery = query.trim().length > 0;
+  const isSearchActive = isFocused || hasQuery;
+  const shouldCollapse = hasQuery;
 
   const [markAllRead] = useMarkAllReadMutation();
 
@@ -57,7 +57,7 @@ const MessagesListHeader = ({
     <div className="mb-3 flex shrink-0 items-center gap-1.5">
       <div className="relative shrink-0">
         <motion.div
-          className="overflow-hidden md:!w-auto md:!opacity-100"
+          className="overflow-hidden"
           animate={{
             width: shouldCollapse ? 0 : 'auto',
             opacity: shouldCollapse ? 0 : 1,
@@ -86,23 +86,23 @@ const MessagesListHeader = ({
             if (event.key === 'Escape') closeSearch();
           }}
           placeholder="Search chats or people..."
-          className="w-full rounded-lg border border-border bg-surface-raised py-1.5 pl-8 pr-2.5 text-sm outline-none focus:border-primary"
+          className="w-full rounded-lg border border-border bg-surface-raised py-1.5 pl-8 pr-8 text-sm outline-none focus:border-primary"
         />
+        {isSearchActive && (
+          <button
+            type="button"
+            onClick={closeSearch}
+            aria-label="Close search"
+            className="absolute right-2 rounded p-0.5 text-icon hover:text-icon-hover"
+          >
+            <X className="h-4 w-4" strokeWidth={1.75} />
+          </button>
+        )}
       </div>
-
-      {isSearchActive && (
-        <button
-          type="button"
-          onClick={closeSearch}
-          className="shrink-0 rounded-lg p-1.5 text-xs font-medium text-text-muted hover:bg-surface-raised hover:text-text-primary"
-        >
-          Cancel
-        </button>
-      )}
 
       <div className="relative shrink-0">
         <motion.div
-          className="overflow-hidden md:!w-auto md:!opacity-100"
+          className="overflow-hidden"
           animate={{
             width: shouldCollapse ? 0 : 'auto',
             opacity: shouldCollapse ? 0 : 1,
@@ -154,7 +154,7 @@ const MessagesListHeader = ({
 
       <div className="relative shrink-0">
         <motion.div
-          className="overflow-hidden md:!w-auto md:!opacity-100"
+          className="overflow-hidden"
           animate={{
             width: shouldCollapse ? 0 : 'auto',
             opacity: shouldCollapse ? 0 : 1,

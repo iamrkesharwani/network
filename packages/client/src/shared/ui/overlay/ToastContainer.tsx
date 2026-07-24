@@ -34,28 +34,51 @@ const ToastProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
+  const plainToasts = toasts.filter((toast) => !toast.action);
+  const actionableToasts = toasts.filter((toast) => toast.action);
+
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
       {isMounted &&
         createPortal(
-          <div
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-100 flex flex-col items-center gap-2 w-full max-w-80 px-4 pointer-events-none"
-            aria-live="assertive"
-            aria-atomic="false"
-          >
-            {toasts.map((toast) => (
-              <Toast
-                key={toast.id}
-                id={toast.id}
-                message={toast.message}
-                type={toast.type}
-                duration={toast.duration}
-                action={toast.action}
-                onClose={removeToast}
-              />
-            ))}
-          </div>,
+          <>
+            <div
+              className="fixed top-4 left-1/2 -translate-x-1/2 z-100 flex flex-col items-center gap-2 w-full max-w-80 px-4 pointer-events-none"
+              aria-live="assertive"
+              aria-atomic="false"
+            >
+              {plainToasts.map((toast) => (
+                <Toast
+                  key={toast.id}
+                  id={toast.id}
+                  message={toast.message}
+                  type={toast.type}
+                  duration={toast.duration}
+                  action={toast.action}
+                  onClose={removeToast}
+                />
+              ))}
+            </div>
+            {/* Toasts with an action (e.g. Undo) sit at the bottom, within thumb reach */}
+            <div
+              className="fixed bottom-4 left-1/2 -translate-x-1/2 z-100 flex flex-col-reverse items-center gap-2 w-full max-w-80 px-4 pointer-events-none"
+              aria-live="assertive"
+              aria-atomic="false"
+            >
+              {actionableToasts.map((toast) => (
+                <Toast
+                  key={toast.id}
+                  id={toast.id}
+                  message={toast.message}
+                  type={toast.type}
+                  duration={toast.duration}
+                  action={toast.action}
+                  onClose={removeToast}
+                />
+              ))}
+            </div>
+          </>,
           document.body
         )}
     </ToastContext.Provider>

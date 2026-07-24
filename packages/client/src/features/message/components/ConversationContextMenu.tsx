@@ -2,12 +2,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Pin, PinOff, Bell, BellOff, Archive, ArchiveRestore, Trash2 } from 'lucide-react';
 import {
-  CONVERSATION_DELETE_UNDO_WINDOW_MS,
+  DELETE_FOR_ME_UNDO_WINDOW_MS,
   type IConversationSummary,
   type ConversationMuteDuration,
 } from '@network/shared';
 import { useToast } from '../../../shared/hooks/useToast';
 import { cn } from '../../../shared/utils/cn';
+import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
 import {
   usePinConversationMutation,
   useUnpinConversationMutation,
@@ -47,10 +48,11 @@ const ConversationContextMenu = ({
   const [unpinConversation] = useUnpinConversationMutation();
   const [muteConversation] = useMuteConversationMutation();
   const [unmuteConversation] = useUnmuteConversationMutation();
-  const [archiveConversation] = useArchiveConversationMutation();
+  const [archiveConversation, { isLoading: isArchiving }] = useArchiveConversationMutation();
   const [unarchiveConversation] = useUnarchiveConversationMutation();
   const [deleteConversation] = useDeleteConversationMutation();
   const [undeleteConversation] = useUndeleteConversationMutation();
+  const [pendingAction, setPendingAction] = useState<'archive' | 'delete' | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const [clampedPosition, setClampedPosition] = useState<{
@@ -73,6 +75,7 @@ const ConversationContextMenu = ({
   }, [position]);
 
   useEffect(() => {
+    if (pendingAction !== null) return;
     const close = () => onClose();
     window.addEventListener('scroll', close, true);
     window.addEventListener('resize', close);
@@ -80,111 +83,153 @@ const ConversationContextMenu = ({
       window.removeEventListener('scroll', close, true);
       window.removeEventListener('resize', close);
     };
-  }, [onClose]);
+  }, [onClose, pendingAction]);
 
   const runAndClose = (action: () => void) => {
     action();
     onClose();
   };
 
-  const handleDelete = () => {
+  const handleArchiveClick = () => {
+    if (conversation.isArchived) {
+      runAndClose(() => unarchiveConversation(conversation.id));
+    } else {
+      setPendingAction('archive');
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setPendingAction('delete');
+  };
+
+  const closeConfirm = () => {
+    setPendingAction(null);
     onClose();
+  };
+
+  const confirmArchive = async () => {
+    await archiveConversation(conversation.id).unwrap();
+    closeConfirm();
+  };
+
+  const confirmDelete = () => {
     deleteConversation(conversation.id);
     addToast(
       'Conversation deleted',
       'info',
-      CONVERSATION_DELETE_UNDO_WINDOW_MS,
+      DELETE_FOR_ME_UNDO_WINDOW_MS,
       { label: 'Undo', onClick: () => undeleteConversation(conversation.id) }
     );
+    closeConfirm();
   };
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden="true" />
-      <div
-        ref={menuRef}
-        style={{
-          position: 'fixed',
-          top: (clampedPosition ?? position).top,
-          left: (clampedPosition ?? position).left,
-          visibility: clampedPosition ? 'visible' : 'hidden',
-        }}
-        className="z-50 w-52 py-1 rounded-xl bg-surface-overlay border border-border shadow-xl shadow-black/40"
-      >
-        <button
-          type="button"
-          className={menuItemClasses}
-          onClick={() =>
-            runAndClose(() =>
-              conversation.isPinned
-                ? unpinConversation(conversation.id)
-                : pinConversation(conversation.id)
-            )
-          }
-        >
-          {conversation.isPinned ? (
-            <PinOff className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-          ) : (
-            <Pin className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-          )}
-          {conversation.isPinned ? 'Unpin' : 'Pin'}
-        </button>
-
-        {conversation.isMuted ? (
-          <button
-            type="button"
-            className={menuItemClasses}
-            onClick={() => runAndClose(() => unmuteConversation(conversation.id))}
+      {pendingAction === null && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden="true" />
+          <div
+            ref={menuRef}
+            style={{
+              position: 'fixed',
+              top: (clampedPosition ?? position).top,
+              left: (clampedPosition ?? position).left,
+              visibility: clampedPosition ? 'visible' : 'hidden',
+            }}
+            className="z-50 w-52 py-1 rounded-xl bg-surface-overlay border border-border shadow-xl shadow-black/40"
           >
-            <Bell className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-            Unmute
-          </button>
-        ) : (
-          MUTE_OPTIONS.map((option) => (
             <button
-              key={option.duration}
               type="button"
               className={menuItemClasses}
               onClick={() =>
                 runAndClose(() =>
-                  muteConversation({ conversationId: conversation.id, duration: option.duration })
+                  conversation.isPinned
+                    ? unpinConversation(conversation.id)
+                    : pinConversation(conversation.id)
                 )
               }
             >
-              <BellOff className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-              {option.label}
+              {conversation.isPinned ? (
+                <PinOff className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+              ) : (
+                <Pin className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+              )}
+              {conversation.isPinned ? 'Unpin' : 'Pin'}
             </button>
-          ))
-        )}
 
-        <button
-          type="button"
-          className={menuItemClasses}
-          onClick={() =>
-            runAndClose(() =>
-              conversation.isArchived
-                ? unarchiveConversation(conversation.id)
-                : archiveConversation(conversation.id)
-            )
-          }
-        >
-          {conversation.isArchived ? (
-            <ArchiveRestore className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-          ) : (
-            <Archive className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-          )}
-          {conversation.isArchived ? 'Unarchive' : 'Archive'}
-        </button>
+            {conversation.isMuted ? (
+              <button
+                type="button"
+                className={menuItemClasses}
+                onClick={() => runAndClose(() => unmuteConversation(conversation.id))}
+              >
+                <Bell className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                Unmute
+              </button>
+            ) : (
+              MUTE_OPTIONS.map((option) => (
+                <button
+                  key={option.duration}
+                  type="button"
+                  className={menuItemClasses}
+                  onClick={() =>
+                    runAndClose(() =>
+                      muteConversation({
+                        conversationId: conversation.id,
+                        duration: option.duration,
+                      })
+                    )
+                  }
+                >
+                  <BellOff className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                  {option.label}
+                </button>
+              ))
+            )}
 
-        <button
-          type="button"
-          className={cn(menuItemClasses, 'text-error hover:text-error')}
-          onClick={handleDelete}
-        >
-          <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
-          Delete
-        </button>
-      </div>
+            <button
+              type="button"
+              className={menuItemClasses}
+              onClick={handleArchiveClick}
+            >
+              {conversation.isArchived ? (
+                <ArchiveRestore className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+              ) : (
+                <Archive className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+              )}
+              {conversation.isArchived ? 'Unarchive' : 'Archive'}
+            </button>
+
+            <button
+              type="button"
+              className={cn(menuItemClasses, 'text-error hover:text-error')}
+              onClick={handleDeleteClick}
+            >
+              <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+              Delete
+            </button>
+          </div>
+        </>
+      )}
+
+      <ConfirmModal
+        isOpen={pendingAction !== null}
+        onClose={closeConfirm}
+        onConfirm={pendingAction === 'delete' ? confirmDelete : confirmArchive}
+        title={
+          pendingAction === 'delete'
+            ? 'Delete this conversation?'
+            : 'Archive this conversation?'
+        }
+        description={
+          pendingAction === 'delete'
+            ? "It'll disappear from your list. You'll have a few seconds to undo right after."
+            : "It'll move out of your main list into Archived. You can bring it back anytime."
+        }
+        confirmLabel={pendingAction === 'delete' ? 'Delete' : 'Archive'}
+        intent={pendingAction === 'delete' ? 'danger' : 'warning'}
+        isLoading={pendingAction === 'archive' && isArchiving}
+      />
     </>,
     document.body
   );

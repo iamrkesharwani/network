@@ -75,6 +75,15 @@ export const remove = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json(new ApiResponse(null, 'Message deleted successfully'));
 });
 
+export const undelete = asyncHandler(async (req: Request, res: Response) => {
+  const user = requireUser(req);
+  const { messageId } = req.params as unknown as MessageIdParam;
+
+  await messageService.undeleteMessageForMe(user.id, messageId);
+
+  res.status(200).json(new ApiResponse(null, 'Message restored successfully'));
+});
+
 export const getById = asyncHandler(async (req: Request, res: Response) => {
   const user = requireUser(req);
   const { messageId } = req.params as unknown as MessageIdParam;

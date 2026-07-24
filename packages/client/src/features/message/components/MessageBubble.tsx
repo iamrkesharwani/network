@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
 import {
   MoreHorizontal,
   Trash2,
@@ -17,12 +18,20 @@ import {
   getRelativeDate,
   formatDuration,
   MESSAGE_QUICK_REACTION_EMOJIS,
+  DELETE_FOR_ME_UNDO_WINDOW_MS,
 } from '@network/shared';
 import { cn } from '../../../shared/utils/cn';
 import { axiosInstance } from '../../../shared/lib/axiosInstance';
+import { useToast } from '../../../shared/hooks/useToast';
+import ConfirmModal from '../../../shared/ui/overlay/ConfirmModal';
+import { useIsMobileLayout } from '../../../shared/hooks/useIsMobileLayout';
 import { decodeMessagePayload } from '../messagePayload';
 import { linkifyText } from '../utils/linkifyText';
-import { useDeleteMessageMutation, useGetMessageByIdQuery } from '../messageApi';
+import {
+  useDeleteMessageMutation,
+  useUndeleteMessageMutation,
+  useGetMessageByIdQuery,
+} from '../messageApi';
 import SeenByIndicator from './SeenByIndicator';
 
 interface MessageBubbleProps {
@@ -39,6 +48,10 @@ interface MessageBubbleProps {
   onRemoveReaction: (messageId: string) => Promise<void>;
   onEdit: (messageId: string, text: string) => Promise<void>;
 }
+
+const LONG_PRESS_DURATION_MS = 500;
+const LONG_PRESS_MOVE_TOLERANCE_PX = 10;
+const SWIPE_REPLY_THRESHOLD_PX = 56;
 
 const formatCountdown = (expiresAt: string): string => {
   const remainingMs = new Date(expiresAt).getTime() - Date.now();
@@ -219,8 +232,20 @@ const MessageBubble = ({
   const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editDraft, setEditDraft] = useState('');
+  const [pendingDeleteScope, setPendingDeleteScope] = useState<'me' | 'everyone' | null>(
+    null
+  );
+  const [showActionsOnMobile, setShowActionsOnMobile] = useState(false);
   const [deleteMessage] = useDeleteMessageMutation();
+  const [undeleteMessage] = useUndeleteMessageMutation();
+  const { addToast } = useToast();
+  const dragProgress = useMotionValue(0);
+  const isMobile = useIsMobileLayout();
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressFiredRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const isOwn = message.senderId === myUserId;
+  const isUnsent = Boolean(message.unsentAt);
   const isRemoved = Boolean(
     message.unsentAt || message.expiredAt || message.moderationRemovedAt
   );
@@ -245,14 +270,79 @@ const MessageBubble = ({
     (reaction) => reaction.userId === myUserId
   )?.content;
 
-  const handleDeleteForMe = () => {
-    deleteMessage({ messageId: message.id, scope: 'me' });
-    setIsMenuOpen(false);
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current !== null) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
   };
 
-  const handleUnsendForEveryone = () => {
-    deleteMessage({ messageId: message.id, scope: 'everyone' });
+  const handleTouchStart = (event: React.TouchEvent) => {
+    const touch = event.touches[0];
+    if (!touch || isRemoved || isEditing) return;
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    longPressFiredRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      longPressFiredRef.current = true;
+      setIsMenuOpen(true);
+    }, LONG_PRESS_DURATION_MS);
+  };
+
+  const handleTouchMove = (event: React.TouchEvent) => {
+    const touch = event.touches[0];
+    const start = touchStartRef.current;
+    if (!touch || !start) return;
+    const distance = Math.hypot(touch.clientX - start.x, touch.clientY - start.y);
+    if (distance > LONG_PRESS_MOVE_TOLERANCE_PX) clearLongPressTimer();
+  };
+
+  const handleTouchEnd = () => {
+    clearLongPressTimer();
+  };
+
+  const handleBubbleClick = (event: React.MouseEvent) => {
+    if (longPressFiredRef.current) {
+      longPressFiredRef.current = false;
+      return;
+    }
+    if (!isMobile || isRemoved || isEditing) return;
+    if ((event.target as HTMLElement).closest('button, a')) return;
+    setShowActionsOnMobile((prev) => !prev);
+  };
+
+  const handleSwipeDrag = (_event: unknown, info: { offset: { x: number } }) => {
+    dragProgress.set(Math.min(Math.max(info.offset.x / SWIPE_REPLY_THRESHOLD_PX, 0), 1));
+  };
+
+  const handleSwipeDragEnd = (_event: unknown, info: { offset: { x: number } }) => {
+    dragProgress.set(0);
+    if (info.offset.x >= SWIPE_REPLY_THRESHOLD_PX * 0.7) onReply(message);
+  };
+
+  const handleDeleteForMeClick = () => {
     setIsMenuOpen(false);
+    setPendingDeleteScope('me');
+  };
+
+  const handleUnsendForEveryoneClick = () => {
+    setIsMenuOpen(false);
+    setPendingDeleteScope('everyone');
+  };
+
+  const confirmDeleteForMe = () => {
+    setPendingDeleteScope(null);
+    deleteMessage({ messageId: message.id, scope: 'me' });
+    addToast(
+      'Message deleted',
+      'info',
+      DELETE_FOR_ME_UNDO_WINDOW_MS,
+      { label: 'Undo', onClick: () => undeleteMessage(message.id) }
+    );
+  };
+
+  const confirmUnsendForEveryone = () => {
+    setPendingDeleteScope(null);
+    deleteMessage({ messageId: message.id, scope: 'everyone' });
   };
 
   const handlePickEmoji = async (emoji: string) => {
@@ -293,267 +383,294 @@ const MessageBubble = ({
   return (
     <div
       id={id}
-      className={cn(
-        'group flex scroll-mt-3',
-        isLastFromSender ? 'mb-2' : 'mb-0.5',
-        isOwn ? 'justify-end' : 'justify-start'
-      )}
+      className={cn('group flex scroll-mt-3', isOwn ? 'justify-end' : 'justify-start')}
     >
-      <div className="relative max-w-[75%]">
-        {message.replyToMessageId && (
-          <ReplyPreview
-            replyToMessageId={message.replyToMessageId}
-            repliedToMessage={repliedToMessage}
-            conversation={conversation}
-            myUserId={myUserId}
-          />
-        )}
-
-        {isEditing ? (
-          <div className="rounded-2xl bg-surface-raised px-3.5 py-2">
-            <textarea
-              value={editDraft}
-              onChange={(event) => setEditDraft(event.target.value)}
-              className="w-full resize-none bg-transparent text-sm text-text-primary outline-none"
-              rows={2}
-              autoFocus
-            />
-            <div className="mt-1 flex justify-end gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="text-text-muted hover:text-text-primary"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveEdit}
-                className="font-medium text-primary hover:text-primary/80"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div
-            className={cn(
-              groupRoundedClass,
-              'px-3.5 py-2 text-sm',
-              isRemoved
-                ? 'bg-surface-raised italic text-text-muted'
-                : isOwn
-                  ? 'border border-primary/40 bg-primary-subtle text-text-primary'
-                  : 'bg-surface-raised text-text-primary'
-            )}
+      <AnimatePresence initial={false}>
+        {!isUnsent && (
+          <motion.div
+            key="bubble"
+            className={cn('relative max-w-[75%]', isLastFromSender ? 'mb-2' : 'mb-0.5')}
+            exit={{
+              opacity: 0,
+              height: 0,
+              marginTop: 0,
+              marginBottom: 0,
+              overflow: 'hidden',
+            }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            drag={!isRemoved && !isEditing && isMobile ? 'x' : false}
+            dragConstraints={{ left: 0, right: SWIPE_REPLY_THRESHOLD_PX }}
+            dragElastic={0.15}
+            dragSnapToOrigin
+            onDrag={handleSwipeDrag}
+            onDragEnd={handleSwipeDragEnd}
+            onClick={handleBubbleClick}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
-            {message.unsentAt
-              ? 'This message was removed.'
-              : message.expiredAt
-                ? 'This message has expired.'
-                : message.moderationRemovedAt
-                  ? 'This message was removed for violating community guidelines.'
-                  : text !== null
-                    ? linkifyText(text)
-                    : '...'}
-
-            {!isRemoved && message.attachmentType && (
-              <MessageAttachmentView message={message} isOwn={isOwn} />
-            )}
-
-            {linkPreview && (
-              <a
-                href={linkPreview.url}
-                target="_blank"
-                rel="noreferrer noopener"
-                className={cn(
-                  'mt-2 flex gap-2 rounded-lg border p-2 text-xs',
-                  isOwn
-                    ? 'border-primary/20 bg-surface'
-                    : 'border-border bg-surface'
-                )}
-              >
-                {linkPreview.thumbnailUrl ? (
-                  <img
-                    src={linkPreview.thumbnailUrl}
-                    alt=""
-                    className="h-12 w-12 shrink-0 rounded object-cover"
-                  />
-                ) : (
-                  <Link2 className="h-4 w-4 shrink-0 opacity-70" />
-                )}
-                <span className="min-w-0">
-                  <span className="block truncate font-medium">
-                    {linkPreview.title}
-                  </span>
-                  <span className="block truncate opacity-70">
-                    {linkPreview.authorName ?? linkPreview.provider}
-                  </span>
-                </span>
-              </a>
-            )}
-          </div>
-        )}
-
-        {reactionGroups.length > 0 && (
-          <div
-            className={cn(
-              'mt-1 flex flex-wrap gap-1',
-              isOwn ? 'justify-end' : 'justify-start'
-            )}
-          >
-            {reactionGroups.map(([emoji, users]) => (
-              <button
-                key={emoji}
-                type="button"
-                onClick={() => handlePickEmoji(emoji)}
-                className={cn(
-                  'rounded-full border px-1.5 py-0.5 text-xs',
-                  users.includes(myUserId)
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border bg-surface'
-                )}
-              >
-                {emoji} {users.length}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <span
-          className={cn(
-            'mt-1 flex items-center gap-1 text-[0.65rem] text-text-muted',
-            isOwn ? 'justify-end' : 'justify-start'
-          )}
-        >
-          {message.editedAt && !isRemoved && <span>(edited)</span>}
-          {getRelativeDate(message.createdAt)}
-          {message.expiresAt && !isRemoved && (
-            <span className="flex items-center gap-0.5">
-              <Clock className="h-2.5 w-2.5" /> {formatCountdown(message.expiresAt)}
-            </span>
-          )}
-        </span>
-
-        {!isRemoved && !isEditing && (
-          <div
-            className={cn(
-              'absolute -top-2 hidden items-center gap-1 group-hover:flex',
-              isOwn ? 'right-0' : 'left-0'
-            )}
-          >
-            <button
-              type="button"
-              onClick={() => setIsReactionPickerOpen((open) => !open)}
-              className="rounded-full bg-surface p-1 text-text-muted hover:text-text-primary"
-              aria-label="React"
+            <motion.div
+              className="pointer-events-none absolute top-1/2 -left-8 -translate-y-1/2 text-icon"
+              style={{ opacity: dragProgress }}
             >
-              <Smile className="h-3.5 w-3.5" />
-            </button>
+              <Reply className="h-4 w-4" strokeWidth={1.75} />
+            </motion.div>
 
-            <button
-              type="button"
-              onClick={() => onReply(message)}
-              className="rounded-full bg-surface p-1 text-text-muted hover:text-text-primary"
-              aria-label="Reply"
-            >
-              <Reply className="h-3.5 w-3.5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsMenuOpen((open) => !open)}
-              className="rounded-full bg-surface p-1 text-text-muted hover:text-text-primary"
-              aria-label="Message options"
-            >
-              <MoreHorizontal className="h-3.5 w-3.5" />
-            </button>
-
-            {isReactionPickerOpen && (
+            {message.replyToMessageId && (
+              <ReplyPreview
+                replyToMessageId={message.replyToMessageId}
+                repliedToMessage={repliedToMessage}
+                conversation={conversation}
+                myUserId={myUserId}
+              />
+            )}
+    
+            {isEditing ? (
+              <div className="rounded-2xl bg-surface-raised px-3.5 py-2">
+                <textarea
+                  value={editDraft}
+                  onChange={(event) => setEditDraft(event.target.value)}
+                  className="w-full resize-none bg-transparent text-sm text-text-primary outline-none"
+                  rows={2}
+                  autoFocus
+                />
+                <div className="mt-1 flex justify-end gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="text-text-muted hover:text-text-primary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveEdit}
+                    className="font-medium text-primary hover:text-primary/80"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            ) : (
               <div
                 className={cn(
-                  'absolute top-6 z-10 flex gap-1 rounded-full border border-border bg-surface px-2 py-1 shadow-lg',
-                  isOwn ? 'right-0' : 'left-0'
+                  groupRoundedClass,
+                  'px-3.5 py-2 text-sm',
+                  isRemoved
+                    ? 'bg-surface-raised italic text-text-muted'
+                    : isOwn
+                      ? 'border border-primary/40 bg-primary-subtle text-text-primary'
+                      : 'bg-surface-raised text-text-primary'
                 )}
               >
-                {MESSAGE_QUICK_REACTION_EMOJIS.map((emoji) => (
+                {message.expiredAt
+                  ? 'This message has expired.'
+                  : message.moderationRemovedAt
+                    ? 'This message was removed for violating community guidelines.'
+                    : text !== null
+                      ? linkifyText(text)
+                      : '...'}
+    
+                {!isRemoved && message.attachmentType && (
+                  <MessageAttachmentView message={message} isOwn={isOwn} />
+                )}
+    
+                {linkPreview && (
+                  <a
+                    href={linkPreview.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={cn(
+                      'mt-2 flex gap-2 rounded-lg border p-2 text-xs',
+                      isOwn
+                        ? 'border-primary/20 bg-surface'
+                        : 'border-border bg-surface'
+                    )}
+                  >
+                    {linkPreview.thumbnailUrl ? (
+                      <img
+                        src={linkPreview.thumbnailUrl}
+                        alt=""
+                        className="h-12 w-12 shrink-0 rounded object-cover"
+                      />
+                    ) : (
+                      <Link2 className="h-4 w-4 shrink-0 opacity-70" />
+                    )}
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium">
+                        {linkPreview.title}
+                      </span>
+                      <span className="block truncate opacity-70">
+                        {linkPreview.authorName ?? linkPreview.provider}
+                      </span>
+                    </span>
+                  </a>
+                )}
+              </div>
+            )}
+    
+            {reactionGroups.length > 0 && (
+              <div
+                className={cn(
+                  'mt-1 flex flex-wrap gap-1',
+                  isOwn ? 'justify-end' : 'justify-start'
+                )}
+              >
+                {reactionGroups.map(([emoji, users]) => (
                   <button
                     key={emoji}
                     type="button"
                     onClick={() => handlePickEmoji(emoji)}
-                    className="text-base hover:scale-110"
+                    className={cn(
+                      'rounded-full border px-1.5 py-0.5 text-xs',
+                      users.includes(myUserId)
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-surface'
+                    )}
                   >
-                    {emoji}
+                    {emoji} {users.length}
                   </button>
                 ))}
-                <button
-                  type="button"
-                  onClick={() => setIsReactionPickerOpen(false)}
-                  className="text-text-muted hover:text-text-primary"
-                  aria-label="Close reaction picker"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
               </div>
             )}
-
-            {isMenuOpen && (
+    
+            <span
+              className={cn(
+                'mt-1 flex items-center gap-1 text-[0.65rem] text-text-muted',
+                isOwn ? 'justify-end' : 'justify-start'
+              )}
+            >
+              {message.editedAt && !isRemoved && <span>(edited)</span>}
+              {getRelativeDate(message.createdAt)}
+              {message.expiresAt && !isRemoved && (
+                <span className="flex items-center gap-0.5">
+                  <Clock className="h-2.5 w-2.5" /> {formatCountdown(message.expiresAt)}
+                </span>
+              )}
+            </span>
+    
+            {!isRemoved && !isEditing && (
               <div
                 className={cn(
-                  'absolute z-10 mt-1 w-44 rounded-lg border border-border bg-surface shadow-lg',
+                  'absolute -top-2 items-center gap-1',
+                  showActionsOnMobile ? 'flex' : 'hidden group-hover:flex',
                   isOwn ? 'right-0' : 'left-0'
                 )}
               >
                 <button
                   type="button"
-                  onClick={handleDeleteForMe}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-text-primary hover:bg-surface-raised"
+                  onClick={() => setIsReactionPickerOpen((open) => !open)}
+                  className="rounded-full bg-surface p-1 text-text-muted hover:text-text-primary"
+                  aria-label="React"
                 >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete for me
+                  <Smile className="h-3.5 w-3.5" />
                 </button>
-                {isOwn && canEdit && (
-                  <button
-                    type="button"
-                    onClick={handleStartEdit}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-text-primary hover:bg-surface-raised"
+    
+                <button
+                  type="button"
+                  onClick={() => onReply(message)}
+                  className="rounded-full bg-surface p-1 text-text-muted hover:text-text-primary"
+                  aria-label="Reply"
+                >
+                  <Reply className="h-3.5 w-3.5" />
+                </button>
+    
+                <button
+                  type="button"
+                  onClick={() => setIsMenuOpen((open) => !open)}
+                  className="rounded-full bg-surface p-1 text-text-muted hover:text-text-primary"
+                  aria-label="Message options"
+                >
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                </button>
+    
+                {isReactionPickerOpen && (
+                  <div
+                    className={cn(
+                      'absolute top-6 z-10 flex gap-1 rounded-full border border-border bg-surface px-2 py-1 shadow-lg',
+                      isOwn ? 'right-0' : 'left-0'
+                    )}
                   >
-                    <Pencil className="h-3.5 w-3.5" /> Edit
-                  </button>
+                    {MESSAGE_QUICK_REACTION_EMOJIS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => handlePickEmoji(emoji)}
+                        className="text-base hover:scale-110"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setIsReactionPickerOpen(false)}
+                      className="text-text-muted hover:text-text-primary"
+                      aria-label="Close reaction picker"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 )}
-                {isOwn && (
-                  <button
-                    type="button"
-                    onClick={handleUnsendForEveryone}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-error hover:bg-surface-raised"
+    
+                {isMenuOpen && (
+                  <div
+                    className={cn(
+                      'absolute z-10 mt-1 w-44 rounded-lg border border-border bg-surface shadow-lg',
+                      isOwn ? 'right-0' : 'left-0'
+                    )}
                   >
-                    <Trash2 className="h-3.5 w-3.5" /> Unsend for everyone
-                  </button>
-                )}
-                {!isOwn && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsReportOpen(true);
-                    }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-error hover:bg-surface-raised"
-                  >
-                    <Flag className="h-3.5 w-3.5" /> Report message
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteForMeClick}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-text-primary hover:bg-surface-raised"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete for me
+                    </button>
+                    {isOwn && canEdit && (
+                      <button
+                        type="button"
+                        onClick={handleStartEdit}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-text-primary hover:bg-surface-raised"
+                      >
+                        <Pencil className="h-3.5 w-3.5" /> Edit
+                      </button>
+                    )}
+                    {isOwn && (
+                      <button
+                        type="button"
+                        onClick={handleUnsendForEveryoneClick}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-error hover:bg-surface-raised"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Unsend for everyone
+                      </button>
+                    )}
+                    {!isOwn && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          setIsReportOpen(true);
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-error hover:bg-surface-raised"
+                      >
+                        <Flag className="h-3.5 w-3.5" /> Report message
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             )}
-          </div>
+    
+            {isOwn && isLastFromSender && !isRemoved && (
+              <SeenByIndicator
+                message={message}
+                conversation={conversation}
+                viewerId={myUserId}
+              />
+            )}
+          </motion.div>
         )}
-
-        {isOwn && isLastFromSender && !isRemoved && (
-          <SeenByIndicator
-            message={message}
-            conversation={conversation}
-            viewerId={myUserId}
-          />
-        )}
-      </div>
+      </AnimatePresence>
 
       {!isOwn && (
         <ReportModal
@@ -571,6 +688,26 @@ const MessageBubble = ({
           })()}
         />
       )}
+
+      <ConfirmModal
+        isOpen={pendingDeleteScope !== null}
+        onClose={() => setPendingDeleteScope(null)}
+        onConfirm={
+          pendingDeleteScope === 'everyone' ? confirmUnsendForEveryone : confirmDeleteForMe
+        }
+        title={
+          pendingDeleteScope === 'everyone'
+            ? 'Unsend this message for everyone?'
+            : 'Delete this message for you?'
+        }
+        description={
+          pendingDeleteScope === 'everyone'
+            ? "This removes it for everyone in the conversation and can't be undone."
+            : "It'll disappear from your view only. You'll have a few seconds to undo right after."
+        }
+        confirmLabel={pendingDeleteScope === 'everyone' ? 'Unsend' : 'Delete'}
+        intent="danger"
+      />
     </div>
   );
 };

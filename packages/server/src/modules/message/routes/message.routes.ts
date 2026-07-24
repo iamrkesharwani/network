@@ -78,6 +78,14 @@ router.delete(
   messageController.remove
 );
 
+router.post(
+  '/:messageId/undelete',
+  requireAuth,
+  messageLimiter,
+  validate({ params: messageIdParamSchema }),
+  messageController.undelete
+);
+
 router.put(
   '/:messageId/reactions',
   requireAuth,
