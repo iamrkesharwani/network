@@ -4,6 +4,7 @@ import { ArrowLeft, Ban, Flag } from 'lucide-react';
 import {
   CLIENT_ROUTES,
   MESSAGE_EDIT_WINDOW_MS,
+  MESSAGE_GROUP_GAP_MS,
   MESSAGE_THREAD_PAGE_LIMIT,
   type ConversationDisappearingTtl,
   type IConversationSummary,
@@ -65,6 +66,15 @@ const getParticipantLabel = (
 };
 
 const MESSAGE_LIST_ARGS = { limit: MESSAGE_THREAD_PAGE_LIMIT };
+
+const isSameMessageGroup = (
+  a: IMessageResponse,
+  b: IMessageResponse
+): boolean =>
+  a.senderId === b.senderId &&
+  Math.abs(
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  ) < MESSAGE_GROUP_GAP_MS;
 
 const MessageThread = ({
   conversation,
@@ -268,41 +278,49 @@ const MessageThread = ({
       {isLoading ? (
         <MessageThreadSkeleton />
       ) : isError ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 px-2 py-4 text-center text-sm text-text-muted">
+        <div className="relative flex flex-1 flex-col items-center justify-center gap-2 px-2 py-4 text-center text-sm text-text-muted">
+          <div className="chat-thread-bg" />
           <p>{getApiErrorMessage(error, "Couldn't load this conversation.")}</p>
           <Button size="sm" variant="outline" onClick={() => refetch()}>
             Retry
           </Button>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto py-3">
-          {orderedMessages.map((message, index) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              myUserId={myUserId}
-              conversation={conversation}
-              isLastFromSender={
-                index === orderedMessages.length - 1 ||
-                orderedMessages[index + 1]?.senderId !== message.senderId
-              }
-              canEdit={
-                message.senderId === myUserId &&
-                Date.now() - new Date(message.createdAt).getTime() <
-                  MESSAGE_EDIT_WINDOW_MS
-              }
-              repliedToMessage={
-                message.replyToMessageId
-                  ? messagesById.get(message.replyToMessageId)
-                  : undefined
-              }
-              onReply={setReplyTo}
-              onReact={handleReact}
-              onRemoveReaction={handleRemoveReaction}
-              onEdit={handleEdit}
-            />
-          ))}
-          <div ref={bottomRef} />
+        <div className="relative flex-1">
+          <div className="chat-thread-bg" />
+          <div className="absolute inset-0 overflow-y-auto py-3">
+            {orderedMessages.map((message, index) => (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                myUserId={myUserId}
+                conversation={conversation}
+                isFirstFromSender={
+                  index === 0 ||
+                  !isSameMessageGroup(orderedMessages[index - 1], message)
+                }
+                isLastFromSender={
+                  index === orderedMessages.length - 1 ||
+                  !isSameMessageGroup(message, orderedMessages[index + 1])
+                }
+                canEdit={
+                  message.senderId === myUserId &&
+                  Date.now() - new Date(message.createdAt).getTime() <
+                    MESSAGE_EDIT_WINDOW_MS
+                }
+                repliedToMessage={
+                  message.replyToMessageId
+                    ? messagesById.get(message.replyToMessageId)
+                    : undefined
+                }
+                onReply={setReplyTo}
+                onReact={handleReact}
+                onRemoveReaction={handleRemoveReaction}
+                onEdit={handleEdit}
+              />
+            ))}
+            <div ref={bottomRef} />
+          </div>
         </div>
       )}
 

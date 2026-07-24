@@ -2,6 +2,7 @@ import {
   ONE_HOUR_SECONDS,
   FIFTEEN_MINUTES_MS,
   FIVE_MINUTES_SECONDS,
+  FIVE_MINUTES_MS,
 } from '../general/constants/time.constants.js';
 
 export const CONVERSATION_TYPES = ['direct', 'group'] as const;
@@ -58,6 +59,8 @@ export const MESSAGE_EDITED_SOCKET_EVENT = 'message:edited';
 export const MESSAGE_EXPIRED_SOCKET_EVENT = 'message:expired';
 
 export const MESSAGE_EDIT_WINDOW_MS = 30 * 60 * 1000;
+
+export const MESSAGE_GROUP_GAP_MS = FIVE_MINUTES_MS;
 
 export const MESSAGE_DISAPPEARING_TTL_OPTIONS = ['off', '24h', '7d'] as const;
 

@@ -29,6 +29,7 @@ interface MessageBubbleProps {
   message: IMessageResponse;
   myUserId: string;
   conversation: IConversationSummary;
+  isFirstFromSender: boolean;
   isLastFromSender: boolean;
   canEdit: boolean;
   repliedToMessage: IMessageResponse | undefined;
@@ -202,6 +203,7 @@ const MessageBubble = ({
   message,
   myUserId,
   conversation,
+  isFirstFromSender,
   isLastFromSender,
   canEdit,
   repliedToMessage,
@@ -274,9 +276,25 @@ const MessageBubble = ({
     setIsEditing(false);
   };
 
+  const groupRoundedClass = isOwn
+    ? cn(
+        'rounded-2xl',
+        !isFirstFromSender && 'rounded-tr-md',
+        !isLastFromSender && 'rounded-br-md'
+      )
+    : cn(
+        'rounded-2xl',
+        !isFirstFromSender && 'rounded-tl-md',
+        !isLastFromSender && 'rounded-bl-md'
+      );
+
   return (
     <div
-      className={cn('group mb-2 flex', isOwn ? 'justify-end' : 'justify-start')}
+      className={cn(
+        'group flex',
+        isLastFromSender ? 'mb-2' : 'mb-0.5',
+        isOwn ? 'justify-end' : 'justify-start'
+      )}
     >
       <div className="relative max-w-[75%]">
         {message.replyToMessageId && (
@@ -317,11 +335,12 @@ const MessageBubble = ({
         ) : (
           <div
             className={cn(
-              'rounded-2xl px-3.5 py-2 text-sm',
+              groupRoundedClass,
+              'px-3.5 py-2 text-sm',
               isRemoved
                 ? 'bg-surface-raised italic text-text-muted'
                 : isOwn
-                  ? 'bg-primary text-white'
+                  ? 'border border-primary/40 bg-primary-subtle text-text-primary'
                   : 'bg-surface-raised text-text-primary'
             )}
           >
@@ -347,7 +366,7 @@ const MessageBubble = ({
                 className={cn(
                   'mt-2 flex gap-2 rounded-lg border p-2 text-xs',
                   isOwn
-                    ? 'border-white/20 bg-black/10'
+                    ? 'border-primary/20 bg-surface'
                     : 'border-border bg-surface'
                 )}
               >
