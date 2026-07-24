@@ -10,12 +10,15 @@ import { buildConversationPath } from '../utils/buildMessagesPath';
 import {
   useGetConversationsQuery,
   useGetArchivedConversationsQuery,
+  useCreateDirectConversationMutation,
   CONVERSATION_LIST_ARGS,
   CONVERSATION_ARCHIVED_LIST_ARGS,
 } from '../conversationApi';
+import { useUnifiedConversationSearch } from '../hooks/useUnifiedConversationSearch';
 import ConversationList from '../components/ConversationList';
 import ArchivedConversationList from '../components/ArchivedConversationList';
 import MessagesListHeader from '../components/MessagesListHeader';
+import MessagesSearchResultsList from '../components/MessagesSearchResultsList';
 import MessageThread from '../components/MessageThread';
 import CreateGroupModal from '../components/CreateGroupModal';
 import GroupInfoPanel from '../components/GroupInfoPanel';
@@ -33,6 +36,11 @@ const MessagesPage = () => {
   const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
   const [isAddParticipantsOpen, setIsAddParticipantsOpen] = useState(false);
   const [isArchivedViewOpen, setIsArchivedViewOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const { isActive: isSearchActive, matchedConversations, matchedPeople } =
+    useUnifiedConversationSearch(searchQuery);
+  const [createDirectConversation] = useCreateDirectConversationMutation();
 
   const { data: conversationsData, isLoading: isLoadingConversations } =
     useGetConversationsQuery(CONVERSATION_LIST_ARGS);
@@ -50,6 +58,19 @@ const MessagesPage = () => {
     Boolean(activeConversationId) &&
     !activeConversation &&
     (isLoadingConversations || isLoadingArchivedConversations);
+
+  const handleSelectFromSearch = (id: string) => {
+    setSearchQuery('');
+    setIsSearchFocused(false);
+    navigate(buildConversationPath(id));
+  };
+
+  const handleStartChat = async (participantId: string) => {
+    const result = await createDirectConversation({ participantId }).unwrap();
+    setSearchQuery('');
+    setIsSearchFocused(false);
+    navigate(buildConversationPath(result.data.id));
+  };
 
   if (!user) return null;
 
@@ -77,9 +98,12 @@ const MessagesPage = () => {
           </div>
         ) : (
           <MessagesListHeader
+            query={searchQuery}
+            onQueryChange={setSearchQuery}
+            isFocused={isSearchFocused}
+            onFocusChange={setIsSearchFocused}
             onOpenArchived={() => setIsArchivedViewOpen(true)}
             onCreateGroup={() => setIsCreateGroupOpen(true)}
-            onSelectConversation={(id) => navigate(buildConversationPath(id))}
           />
         )}
 
@@ -89,6 +113,13 @@ const MessagesPage = () => {
               key={user.id}
               activeConversationId={activeConversationId}
               onSelect={(id) => navigate(buildConversationPath(id))}
+            />
+          ) : isSearchActive ? (
+            <MessagesSearchResultsList
+              matchedConversations={matchedConversations}
+              matchedPeople={matchedPeople}
+              onSelectConversation={handleSelectFromSearch}
+              onStartChat={handleStartChat}
             />
           ) : (
             <ConversationList
